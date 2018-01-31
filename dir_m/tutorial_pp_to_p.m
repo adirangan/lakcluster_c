@@ -1,0 +1,10 @@
+function p = tutorial_pp_to_p(pp);
+% pp = probability of a loop being rank-1. ;
+% qq = probability of a loop being rank-2. ;
+% p = probability of an (entrywise) random replacement. ;
+% q = probability of no random replacement. ;
+% we see that qq = 4pq^3 + 4qp^3 = 4pq*(q^2+p^2) = 4pq*(1-2pq) ;
+pp = min(1.0,max(0.5,pp));
+qq = 1-pp;
+pq = 0.25 * (1 - 0.25 * sqrt(16 - 32*qq));
+p = 0.5 * (1 - sqrt(1 - 4*pq));
