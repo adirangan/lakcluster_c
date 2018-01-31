@@ -1,0 +1,145 @@
+void bcc_scorebox_xij(struct bcc_ajdk *D,int nrows,int *out_xdrop_nb,int *out_xdrop_lmr,int ncols,int *mc_srt)
+{
+  /* Copies last D->A_rpop_j_total entries from mr_srt (i.e., out_xdrop_nb and out_xdrop_lmr) ;
+     into D->QR_lnb and D->QR_lmr_a, respectively. ;
+     Copies last D->A_cpop_j entries from mc_srt ;
+     into D->QC_lmc_a. ;
+  */
+  int verbose=0; 
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb1=0; struct bcc_single *E=NULL;
+  int na_j=0,nr=0;
+  int Irow=0,Icol=0;
+  if (verbose){ printf(" %% [entering bcc_scorebox_xij]\n");}
+  D->Irem=0; for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1]; D->Irem += (E->A_rpop_j>0?1:0);} 
+  D->Ireq = minimum(nbins,minimum(D->Irem,GLOBAL_Ireq));
+  if (GLOBAL_Ireq<=0){ Irow=0; Icol=0;} else if (GLOBAL_Ireq>0){ Irow = D->Irem - D->Ireq; Icol = D->Irem*D->Irem - D->Ireq*D->Ireq;}
+  if (verbose){ printf(" %% found D->Irem %d/%d, using D->Ireq %d; Irow %d Icol %d\n",D->Irem,nbins,D->Ireq,Irow,Icol);}
+  if (verbose){
+    printf(" %% D->A_ncols %d D->A_cpop_b %d D->A_cpop_j %d\n",D->A_ncols,D->A_cpop_b,D->A_cpop_j);
+    if (verbose>1){ sprintf(D->tmpAnchar," %%%% D->A_bmc_b: "); bprintf(D->A_bmc_b,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+    if (verbose>1){ sprintf(D->tmpAnchar," %%%% D->A_bmc_j: "); bprintf(D->A_bmc_j,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+    /* if (verbose){ } */}
+  if (mc_srt!=NULL && ncols>=D->A_cpop_j){ 
+    for (na_j=0;na_j<D->A_cpop_j;na_j++){ D->QC_ira_a[na_j] = mc_srt[ncols-D->A_cpop_j+na_j];} 
+    /* if (mc_srt!=NULL){ } */}
+  if (out_xdrop_nb!=NULL && out_xdrop_lmr!=NULL && nrows>=D->A_rpop_j_total){ 
+    for (nr=0;nr<D->A_rpop_j_total;nr++){ 
+      D->QR_lmr_a[nr] = out_xdrop_lmr[nrows-D->A_rpop_j_total+nr];
+      D->QR_lnb[nr] = out_xdrop_lnb[nrows-D->A_rpop_j_total+nr];
+      /* for (nr=0;nr<D->A_rpop_j_total;nr++){ } */}
+    /* if (mc_srt!=NULL){ } */};
+  if (verbose>1){ printf(" %% finished copying out_xdrop_nb,out_xdrop_lmr and mc_srt\n");}    
+  if (verbose>1){
+    raprintf(D->QR_lmr_a,   "int",1,D->A_rpop_j_total," %% D->QR_lmr_a pos :");
+    raprintf(  D->QR_lnb,   "int",1,D->A_rpop_j_total," %%   D->QR_lnb pos :");
+    raprintf(D->QC_lmc_a,   "int",1,D->A_cpop_j," %% D->QC_lmc_a pos :");
+    /* if (verbose){ } */}
+  if (verbose){ printf(" %% [finished bcc_scorebox_xij]\n");}
+}
+
+void bcc_scorebox_mxA(struct bcc_ajdk *D,int nrows,int *out_xdrop_nb,int *out_xdrop_lmr,int nr_final,int ncols,int *out_xdrop_lmc,int nc_final)
+{
+  /* writes to E->A_umr_j and D->A_umc_j ;
+     drops rows out_xdrop_lmr[0] to out_xdrop_lmr[nr_final-1] (using out_xdrop_nb to determine nb) ;
+     drops cols out_xdrop_lmc[0] to out_xdrop_lmc[nc_final-1] ;
+     Then writes D->A_umc_j into D->A_bmc_j and E->A_umr_j into E->A_bmc_j ;
+   */
+  int verbose=0;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0,nr=0,nc=0,rdrop=0,cdrop=0,rkept=0,ckept=0;
+  if (verbose){ printf(" %% [entering bcc_scorebox_mxA] nrows %d, nr_final %d, ncols %d, nc_final %d\n",nrows,nr_final,ncols,nc_final);}
+  cdrop=0; for (nc=0;nc<nc_final;nc++){ D->A_umc_j[out_xdrop_lmc[nc]]=0; cdrop += D->A_umc_b[out_xdrop_lmc[nc]];} 
+  ckept=0; for (nc=nc_final;nc<ncols;nc++){ D->A_umc_j[out_xdrop_lmc[nc]]=D->A_umc_b[out_xdrop_lmc[nc]]; ckept += D->A_umc_b[out_xdrop_lmc[nc]];}
+  if (verbose>2){ raprintf(D->A_umc_j,"char",1,D->A_ncols," %% D->A_umc_j: ");}
+  fill_uchar_zero(D->A_bmc_j,bsize(D->A_ncols)/* rup(D->A_ncols+D->A_ncols_extend,POPLENGTH)/BIT8 */);
+  for (nc=0;nc<D->A_ncols;nc++){ b_copy_u(D->A_bmc_j,D->A_umc_j,nc);}
+  rdrop=0; for (nr=0;nr<nr_final;nr++){ E_[out_xdrop_nb[nr]]->A_umr_j[out_xdrop_lmr[nr]]=0; rdrop += E_[out_xdrop_nb[nr]]->A_umr_b[out_xdrop_lmr[nr]];}
+  rkept=0; for (nr=nr_final;nr<nrows;nr++){ E_[out_xdrop_nb[nr]]->A_umr_j[out_xdrop_lmr[nr]]=E_[out_xdrop_nb[nr]]->A_umr_b[out_xdrop_lmr[nr]]; rkept += E_[out_xdrop_nb[nr]]->A_umr_b[out_xdrop_lmr[nr]];}
+  for (nb=0;nb<nbins;nb++){ 
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_umr_j_[%.2d]: ",nb); if (verbose>2){ raprintf(E_[nb]->A_umr_j,"char",1,E_[nb]->A_nrows,D->tmpAnchar);}
+    fill_uchar_zero(E_[nb]->A_bmr_j,bsize(E_[nb]->A_nrows)/* rup(E_[nb]->A_nrows+E_[nb]->A_nrows_extend,POPLENGTH)/BIT8 */);
+    for (nr=0;nr<E_[nb]->A_nrows;nr++){ b_copy_u(E_[nb]->A_bmr_j,E_[nb]->A_umr_j,nr);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){ printf(" %% [finished bcc_scorebox_mxA], rdrop %d, rkept %d, cdrop %d, ckept %d\n",rdrop,rkept,cdrop,ckept);}
+}
+
+void bcc_scorebox_mxB(struct bcc_ajdk *D,int nrows,int *out_xdrop_nb,int *out_xdrop_lmr,int nr_final,int ncols,int *out_xdrop_lmc,int nc_final)
+{
+  /* reads from D->A_bmc_j and writes to D->A_umc_j ; 
+     uses nc_final and D->A_umc_j to define D->A_umc_j_rtn and D->A_umc_j_rmv ;
+     reads from E->A_bmr_j and writes to E->A_umr_j ;
+     uses nr_final and E->A_umr_j to define E->A_umr_j_rtn and E->A_umr_j_rmv ;
+   */
+  int verbose=0;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb1=0,nr=0,nc=0; struct bcc_single *E=NULL;
+  if (verbose){ printf(" %% [entering bcc_scorebox_mxB]\n");}
+  for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j[nc] = bget__on(D->A_bmc_j,nc);} for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j_rtn[nc] = D->A_umc_j[nc]; D->A_umc_j_rmv[nc] = 0;}
+  for (nc=0;nc<nc_final;nc++){ if (D->A_umc_j_rtn[out_xdrop_lmc[nc]]==1){ D->A_umc_j_rmv[out_xdrop_lmc[nc]]=1; D->A_umc_j_rtn[out_xdrop_lmc[nc]]=0;}}
+  for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];
+    for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j[nr] = bget__on(E->A_bmr_j,nr);} 
+    for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j_rtn[nr] = E->A_umr_j[nr]; E->A_umr_j_rmv[nr] = 0;}
+    /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  for (nr=0;nr<nr_final;nr++){ nb1 = out_xdrop_nb[nr]; E = E_[nb1]; if (E->A_umr_j_rtn[out_xdrop_lmr[nr]]==1){ E->A_umr_j_rmv[out_xdrop_lmr[nr]]=1; E->A_umr_j_rtn[out_xdrop_lmr[nr]]=0;}}
+  bcc_sumscores_mxB(D);
+  if (verbose){ printf(" %% [finished bcc_scorebox_mxB]\n");}
+}
+
+void xcc_out_xdrop_srt(int nlines,int *out_xdrop,int *nrows_,int **mr_srt_,int *ncols_,int **mc_srt_)
+{
+  /* converts out_xdrop into sorted lists of indices */
+  int verbose=0;
+  int nl=0,nrmax=0,ncmax=0,nr=0,nc=0;
+  if (verbose){ printf(" %% [entering xcc_out_xdrop_srt]\n");}
+  (*nrows_)=0;(*ncols_)=0; nrmax=0;ncmax=0; for (nl=0;nl<nlines;nl++){ if (out_xdrop[0 + nl*2]>=0){ nrmax = maximum(nrmax,out_xdrop[0 + nl*2]); (*nrows_)++;} if (out_xdrop[1 + nl*2]>=0){ ncmax = maximum(ncmax,out_xdrop[1 + nl*2]); (*ncols_)++;}} if ((*nrows_)!=nrmax+1 || (*ncols_)!=ncmax+1){ if (verbose>-1){ printf(" %% Note: (*nrows_) %d (*ncols_) %d nrmax %d ncmax %d in xcc_out_xdrop_srt\n",(*nrows_),(*ncols_),nrmax,ncmax);}}
+  if (verbose){ printf(" %% (*nrows_) %d (*ncols_) %d\n",(*nrows_),(*ncols_));}
+  if (*mr_srt_==NULL){ (*mr_srt_) = (int *) wkspace_all0c((*nrows_)*sizeof(int));}
+  if (*mc_srt_==NULL){ (*mc_srt_) = (int *) wkspace_all0c((*ncols_)*sizeof(int));}
+  nr=0; nl=0; while (nr<(*nrows_) && nl<nlines){ if (out_xdrop[0 + nl*2]>=0){ (*mr_srt_)[nr] = out_xdrop[0 + nl*2]; nr++;} nl++;}
+  nc=0; nl=0; while (nc<(*ncols_) && nl<nlines){ if (out_xdrop[1 + nl*2]>=0){ (*mc_srt_)[nc] = out_xdrop[1 + nl*2]; nc++;} nl++;}
+  if (verbose>1){ raprintf(*mr_srt_,"int",1,(*nrows_)," %% mr_srt: ");}
+  if (verbose>1){ raprintf(*mc_srt_,"int",1,(*ncols_)," %% mc_srt: ");}
+  if (verbose){ printf(" %% [finished xcc_out_xdrop_srt]\n");}
+}
+
+void xcc_out_xdrop_get(char *fname,int *nlines_,int **out_xdrop_)
+{
+  /* recover out_xdrop from disc */
+  int verbose=0;
+  int nl=0; char c[128];
+  FILE *fp=NULL; 
+  if (verbose){ printf(" %% [entering xcc_out_xdrop_get]\n");}
+  if (out_xdrop_!=NULL){
+    if ((fp=fopen(fname,"r"))==NULL){ printf(" %% Warning! could not open %s when reading from disc in xcc_out_xdrop_get.\n",fname); exit(RET_READ_FAIL);}
+    (*nlines_)=0; while(!feof(fp)){ (*nlines_) += (fgetc(fp)=='\n');} if (verbose){ printf(" %% found %d lines in %s\n",(*nlines_),fname);}
+    if (*out_xdrop_==NULL){ (*out_xdrop_) = (int *) wkspace_all0c(2*(*nlines_)*sizeof(int));}
+    fseeko(fp,(off_t)(0),SEEK_SET);
+    for (nl=0;nl<(*nlines_);nl++){ fscanf(fp,"%d",&((*out_xdrop_)[0 + nl*2])); fscanf(fp,"%d",&((*out_xdrop_)[1 + nl*2])); fscanf(fp,"%c",c);}
+    fclose(fp);fp=NULL; 
+    if (verbose>1){ raprintf(*out_xdrop_,"int",2,(*nlines_)," %% out_xdrop: ");}
+    /* if (out_xdrop_!=NULL){ } */}
+  if (verbose){ printf(" %% [finished xcc_out_xdrop_get]\n");}
+}
+
+void bcc_out_xdrop_lkp(struct bcc_ajdk *D,int nrows,int *mr_a_srt,int **out_xdrop_nb_,int **out_xdrop_lmr_)
+{
+  /* converts mr_a_srt to nb_ and mr_a_ indices */
+  int verbose=2;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nl=0,tmpd=0,nb=0,mx_a_tot=0;
+  struct bcc_single *E=NULL;
+  if (verbose){ printf(" %% [entering bcc_out_xdrop_lkp]\n");}
+  mx_a_tot = 0; for (nb=0;nb<nbins;nb++){ E = E_[nb]; mx_a_tot += E->A_nrows; /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){ printf(" %% nbins %d, mx_a_tot %d, nrows %d\n",nbins,mx_a_tot,nrows);}
+  if (*out_xdrop_nb_==NULL){ (*out_xdrop_nb_) = (int *) wkspace_all0c(nrows*sizeof(int));}
+  if (*out_xdrop_lmr_==NULL){ (*out_xdrop_lmr_) = (int *) wkspace_all0c(nrows*sizeof(int));}
+  for (nl=0;nl<nrows;nl++){  
+    tmpd = mr_a_srt[nl];
+    nb=0; while (tmpd>=E_[nb]->A_nrows){ tmpd-=E_[nb]->A_nrows; nb++;}
+    (*out_xdrop_nb_)[nl] = nb; (*out_xdrop_lmr_)[nl] = tmpd;
+    /* for (nl=0;nl<nrows;nl++){ } */}
+  if (verbose>1){ raprintf(*out_xdrop_nb_,"int",1,nrows," %% out_xdrop_nb: ");}
+  if (verbose>1){ raprintf(*out_xdrop_lmr_,"int",1,nrows," %% out_xdrop_lmr: ");}
+  if (verbose){ printf(" %% [finished bcc_out_xdrop_lkp]\n");}
+}

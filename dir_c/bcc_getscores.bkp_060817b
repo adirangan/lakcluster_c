@@ -1,0 +1,1816 @@
+void *get_xxxxle_singlestudy(void *vp)
+{
+  /* This function takes in a variety of inputs and calculates a variety of single-study terms */
+  int verbose=0;
+  int ip=0,length=0,length_tmp=0,length_singlestudy=0;
+  void **vpra=(void **)vp;
+  int tidx = *(int *)(vpra[ip++]);
+  struct bcc_single *E = (struct bcc_single *)(vpra[ip++]); struct bcc_ajdk *D=E->D; 
+  int output_spacing_At = *(int *)(vpra[ip++]);
+  int output_spacing_An = *(int *)(vpra[ip++]); int output_spacing_Zn = output_spacing_An; int output_spacing_Yn = output_spacing_An;
+  int output_spacing_Tt = *(int *)(vpra[ip++]);
+  struct M_handle *M_An = E->M_An;
+  struct M_handle *M_At = E->M_At;
+  struct M_handle *M_Tt = E->M_Tt;
+  struct M_handle *M_Yn = E->M_Yn;
+  struct M_handle *M_Yt = E->M_Yt;
+  /* struct M_handle *M_Wt = E->M_Wt; */
+  struct M_handle *M_St = E->M_St;
+  struct M_handle *M_Zt = E->M_Zt;
+  struct L_handle *lf_An_ajdk = E->lf_An_ajdk;
+  struct L_handle *lf_Yn_ajdk = E->lf_Yn_ajdk;
+  /* struct L_handle *lf_Wn_ajdk = E->lf_Wn_ajdk; */
+  struct L_handle *lf_Zn_ajdk = E->lf_Zn_ajdk;
+  double *A_ajdk = D->A_ajdk;
+  double *Y_ajdk = D->Y_ajdk;
+  double *output_singlestudy = E->lf_singlestudy;
+  int A_pcols = psize(M_At->nrows);
+  double *D_An = (double *)&(A_ajdk[0 + AJDK_0_1*A_pcols]);
+  double *a_An = (double *)&(A_ajdk[0 + AJDK_1_0*A_pcols]);
+  int Y_pcols = psize(M_Yt->nrows);
+  double *D_Yn = (double *)&(Y_ajdk[0 + AJDK_0_1*Y_pcols]);
+  double *a_Yn = (double *)&(Y_ajdk[0 + AJDK_1_0*Y_pcols]);
+  double tmp_a=0,tmp_y=0;
+  struct L_handle *lf_tmp=NULL;
+  int A_ncols = M_At->nrows, T_ncols = M_Tt->nrows, A_nrows = M_At->ncols;
+  length = A_ncols; lf_tmp = E->lf_At_Yn_a1d1; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = A_ncols; lf_tmp = E->lf_At_An_a1d1; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols; lf_tmp = E->lf_a1d2_Zt_Sn; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols; lf_tmp = E->lf_a2d2_Zt_Sn; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols; lf_tmp = E->lf_a3d2_Zt_Sn; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols; lf_tmp = E->lf_a1d2_At_Tn; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols; lf_tmp = E->lf_a2d2_At_Tn; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols; lf_tmp = E->lf_a3d2_At_Tn; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols; lf_tmp = E->lf_et_Tn; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols; lf_tmp = E->lf_et_Sn; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = A_ncols; lf_tmp = E->lf_et_An; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = A_ncols; lf_tmp = E->lf_a1d1_At_en; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = A_ncols; lf_tmp = E->lf_a1d2_At_en; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = A_ncols; lf_tmp = E->lf_a3d2_At_en; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = 1; lf_tmp = E->lf_et_Yn_a1d1; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols; lf_tmp = E->lf_Tt_Yn_a1d1; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = A_ncols*T_ncols; lf_tmp = E->lf_At_T_Yn_a1d1; lf_tmp->row_stride = A_ncols; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = T_ncols; lf_tmp->spacing_col = SPACING_a; L_zero(lf_tmp);
+  length = 1; lf_tmp = E->lf_et_An_a1d1; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols; lf_tmp = E->lf_Tt_An_a1d1; lf_tmp->row_stride = length; lf_tmp->spacing_row = SPACING_a; L_zero(lf_tmp);
+  length = A_ncols*T_ncols; lf_tmp = E->lf_At_T_An_a1d1; lf_tmp->row_stride = A_ncols; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = T_ncols; lf_tmp->spacing_col = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols*A_nrows; lf_tmp = E->lf_T_AnAt_YnYt; lf_tmp->row_stride = T_ncols; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = A_nrows; lf_tmp->spacing_col = SPACING_a; L_zero(lf_tmp);
+  length = T_ncols*A_nrows; lf_tmp = E->lf_T_AnAt_AnAt; lf_tmp->row_stride = T_ncols; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = A_nrows; lf_tmp->spacing_col = SPACING_a; L_zero(lf_tmp);
+  /* length = 0; */
+  /* length_tmp = A_ncols; double *At_Yn_a1d1 = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTYnYtTAn_bother){ } */
+  /* length_tmp = A_ncols; double *At_An_a1d1 = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTAnAtTAn_bother){ } */
+  /* length_tmp = T_ncols; double *a1d2_Zt_Sn = &(output_singlestudy[length]); length += length_tmp; //if (ZR_AnZtSZnAt_bother){ } */
+  /* length_tmp = T_ncols; double *a2d2_Zt_Sn = &(output_singlestudy[length]); length += length_tmp; //if (ZR_AnZtSZnAt_bother){ } */
+  /* length_tmp = T_ncols; double *a3d2_Zt_Sn = &(output_singlestudy[length]); length += length_tmp; //if (ZR_AnZtSZnAt_bother){ } */
+  /* length_tmp = T_ncols; double *a1d2_At_Tn = &(output_singlestudy[length]); length += length_tmp; //if (ZR_AnAtTAnAt_bother){ }  */
+  /* length_tmp = T_ncols; double *a2d2_At_Tn = &(output_singlestudy[length]); length += length_tmp; //if (ZR_AnAtTAnAt_bother){ } */
+  /* length_tmp = T_ncols; double *a3d2_At_Tn = &(output_singlestudy[length]); length += length_tmp; //if (ZR_AnAtTAnAt_bother){ } */
+  /* length_tmp = T_ncols; double *et_Tn = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTYnWtSZn || ZC_AtTAnZtSZn || ZC_AtTYnYtTAn || ZC_AtTAnAtTAn || ZR_AnAtTAnAt_bother){ } */
+  /* length_tmp = T_ncols; double *et_Sn = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTYnWtSZn || ZC_AtTAnZtSZn || ZR_AnZtSZnAt_bother){ } */
+  /* length_tmp = A_ncols; double *et_An = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTYnYtTAn || ZC_AtTAnAtTAn){ } */
+  /* length_tmp = A_ncols; double *a1d1_At_en = &(output_singlestudy[length]); length += length_tmp; //if (ZR_AnAtTAnAt_bother){ }  */
+  /* length_tmp = A_ncols; double *a1d2_At_en = &(output_singlestudy[length]); length += length_tmp; //if (ZR_AnAtTAnAt_bother){ }  */
+  /* length_tmp = A_ncols; double *a3d2_At_en = &(output_singlestudy[length]); length += length_tmp; //if (ZR_AnAtTAnAt_bother){ }  */
+  /* length_tmp = 1; double *et_Yn_a1d1 = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTYnYtTAn_bother){ } */
+  /* length_tmp = T_ncols; double *Tt_Yn_a1d1 = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTYnYtTAn_bother){ } */
+  /* length_tmp = A_ncols*T_ncols; double *At_T_Yn_a1d1 = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTYnYtTAn_bother){ } */
+  /* length_tmp = 1; double *et_An_a1d1 = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTAnAtTAn_bother){ } */
+  /* length_tmp = T_ncols; double *Tt_An_a1d1 = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTAnAtTAn_bother){ } */
+  /* length_tmp = A_ncols*T_ncols; double *At_T_An_a1d1 = &(output_singlestudy[length]); length += length_tmp; //if (ZC_AtTAnAtTAn_bother){ } */
+  /* length_tmp = T_ncols*A_nrows; double *T_AnAt_YnYt = &(output_singlestudy[length]); length += length_tmp; length_tmp = T_ncols*A_nrows; double *T_AnAt_AnAt = &(output_singlestudy[length]); length += length_tmp;  */
+  /* length_singlestudy = length; */
+  int ns_j=0,ns_b=0,ns_a=0;/* ,tab_Tt_stride=0,tab_Tt=0; */
+  int na_j=0,na_b=0,na_a=0,/* tab_An_stride=0,tab_An=0, */ma_j=0,ma_b=0,ma_a=0;/* ,tab_At_stride=0,tab_At=0; */
+  int ny_j=0,ny_b=0,ny_a=0,/* ,tab_Yn_stride=0 *//* ,tab_Yn=0, */my_j=0,my_b=0,my_a=0/* ,tab_Yt_stride=0,tab_Yt=0 */;
+  /* int nw_j=0,nw_b=0,nw_a=0,mw_j=0,mw_b=0,mw_a=0; */
+  int nz_j=0,nz_b=0,nz_a=0;/* ,tab_Zn_stride=0,tab_Zn=0 *//* ,mz_j=0,mz_b=0,mz_a=0 */;
+  int vA=0,vY=0,vM=0,vT=0,vS=0;
+  __m128i *wAt_tag=NULL;
+  __m128i *wTt_tag=NULL;
+  __m128i *wSt_tag=NULL;
+  __m128i *mcax_tag=NULL,*mcax_end=NULL;
+  __m128i *mctx_tag=NULL,*mctx_end=NULL;
+  unsigned char *At_tag=NULL;
+  unsigned char *An_tag=NULL;
+  unsigned char *Tt_tag=NULL;
+  unsigned char *Yn_tag=NULL;
+  /* unsigned char *Yt_tag=NULL; */
+  /* unsigned char *Wt_tag=NULL; */
+  /* unsigned char *Zt_tag=NULL; */
+  unsigned char *St_tag=NULL;
+  unsigned char *mca_tag=NULL,*mca_end=NULL;
+  unsigned char *mcy_tag=NULL,*mcy_end=NULL;
+  unsigned char *mct_tag=NULL,*mct_end=NULL;
+  unsigned int *ma_b_,*ma_a_;
+  unsigned int *na_b_,*na_a_;
+  unsigned int *my_b_,*my_a_;
+  unsigned int *ny_b_,*ny_a_;
+  /* unsigned int *mw_b_,*mw_; */
+  /* unsigned int *nw_b_,*nw_; */
+  unsigned int *mz_b_,*mz_a_;
+  unsigned int *nz_b_,*nz_a_;
+  unsigned int *ns_b_,*ns_a_;
+  /* int ZR_AnZtSWnYt_bother = E->ZR_AnZtSWnYt_bother; */
+  /* int ZR_AnZtSZnAt_bother = E->ZR_AnZtSZnAt_bother; */
+  /* int ZR_AnAtTYnYt_bother = E->ZR_AnAtTYnYt_bother; */
+  /* int ZR_AnAtTAnAt_bother = E->ZR_AnAtTAnAt_bother; */
+  /* int ZC_AtTYnWtSZn_bother = E->ZC_AtTYnWtSZn_bother; */
+  /* int ZC_AtTAnZtSZn_bother = E->ZC_AtTAnZtSZn_bother; */
+  /* int ZC_AtTYnYtTAn_bother = E->ZC_AtTYnYtTAn_bother; */
+  /* int ZC_AtTAnAtTAn_bother = E->ZC_AtTAnAtTAn_bother; */
+  /* int use_AnXt_X_XnXt_flag = E->use_AnXt_X_XnXt_flag; */
+  /* int use_An_XtXXn_Xt_flag = E->use_An_XtXXn_Xt_flag; */
+  /* int use_At_T_XnXt_X_Xn_flag = E->use_At_T_XnXt_X_Xn_flag; */
+  /* int use_AtTXn____XtXXn_flag = E->use_AtTXn____XtXXn_flag; */
+  if (verbose>1){ printf(" %% [entering get_xxxxle_singlestudy] tidx %d\n",tidx);}  
+  if (verbose>2){ bprintf(M_At->mr_b,M_At->bitj,1,M_At->nrows," %% M_At->mr_b: "); bprintf(M_At->mr_j,M_At->bitj,1,M_At->nrows," %% M_At->mr_j: ");}
+  if (verbose>2){ bprintf(M_At->mc_b,M_At->bitj,1,M_At->ncols," %% M_At->mc_b: "); bprintf(M_At->mc_j,M_At->bitj,1,M_At->ncols," %% M_At->mc_j: ");}
+  if (verbose>2){ bprintf(M_Tt->mr_b,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_b: "); bprintf(M_Tt->mr_j,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_j: ");}
+  if (verbose>2){ bprintf(M_Tt->mc_b,M_Tt->bitj,1,M_Tt->ncols," %% M_Tt->mc_b: "); bprintf(M_Tt->mc_j,M_Tt->bitj,1,M_Tt->ncols," %% M_Tt->mc_j: ");}
+  if (verbose>2){ bprintf(M_Yt->mr_b,M_Yt->bitj,1,M_Yt->nrows," %% M_Yt->mr_b: "); bprintf(M_Yt->mr_j,M_Yt->bitj,1,M_Yt->nrows," %% M_Yt->mr_j: ");}
+  if (verbose>2){ bprintf(M_Yt->mc_b,M_Yt->bitj,1,M_Yt->ncols," %% M_Yt->mc_b: "); bprintf(M_Yt->mc_j,M_Yt->bitj,1,M_Yt->ncols," %% M_Yt->mc_j: ");}
+  /* if (verbose>2){ bprintf(M_Wt->mr_b,M_Wt->bitj,1,M_Wt->nrows," %% M_Wt->mr_b: "); bprintf(M_Wt->mr_j,M_Wt->bitj,1,M_Wt->nrows," %% M_Wt->mr_j: ");} */
+  /* if (verbose>2){ bprintf(M_Wt->mc_b,M_Wt->bitj,1,M_Wt->ncols," %% M_Wt->mc_b: "); bprintf(M_Wt->mc_j,M_Wt->bitj,1,M_Wt->ncols," %% M_Wt->mc_j: ");} */
+  if (verbose>2){ bprintf(M_St->mr_b,M_St->bitj,1,M_St->nrows," %% M_St->mr_b: "); bprintf(M_St->mr_j,M_St->bitj,1,M_St->nrows," %% M_St->mr_j: ");}
+  if (verbose>2){ bprintf(M_St->mc_b,M_St->bitj,1,M_St->ncols," %% M_St->mc_b: "); bprintf(M_St->mc_j,M_St->bitj,1,M_St->ncols," %% M_St->mc_j: ");}
+  if (verbose>2){ bprintf(M_Zt->mr_b,M_Zt->bitj,1,M_Zt->nrows," %% M_Zt->mr_b: "); bprintf(M_Zt->mr_j,M_Zt->bitj,1,M_Zt->nrows," %% M_Zt->mr_j: ");}
+  if (verbose>2){ bprintf(M_Zt->mc_b,M_Zt->bitj,1,M_Zt->ncols," %% M_Zt->mc_b: "); bprintf(M_Zt->mc_j,M_Zt->bitj,1,M_Zt->ncols," %% M_Zt->mc_j: ");}
+  ma_b_ = M_At->m_b_; ma_a_ = M_At->m_a_;
+  na_b_ = M_At->n_b_; na_a_ = M_At->n_a_;
+  my_b_ = M_Yt->m_b_; my_a_ = M_Yt->m_a_;
+  ny_b_ = M_Yt->n_b_; ny_a_ = M_Yt->n_a_;
+  /* mw_b_ = M_Wt->m_b_; mw_ = M_Wt->m_a_; */
+  /* nw_b_ = M_Wt->n_b_; nw_ = M_Wt->n_a_; */
+  mz_b_ = M_Zt->m_b_; mz_a_ = M_Zt->m_a_;
+  nz_b_ = M_Zt->n_b_; nz_a_ = M_Zt->n_a_;
+  ns_b_ = M_St->m_b_; ns_a_ = M_St->m_a_;
+  /* switch (output_spacing_Tt){ case SPACING_j: tab_Tt_stride = M_St->rpop_j; break; case SPACING_b: tab_Tt_stride = M_St->rpop_b; break; case SPACING_a: tab_Tt_stride = M_St->nrows; break; default: break; /\* switch (output_spacing_Tt){ } *\/} */
+  /* switch (output_spacing_At){ case SPACING_j: tab_At_stride = M_At->rpop_j; break; case SPACING_b: tab_At_stride = M_At->rpop_b; break; case SPACING_a: tab_At_stride = M_At->nrows; break; default: break; /\* switch (output_spacing_At){ } *\/} */
+  /* switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At->cpop_j; break; case SPACING_b: tab_An_stride = M_At->cpop_b; break; case SPACING_a: tab_An_stride = M_At->ncols; break; default: break; /\* switch (output_spacing_An){ } *\/} */
+  /* switch (output_spacing_Zn){ case SPACING_j: tab_Zn_stride = M_Zt->cpop_j; break; case SPACING_b: tab_Zn_stride = M_Zt->cpop_b; break; case SPACING_a: tab_Zn_stride = M_Zt->ncols; break; default: break; /\* switch (output_spacing_Zn){ } *\/} */
+  /* if (verbose>2){ printf(" %% tab_Tt_stride %d tab_At_stride %d tab_An_stride %d\n",tab_Tt_stride,tab_At_stride,tab_An_stride);} */
+  /* fill_uchar_zero((unsigned char *)output_singlestudy,length_singlestudy*sizeof(double)); */
+  if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){
+    if (verbose>1){ printf(" %% Tt_Yn_a1d1, Tt_An_a1d1\n");}
+    ns_j=0; while (ns_j<M_Tt->rpop_j){
+      ns_a = ns_a_[ns_j]; ns_b = ns_b_[ns_j];
+      switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      Tt_tag = (unsigned char *)(&(M_Tt->wX[ns_b*M_Tt->mc_length]));
+      mct_tag = (unsigned char *)(&(M_Tt->mc_j[0]));
+      mct_end = (unsigned char *)(&(M_Tt->mc_j[M_Tt->mc_length]));
+      Tt_Yn_a1d1[tab_Tt]=0; Tt_An_a1d1[tab_Tt]=0;
+      na_j=0; while (na_j<M_At->cpop_j){
+	na_a = na_a_[na_j]; na_b = na_b_[na_j];
+	switch (output_spacing_An){ case SPACING_j: tab_An=na_j; break; case SPACING_b: tab_An=na_b; break; case SPACING_a: tab_An=na_a; break; default: break; /* switch (output_spacing_An){ } */}
+	vT = bget____(Tt_tag,na_a); vM = bget__on(mct_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",na_j,na_b,na_a);}
+	if (ZC_AtTYnYtTAn_bother){ Tt_Yn_a1d1[tab_Tt] += vT*lf_Yn_ajdk[tab_An + AJDK_1_1*tab_An_stride];}
+	if (ZC_AtTAnAtTAn_bother){ Tt_An_a1d1[tab_Tt] += vT*lf_An_ajdk[tab_An + AJDK_1_1*tab_An_stride];}
+	na_j++; /* while (na_j<M_At->cpop_j){ } */}
+      ns_j++; /* while (ns_j<M_Tt->rpop_j){ } */}
+    if (verbose>2){ raprintf(Tt_Yn_a1d1,"double",1,tab_Tt_stride," %% Tt_Yn_a1d1: ");}
+    if (verbose>2){ raprintf(Tt_An_a1d1,"double",1,tab_Tt_stride," %% Tt_An_a1d1: ");}
+    if (verbose>1){ printf(" %% At_T_Yn_a1d1, At_T_An_a1d1\n");}
+    ns_j=0; while (ns_j<M_Tt->rpop_j){
+      ns_a = ns_a_[ns_j]; ns_b = ns_b_[ns_j];
+      switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      Tt_tag = (unsigned char *)(&(M_Tt->wX[ns_b*M_Tt->mc_length]));
+      mct_tag = (unsigned char *)(&(M_Tt->mc_j[0]));
+      mct_end = (unsigned char *)(&(M_Tt->mc_j[M_Tt->mc_length]));
+      ma_j=0; while (ma_j<M_At->rpop_j){
+	ma_a = ma_a_[ma_j]; ma_b = ma_b_[ma_j];
+	switch (output_spacing_At){ case SPACING_j: tab_At=ma_j; break; case SPACING_b: tab_At=ma_b; break; case SPACING_a: tab_At=ma_a; break; default: break; /* switch (output_spacing_At){ } */}
+	At_tag = (unsigned char *)(&(M_At->wX[ma_b*M_At->mc_length]));
+	mca_tag = (unsigned char *)(&(M_At->mc_j[0]));
+	mca_end = (unsigned char *)(&(M_At->mc_j[M_At->mc_length]));
+	At_T_Yn_a1d1[tab_At + tab_Tt*tab_At_stride]=0; At_T_An_a1d1[tab_At + tab_Tt*tab_At_stride]=0;
+	na_j=0; while (na_j<M_At->cpop_j){
+	  na_a = na_a_[na_j]; na_b = na_b_[na_j];
+	  switch (output_spacing_An){ case SPACING_j: tab_An=na_j; break; case SPACING_b: tab_An=na_b; break; case SPACING_a: tab_An=na_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  vA = bget____(At_tag,na_a); vM = bget__on(mca_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_At->mc_j\n",na_j,na_b,na_a);}
+	  vT = bget____(Tt_tag,na_a); vM = bget__on(mct_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_At->mc_j\n",na_j,na_b,na_a);}
+	  if (ZC_AtTYnYtTAn_bother){ At_T_Yn_a1d1[tab_At + tab_Tt*tab_At_stride] += vA*vT*lf_Yn_ajdk[tab_An + AJDK_1_1*tab_An_stride];}
+	  if (ZC_AtTAnAtTAn_bother){ At_T_An_a1d1[tab_At + tab_Tt*tab_At_stride] += vA*vT*lf_An_ajdk[tab_An + AJDK_1_1*tab_An_stride];}
+	  na_j++; /* while (na_j<M_At->cpop_j){ } */}
+	ma_j++; /* while (ma_j<M_At->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_Tt->rpop_j){ } */}
+    if (verbose>2){ raprintf(At_T_Yn_a1d1,"double",tab_At_stride,tab_Tt_stride," %% Tt_Yn_a1d1: ");}
+    if (verbose>2){ raprintf(At_T_An_a1d1,"double",tab_At_stride,tab_Tt_stride," %% Tt_An_a1d1: ");}
+    /* if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){ } */}
+  if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){
+    if (verbose>1){ printf(" %% At_Yn_a1d1, At_An_a1d1\n");}
+    ma_j=0; while (ma_j<M_At->rpop_j){
+      ma_a = ma_a_[ma_j]; ma_b = ma_b_[ma_j];
+      switch (output_spacing_At){ case SPACING_j: tab_At=ma_j; break; case SPACING_b: tab_At=ma_b; break; case SPACING_a: tab_At=ma_a; break; default: break; /* switch (output_spacing_At){ } */}
+      At_tag = (unsigned char *)(&(M_At->wX[ma_b*M_At->mc_length]));
+      mca_tag = (unsigned char *)(&(M_At->mc_j[0]));
+      mca_end = (unsigned char *)(&(M_At->mc_j[M_At->mc_length]));
+      At_Yn_a1d1[tab_At]=0; At_An_a1d1[tab_At]=0;
+      na_j=0; while (na_j<M_At->cpop_j){
+	na_a = na_a_[na_j]; na_b = na_b_[na_j];
+	switch (output_spacing_An){ case SPACING_j: tab_An=na_j; break; case SPACING_b: tab_An=na_b; break; case SPACING_a: tab_An=na_a; break; default: break; /* switch (output_spacing_An){ } */}
+	vA = bget____(At_tag,na_a); vM = bget__on(mca_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_At->mc_j\n",na_j,na_b,na_a);}
+	if (ZC_AtTYnYtTAn_bother){ At_Yn_a1d1[tab_At] += vA*lf_Yn_ajdk[tab_An + AJDK_1_1*tab_An_stride];}
+	if (ZC_AtTAnAtTAn_bother){ At_An_a1d1[tab_At] += vA*lf_An_ajdk[tab_An + AJDK_1_1*tab_An_stride];}
+	na_j++; /* while (na_j<M_At->cpop_j){ } */}
+      ma_j++; /* while (ma_j<M_At->rpop_j){ } */}
+    if (verbose>2){ raprintf(At_Yn_a1d1,"double",1,tab_At_stride," %% At_Yn_a1d1: ");}
+    if (verbose>2){ raprintf(At_An_a1d1,"double",1,tab_At_stride," %% At_An_a1d1: ");}
+    /* if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){ } */}
+  if (ZR_AnZtSZnAt_bother || ZR_AnAtTAnAt_bother){
+    if (verbose>1){ printf(" %% a1d2_Zt_Sn, a2d2_Zt_Sn, a3d2_Zt_Sn, a1d2_At_Tn, a2d2_At_Tn, a3d2_At_Tn\n");}
+    ns_j=0; while (ns_j<M_Tt->rpop_j){
+      ns_a = ns_a_[ns_j]; ns_b = ns_b_[ns_j];
+      switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      Tt_tag = (unsigned char *)(&(M_Tt->wX[ns_b*M_Tt->mc_length]));
+      mct_tag = (unsigned char *)(&(M_Tt->mc_j[0]));
+      mct_end = (unsigned char *)(&(M_Tt->mc_j[M_Tt->mc_length]));
+      a1d2_At_Tn[tab_Tt]=0; a2d2_At_Tn[tab_Tt]=0; a3d2_At_Tn[tab_Tt]=0;
+      if (ZR_AnAtTAnAt_bother){ 
+	na_j=0; while (na_j<M_Tt->cpop_j){
+	  na_a = na_a_[na_j]; na_b = na_b_[na_j];
+	  switch (output_spacing_An){ case SPACING_j: tab_An=na_j; break; case SPACING_b: tab_An=na_b; break; case SPACING_a: tab_An=na_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  vT = bget____(Tt_tag,na_a); vM = bget__on(mct_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",na_j,na_b,na_a);}
+	  if (verbose>4){ printf(" %% (ns %.2d,%.2d,%.2d na %.2d,%.2d,%.2d), combining vT %s * lf_An_ajdk[%d+%d*%d] %f\n",ns_j,ns_b,ns_a,na_j,na_b,na_a,vT>0?"+":"-",tab_An,AJDK_1_2,tab_An_stride,lf_An_ajdk[tab_An + AJDK_1_2*tab_An_stride]);}
+	  a1d2_At_Tn[tab_Tt] += vT*lf_An_ajdk[tab_An + AJDK_1_2*tab_An_stride];
+	  a2d2_At_Tn[tab_Tt] += vT*lf_An_ajdk[tab_An + AJDK_2_2*tab_An_stride];
+	  a3d2_At_Tn[tab_Tt] += vT*lf_An_ajdk[tab_An + AJDK_3_2*tab_An_stride];
+	  na_j++; /* while (na_j<M_At->cpop_j){ } */}
+	/* if (ZR_AnAtTAnAt_bother){ } */}
+      St_tag = (unsigned char *)(&(M_St->wX[ns_b*M_St->mc_length]));
+      mct_tag = (unsigned char *)(&(M_St->mc_j[0]));
+      mct_end = (unsigned char *)(&(M_St->mc_j[M_St->mc_length]));
+      a1d2_Zt_Sn[tab_Tt]=0; a2d2_Zt_Sn[tab_Tt]=0; a3d2_Zt_Sn[tab_Tt]=0;
+      if (ZR_AnZtSZnAt_bother){
+	nz_j=0; while (nz_j<M_Zt->cpop_j){
+	  nz_a = nz_a_[nz_j]; nz_b = nz_b_[nz_j];
+	  switch (output_spacing_Zn){ case SPACING_j: tab_Zn=nz_j; break; case SPACING_b: tab_Zn=nz_b; break; case SPACING_a: tab_Zn=nz_a; break; default: break; /* switch (output_spacing_Zn){ } */}
+	  vS = bget____(St_tag,nz_a); vM = bget__on(mct_tag,nz_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_St->mc_j\n",nz_j,nz_b,nz_a);}
+	  if (verbose>4){ printf(" %% (ns %.2d,%.2d,%.2d nz %.2d,%.2d,%.2d), combining vS %s * lf_Zn_ajdk[%d+%d*%d] %f\n",ns_j,ns_b,ns_a,nz_j,nz_b,nz_a,vS>0?"+":"-",tab_Zn,AJDK_1_2,tab_Zn_stride,lf_Zn_ajdk[tab_Zn + AJDK_1_2*tab_Zn_stride]);}
+	  a1d2_Zt_Sn[tab_Tt] += vS*lf_Zn_ajdk[tab_Zn + AJDK_1_2*tab_Zn_stride];
+	  a2d2_Zt_Sn[tab_Tt] += vS*lf_Zn_ajdk[tab_Zn + AJDK_2_2*tab_Zn_stride];
+	  a3d2_Zt_Sn[tab_Tt] += vS*lf_Zn_ajdk[tab_Zn + AJDK_3_2*tab_Zn_stride];
+	  nz_j++; /* while (nz_j<M_St->cpop_j){ } */}
+	/* if (ZR_AnZtSZnAt_bother){ } */}
+      ns_j++; /* while (ns_j<M_Tt->rpop_j){ } */}
+    if (verbose>2){ raprintf(a1d2_At_Tn,"double",1,tab_Tt_stride," %% a1d2_At_Tn: ");}
+    if (verbose>2){ raprintf(a2d2_At_Tn,"double",1,tab_Tt_stride," %% a2d2_At_Tn: ");}
+    if (verbose>2){ raprintf(a3d2_At_Tn,"double",1,tab_Tt_stride," %% a3d2_At_Tn: ");}
+    if (verbose>2){ raprintf(a1d2_Zt_Sn,"double",1,tab_Tt_stride," %% a1d2_Zt_Sn: ");}
+    if (verbose>2){ raprintf(a2d2_Zt_Sn,"double",1,tab_Tt_stride," %% a2d2_Zt_Sn: ");}
+    if (verbose>2){ raprintf(a3d2_Zt_Sn,"double",1,tab_Tt_stride," %% a3d2_Zt_Sn: ");}
+    /* if (ZR_AnZtSZnAt_bother || ZR_AnAtTAnAt_bother){ } */}
+  if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother || ZR_AnAtTAnAt_bother){
+    if (verbose>1){ printf(" %% et_An, a1d1_At_en, a1d2_At_en, a3d2_At_en\n");}
+    ma_j=0; while (ma_j<M_At->rpop_j){
+      ma_a = ma_a_[ma_j]; ma_b = ma_b_[ma_j];
+      switch (output_spacing_At){ case SPACING_j: tab_At=ma_j; break; case SPACING_b: tab_At=ma_b; break; case SPACING_a: tab_At=ma_a; break; default: break; /* switch (output_spacing_At){ } */}
+      wAt_tag = (__m128i *)(&(M_At->wX[ma_b*M_At->mc_length]));
+      mcax_tag = (__m128i *)(&(M_At->mc_j[0]));
+      mcax_end = (__m128i *)(&(M_At->mc_j[M_At->mc_length]));
+      if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){ et_An[tab_At] = -M_At->cpop_j + 2*popcount_1mask_multiword_adv_end(&wAt_tag,&mcax_tag,&mcax_end);}
+      if (ZR_AnAtTAnAt_bother){ a1d1_At_en[tab_At] = (A_ajdk ? A_ajdk[ma_a/POPLENGTH + AJDK_1_1*A_pcols] : 0)*et_An[tab_At];}
+      if (ZR_AnAtTAnAt_bother){ a1d2_At_en[tab_At] = (A_ajdk ? A_ajdk[ma_a/POPLENGTH + AJDK_1_2*A_pcols] : 0)*et_An[tab_At];}
+      if (ZR_AnAtTAnAt_bother){ a3d2_At_en[tab_At] = (A_ajdk ? A_ajdk[ma_a/POPLENGTH + AJDK_3_2*A_pcols] : 0)*et_An[tab_At];}
+      ma_j++; /* while (ma_j<M_At->rpop_j){ } */}
+    if (verbose>2){ raprintf(et_An,"double",1,tab_At_stride," %% et_An: ");}
+    if (verbose>2){ raprintf(a1d1_At_en,"double",1,tab_At_stride," %% a1d1_At_en: ");}
+    if (verbose>2){ raprintf(a1d2_At_en,"double",1,tab_At_stride," %% a1d2_At_en: ");}
+    if (verbose>2){ raprintf(a3d2_At_en,"double",1,tab_At_stride," %% a3d2_At_en: ");}
+    /* if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother || ZR_AnAtTAnAt_bother){ } */}
+  if (ZC_AtTYnWtSZn_bother || ZC_AtTAnZtSZn_bother || ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother || ZR_AnZtSZnAt_bother || ZR_AnAtTAnAt_bother){  
+    if (verbose>1){ printf(" %% et_Tn, et_Sn\n");}
+    ns_j=0; while (ns_j<M_Tt->rpop_j){
+      ns_a = ns_a_[ns_j]; ns_b = ns_b_[ns_j];
+      switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      wTt_tag = (__m128i *)(&(M_Tt->wX[ns_b*M_Tt->mc_length]));
+      mctx_tag = (__m128i *)(&(M_Tt->mc_j[0]));
+      mctx_end = (__m128i *)(&(M_Tt->mc_j[M_Tt->mc_length]));
+      if (ZC_AtTYnWtSZn_bother || ZC_AtTAnZtSZn_bother || ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother || ZR_AnAtTAnAt_bother){ et_Tn[tab_Tt] = -M_Tt->cpop_j + 2*popcount_1mask_multiword_adv_end(&wTt_tag,&mctx_tag,&mctx_end);}
+      wSt_tag = (__m128i *)(&(M_St->wX[ns_b*M_St->mc_length]));
+      mctx_tag = (__m128i *)(&(M_St->mc_j[0]));
+      mctx_end = (__m128i *)(&(M_St->mc_j[M_St->mc_length]));
+      if (ZC_AtTYnWtSZn_bother || ZC_AtTAnZtSZn_bother || ZR_AnZtSZnAt_bother){ et_Sn[tab_Tt] = -M_St->cpop_j + 2*popcount_1mask_multiword_adv_end(&wSt_tag,&mctx_tag,&mctx_end);}
+      ns_j++; /* while (ns_j<M_Tt->rpop_j){ } */}
+    if (verbose>2){ raprintf(et_Tn,"double",1,tab_Tt_stride," %% et_Tn: ");}
+    if (verbose>2){ raprintf(et_Sn,"double",1,tab_Tt_stride," %% et_Sn: ");}
+    /* if (ZC_AtTYnWtSZn_bother || ZC_AtTAnZtSZn_bother || ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother || ZR_AnZtSZnAt_bother ||  ZR_AnAtTAnAt_bother){ } */}
+  if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){
+    if (verbose>1){ printf(" %% et_Yn_a1d1, et_An_a1d1\n");}
+    et_Yn_a1d1[0]=0; et_An_a1d1[0]=0;
+    na_j=0; while (na_j<M_At->cpop_j){
+      na_a = na_a_[na_j]; na_b = na_b_[na_j];
+      switch (output_spacing_An){ case SPACING_j: tab_An=na_j; break; case SPACING_b: tab_An=na_b; break; case SPACING_a: tab_An=na_a; break; default: break; /* switch (output_spacing_An){ } */}
+      if (ZC_AtTYnYtTAn_bother){ et_Yn_a1d1[0] += lf_Yn_ajdk[tab_An + AJDK_1_1*tab_An_stride];}
+      if (ZC_AtTAnAtTAn_bother){ et_An_a1d1[0] += lf_An_ajdk[tab_An + AJDK_1_1*tab_An_stride];}
+      na_j++; /* while (na_j<M_At->cpop_j){ } */}
+    if (verbose>2){ raprintf(et_Yn_a1d1,"double",1,1," %% et_Yn_a1d1: ");}
+    if (verbose>2){ raprintf(et_An_a1d1,"double",1,1," %% et_An_a1d1: ");}
+    /* if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){ } */}
+  if (ZR_AnAtTYnYt_bother || ZR_AnAtTAnAt_bother){
+    if (verbose>1){ printf(" %% T_AnAt_YnYt, T_AnAt_AnAt\n");}  
+    if (use_AnXt_X_XnXt_flag || use_At_T_XnXt_X_Xn_flag){ /* no need for T_AnAt_XnXt */
+      /* ns_j=0; while (ns_j<M_Tt->rpop_j){ */
+      /* 	ns_a = ns_a_[ns_j]; ns_b = ns_b_[ns_j]; */
+      /* 	switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /\* switch (output_spacing_Tt){ } *\/} */
+      /* 	Tt_tag = (unsigned char *)(&(M_Tt->wX[ns_b*M_Tt->mc_length])); */
+      /* 	mct_tag = (unsigned char *)(&(M_Tt->mc_j[0])); */
+      /* 	mct_end = (unsigned char *)(&(M_Tt->mc_j[M_Tt->mc_length])); */
+      /* 	na_j=0; while (na_j<M_Tt->cpop_j){ */
+      /* 	  na_a = na_a_[na_j]; na_b = na_b_[na_j]; ny_a = na_a; ny_b = na_b; ny_j = na_j; */
+      /* 	  switch (output_spacing_An){ case SPACING_j: tab_An=na_j; break; case SPACING_b: tab_An=na_b; break; case SPACING_a: tab_An=na_a; break; default: break; /\* switch (output_spacing_An){ } *\/} */
+      /* 	  switch (output_spacing_Yn){ case SPACING_j: tab_Yn=ny_j; break; case SPACING_b: tab_Yn=ny_b; break; case SPACING_a: tab_Yn=ny_a; break; default: break; /\* switch (output_spacing_Yn){ } *\/} */
+      /* 	  vT = bget____(Tt_tag,na_a); vM = bget__on(mct_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",na_j,na_b,na_a);} */
+      /* 	  if (ZR_AnAtTYnYt_bother){ T_AnAt_YnYt[tab_Tt + tab_An*tab_Tt_stride] = vT*(lf_AnAt!=NULL ? lf_AnAt[tab_An + tab_An*tab_An_stride] : 0)*(lf_YnYt!=NULL ? lf_YnYt[tab_Yn + tab_Yn*tab_Yn_stride] : 0);} */
+      /* 	  if (ZR_AnAtTAnAt_bother){ T_AnAt_AnAt[tab_Tt + tab_An*tab_Tt_stride] = vT*(lf_AnAt!=NULL ? lf_AnAt[tab_An + tab_An*tab_An_stride] : 0)*(lf_AnAt!=NULL ? lf_AnAt[tab_Yn + tab_Yn*tab_Yn_stride] : 0);} */
+      /* 	  na_j++; /\* while (na_j<M_At->cpop_j){ } *\/} */
+      /* 	ns_j++; /\* while (ns_j<M_Tt->rpop_j){ } *\/} */
+      /* if (use_AnXt_X_XnXt_flag || use_At_T_XnXt_X_Xn_flag){ } */}    
+    if (use_An_XtXXn_Xt_flag || use_AtTXn____XtXXn_flag){ /* use T_AnAt_XnXt later */
+      na_j=0; while (na_j<M_Tt->cpop_j){
+	na_a = na_a_[na_j]; na_b = na_b_[na_j]; ny_a = na_a; ny_b = na_b; ny_j = na_j;
+	switch (output_spacing_An){ case SPACING_j: tab_An=na_j; break; case SPACING_b: tab_An=na_b; break; case SPACING_a: tab_An=na_a; break; default: break; /* switch (output_spacing_An){ } */}
+	switch (output_spacing_Yn){ case SPACING_j: tab_Yn=ny_j; break; case SPACING_b: tab_Yn=ny_b; break; case SPACING_a: tab_Yn=ny_a; break; default: break; /* switch (output_spacing_Yn){ } */}
+	An_tag = (unsigned char *)(&(M_An->wX[na_b*M_An->mc_length])); tmp_a=0;
+	mca_tag = (unsigned char *)(&(M_An->mc_j[0]));
+	mca_end = (unsigned char *)(&(M_An->mc_j[M_An->mc_length]));
+	ma_j=0; while (ma_j<M_At->rpop_j){
+	  ma_a = ma_a_[ma_j]; ma_b = ma_b_[ma_j];
+	  vA = bget____(An_tag,ma_a); vM = bget__on(mca_tag,ma_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_An->mc_j\n",ma_j,ma_b,ma_a);}
+	  tmp_a += (vA-a_An[ma_a/POPLENGTH])*D_An[ma_a/POPLENGTH]*(vA-a_An[ma_a/POPLENGTH]);
+	  ma_j++; /* while (ma_j<M_At->rpop_j){ } */}
+	if (ZR_AnAtTAnAt_bother){ 
+	  ns_j=0; while (ns_j<M_Tt->rpop_j){
+	    ns_a = ns_a_[ns_j]; ns_b = ns_b_[ns_j];
+	    switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+	    Tt_tag = (unsigned char *)(&(M_Tt->wX[ns_b*M_Tt->mc_length]));
+	    mct_tag = (unsigned char *)(&(M_Tt->mc_j[0]));
+	    mct_end = (unsigned char *)(&(M_Tt->mc_j[M_Tt->mc_length]));
+	    vT = bget____(Tt_tag,na_a); vM = bget__on(mct_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",na_j,na_b,na_a);}
+	    T_AnAt_AnAt[tab_Tt + tab_An*tab_Tt_stride] = vT*tmp_a*tmp_a;
+	    ns_j++; /* while (ns_j<M_Tt->rpop_j){ } */}
+	  /* if (ZR_AnAtTAnAt_bother){ } */}
+	if (ZR_AnAtTYnYt_bother){
+	  Yn_tag = (unsigned char *)(&(M_Yn->wX[ny_b*M_Yn->mc_length])); tmp_y=0;
+	  mcy_tag = (unsigned char *)(&(M_Yn->mc_j[0]));
+	  mcy_end = (unsigned char *)(&(M_Yn->mc_j[M_Yn->mc_length]));
+	  my_j=0; while (my_j<M_Yt->rpop_j){
+	    my_a = my_a_[my_j]; my_b = my_b_[my_j];
+	    vY = bget____(Yn_tag,my_a); vM = bget__on(mcy_tag,my_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Yn->mc_j\n",my_j,my_b,my_a);}
+	    tmp_y += (vY-a_Yn[my_a/POPLENGTH])*D_Yn[my_a/POPLENGTH]*(vY-a_Yn[my_a/POPLENGTH]);
+	    my_j++; /* while (my_j<M_Yt->rpop_j){ } */}
+	  ns_j=0; while (ns_j<M_Tt->rpop_j){
+	    ns_a = ns_a_[ns_j]; ns_b = ns_b_[ns_j];
+	    switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+	    Tt_tag = (unsigned char *)(&(M_Tt->wX[ns_b*M_Tt->mc_length]));
+	    mct_tag = (unsigned char *)(&(M_Tt->mc_j[0]));
+	    mct_end = (unsigned char *)(&(M_Tt->mc_j[M_Tt->mc_length]));
+	    vT = bget____(Tt_tag,na_a); vM = bget__on(mct_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",na_j,na_b,na_a);}
+	    T_AnAt_YnYt[tab_Tt + tab_An*tab_Tt_stride] = vT*tmp_a*tmp_y;
+	    ns_j++; /* while (ns_j<M_Tt->rpop_j){ } */}
+	  /* if (ZR_AnAtTYnYt_bother){ } */}
+	na_j++; /* while (na_j<M_At->cpop_j){ } */}
+      /* if (verbose>4){ raprintf(lf_AnAt,"double",tab_An_stride,tab_Yn_stride," %% lf_AnAt: "); printf(" %% \n"); if (lf_YnYt!=NULL){ raprintf(lf_YnYt,"double",tab_An_stride,tab_Yn_stride," %% lf_YnYt: ");}} */
+      if (verbose>2){ raprintf(T_AnAt_YnYt,"double",tab_Tt_stride,tab_An_stride," %% T_AnAt_YnYt: ");}
+      if (verbose>2){ raprintf(T_AnAt_AnAt,"double",tab_Tt_stride,tab_An_stride," %% T_AnAt_AnAt: ");}
+      /* if (use_An_XtXXn_Xt_flag || use_AtTXn____XtXXn_flag){ } */}
+    /* if (ZR_AnAtTYnYt_bother || ZR_AnAtTAnAt_bother){ } */}
+  if (verbose){ printf(" %% [finished get_xxxxle_singlestudy] tidx %d\n",tidx);}
+  return NULL;
+}
+
+void binary_xxxxle_singlestudy(int *tidx,void **vpra,pthread_t *thread_in,int output_spacing_At,int output_spacing_An,int output_spacing_Tt,struct bcc_single *E)
+{
+  /* This function calls get_xxxxle_singlestudy ; 
+     No reloading of data is performed ; we assume all data is preloaded ;
+     calculation performed in thread *thread_in ; thread number *tidx ;
+     variable space in **vpra (should be at least size 8)
+   */
+  int verbose=0;
+  /* unsigned char *wkspace_mark=NULL; */
+  int nb1=0,nbins=0;
+  int length=0,ip=0;
+  double **output_singlestudy_p=NULL;
+  if (verbose){ printf(" %% [entering binary_xxxxle_singlestudy] tidx %d\n",*tidx);}
+  nb1 = *nb1_p; nbins = *nbins_p;
+  output_singlestudy_p = &(E->lf_singlestudy);
+  length = E->length_singlestudy; 
+  if (*output_singlestudy_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_singlestudy_p = (double *)wkspace_alloc(length*sizeof(double));}
+  memset((*output_singlestudy_p),0,length*sizeof(double));
+  ip=0; 
+  vpra[ip++] = tidx; vpra[ip++] = E; 
+  switch (output_spacing_An){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_An){ } */}
+  switch (output_spacing_At){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_At){ } */}
+  switch (output_spacing_Tt){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+  if (*tidx>0){ if (pthread_create(thread_in,NULL,&get_xxxxle_singlestudy,vpra)){ printf("Warning! cannot create thread %d in binary_xxxxle_singlestudy\n",*tidx);}}
+  else /* if (*tidx<=0) */{ get_xxxxle_singlestudy(vpra);} /* must join threads later */;
+  if (verbose>2){ raprintf((*output_singlestudy_p),"double",1,length," %% (*output_singlestudy_p): ");}
+  if (verbose){ printf(" %% [finished binary_xxxxle_singlestudy] tidx %d\n",*tidx);}
+}
+
+void bcc_xxxxle_compute_lf_singlestudy(int nbins,struct bcc_ajdk *D,struct bcc_single **E_)
+{
+  int verbose=GLOBAL_verbose,verbose_timing_quik=0;
+  int nb1=0;
+  if (verbose){ printf(" %% calculating E_[nb]->lf_singlestudy.\n");}
+  GLOBAL_tic(0);
+  GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+  for (nb1=0;nb1<nbins;nb1++){ 
+    GLOBAL_pthread_tic(); 
+    binary_xxxxle_singlestudy(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),SPACING_a,SPACING_a,SPACING_a,&(GLOBAL_nbra[nb1]),&nbins,D,E_);
+    GLOBAL_pthread_toc();
+    /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  GLOBAL_pthread_tuc();
+  GLOBAL_toc(0,verbose_timing_quik," %% calculating E_[nb]->lf_singlestudy: "); 
+  if (verbose>2){
+    for (nb1=0;nb1<nbins;nb1++){
+      printf(" %% nb1 %d\n",nb1);
+      raprintf(E_[nb1]->lf_singlestudy,"double",1,E_[nb1]->length_singlestudy," %% lf_singlestudy: ");
+      /* for (nb1=0;nb1<nbins;nb1++){ } */}
+    /* if (verbose>2){ } */}
+}
+
+/******************************************************************/
+
+void *get_xxxxle_doublestudy(void *vp)
+{
+  /* This function takes in a variety of inputs and calculates a variety of double-study terns */
+  int verbose=0;
+  int ip=0,length=0,length_tmp=0,length_singlestudy_nb1=0,length_singlestudy_nb2=0,length_doublestudy=0;
+  void **vpra=(void **)vp;
+  int tidx = *(int *)(vpra[ip++]);
+  int nb1 = *(int *)(vpra[ip++]);
+  int nb2 = *(int *)(vpra[ip++]);
+  int nbins = *(int *)(vpra[ip++]);
+  struct bcc_ajdk *D = (struct bcc_ajdk *)(vpra[ip++]);
+  struct bcc_single **E_ = (struct bcc_single **)(vpra[ip++]);
+  struct bcc_double **F_ = (struct bcc_double **)(vpra[ip++]);
+  int output_spacing_An = *(int *)(vpra[ip++]);
+  int output_spacing_At = *(int *)(vpra[ip++]);
+  int output_spacing_Zn = *(int *)(vpra[ip++]);
+  int output_spacing_Zt = *(int *)(vpra[ip++]);
+  int output_spacing_Yt = *(int *)(vpra[ip++]);
+  int output_spacing_Tt = *(int *)(vpra[ip++]);
+  int output_spacing_YnWt = *(int *)(vpra[ip++]);
+  struct M_handle *M_An_nb1 = E_[nb1]->M_An;
+  struct M_handle *M_At_nb1 = E_[nb1]->M_At;
+  struct M_handle *M_Yn_nb1 = E_[nb1]->M_Yn;
+  struct M_handle *M_Yt_nb1 = E_[nb1]->M_Yt;
+  struct M_handle *M_Tt_nb1 = E_[nb1]->M_Tt;
+  struct M_handle *M_St_nb1 = E_[nb1]->M_St;
+  /* struct M_handle *M_Zn_nb1 = E_[nb1]->M_Zn; */
+  struct M_handle *M_Zt_nb1 = E_[nb1]->M_Zt;
+  double *lf_AtTn_nb1 = E_[nb1]->lf_AtTn;
+  /* double *lf_ZtSn_nb1 = E_[nb1]->lf_ZtSn; */
+  double *lf_YtTn_nb1 = E_[nb1]->lf_YtTn;
+  /* double *lf_WtSn_nb1 = E_[nb1]->lf_WtSn; */
+  double *lf_singlestudy_nb1 = E_[nb1]->lf_singlestudy;
+  struct M_handle *M_An_nb2 = E_[nb2]->M_An;
+  struct M_handle *M_At_nb2 = E_[nb2]->M_At;
+  struct M_handle *M_Tt_nb2 = E_[nb2]->M_Tt;
+  struct M_handle *M_St_nb2 = E_[nb2]->M_St;
+  struct M_handle *M_Zn_nb2 = E_[nb2]->M_Zn;
+  struct M_handle *M_Zt_nb2 = E_[nb2]->M_Zt;
+  struct M_handle *M_Yn_nb2 = E_[nb2]->M_Yn;
+  struct M_handle *M_Wn_nb2 = E_[nb2]->M_Wn;
+  /* struct M_handle *M_Wt_nb2 = E_[nb2]->M_Wt; */
+  double *lf_AtTn_nb2 = E_[nb2]->lf_AtTn;
+  double *lf_ZtSn_nb2 = E_[nb2]->lf_ZtSn;
+  double *lf_YtTn_nb2 = E_[nb2]->lf_YtTn;
+  double *lf_WtSn_nb2 = E_[nb2]->lf_WtSn;
+  double *lf_singlestudy_nb2 = E_[nb2]->lf_singlestudy;
+  int nbx = nb1+nb2*nbins;
+  double *lf_AnAt_nbx = F_[nbx]->lf_AnAt;
+  double *lf_AnZt_nbx = F_[nbx]->lf_AnZt;
+  double *lf_YnYt_nbx = F_[nbx]->lf_YnYt;
+  double *lf_YnWt_nbx = F_[nbx]->lf_YnWt;
+  double *output_doublestudy = F_[nbx]->lf_doublestudy;
+  int A_pcols = psize(M_At_nb1->nrows);
+  int Y_pcols = psize(M_Yt_nb1->nrows);
+  double *A_ajdk = D->A_ajdk;
+  double *D_An = (double *)&(A_ajdk[0 + AJDK_0_1*A_pcols]);
+  double *a_An = (double *)&(A_ajdk[0 + AJDK_1_0*A_pcols]);
+  double *Y_ajdk = D->Y_ajdk;
+  double *D_Yn = (double *)&(Y_ajdk[0 + AJDK_0_1*Y_pcols]);
+  double *a_Yn = (double *)&(Y_ajdk[0 + AJDK_1_0*Y_pcols]);
+  int A_ncols = M_At_nb1->nrows, T_ncols = M_Tt_nb1->nrows;
+  int A_nrows_nb1 = M_At_nb1->ncols, A_nrows_nb2 = M_At_nb2->ncols;
+  int /* Z_nrows_nb1 = M_Zt_nb1->ncols, */Z_nrows_nb2 = M_Zt_nb2->ncols;
+  length = 0;
+  length_tmp = A_ncols; /* double *At_Yn_a1d1_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *At_An_a1d1_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a1d2_Zt_Sn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a2d2_Zt_Sn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a3d2_Zt_Sn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a1d2_At_Tn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a2d2_At_Tn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a3d2_At_Tn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; double *et_Tn_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = T_ncols; /* double *et_Sn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *et_An_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a1d1_At_en_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a1d2_At_en_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a3d2_At_en_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = 1; /* double *et_Yn_a1d1_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *Tt_Yn_a1d1_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = A_ncols*T_ncols; /* double *At_T_Yn_a1d1_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = 1; /* double *et_An_a1d1_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *Tt_An_a1d1_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = A_ncols*T_ncols; /* double *At_T_An_a1d1_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols*A_nrows_nb1; /* double *T_AnAt_YnYt_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols*A_nrows_nb1; /* double *T_AnAt_AnAt_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp; 
+  length_singlestudy_nb1 = length;
+  length = 0;
+  length_tmp = A_ncols; /* double *At_Yn_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *At_An_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a1d2_Zt_Sn_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a2d2_Zt_Sn_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a3d2_Zt_Sn_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a1d2_At_Tn_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a2d2_At_Tn_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a3d2_At_Tn_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; double *et_Tn_nb2 = &(lf_singlestudy_nb2[length]); length += length_tmp;
+  length_tmp = T_ncols; double *et_Sn_nb2 = &(lf_singlestudy_nb2[length]); length += length_tmp;
+  length_tmp = A_ncols; /* double *et_An_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a1d1_At_en_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a1d2_At_en_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a3d2_At_en_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = 1; /* double *et_Yn_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *Tt_Yn_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols*T_ncols; /* double *At_T_Yn_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = 1; /* double *et_An_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *Tt_An_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols*T_ncols; /* double *At_T_An_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols*A_nrows_nb2; /* double *T_AnAt_YnYt_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols*A_nrows_nb2; /* double *T_AnAt_AnAt_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp; 
+  length_singlestudy_nb2 = length;
+  double *An_a2d2_Zt_Sn = NULL; double *An_a2d2_At_Tn = NULL; double *et_T_YnWt = NULL; double *et_T_AnZt = NULL; double *et_T_YnWt_S_Zn = NULL; double *et_T_AnZt_S_Zn = NULL; double *et_T_YnYt = NULL; double *et_T_AnAt = NULL; double *et_T_YnYt_T_An = NULL; double *et_T_AnAt_T_An = NULL; double *YnWt_S_en = NULL; double *AnZt_S_en = NULL; double *At_T_YnWt_S_en = NULL; double *At_T_AnZt_S_en = NULL; double *YnYt_T_en = NULL; double *AnAt_T_en = NULL; double *At_T_YnYt_T_en = NULL; double *At_T_AnAt_T_en = NULL; double *et_T_YnWt_S_en = NULL; double *et_T_AnZt_S_en = NULL; double *et_T_YnYt_T_en = NULL; double *et_T_AnAt_T_en = NULL;
+  length = 0;
+  length_tmp = A_nrows_nb1*T_ncols; An_a2d2_Zt_Sn = &(output_doublestudy[length]); length += length_tmp; // if (ZR_AnZtSZnAt_bother){ }
+  length_tmp = A_nrows_nb1*T_ncols; An_a2d2_At_Tn = &(output_doublestudy[length]); length += length_tmp; // if (ZR_AnAtTAnAt_bother){ }
+  if (F_[nbx]->use_At_T_XnXt_X_Xn_flag){
+    length_tmp = T_ncols*Z_nrows_nb2; et_T_YnWt = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnWtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx){ }
+    length_tmp = T_ncols*Z_nrows_nb2; et_T_AnZt = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnZtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx){ }
+    length_tmp = T_ncols*A_ncols; et_T_YnWt_S_Zn = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnWtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx){ }
+    length_tmp = T_ncols*A_ncols; et_T_AnZt_S_Zn = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnZtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx){ }
+    length_tmp = T_ncols*A_nrows_nb2; et_T_YnYt = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnYtTYn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx){ }
+    length_tmp = T_ncols*A_nrows_nb2; et_T_AnAt = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnAtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx){ }
+    length_tmp = T_ncols*A_ncols; et_T_YnYt_T_An = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnYtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx){ }
+    length_tmp = T_ncols*A_ncols; et_T_AnAt_T_An = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnAtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx){ }
+    length_tmp = A_nrows_nb1*T_ncols; YnWt_S_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnWtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx){ }
+    length_tmp = A_nrows_nb1*T_ncols; AnZt_S_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnZtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx){ }
+    length_tmp = A_ncols*T_ncols; At_T_YnWt_S_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnWtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx){ }
+    length_tmp = A_ncols*T_ncols; At_T_AnZt_S_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnZtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx){ }
+    length_tmp = A_nrows_nb1*T_ncols; YnYt_T_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnYtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx){ }
+    length_tmp = A_nrows_nb1*T_ncols; AnAt_T_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnAtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx){ }
+    length_tmp = A_ncols*T_ncols; At_T_YnYt_T_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnYtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx){ }
+    length_tmp = A_ncols*T_ncols; At_T_AnAt_T_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnAtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx){ }
+    length_tmp = T_ncols; et_T_YnWt_S_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnWtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx){ }
+    length_tmp = T_ncols; et_T_AnZt_S_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnZtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx){ }
+    length_tmp = T_ncols; et_T_YnYt_T_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnYtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx){ }
+    length_tmp = T_ncols; et_T_AnAt_T_en = &(output_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnAtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx){ }
+    /* if (F_[nbx]->use_At_T_XnXt_X_Xn_flag){ } */}
+  length_doublestudy = length;
+  int ns_j=0,ns_b=0,ns_a=0,tab_Tt_stride=0,tab_Tt=0,tab_St_stride=0,tab_St=0;
+  int na_j=0,na_b=0,na_a=0,tab_At_stride=0,tab_At=0,ma_j=0,ma_b=0,ma_a=0,tab_An_stride=0,tab_An=0;
+  int ny_j=0,ny_b=0,ny_a=0,tab_Yt_stride=0,tab_Yt=0,tab_Yn_stride=0/* ,tab_Yn=0 */, tab_YnWt=0;
+  /* int nw_j=0,nw_b=0,nw=0,mw_j=0,mw_b=0,mw=0; */
+  int nz_j=0,nz_b=0,nz_a=0,tab_Zt_stride=0,tab_Zt=0,mz_j=0,mz_b=0,mz_a=0,tab_Zn_stride=0,tab_Zn=0;
+  int vA=0,vM=0,vT=0,vS=0,vZ=0,vW=0,vY=0;
+  unsigned char *An_tag=NULL;
+  unsigned char *At_tag=NULL;
+  unsigned char *Tt_tag=NULL;
+  unsigned char *Yn_tag=NULL;
+  /* unsigned char *Yt_tag=NULL; */
+  unsigned char *Wn_tag=NULL;
+  unsigned char *Zn_tag=NULL;
+  unsigned char *Zt_tag=NULL;
+  unsigned char *St_tag=NULL;
+  unsigned char *mca_tag=NULL,*mca_end=NULL;
+  unsigned char *mcy_tag=NULL,*mcy_end=NULL;
+  unsigned char *mcw_tag=NULL,*mcw_end=NULL;
+  unsigned char *mcz_tag=NULL,*mcz_end=NULL;
+  unsigned char *mct_tag=NULL,*mct_end=NULL;
+  unsigned char *mcs_tag=NULL,*mcs_end=NULL;
+  /* int ZR_AnZtSWnYt_bother = F_[nbx]->ZR_AnZtSWnYt_bother; */
+  int ZR_AnZtSZnAt_bother = F_[nbx]->ZR_AnZtSZnAt_bother;
+  /* int ZR_AnAtTYnYt_bother = F_[nbx]->ZR_AnAtTYnYt_bother; */
+  int ZR_AnAtTAnAt_bother = F_[nbx]->ZR_AnAtTAnAt_bother;
+  int ZC_At_T_YnWt_S_Zn_bother = F_[nbx]->ZC_AtTYnWtSZn_bother && F_[nbx]->lf_At_T_YnWt_S_Zn && F_[nbx]->use_At_T_XnXt_X_Xn_flag;
+  int ZC_At_T_AnZt_S_Zn_bother = F_[nbx]->ZC_AtTAnZtSZn_bother && F_[nbx]->lf_At_T_AnZt_S_Zn && F_[nbx]->use_At_T_XnXt_X_Xn_flag;
+  int ZC_At_T_YnYt_T_An_bother = F_[nbx]->ZC_AtTYnYtTAn_bother && F_[nbx]->lf_At_T_YnYt_T_An && F_[nbx]->use_At_T_XnXt_X_Xn_flag;
+  int ZC_At_T_AnAt_T_An_bother = F_[nbx]->ZC_AtTAnAtTAn_bother && F_[nbx]->lf_At_T_AnAt_T_An && F_[nbx]->use_At_T_XnXt_X_Xn_flag;
+  if (verbose>1){ printf(" %% [entering get_xxxxle_doublestudy] tidx %d nb1 %d nb2 %d nbins %d\n",tidx,nb1,nb2,nbins);}  
+  if (verbose>2){ bprintf(M_At_nb1->mr_b,M_At_nb1->bitj,1,M_At_nb1->nrows," %% M_At_nb1->mr_b: "); bprintf(M_At_nb1->mr_j,M_At_nb1->bitj,1,M_At_nb1->nrows," %% M_At_nb1->mr_j: ");}
+  if (verbose>2){ bprintf(M_At_nb1->mc_b,M_At_nb1->bitj,1,M_At_nb1->ncols," %% M_At_nb1->mc_b: "); bprintf(M_At_nb1->mc_j,M_At_nb1->bitj,1,M_At_nb1->ncols," %% M_At_nb1->mc_j: ");}
+  if (verbose>2){ bprintf(M_Tt_nb1->mr_b,M_Tt_nb1->bitj,1,M_Tt_nb1->nrows," %% M_Tt_nb1->mr_b: "); bprintf(M_Tt_nb1->mr_j,M_Tt_nb1->bitj,1,M_Tt_nb1->nrows," %% M_Tt_nb1->mr_j: ");}
+  if (verbose>2){ bprintf(M_Tt_nb1->mc_b,M_Tt_nb1->bitj,1,M_Tt_nb1->ncols," %% M_Tt_nb1->mc_b: "); bprintf(M_Tt_nb1->mc_j,M_Tt_nb1->bitj,1,M_Tt_nb1->ncols," %% M_Tt_nb1->mc_j: ");}
+  if (verbose>2){ bprintf(M_Yn_nb1->mr_b,M_Yn_nb1->bitj,1,M_Yn_nb1->nrows," %% M_Yn_nb1->mr_b: "); bprintf(M_Yn_nb1->mr_j,M_Yn_nb1->bitj,1,M_Yn_nb1->nrows," %% M_Yn_nb1->mr_j: ");}
+  if (verbose>2){ bprintf(M_Yn_nb1->mc_b,M_Yn_nb1->bitj,1,M_Yn_nb1->ncols," %% M_Yn_nb1->mc_b: "); bprintf(M_Yn_nb1->mc_j,M_Yn_nb1->bitj,1,M_Yn_nb1->ncols," %% M_Yn_nb1->mc_j: ");}
+  if (verbose>2){ bprintf(M_Wn_nb2->mr_b,M_Wn_nb2->bitj,1,M_Wn_nb2->nrows," %% M_Wn_nb2->mr_b: "); bprintf(M_Wn_nb2->mr_j,M_Wn_nb2->bitj,1,M_Wn_nb2->nrows," %% M_Wn_nb2->mr_j: ");}
+  if (verbose>2){ bprintf(M_Wn_nb2->mc_b,M_Wn_nb2->bitj,1,M_Wn_nb2->ncols," %% M_Wn_nb2->mc_b: "); bprintf(M_Wn_nb2->mc_j,M_Wn_nb2->bitj,1,M_Wn_nb2->ncols," %% M_Wn_nb2->mc_j: ");}
+  if (verbose>2){ bprintf(M_St_nb1->mr_b,M_St_nb1->bitj,1,M_St_nb1->nrows," %% M_St_nb1->mr_b: "); bprintf(M_St_nb1->mr_j,M_St_nb1->bitj,1,M_St_nb1->nrows," %% M_St_nb1->mr_j: ");}
+  if (verbose>2){ bprintf(M_St_nb1->mc_b,M_St_nb1->bitj,1,M_St_nb1->ncols," %% M_St_nb1->mc_b: "); bprintf(M_St_nb1->mc_j,M_St_nb1->bitj,1,M_St_nb1->ncols," %% M_St_nb1->mc_j: ");}
+  if (verbose>2){ bprintf(M_Zt_nb1->mr_b,M_Zt_nb1->bitj,1,M_Zt_nb1->nrows," %% M_Zt_nb1->mr_b: "); bprintf(M_Zt_nb1->mr_j,M_Zt_nb1->bitj,1,M_Zt_nb1->nrows," %% M_Zt_nb1->mr_j: ");}
+  if (verbose>2){ bprintf(M_Zt_nb1->mc_b,M_Zt_nb1->bitj,1,M_Zt_nb1->ncols," %% M_Zt_nb1->mc_b: "); bprintf(M_Zt_nb1->mc_j,M_Zt_nb1->bitj,1,M_Zt_nb1->ncols," %% M_Zt_nb1->mc_j: ");}
+  fill_uchar_zero((unsigned char *)output_doublestudy,length_doublestudy*sizeof(double)); 
+  if (ZR_AnZtSZnAt_bother || ZR_AnAtTAnAt_bother){
+    if (verbose>1){ printf(" %% An_a2d2_Zt_Sn, An_a2d2_At_Tn\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_Tt_stride = M_Tt_nb2->rpop_j; break; case SPACING_b: tab_Tt_stride = M_Tt_nb2->rpop_b; break; case SPACING_a: tab_Tt_stride = M_Tt_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_At){ case SPACING_j: tab_At_stride = M_At_nb1->rpop_j; break; case SPACING_b: tab_At_stride = M_At_nb1->rpop_b; break; case SPACING_a: tab_At_stride = M_At_nb1->nrows; break; default: break; /* switch (output_spacing_At){ } */}
+    switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+    switch (output_spacing_Yt){ case SPACING_j: tab_Yt_stride = M_Yt_nb1->rpop_j; break; case SPACING_b: tab_Yt_stride = M_Yt_nb1->rpop_b; break; case SPACING_a: tab_Yt_stride = M_Yt_nb1->nrows; break; default: break; /* switch (output_spacing_At){ } */}
+    tab_Yn_stride = tab_An_stride;
+    ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
+      ns_a = M_Tt_nb2->m_a_[ns_j]; ns_b = M_Tt_nb2->m_b_[ns_j];
+      switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	An_tag = (unsigned char *)(&(M_An_nb1->wX[ma_b*M_An_nb1->mc_length]));
+	mca_tag = (unsigned char *)(&(M_An_nb1->mc_j[0]));
+	mca_end = (unsigned char *)(&(M_An_nb1->mc_j[M_An_nb1->mc_length]));
+	An_a2d2_Zt_Sn[tab_An + tab_Tt*tab_An_stride]=0; An_a2d2_At_Tn[tab_An + tab_Tt*tab_An_stride]=0;
+	na_j=0; while (na_j<M_An_nb1->cpop_j){
+	  na_a = M_An_nb1->n_a_[na_j]; na_b = M_An_nb1->n_b_[na_j];
+	  switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_At){ } */}
+	  vA = bget____(An_tag,na_a); vM = bget__on(mca_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_An->mc_j\n",na_j,na_b,na_a);}
+	  if (ZR_AnZtSZnAt_bother){ An_a2d2_Zt_Sn[tab_An + tab_Tt*tab_An_stride] += vA * (A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_2_2*A_pcols] : 0) * lf_ZtSn_nb2[tab_At + tab_Tt*tab_At_stride];}
+	  if (ZR_AnAtTAnAt_bother){ An_a2d2_At_Tn[tab_An + tab_Tt*tab_An_stride] += vA * (A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_2_2*A_pcols] : 0) * lf_AtTn_nb2[tab_At + tab_Tt*tab_At_stride];}
+	  na_j++; /* while (na_j<M_An_nb1->cpop_j){ } */}
+	ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_Tt_nb2->rpop_j){ } */}
+    if (verbose>4){ if (A_ajdk){ raprintf(&(A_ajdk[0 + AJDK_2_2*A_pcols]),"double",1,A_pcols," %% A_a2d2: ");}}
+    if (verbose>4){ raprintf(lf_ZtSn_nb2,"double",tab_At_stride,tab_Tt_stride," %% lf_ZtSn_nb2: ");}
+    if (verbose>4){ raprintf(lf_AtTn_nb2,"double",tab_At_stride,tab_Tt_stride," %% lf_AtTn_nb2: ");}
+    if (verbose>1){ raprintf(An_a2d2_Zt_Sn,"double",tab_An_stride,tab_Tt_stride," %% An_a2d2_Zt_Sn: ");}
+    if (verbose>1){ raprintf(An_a2d2_At_Tn,"double",tab_An_stride,tab_Tt_stride," %% An_a2d2_At_Tn: ");}
+    /* if (ZR_AnZtSZnAt_bother || ZR_AnAtTAnAt_bother){ } */}
+  if (ZC_At_T_YnWt_S_Zn_bother || ZC_At_T_AnZt_S_Zn_bother){
+    if (verbose>1){ printf(" %% et_T_YnWt, et_T_AnZt\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_Tt_stride = M_Tt_nb1->rpop_j; break; case SPACING_b: tab_Tt_stride = M_Tt_nb1->rpop_b; break; case SPACING_a: tab_Tt_stride = M_Tt_nb1->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+    switch (output_spacing_Zn){ case SPACING_j: tab_Zn_stride = M_Zt_nb2->cpop_j; break; case SPACING_b: tab_Zn_stride = M_Zt_nb2->cpop_b; break; case SPACING_a: tab_Zn_stride = M_Zt_nb2->ncols; break; default: break; /* switch (output_spacing_Zn){ } */}
+    if (lf_YnWt_nbx!=NULL || lf_AnZt_nbx!=NULL){
+      ns_j=0; while (ns_j<M_Tt_nb1->rpop_j){
+	ns_a = M_Tt_nb1->m_a_[ns_j]; ns_b = M_Tt_nb1->m_b_[ns_j];
+	Tt_tag = (unsigned char *)(&(M_Tt_nb1->wX[ns_b*M_Tt_nb1->mc_length]));
+	mct_tag = (unsigned char *)(&(M_Tt_nb1->mc_j[0]));
+	mct_end = (unsigned char *)(&(M_Tt_nb1->mc_j[M_Tt_nb1->mc_length]));    
+	switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+	mz_j=0; while (mz_j<M_Zn_nb2->rpop_j){
+	  mz_a = M_Zn_nb2->m_a_[mz_j]; mz_b = M_Zn_nb2->m_b_[mz_j];
+	  switch (output_spacing_Zn){ case SPACING_j: tab_Zn=mz_j; break; case SPACING_b: tab_Zn=mz_b; break; case SPACING_a: tab_Zn=mz_a; break; default: break; /* switch (output_spacing_Zn){ } */}
+	  et_T_YnWt[tab_Tt + tab_Zn*tab_Tt_stride] = 0; et_T_AnZt[tab_Tt + tab_Zn*tab_Tt_stride] = 0;
+	  ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	    ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	    switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	    vT = bget____(Tt_tag,ma_a); vM = bget__on(mct_tag,ma_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",ma_j,ma_b,ma_a);}
+	    switch (output_spacing_YnWt){ case SPACING_j: tab_YnWt=ma_j + mz_j*M_At_nb1->cpop_j; break; case SPACING_b: tab_YnWt=ma_b + mz_b*M_At_nb1->cpop_b; break; case SPACING_a: tab_YnWt=ma_a + mz_a*M_At_nb1->ncols; break; /* switch (output_spacing_YnWt){ } */}
+	    if (ZC_At_T_YnWt_S_Zn_bother){ et_T_YnWt[tab_Tt + tab_Zn*tab_Tt_stride] += (GLOBAL_ZC_AtIXnXtXXn ? 1 : vT) * (lf_YnWt_nbx!=NULL ? lf_YnWt_nbx[tab_YnWt/* ma_j + mz_j*M_At_nb1->cpop_j *//* tab_An + tab_Zn*tab_An_stride */] : 0);}
+	    if (ZC_At_T_AnZt_S_Zn_bother){ et_T_AnZt[tab_Tt + tab_Zn*tab_Tt_stride] += (GLOBAL_ZC_AtIXnXtXXn ? 1 : vT) * (lf_AnZt_nbx!=NULL ? lf_AnZt_nbx[tab_YnWt/* ma_j + mz_j*M_At_nb1->cpop_j *//* tab_An + tab_Zn*tab_An_stride */] : 0);}
+	    ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+	  mz_j++; /* while (mz_j<M_Zn_nb2->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_Tt_nb1->rpop_j){ } */}
+      /* if (lf_YnWt_nbx!=NULL || lf_AnZt_nbx!=NULL){ } */}
+    else /* if (lf_YnWt_nbx==NULL || lf_AnZt_nbx==NULL){ } */{
+      ns_j=0; while (ns_j<M_Tt_nb1->rpop_j){
+	ns_a = M_Tt_nb1->m_a_[ns_j]; ns_b = M_Tt_nb1->m_b_[ns_j];
+	switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+	mz_j=0; while (mz_j<M_Zn_nb2->rpop_j){
+	  mz_a = M_Zn_nb2->m_a_[mz_j]; mz_b = M_Zn_nb2->m_b_[mz_j];
+	  Wn_tag = (unsigned char *)(&(M_Wn_nb2->wX[mz_b*M_Wn_nb2->mc_length]));
+	  mcw_tag = (unsigned char *)(&(M_Wn_nb2->mc_j[0]));
+	  mcw_end = (unsigned char *)(&(M_Wn_nb2->mc_j[M_Wn_nb2->mc_length]));    
+	  Zn_tag = (unsigned char *)(&(M_Zn_nb2->wX[mz_b*M_Zn_nb2->mc_length]));
+	  mcz_tag = (unsigned char *)(&(M_Zn_nb2->mc_j[0]));
+	  mcz_end = (unsigned char *)(&(M_Zn_nb2->mc_j[M_Zn_nb2->mc_length]));    
+	  switch (output_spacing_Zn){ case SPACING_j: tab_Zn=mz_j; break; case SPACING_b: tab_Zn=mz_b; break; case SPACING_a: tab_Zn=mz_a; break; default: break; /* switch (output_spacing_Zn){ } */}
+	  et_T_YnWt[tab_Tt + tab_Zn*tab_Tt_stride] = 0;
+	  if (ZC_At_T_YnWt_S_Zn_bother){
+	    ny_j=0; while (ny_j<M_Yn_nb1->cpop_j){
+	      ny_a = M_Yn_nb1->n_a_[ny_j]; ny_b = M_Yn_nb1->n_b_[ny_j];
+	      switch (output_spacing_Yt){ case SPACING_j: tab_Yt=ny_j; break; case SPACING_b: tab_Yt=ny_b; break; case SPACING_a: tab_Yt=ny_a; break; default: break; /* switch (output_spacing_An){ } */}
+	      vW = bget____(Wn_tag,ny_a); vM = bget__on(mcw_tag,ny_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Wn->mc_j\n",ny_j,ny_b,ny_a);}
+	      et_T_YnWt[tab_Tt + tab_Zn*tab_Tt_stride] += (lf_YtTn_nb1[tab_Yt + (GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)*tab_Yt_stride] - et_Tn_nb1[(GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)]*a_Yn[ny_a/POPLENGTH]) * D_Yn[ny_a/POPLENGTH] * (vW - a_Yn[ny_a/POPLENGTH]);
+	      ny_j++; /* while (ny_j<M_Yn_nb1->cpop_j){ } */}
+	    /* if (ZC_At_T_YnWt_S_Zn_bother){ } */}
+	  et_T_AnZt[tab_Tt + tab_Zn*tab_Tt_stride] = 0;
+	  if (ZC_At_T_AnZt_S_Zn_bother){
+	    na_j=0; while (na_j<M_An_nb1->cpop_j){
+	      na_a = M_An_nb1->n_a_[na_j]; na_b = M_An_nb1->n_b_[na_j];
+	      switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_An){ } */}
+	      vZ = bget____(Zn_tag,na_a); vM = bget__on(mcz_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Zn->mc_j\n",na_j,na_b,na_a);}
+	      et_T_AnZt[tab_Tt + tab_Zn*tab_Tt_stride] += (lf_AtTn_nb1[tab_At + (GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)*tab_At_stride] - et_Tn_nb1[(GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)]*a_An[na_a/POPLENGTH]) * D_An[na_a/POPLENGTH] * (vZ - a_An[na_a/POPLENGTH]);
+	      na_j++; /* while (na_j<M_An_nb1->cpop_j){ } */}
+	    /* if (ZC_At_T_AnZt_S_Zn_bother){ } */}
+	  mz_j++; /* while (mz_j<M_Zn_nb2->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_Tt_nb1->rpop_j){ } */}
+      /* if (lf_YnWt_nbx==NULL || lf_AnZt_nbx==NULL){ } */}
+    if (verbose>1){ raprintf(et_T_YnWt,"double",tab_Tt_stride,tab_Zn_stride," %% et_T_YnWt: ");}
+    if (verbose>1){ raprintf(et_T_AnZt,"double",tab_Tt_stride,tab_Zn_stride," %% et_T_AnZt: ");}
+    if (verbose>1){ printf(" %% et_T_YnWt_S_Zn, et_T_AnZt_S_Zn\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_Tt_stride = M_Tt_nb2->rpop_j; break; case SPACING_b: tab_Tt_stride = M_Tt_nb2->rpop_b; break; case SPACING_a: tab_Tt_stride = M_Tt_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_Zt){ case SPACING_j: tab_Zt_stride = M_Zt_nb2->rpop_j; break; case SPACING_b: tab_Zt_stride = M_Zt_nb2->rpop_b; break; case SPACING_a: tab_Zt_stride = M_Zt_nb2->nrows; break; default: break; /* switch (output_spacing_Zt){ } */}
+    switch (output_spacing_Zn){ case SPACING_j: tab_Zn_stride = M_Zn_nb2->rpop_j; break; case SPACING_b: tab_Zn_stride = M_Zn_nb2->rpop_b; break; case SPACING_a: tab_Zn_stride = M_Zn_nb2->nrows; break; default: break; /* switch (output_spacing_Zn){ } */}
+    ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
+      ns_a = M_Tt_nb2->m_a_[ns_j]; ns_b = M_Tt_nb2->m_b_[ns_j];
+      St_tag = (unsigned char *)(&(M_St_nb2->wX[ns_b*M_St_nb2->mc_length]));
+      mcs_tag = (unsigned char *)(&(M_St_nb2->mc_j[0]));
+      mcs_end = (unsigned char *)(&(M_St_nb2->mc_j[M_St_nb2->mc_length]));    
+      switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      nz_j=0; while (nz_j<M_Zt_nb2->rpop_j){
+	nz_a = M_Zt_nb2->m_a_[nz_j]; nz_b = M_Zt_nb2->m_b_[nz_j];
+	switch (output_spacing_Zt){ case SPACING_j: tab_Zt=nz_j; break; case SPACING_b: tab_Zt=nz_b; break; case SPACING_a: tab_Zt=nz_a; break; default: break; /* switch (output_spacing_Zt){ } */}
+	Zt_tag = (unsigned char *)(&(M_Zt_nb2->wX[nz_b*M_Zt_nb2->mc_length]));
+	mcz_tag = (unsigned char *)(&(M_Zt_nb2->mc_j[0]));
+	mcz_end = (unsigned char *)(&(M_Zt_nb2->mc_j[M_Zt_nb2->mc_length]));
+	et_T_YnWt_S_Zn[tab_Tt + tab_Zt*tab_Tt_stride] = 0; et_T_AnZt_S_Zn[tab_Tt + tab_Zt*tab_Tt_stride] = 0;
+	mz_j=0; while (mz_j<M_Zn_nb2->rpop_j){
+	  mz_a = M_Zn_nb2->m_a_[mz_j]; mz_b = M_Zn_nb2->m_b_[mz_j];
+	  switch (output_spacing_Zn){ case SPACING_j: tab_Zn=mz_j; break; case SPACING_b: tab_Zn=mz_b; break; case SPACING_a: tab_Zn=mz_a; break; default: break; /* switch (output_spacing_Zn){ } */}
+	  vS = bget____(St_tag,mz_a); vM = bget__on(mcs_tag,mz_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_St->mc_j\n",mz_j,mz_b,mz_a);}
+	  vZ = bget____(Zt_tag,mz_a); vM = bget__on(mcz_tag,mz_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Zt->mc_j\n",mz_j,mz_b,mz_a);}
+	  if (ZC_At_T_YnWt_S_Zn_bother){ et_T_YnWt_S_Zn[tab_Tt + tab_Zt*tab_Tt_stride] += et_T_YnWt[tab_Tt + tab_Zn*tab_Tt_stride]*vS*vZ;}
+	  if (ZC_At_T_AnZt_S_Zn_bother){ et_T_AnZt_S_Zn[tab_Tt + tab_Zt*tab_Tt_stride] += et_T_AnZt[tab_Tt + tab_Zn*tab_Tt_stride]*vS*vZ;}
+	  mz_j++; /* while (mz_j<M_Zn_nb2->rpop_j){ } */}
+	nz_j++; /* while (nz_j<M_Zt_nb2->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_Tt_nb2->rpop_j){ } */}
+    if (verbose>1){ raprintf(et_T_YnWt_S_Zn,"double",tab_Tt_stride,tab_Zt_stride," %% et_T_YnWt_S_Zn: ");}
+    if (verbose>1){ raprintf(et_T_AnZt_S_Zn,"double",tab_Tt_stride,tab_Zt_stride," %% et_T_AnZt_S_Zn: ");}
+    /* if (ZC_At_T_YnWt_S_Zn_bother || ZC_At_T_AnZt_S_Zn_bother){ } */}
+  if (ZC_At_T_YnYt_T_An_bother || ZC_At_T_AnAt_T_An_bother){
+    if (verbose>1){ printf(" %% et_T_YnYt, et_T_AnAt\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_Tt_stride = M_Tt_nb1->rpop_j; break; case SPACING_b: tab_Tt_stride = M_Tt_nb1->rpop_b; break; case SPACING_a: tab_Tt_stride = M_Tt_nb1->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+    switch (output_spacing_Zn){ case SPACING_j: tab_Zn_stride = M_Zt_nb2->cpop_j; break; case SPACING_b: tab_Zn_stride = M_Zt_nb2->cpop_b; break; case SPACING_a: tab_Zn_stride = M_Zt_nb2->ncols; break; default: break; /* switch (output_spacing_Zn){ } */}
+    if (lf_YnYt_nbx!=NULL || lf_AnAt_nbx!=NULL){
+      ns_j=0; while (ns_j<M_Tt_nb1->rpop_j){
+	ns_a = M_Tt_nb1->m_a_[ns_j]; ns_b = M_Tt_nb1->m_b_[ns_j];
+	Tt_tag = (unsigned char *)(&(M_Tt_nb1->wX[ns_b*M_Tt_nb1->mc_length]));
+	mct_tag = (unsigned char *)(&(M_Tt_nb1->mc_j[0]));
+	mct_end = (unsigned char *)(&(M_Tt_nb1->mc_j[M_Tt_nb1->mc_length]));    
+	switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+	mz_j=0; while (mz_j<M_An_nb2->rpop_j){
+	  mz_a = M_An_nb2->m_a_[mz_j]; mz_b = M_An_nb2->m_b_[mz_j];
+	  switch (output_spacing_Zn){ case SPACING_j: tab_Zn=mz_j; break; case SPACING_b: tab_Zn=mz_b; break; case SPACING_a: tab_Zn=mz_a; break; default: break; /* switch (output_spacing_Zn){ } */}
+	  et_T_YnYt[tab_Tt + tab_Zn*tab_Tt_stride] = 0; et_T_AnAt[tab_Tt + tab_Zn*tab_Tt_stride] = 0;
+	  ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	    ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	    switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	    vT = bget____(Tt_tag,ma_a); vM = bget__on(mct_tag,ma_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",ma_j,ma_b,ma_a);}
+	    switch (output_spacing_YnWt){ case SPACING_j: tab_YnWt=ma_j + mz_j*M_At_nb1->cpop_j; break; case SPACING_b: tab_YnWt=ma_b + mz_b*M_At_nb1->cpop_b; break; case SPACING_a: tab_YnWt=ma_a + mz_a*M_At_nb1->ncols; break; /* switch (output_spacing_YnWt){ } */}
+	    if (ZC_At_T_YnYt_T_An_bother){ et_T_YnYt[tab_Tt + tab_Zn*tab_Tt_stride] += (GLOBAL_ZC_AtIXnXtXXn ? 1 : vT) * (lf_YnYt_nbx!=NULL ? lf_YnYt_nbx[tab_YnWt/* ma_j + mz_j*M_At_nb1->cpop_j *//* tab_An + tab_Zn*tab_An_stride */] : 0);}
+	    if (ZC_At_T_AnAt_T_An_bother){ et_T_AnAt[tab_Tt + tab_Zn*tab_Tt_stride] += (GLOBAL_ZC_AtIXnXtXXn ? 1 : vT) * (lf_AnAt_nbx!=NULL ? lf_AnAt_nbx[tab_YnWt/* ma_j + mz_j*M_At_nb1->cpop_j *//* tab_An + tab_Zn*tab_An_stride */] : 0);}
+	    ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+	  mz_j++; /* while (mz_j<M_An_nb2->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_Tt_nb1->rpop_j){ } */}
+      /* if (lf_YnYt_nbx!=NULL || lf_AnAt_nbx!=NULL){ } */}
+    else /* if (lf_YnYt_nbx==NULL || lf_AnAt_nbx==NULL){ } */{
+      ns_j=0; while (ns_j<M_Tt_nb1->rpop_j){
+	ns_a = M_Tt_nb1->m_a_[ns_j]; ns_b = M_Tt_nb1->m_b_[ns_j];
+	switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+	ma_j=0; while (ma_j<M_An_nb2->rpop_j){
+	  ma_a = M_An_nb2->m_a_[ma_j]; ma_b = M_An_nb2->m_b_[ma_j];
+	  Yn_tag = (unsigned char *)(&(M_Yn_nb2->wX[ma_b*M_Yn_nb2->mc_length]));
+	  mcy_tag = (unsigned char *)(&(M_Yn_nb2->mc_j[0]));
+	  mcy_end = (unsigned char *)(&(M_Yn_nb2->mc_j[M_Yn_nb2->mc_length]));    
+	  An_tag = (unsigned char *)(&(M_An_nb2->wX[ma_b*M_An_nb2->mc_length]));
+	  mca_tag = (unsigned char *)(&(M_An_nb2->mc_j[0]));
+	  mca_end = (unsigned char *)(&(M_An_nb2->mc_j[M_An_nb2->mc_length]));    
+	  switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  et_T_YnYt[tab_Tt + tab_An*tab_Tt_stride] = 0;
+	  if (ZC_At_T_YnYt_T_An_bother){
+	    ny_j=0; while (ny_j<M_Yn_nb1->cpop_j){
+	      ny_a = M_Yn_nb1->n_a_[ny_j]; ny_b = M_Yn_nb1->n_b_[ny_j];
+	      switch (output_spacing_Yt){ case SPACING_j: tab_Yt=ny_j; break; case SPACING_b: tab_Yt=ny_b; break; case SPACING_a: tab_Yt=ny_a; break; default: break; /* switch (output_spacing_An){ } */}
+	      vY = bget____(Yn_tag,ny_a); vM = bget__on(mcy_tag,ny_a); if(!vM){ printf(" %% Yarning! bit %d,%d,%d off in M_Yn->mc_j\n",ny_j,ny_b,ny_a);}
+	      et_T_YnYt[tab_Tt + tab_An*tab_Tt_stride] += (lf_YtTn_nb1[tab_Yt + (GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)*tab_Yt_stride] - et_Tn_nb1[(GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)]*a_Yn[ny_a/POPLENGTH]) * D_Yn[ny_a/POPLENGTH] * (vY - a_Yn[ny_a/POPLENGTH]);
+	      ny_j++; /* while (ny_j<M_Yn_nb1->cpop_j){ } */}
+	    /* if (ZC_At_T_YnYt_T_An_bother){ } */}
+	  et_T_AnAt[tab_Tt + tab_An*tab_Tt_stride] = 0;
+	  if (ZC_At_T_AnAt_T_An_bother){
+	    na_j=0; while (na_j<M_An_nb1->cpop_j){
+	      na_a = M_An_nb1->n_a_[na_j]; na_b = M_An_nb1->n_b_[na_j];
+	      switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_An){ } */}
+	      vA = bget____(An_tag,na_a); vM = bget__on(mca_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_An->mc_j\n",na_j,na_b,na_a);}
+	      et_T_AnAt[tab_Tt + tab_An*tab_Tt_stride] += (lf_AtTn_nb1[tab_At + (GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)*tab_At_stride] - et_Tn_nb1[(GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)]*a_An[na_a/POPLENGTH]) * D_An[na_a/POPLENGTH] * (vA - a_An[na_a/POPLENGTH]);
+	      na_j++; /* while (na_j<M_An_nb1->cpop_j){ } */}
+	    /* if (ZC_At_T_AnAt_T_An_bother){ } */}
+	  ma_j++; /* while (ma_j<M_An_nb2->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_Tt_nb1->rpop_j){ } */}
+      /* if (lf_YnYt_nbx==NULL || lf_AnAt_nbx==NULL){ } */}
+    if (verbose>1){ raprintf(et_T_YnYt,"double",tab_Tt_stride,tab_Zn_stride," %% et_T_YnYt: ");}
+    if (verbose>1){ raprintf(et_T_AnAt,"double",tab_Tt_stride,tab_Zn_stride," %% et_T_AnAt: ");}
+    if (verbose>1){ printf(" %% et_T_YnYt_T_An, et_T_AnAt_T_An\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_Tt_stride = M_Tt_nb2->rpop_j; break; case SPACING_b: tab_Tt_stride = M_Tt_nb2->rpop_b; break; case SPACING_a: tab_Tt_stride = M_Tt_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_Zt){ case SPACING_j: tab_Zt_stride = M_At_nb2->rpop_j; break; case SPACING_b: tab_Zt_stride = M_At_nb2->rpop_b; break; case SPACING_a: tab_Zt_stride = M_At_nb2->nrows; break; default: break; /* switch (output_spacing_Zt){ } */}
+    switch (output_spacing_Zn){ case SPACING_j: tab_Zn_stride = M_An_nb2->rpop_j; break; case SPACING_b: tab_Zn_stride = M_An_nb2->rpop_b; break; case SPACING_a: tab_Zn_stride = M_An_nb2->nrows; break; default: break; /* switch (output_spacing_Zn){ } */}
+    ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
+      ns_a = M_Tt_nb2->m_a_[ns_j]; ns_b = M_Tt_nb2->m_b_[ns_j];
+      Tt_tag = (unsigned char *)(&(M_Tt_nb2->wX[ns_b*M_Tt_nb2->mc_length]));
+      mcs_tag = (unsigned char *)(&(M_Tt_nb2->mc_j[0]));
+      mcs_end = (unsigned char *)(&(M_Tt_nb2->mc_j[M_Tt_nb2->mc_length]));    
+      switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      nz_j=0; while (nz_j<M_At_nb2->rpop_j){
+	nz_a = M_At_nb2->m_a_[nz_j]; nz_b = M_At_nb2->m_b_[nz_j];
+	switch (output_spacing_Zt){ case SPACING_j: tab_Zt=nz_j; break; case SPACING_b: tab_Zt=nz_b; break; case SPACING_a: tab_Zt=nz_a; break; default: break; /* switch (output_spacing_Zt){ } */}
+	Zt_tag = (unsigned char *)(&(M_At_nb2->wX[nz_b*M_At_nb2->mc_length]));
+	mcz_tag = (unsigned char *)(&(M_At_nb2->mc_j[0]));
+	mcz_end = (unsigned char *)(&(M_At_nb2->mc_j[M_At_nb2->mc_length]));
+	et_T_YnYt_T_An[tab_Tt + tab_Zt*tab_Tt_stride] = 0; et_T_AnAt_T_An[tab_Tt + tab_Zt*tab_Tt_stride] = 0;
+	mz_j=0; while (mz_j<M_An_nb2->rpop_j){
+	  mz_a = M_An_nb2->m_a_[mz_j]; mz_b = M_An_nb2->m_b_[mz_j];
+	  switch (output_spacing_Zn){ case SPACING_j: tab_Zn=mz_j; break; case SPACING_b: tab_Zn=mz_b; break; case SPACING_a: tab_Zn=mz_a; break; default: break; /* switch (output_spacing_Zn){ } */}
+	  vS = bget____(Tt_tag,mz_a); vM = bget__on(mcs_tag,mz_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",mz_j,mz_b,mz_a);}
+	  vZ = bget____(Zt_tag,mz_a); vM = bget__on(mcz_tag,mz_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_At->mc_j\n",mz_j,mz_b,mz_a);}
+	  if (ZC_At_T_YnYt_T_An_bother){ et_T_YnYt_T_An[tab_Tt + tab_Zt*tab_Tt_stride] += et_T_YnYt[tab_Tt + tab_Zn*tab_Tt_stride]*vS*vZ;}
+	  if (ZC_At_T_AnAt_T_An_bother){ et_T_AnAt_T_An[tab_Tt + tab_Zt*tab_Tt_stride] += et_T_AnAt[tab_Tt + tab_Zn*tab_Tt_stride]*vS*vZ;}
+	  mz_j++; /* while (mz_j<M_An_nb2->rpop_j){ } */}
+	nz_j++; /* while (nz_j<M_At_nb2->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_Tt_nb2->rpop_j){ } */}
+    if (verbose>1){ raprintf(et_T_YnYt_T_An,"double",tab_Tt_stride,tab_Zt_stride," %% et_T_YnYt_T_An: ");}
+    if (verbose>1){ raprintf(et_T_AnAt_T_An,"double",tab_Tt_stride,tab_Zt_stride," %% et_T_AnAt_T_An: ");}
+    /* if (ZC_At_T_YnYt_T_An_bother || ZC_At_T_AnAt_T_An_bother){ } */}
+  if (ZC_At_T_YnWt_S_Zn_bother || ZC_At_T_AnZt_S_Zn_bother){
+    if (verbose>1){ printf(" %% YnWt_S_en, AnZt_S_en\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_St_stride = M_St_nb2->rpop_j; break; case SPACING_b: tab_St_stride = M_St_nb2->rpop_b; break; case SPACING_a: tab_St_stride = M_St_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+    switch (output_spacing_Zn){ case SPACING_j: tab_Zn_stride = M_Zt_nb2->cpop_j; break; case SPACING_b: tab_Zn_stride = M_Zt_nb2->cpop_b; break; case SPACING_a: tab_Zn_stride = M_Zt_nb2->ncols; break; default: break; /* switch (output_spacing_Zn){ } */}
+    if (lf_YnWt_nbx!=NULL || lf_AnZt_nbx!=NULL){
+      ns_j=0; while (ns_j<M_St_nb2->rpop_j){
+	ns_a = M_St_nb2->m_a_[ns_j]; ns_b = M_St_nb2->m_b_[ns_j];
+	St_tag = (unsigned char *)(&(M_St_nb2->wX[ns_b*M_St_nb2->mc_length]));
+	mcs_tag = (unsigned char *)(&(M_St_nb2->mc_j[0]));
+	mcs_end = (unsigned char *)(&(M_St_nb2->mc_j[M_St_nb2->mc_length]));    
+	switch (output_spacing_Tt){ case SPACING_j: tab_St=ns_j; break; case SPACING_b: tab_St=ns_b; break; case SPACING_a: tab_St=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+	ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	  ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	  switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  YnWt_S_en[tab_An + tab_St*tab_An_stride] = 0; AnZt_S_en[tab_An + tab_St*tab_An_stride] = 0;
+	  mz_j=0; while (mz_j<M_Zn_nb2->rpop_j){
+	    mz_a = M_Zn_nb2->m_a_[mz_j]; mz_b = M_Zn_nb2->m_b_[mz_j];
+	    switch (output_spacing_Zn){ case SPACING_j: tab_Zn=mz_j; break; case SPACING_b: tab_Zn=mz_b; break; case SPACING_a: tab_Zn=mz_a; break; default: break; /* switch (output_spacing_Zn){ } */}
+	    vS = bget____(St_tag,mz_a); vM = bget__on(mcs_tag,mz_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_St->mc_j\n",mz_j,mz_b,mz_a);}
+	    switch (output_spacing_YnWt){ case SPACING_j: tab_YnWt=ma_j + mz_j*M_At_nb1->cpop_j; break; case SPACING_b: tab_YnWt=ma_b + mz_b*M_At_nb1->cpop_b; break; case SPACING_a: tab_YnWt=ma_a + mz_a*M_At_nb1->ncols; break; /* switch (output_spacing_YnWt){ } */}
+	    if (ZC_At_T_YnWt_S_Zn_bother){ YnWt_S_en[tab_An + tab_St*tab_An_stride] += vS * (lf_YnWt_nbx!=NULL ? lf_YnWt_nbx[tab_YnWt/* ma_j + mz_j*M_At_nb1->cpop_j *//* tab_An + tab_Zn*tab_An_stride */] : 0);}
+	    if (ZC_At_T_AnZt_S_Zn_bother){ AnZt_S_en[tab_An + tab_St*tab_An_stride] += vS * (lf_AnZt_nbx!=NULL ? lf_AnZt_nbx[tab_YnWt/* ma_j + mz_j*M_At_nb1->cpop_j *//* tab_An + tab_Zn*tab_An_stride */] : 0);}
+	    mz_j++; /* while (mz_j<M_Zn_nb2->rpop_j){ } */}
+	  ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_St_nb2->rpop_j){ } */}
+      /* if (lf_YnWt_nbx!=NULL || lf_AnZt_nbx!=NULL){ } */}
+    else /* if (lf_YnWt_nbx==NULL || lf_AnZt_nbx==NULL){ } */{    
+      ns_j=0; while (ns_j<M_St_nb2->rpop_j){
+	ns_a = M_St_nb2->m_a_[ns_j]; ns_b = M_St_nb2->m_b_[ns_j];
+	switch (output_spacing_Tt){ case SPACING_j: tab_St=ns_j; break; case SPACING_b: tab_St=ns_b; break; case SPACING_a: tab_St=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+	ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	  ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	  Yn_tag = (unsigned char *)(&(M_Yn_nb1->wX[ma_b*M_Yn_nb1->mc_length]));
+	  mcy_tag = (unsigned char *)(&(M_Yn_nb1->mc_j[0]));
+	  mcy_end = (unsigned char *)(&(M_Yn_nb1->mc_j[M_Yn_nb1->mc_length]));    
+	  An_tag = (unsigned char *)(&(M_An_nb1->wX[ma_b*M_An_nb1->mc_length]));
+	  mca_tag = (unsigned char *)(&(M_An_nb1->mc_j[0]));
+	  mca_end = (unsigned char *)(&(M_An_nb1->mc_j[M_An_nb1->mc_length]));    
+	  switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  YnWt_S_en[tab_An + tab_St*tab_An_stride] = 0; 
+	  if (ZC_At_T_YnWt_S_Zn_bother){
+	    ny_j=0; while (ny_j<M_Yn_nb1->cpop_j){
+	      ny_a = M_Yn_nb1->n_a_[ny_j]; ny_b = M_Yn_nb1->n_b_[ny_j];
+	      switch (output_spacing_Yt){ case SPACING_j: tab_Yt=ny_j; break; case SPACING_b: tab_Yt=ny_b; break; case SPACING_a: tab_Yt=ny_a; break; default: break; /* switch (output_spacing_Yt){ } */}
+	      vY = bget____(Yn_tag,ny_a); vM = bget__on(mcy_tag,ny_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Yn->mc_j\n",ny_j,ny_b,ny_a);}
+	      YnWt_S_en[tab_An + tab_St*tab_An_stride] += (vY - a_Yn[ny_a/POPLENGTH]) * D_Yn[ny_a/POPLENGTH] * (lf_WtSn_nb2[tab_Yt + tab_St*tab_Yt_stride] - et_Sn_nb2[tab_St]*a_Yn[ny_a/POPLENGTH]);
+	      ny_j++; /* while (ny_j<M_Yn_nb1->cpop_j){ } */}
+	    /* if (ZC_At_T_YnWt_S_Zn_bother){ } */}
+	  AnZt_S_en[tab_An + tab_St*tab_An_stride] = 0;
+	  if (ZC_At_T_AnZt_S_Zn_bother){
+	    na_j=0; while (na_j<M_An_nb1->cpop_j){
+	      na_a = M_An_nb1->n_a_[na_j]; na_b = M_An_nb1->n_b_[na_j];
+	      switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_At){ } */}
+	      vA = bget____(An_tag,na_a); vM = bget__on(mca_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_An->mc_j\n",na_j,na_b,na_a);}
+	      AnZt_S_en[tab_An + tab_St*tab_An_stride] += (vA - a_An[na_a/POPLENGTH]) * D_An[na_a/POPLENGTH] * (lf_ZtSn_nb2[tab_At + tab_St*tab_At_stride] - et_Sn_nb2[tab_St]*a_An[na_a/POPLENGTH]);
+	      na_j++; /* while (na_j<M_An_nb1->cpop_j){ } */}	
+	    /* if (ZC_At_T_AnZt_S_Zn_bother){ } */}
+	  ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_St_nb2->rpop_j){ } */}
+      /* if (lf_YnWt_nbx==NULL || lf_AnZt_nbx==NULL){ } */}
+    if (verbose>1){ raprintf(YnWt_S_en,"double",tab_An_stride,tab_St_stride," %% YnWt_S_en: ");}
+    if (verbose>1){ raprintf(AnZt_S_en,"double",tab_An_stride,tab_St_stride," %% AnZt_S_en: ");}
+    if (verbose>1){ printf(" %% At_T_YnWt_S_en, At_T_AnZt_S_en\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_Tt_stride = M_Tt_nb1->rpop_j; break; case SPACING_b: tab_Tt_stride = M_Tt_nb1->rpop_b; break; case SPACING_a: tab_Tt_stride = M_Tt_nb1->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+    switch (output_spacing_At){ case SPACING_j: tab_At_stride = M_At_nb1->rpop_j; break; case SPACING_b: tab_At_stride = M_At_nb1->rpop_b; break; case SPACING_a: tab_At_stride = M_At_nb1->nrows; break; default: break; /* switch (output_spacing_At){ } */}
+    ns_j=0; while (ns_j<M_Tt_nb1->rpop_j){
+      ns_a = M_Tt_nb1->m_a_[ns_j]; ns_b = M_Tt_nb1->m_b_[ns_j];
+      Tt_tag = (unsigned char *)(&(M_Tt_nb1->wX[ns_b*M_Tt_nb1->mc_length]));
+      mcs_tag = (unsigned char *)(&(M_Tt_nb1->mc_j[0]));
+      mcs_end = (unsigned char *)(&(M_Tt_nb1->mc_j[M_Tt_nb1->mc_length]));    
+      switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      na_j=0; while (na_j<M_At_nb1->rpop_j){
+	na_a = M_At_nb1->m_a_[na_j]; na_b = M_At_nb1->m_b_[na_j];
+	switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_At){ } */}
+	At_tag = (unsigned char *)(&(M_At_nb1->wX[na_b*M_At_nb1->mc_length]));
+	mca_tag = (unsigned char *)(&(M_At_nb1->mc_j[0]));
+	mca_end = (unsigned char *)(&(M_At_nb1->mc_j[M_At_nb1->mc_length]));
+	At_T_YnWt_S_en[tab_At + tab_Tt*tab_At_stride] = 0; At_T_AnZt_S_en[tab_At + tab_Tt*tab_At_stride] = 0;
+	ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	  ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	  switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  vT = bget____(Tt_tag,ma_a); vM = bget__on(mcs_tag,ma_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",ma_j,ma_b,ma_a);}
+	  vA = bget____(At_tag,ma_a); vM = bget__on(mca_tag,ma_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_At->mc_j\n",ma_j,ma_b,ma_a);}
+	  if (ZC_At_T_YnWt_S_Zn_bother){ At_T_YnWt_S_en[tab_At + tab_Tt*tab_At_stride] += vA*(GLOBAL_ZC_AtIXnXtXXn ? 1 : vT)*YnWt_S_en[tab_An + tab_Tt*tab_An_stride];}
+	  if (ZC_At_T_AnZt_S_Zn_bother){ At_T_AnZt_S_en[tab_At + tab_Tt*tab_At_stride] += vA*(GLOBAL_ZC_AtIXnXtXXn ? 1 : vT)*AnZt_S_en[tab_An + tab_Tt*tab_An_stride];}
+	  ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+	na_j++; /* while (na_j<M_At_nb1->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_Tt_nb1->rpop_j){ } */}
+    if (verbose>1){ raprintf(At_T_YnWt_S_en,"double",tab_At_stride,tab_Tt_stride," %% At_T_YnWt_S_en: ");}
+    if (verbose>1){ raprintf(At_T_AnZt_S_en,"double",tab_At_stride,tab_Tt_stride," %% At_T_AnZt_S_en: ");}
+    /* if (ZC_At_T_YnWt_S_Zn_bother || ZC_At_T_AnZt_S_Zn_bother){ } */}
+  if (ZC_At_T_YnYt_T_An_bother || ZC_At_T_AnAt_T_An_bother){
+    if (verbose>1){ printf(" %% YnYt_T_en, AnAt_T_en\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_Tt_stride = M_Tt_nb2->rpop_j; break; case SPACING_b: tab_Tt_stride = M_Tt_nb2->rpop_b; break; case SPACING_a: tab_Tt_stride = M_Tt_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+    switch (output_spacing_Zn){ case SPACING_j: tab_Zn_stride = M_At_nb2->cpop_j; break; case SPACING_b: tab_Zn_stride = M_At_nb2->cpop_b; break; case SPACING_a: tab_Zn_stride = M_At_nb2->ncols; break; default: break; /* switch (output_spacing_Zn){ } */}
+    if (lf_YnYt_nbx!=NULL || lf_AnAt_nbx!=NULL){
+      ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
+	ns_a = M_Tt_nb2->m_a_[ns_j]; ns_b = M_Tt_nb2->m_b_[ns_j];
+	Tt_tag = (unsigned char *)(&(M_Tt_nb2->wX[ns_b*M_Tt_nb2->mc_length]));
+	mcs_tag = (unsigned char *)(&(M_Tt_nb2->mc_j[0]));
+	mcs_end = (unsigned char *)(&(M_Tt_nb2->mc_j[M_Tt_nb2->mc_length]));    
+	switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+	ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	  ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	  switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  YnYt_T_en[tab_An + tab_Tt*tab_An_stride] = 0; AnAt_T_en[tab_An + tab_Tt*tab_An_stride] = 0;
+	  mz_j=0; while (mz_j<M_An_nb2->rpop_j){
+	    mz_a = M_An_nb2->m_a_[mz_j]; mz_b = M_An_nb2->m_b_[mz_j];
+	    switch (output_spacing_Zn){ case SPACING_j: tab_Zn=mz_j; break; case SPACING_b: tab_Zn=mz_b; break; case SPACING_a: tab_Zn=mz_a; break; default: break; /* switch (output_spacing_Zn){ } */}
+	    vS = bget____(Tt_tag,mz_a); vM = bget__on(mcs_tag,mz_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",mz_j,mz_b,mz_a);}
+	    switch (output_spacing_YnWt){ case SPACING_j: tab_YnWt=ma_j + mz_j*M_At_nb1->cpop_j; break; case SPACING_b: tab_YnWt=ma_b + mz_b*M_At_nb1->cpop_b; break; case SPACING_a: tab_YnWt=ma_a + mz_a*M_At_nb1->ncols; break; /* switch (output_spacing_YnWt){ } */}
+	    if (ZC_At_T_YnYt_T_An_bother){ YnYt_T_en[tab_An + tab_Tt*tab_An_stride] += vS * (lf_YnYt_nbx!=NULL ? lf_YnYt_nbx[tab_YnWt/* ma_j + mz_j*M_At_nb1->cpop_j *//* tab_An + tab_Zn*tab_An_stride */] : 0);}
+	    if (ZC_At_T_AnAt_T_An_bother){ AnAt_T_en[tab_An + tab_Tt*tab_An_stride] += vS * (lf_AnAt_nbx!=NULL ? lf_AnAt_nbx[tab_YnWt/* ma_j + mz_j*M_At_nb1->cpop_j *//* tab_An + tab_Zn*tab_An_stride */] : 0);}
+	    mz_j++; /* while (mz_j<M_An_nb2->rpop_j){ } */}
+	  ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_Tt_nb2->rpop_j){ } */}
+      /* if (lf_YnYt_nbx!=NULL || lf_AnAt_nbx!=NULL){ } */}
+    else /* if (lf_YnYt_nbx==NULL || lf_AnAt_nbx==NULL){ } */{
+      ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
+	ns_a = M_Tt_nb2->m_a_[ns_j]; ns_b = M_Tt_nb2->m_b_[ns_j];
+	switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+	ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	  ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	  Yn_tag = (unsigned char *)(&(M_Yn_nb1->wX[ma_b*M_Yn_nb1->mc_length]));
+	  mcy_tag = (unsigned char *)(&(M_Yn_nb1->mc_j[0]));
+	  mcy_end = (unsigned char *)(&(M_Yn_nb1->mc_j[M_Yn_nb1->mc_length]));    
+	  An_tag = (unsigned char *)(&(M_An_nb1->wX[ma_b*M_An_nb1->mc_length]));
+	  mca_tag = (unsigned char *)(&(M_An_nb1->mc_j[0]));
+	  mca_end = (unsigned char *)(&(M_An_nb1->mc_j[M_An_nb1->mc_length]));    
+	  switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  YnYt_T_en[tab_An + tab_Tt*tab_An_stride] = 0; 
+	  if (ZC_At_T_YnYt_T_An_bother){
+	    ny_j=0; while (ny_j<M_Yn_nb1->cpop_j){
+	      ny_a = M_Yn_nb1->n_a_[ny_j]; ny_b = M_Yn_nb1->n_b_[ny_j];
+	      switch (output_spacing_Yt){ case SPACING_j: tab_Yt=ny_j; break; case SPACING_b: tab_Yt=ny_b; break; case SPACING_a: tab_Yt=ny_a; break; default: break; /* switch (output_spacing_Yt){ } */}
+	      vY = bget____(Yn_tag,ny_a); vM = bget__on(mcy_tag,ny_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Yn->mc_j\n",ny_j,ny_b,ny_a);}
+	      YnYt_T_en[tab_An + tab_Tt*tab_An_stride] += (vY - a_Yn[ny_a/POPLENGTH]) * D_Yn[ny_a/POPLENGTH] * (lf_YtTn_nb2[tab_Yt + tab_Tt*tab_Yt_stride] - et_Tn_nb2[tab_Tt]*a_Yn[ny_a/POPLENGTH]);
+	      ny_j++; /* while (ny_j<M_Yn_nb1->cpop_j){ } */}
+	    /* if (ZC_At_T_YnYt_T_An_bother){ } */}
+	  AnAt_T_en[tab_An + tab_Tt*tab_An_stride] = 0;
+	  if (ZC_At_T_AnAt_T_An_bother){
+	    na_j=0; while (na_j<M_An_nb1->cpop_j){
+	      na_a = M_An_nb1->n_a_[na_j]; na_b = M_An_nb1->n_b_[na_j];
+	      switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_At){ } */}
+	      vA = bget____(An_tag,na_a); vM = bget__on(mca_tag,na_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_An->mc_j\n",na_j,na_b,na_a);}
+	      AnAt_T_en[tab_An + tab_Tt*tab_An_stride] += (vA - a_An[na_a/POPLENGTH]) * D_An[na_a/POPLENGTH] * (lf_AtTn_nb2[tab_At + tab_Tt*tab_At_stride] - et_Tn_nb2[tab_Tt]*a_An[na_a/POPLENGTH]);
+	      na_j++; /* while (na_j<M_An_nb1->cpop_j){ } */}	
+	    /* if (ZC_At_T_AnAt_T_An_bother){ } */}
+	  ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_St_nb2->rpop_j){ } */}    
+      /* if (lf_YnYt_nbx==NULL || lf_AnAt_nbx==NULL){ } */}
+    if (verbose>1){ raprintf(YnYt_T_en,"double",tab_An_stride,tab_Tt_stride," %% YnYt_T_en: ");}
+    if (verbose>1){ raprintf(AnAt_T_en,"double",tab_An_stride,tab_Tt_stride," %% AnAt_T_en: ");}
+    if (verbose>1){ printf(" %% At_T_YnYt_T_en, At_T_AnAt_T_en\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_Tt_stride = M_Tt_nb1->rpop_j; break; case SPACING_b: tab_Tt_stride = M_Tt_nb1->rpop_b; break; case SPACING_a: tab_Tt_stride = M_Tt_nb1->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+    switch (output_spacing_At){ case SPACING_j: tab_At_stride = M_At_nb1->rpop_j; break; case SPACING_b: tab_At_stride = M_At_nb1->rpop_b; break; case SPACING_a: tab_At_stride = M_At_nb1->nrows; break; default: break; /* switch (output_spacing_At){ } */}
+    ns_j=0; while (ns_j<M_Tt_nb1->rpop_j){
+      ns_a = M_Tt_nb1->m_a_[ns_j]; ns_b = M_Tt_nb1->m_b_[ns_j];
+      Tt_tag = (unsigned char *)(&(M_Tt_nb1->wX[ns_b*M_Tt_nb1->mc_length]));
+      mcs_tag = (unsigned char *)(&(M_Tt_nb1->mc_j[0]));
+      mcs_end = (unsigned char *)(&(M_Tt_nb1->mc_j[M_Tt_nb1->mc_length]));    
+      switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      na_j=0; while (na_j<M_At_nb1->rpop_j){
+	na_a = M_At_nb1->m_a_[na_j]; na_b = M_At_nb1->m_b_[na_j];
+	switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_At){ } */}
+	At_tag = (unsigned char *)(&(M_At_nb1->wX[na_b*M_At_nb1->mc_length]));
+	mca_tag = (unsigned char *)(&(M_At_nb1->mc_j[0]));
+	mca_end = (unsigned char *)(&(M_At_nb1->mc_j[M_At_nb1->mc_length]));
+	At_T_YnYt_T_en[tab_At + tab_Tt*tab_At_stride] = 0; At_T_AnAt_T_en[tab_At + tab_Tt*tab_At_stride] = 0;
+	ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	  ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	  switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  vT = bget____(Tt_tag,ma_a); vM = bget__on(mcs_tag,ma_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",ma_j,ma_b,ma_a);}
+	  vA = bget____(At_tag,ma_a); vM = bget__on(mca_tag,ma_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_At->mc_j\n",ma_j,ma_b,ma_a);}
+	  if (ZC_At_T_YnYt_T_An_bother){ At_T_YnYt_T_en[tab_At + tab_Tt*tab_At_stride] += vA*(GLOBAL_ZC_AtIXnXtXXn ? 1 : vT)*YnYt_T_en[tab_An + tab_Tt*tab_An_stride];}
+	  if (ZC_At_T_AnAt_T_An_bother){ At_T_AnAt_T_en[tab_At + tab_Tt*tab_At_stride] += vA*(GLOBAL_ZC_AtIXnXtXXn ? 1 : vT)*AnAt_T_en[tab_An + tab_Tt*tab_An_stride];}
+	  ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+	na_j++; /* while (na_j<M_At_nb1->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_Tt_nb1->rpop_j){ } */}
+    if (verbose>1){ raprintf(At_T_YnYt_T_en,"double",tab_At_stride,tab_Tt_stride," %% At_T_YnYt_T_en: ");}
+    if (verbose>1){ raprintf(At_T_AnAt_T_en,"double",tab_At_stride,tab_Tt_stride," %% At_T_AnAt_T_en: ");}
+    /* if (ZC_At_T_YnYt_T_An_bother || ZC_At_T_AnAt_T_An_bother){ } */}
+  if (ZC_At_T_YnWt_S_Zn_bother || ZC_At_T_AnZt_S_Zn_bother || ZC_At_T_YnYt_T_An_bother || ZC_At_T_AnAt_T_An_bother){
+    if (verbose>1){ printf(" %% et_T_YnWt_S_en, et_T_AnZt_S_en, et_T_YnYt_T_en, et_T_AnAt_T_en\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_Tt_stride = M_Tt_nb1->rpop_j; break; case SPACING_b: tab_Tt_stride = M_Tt_nb1->rpop_b; break; case SPACING_a: tab_Tt_stride = M_Tt_nb1->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+    ns_j=0; while (ns_j<M_Tt_nb1->rpop_j){
+      ns_a = M_Tt_nb1->m_a_[ns_j]; ns_b = M_Tt_nb1->m_b_[ns_j];
+      Tt_tag = (unsigned char *)(&(M_Tt_nb1->wX[ns_b*M_Tt_nb1->mc_length]));
+      mcs_tag = (unsigned char *)(&(M_Tt_nb1->mc_j[0]));
+      mcs_end = (unsigned char *)(&(M_Tt_nb1->mc_j[M_Tt_nb1->mc_length]));    
+      switch (output_spacing_Tt){ case SPACING_j: tab_Tt=ns_j; break; case SPACING_b: tab_Tt=ns_b; break; case SPACING_a: tab_Tt=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      et_T_YnWt_S_en[tab_Tt] = 0; et_T_AnZt_S_en[tab_Tt] = 0; et_T_YnYt_T_en[tab_Tt] = 0; et_T_AnAt_T_en[tab_Tt] = 0;
+      ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	vT = bget____(Tt_tag,ma_a); vM = bget__on(mcs_tag,ma_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",ma_j,ma_b,ma_a);}
+	if (ZC_At_T_YnWt_S_Zn_bother){ et_T_YnWt_S_en[tab_Tt] += (GLOBAL_ZC_AtIXnXtXXn ? 1 : vT)*YnWt_S_en[tab_An + tab_Tt*tab_An_stride];}
+	if (ZC_At_T_AnZt_S_Zn_bother){ et_T_AnZt_S_en[tab_Tt] += (GLOBAL_ZC_AtIXnXtXXn ? 1 : vT)*AnZt_S_en[tab_An + tab_Tt*tab_An_stride];}
+	if (ZC_At_T_YnYt_T_An_bother){ et_T_YnYt_T_en[tab_Tt] += (GLOBAL_ZC_AtIXnXtXXn ? 1 : vT)*YnYt_T_en[tab_An + tab_Tt*tab_An_stride];}
+	if (ZC_At_T_AnAt_T_An_bother){ et_T_AnAt_T_en[tab_Tt] += (GLOBAL_ZC_AtIXnXtXXn ? 1 : vT)*AnAt_T_en[tab_An + tab_Tt*tab_An_stride];}
+	ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_Tt_nb1->rpop_j){ } */}
+    if (verbose>1){ raprintf(et_T_YnWt_S_en,"double",1,tab_Tt_stride," %% et_T_YnWt_S_en: ");}
+    if (verbose>1){ raprintf(et_T_AnZt_S_en,"double",1,tab_Tt_stride," %% et_T_AnZt_S_en: ");}
+    if (verbose>1){ raprintf(et_T_YnYt_T_en,"double",1,tab_Tt_stride," %% et_T_YnYt_T_en: ");}
+    if (verbose>1){ raprintf(et_T_AnAt_T_en,"double",1,tab_Tt_stride," %% et_T_AnAt_T_en: ");}
+    /* if (ZC_At_T_YnWt_S_Zn_bother || ZC_At_T_AnZt_S_Zn_bother || ZC_At_T_YnYt_T_An_bother || ZC_At_T_AnAt_T_An_bother){ } */}
+  if (verbose>1){ printf(" %% \n");}
+  if (verbose>1){ printf(" %% \n");}
+  if (verbose){ printf(" %% [finished get_xxxxle_doublestudy] tidx %d\n",tidx);}
+  return NULL;
+}
+
+void binary_xxxxle_doublestudy(int *tidx,void **vpra,pthread_t *thread_in,int output_spacing_An,int output_spacing_At,int output_spacing_Zn,int output_spacing_Zt,int output_spacing_Yt,int output_spacing_Tt,int output_spacing_YnWt,int *nb1_p,int *nb2_p,int *nbins_p,struct bcc_ajdk *D,struct bcc_single **E_,struct bcc_double **F_)
+{
+  /* This function calls get_xxxxle_doublestudy ; 
+     No reloading of data is performed ; we assume all data is preloaded ;
+     calculation performed in thread *thread_in ; thread number *tidx ;
+     variable space in **vpra (should be at least size 13)
+   */
+  int verbose=0;
+  int nbx=0,nb1=0,nb2=0,nbins=0;
+  int length=0,ip=0;
+  double **output_doublestudy_p=NULL;
+  if (verbose){ printf(" %% [entering binary_xxxxle_doublestudy] tidx %d\n",*tidx);}
+  nb1 = *nb1_p; nb2 = *nb2_p; nbins = *nbins_p; nbx = nb1+nb2*nbins;
+  output_doublestudy_p = &(F_[nbx]->lf_doublestudy);
+  length = F_[nbx]->length_doublestudy;  
+  if (*output_doublestudy_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_doublestudy_p = (double *)wkspace_alloc(length*sizeof(double));}
+  memset((*output_doublestudy_p),0,length*sizeof(double)); 
+  ip=0;
+  vpra[ip++] = tidx; vpra[ip++] = nb1_p; vpra[ip++] = nb2_p; vpra[ip++] = nbins_p; vpra[ip++] = D; vpra[ip++] = E_; vpra[ip++] = F_;
+  switch (output_spacing_An){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_An){ } */}
+  switch (output_spacing_At){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_At){ } */}
+  switch (output_spacing_Zn){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_Zn){ } */}
+  switch (output_spacing_Zt){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_Zt){ } */}
+  switch (output_spacing_Yt){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_Yt){ } */}
+  switch (output_spacing_Tt){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+  switch (output_spacing_YnWt){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_YnWt){ } */}
+  if (*tidx>0){ if (pthread_create(thread_in,NULL,&get_xxxxle_doublestudy,vpra)){ printf("Warning! cannot create thread %d in binary_xxxxle_doublestudy\n",*tidx);}}
+  else /* if (*tidx<=0) */{ get_xxxxle_doublestudy(vpra);} /* must join threads later */;
+  if (verbose>2){ raprintf((*output_doublestudy_p),"double",1,length," %% (*output_doublestudy_p): ");}
+  if (verbose){ printf(" %% [finished binary_xxxxle_doublestudy] tidx %d\n",*tidx);}
+}
+
+void bcc_xxxxle_compute_lf_doublestudy(int nbins,struct bcc_ajdk *D,struct bcc_single **E_,struct bcc_double **F_)
+{
+  int verbose=GLOBAL_verbose,verbose_timing_quik=0;
+  int nbx=0,nb1=0,nb2=0;
+  if (verbose){ printf(" %% calculating F_[nbx]->lf_doublestudy.\n");}
+  GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins;
+      GLOBAL_pthread_tic(); 
+      binary_xxxxle_doublestudy(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),SPACING_a,SPACING_a,SPACING_a,SPACING_a,SPACING_a,SPACING_a,SPACING_b,&(GLOBAL_nbra[nb1]),&(GLOBAL_nbra[nb2]),&nbins,D,E_,F_);
+      GLOBAL_pthread_toc();
+      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+  GLOBAL_pthread_tuc();
+  GLOBAL_toc(0,verbose_timing_quik," %% calculating F_[nbx]->lf_doublestudy: ");
+  if (verbose>2){
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins;
+	printf(" %% nb1 %d nb2 %d nbx %d\n",nb1,nb2,nbx);
+	raprintf(F_[nbx]->lf_doublestudy,"double",1,F_[nbx]->length_doublestudy," %% lf_doublestudy: ");
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    /* if (verbose>2){ } */}
+}
+
+/******************************************************************/
+
+void *get_xxxxle_getscores(void *vp)
+{
+  /* This function takes in a variety of inputs and calculates the row-score */
+  int verbose=0;
+  int ip=0,length=0,length_tmp=0,length_singlestudy_nb1=0,length_singlestudy_nb2=0,length_doublestudy=0,length_getscores=0,nc=0;
+  void **vpra=(void **)vp;
+  int tidx = *(int *)(vpra[ip++]);
+  int nb1 = *(int *)(vpra[ip++]);
+  int nb2 = *(int *)(vpra[ip++]);
+  int nbins = *(int *)(vpra[ip++]);
+  struct bcc_ajdk *D = (struct bcc_ajdk *)(vpra[ip++]);
+  struct bcc_single **E_ = (struct bcc_single **)(vpra[ip++]);
+  struct bcc_double **F_ = (struct bcc_double **)(vpra[ip++]);
+  int output_spacing_An = *(int *)(vpra[ip++]);
+  int output_spacing_At = *(int *)(vpra[ip++]);
+  int output_spacing_Tt = *(int *)(vpra[ip++]);
+  int output_spacing_YnWt = *(int *)(vpra[ip++]);
+  struct M_handle *M_An_nb1 = E_[nb1]->M_An;
+  struct M_handle *M_At_nb1 = E_[nb1]->M_At;
+  struct M_handle *M_Tt_nb1 = E_[nb1]->M_Tt;
+  struct M_handle *M_Yt_nb1 = E_[nb1]->M_Yt;
+  /* struct M_handle *M_Wt_nb1 = E_[nb1]->M_Wt; */
+  /* struct M_handle *M_St_nb1 = E_[nb1]->M_St; */
+  /* struct M_handle *M_Zn_nb1 = E_[nb1]->M_Zn; */
+  /* struct M_handle *M_Zt_nb1 = E_[nb1]->M_Zt; */
+  double *lf_An_ajdk_nb1 = E_[nb1]->lf_An_ajdk;
+  double *lf_AtTn_nb1 = E_[nb1]->lf_AtTn;
+  /* double *lf_ZtSn_nb1 = E_[nb1]->lf_ZtSn; */
+  /* double *lf_YtTn_nb1 = E_[nb1]->lf_YtTn; */
+  /* double *lf_WtSn_nb1 = E_[nb1]->lf_WtSn; */
+  double *lf_singlestudy_nb1 = E_[nb1]->lf_singlestudy;
+  /* struct M_handle *M_An_nb2 = E_[nb2]->M_An; */
+  struct M_handle *M_At_nb2 = E_[nb2]->M_At;
+  struct M_handle *M_Tt_nb2 = E_[nb2]->M_Tt;
+  /* struct M_handle *M_Yt_nb2 = E_[nb2]->M_Yt; */
+  /* struct M_handle *M_Wt_nb2 = E_[nb2]->M_Wt; */
+  struct M_handle *M_St_nb2 = E_[nb2]->M_St;
+  /* struct M_handle *M_Zn_nb2 = E_[nb2]->M_Zn; */
+  struct M_handle *M_Zt_nb2 = E_[nb2]->M_Zt;
+  /* double *lf_An_ajdk_nb2 = E_[nb2]->lf_An_ajdk; */
+  double *lf_AtTn_nb2 = E_[nb2]->lf_AtTn;
+  double *lf_ZtSn_nb2 = E_[nb2]->lf_ZtSn;
+  /* double *lf_YtTn_nb2 = E_[nb2]->lf_YtTn; */
+  /* double *lf_WtSn_nb2 = E_[nb2]->lf_WtSn; */
+  double *lf_singlestudy_nb2 = E_[nb2]->lf_singlestudy;
+  int nbx = nb1+nb2*nbins;
+  double *lf_AnAt_nbx = F_[nbx]->lf_AnAt;
+  /* double *lf_AnZt_nbx = F_[nbx]->lf_AnZt; */
+  double *lf_YnYt_nbx = F_[nbx]->lf_YnYt;
+  /* double *lf_YnWt_nbx = F_[nbx]->lf_YnWt; */
+  double *lf_doublestudy = F_[nbx]->lf_doublestudy;
+  int use_At_T_XnXt_X_Xn_flag = F_[nbx]->use_At_T_XnXt_X_Xn_flag;
+  double *lf_At_T_AnAt_T_An_nbx = F_[nbx]->lf_At_T_AnAt_T_An;
+  double *lf_At_T_AnZt_S_Zn_nbx = F_[nbx]->lf_At_T_AnZt_S_Zn;
+  double *lf_At_T_YnYt_T_An_nbx = F_[nbx]->lf_At_T_YnYt_T_An;
+  double *lf_At_T_YnWt_S_Zn_nbx = F_[nbx]->lf_At_T_YnWt_S_Zn;
+  int use_AtTXn____XtXXn_flag = F_[nbx]->use_AtTXn____XtXXn_flag;
+  double *lf_AtTAn____AtTAn_nbx = F_[nbx]->lf_AtTAn____AtTAn;
+  double *lf_AtTAn____ZtSZn_nbx = F_[nbx]->lf_AtTAn____ZtSZn;
+  double *lf_AtTYn____YtTAn_nbx = F_[nbx]->lf_AtTYn____YtTAn;
+  double *lf_AtTYn____WtSZn_nbx = F_[nbx]->lf_AtTYn____WtSZn; 
+  int use_An_XtXXn_Xt_flag = F_[nbx]->use_An_XtXXn_Xt_flag;
+  double *lf_An_ZtSWn_Yt_nbx = F_[nbx]->lf_An_ZtSWn_Yt;
+  double *lf_An_ZtSZn_At_nbx = F_[nbx]->lf_An_ZtSZn_At;
+  double *lf_An_AtTYn_Yt_nbx = F_[nbx]->lf_An_AtTYn_Yt;
+  double *lf_An_AtTAn_At_nbx = F_[nbx]->lf_An_AtTAn_At;
+  int use_AnXt_X_XnXt_flag = F_[nbx]->use_AnXt_X_XnXt_flag;
+  double *lf_AnZt_S_WnYt_nbx = F_[nbx]->lf_AnZt_S_WnYt;
+  double *lf_AnZt_S_ZnAt_nbx = F_[nbx]->lf_AnZt_S_ZnAt;
+  double *lf_AnAt_T_YnYt_nbx = F_[nbx]->lf_AnAt_T_YnYt;
+  double *lf_AnAt_T_AnAt_nbx = F_[nbx]->lf_AnAt_T_AnAt;
+  double *output_getscores = F_[nbx]->lf_getscores;
+  double *A_ajdk = D->A_ajdk; double *Y_ajdk = D->Y_ajdk;
+  int A_pcols = psize(M_At_nb1->nrows);
+  int Y_pcols = psize(M_Yt_nb1->nrows);
+  int A_ncols = M_At_nb1->nrows, T_ncols = M_Tt_nb1->nrows;
+  int A_nrows_nb1 = M_At_nb1->ncols, A_nrows_nb2 = M_At_nb2->ncols;
+  int /* Z_nrows_nb1 = M_Zt_nb1->ncols, */Z_nrows_nb2 = M_Zt_nb2->ncols;
+  length = 0;
+  length_tmp = A_ncols; double *At_Yn_a1d1_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = A_ncols; double *At_An_a1d1_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = T_ncols; /* double *a1d2_Zt_Sn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a2d2_Zt_Sn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a3d2_Zt_Sn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a1d2_At_Tn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a2d2_At_Tn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *a3d2_At_Tn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = T_ncols; double *et_Tn_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = T_ncols; /* double *et_Sn_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = A_ncols; double *et_An_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = A_ncols; /* double *a1d1_At_en_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a1d2_At_en_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a3d2_At_en_nb1 = &(lf_singlestudy_nb1[length]); */ length += length_tmp;
+  length_tmp = 1; double *et_Yn_a1d1_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = T_ncols; double *Tt_Yn_a1d1_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = A_ncols*T_ncols; double *At_T_Yn_a1d1_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = 1; double *et_An_a1d1_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = T_ncols; double *Tt_An_a1d1_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = A_ncols*T_ncols; double *At_T_An_a1d1_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = T_ncols*A_nrows_nb1; double *T_AnAt_YnYt_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp;
+  length_tmp = T_ncols*A_nrows_nb1; double *T_AnAt_AnAt_nb1 = &(lf_singlestudy_nb1[length]); length += length_tmp; 
+  length_singlestudy_nb1 = length;
+  length = 0;
+  length_tmp = A_ncols; /* double *At_Yn_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *At_An_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; double *a1d2_Zt_Sn_nb2 = &(lf_singlestudy_nb2[length]); length += length_tmp;
+  length_tmp = T_ncols; /* double *a2d2_Zt_Sn_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; double *a3d2_Zt_Sn_nb2 = &(lf_singlestudy_nb2[length]); length += length_tmp;
+  length_tmp = T_ncols; double *a1d2_At_Tn_nb2 = &(lf_singlestudy_nb2[length]); length += length_tmp;
+  length_tmp = T_ncols; /* double *a2d2_At_Tn_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; double *a3d2_At_Tn_nb2 = &(lf_singlestudy_nb2[length]); length += length_tmp;
+  length_tmp = T_ncols; double *et_Tn_nb2 = &(lf_singlestudy_nb2[length]); length += length_tmp;
+  length_tmp = T_ncols; double *et_Sn_nb2 = &(lf_singlestudy_nb2[length]); length += length_tmp;
+  length_tmp = A_ncols; /* double *et_An_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a1d1_At_en_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a1d2_At_en_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols; /* double *a3d2_At_en_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = 1; /* double *et_Yn_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *Tt_Yn_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols*T_ncols; /* double *At_T_Yn_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = 1; /* double *et_An_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols; /* double *Tt_An_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = A_ncols*T_ncols; /* double *At_T_An_a1d1_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols*A_nrows_nb2; /* double *T_AnAt_YnYt_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp;
+  length_tmp = T_ncols*A_nrows_nb2; /* double *T_AnAt_AnAt_nb2 = &(lf_singlestudy_nb2[length]); */ length += length_tmp; 
+  length_singlestudy_nb2 = length;
+  double *An_a2d2_Zt_Sn = NULL; double *An_a2d2_At_Tn = NULL; double *et_T_YnWt = NULL; double *et_T_AnZt = NULL; double *et_T_YnWt_S_Zn = NULL; double *et_T_AnZt_S_Zn = NULL; double *et_T_YnYt = NULL; double *et_T_AnAt = NULL; double *et_T_YnYt_T_An = NULL; double *et_T_AnAt_T_An = NULL; double *YnWt_S_en = NULL; double *AnZt_S_en = NULL; double *At_T_YnWt_S_en = NULL; double *At_T_AnZt_S_en = NULL; double *YnYt_T_en = NULL; double *AnAt_T_en = NULL; double *At_T_YnYt_T_en = NULL; double *At_T_AnAt_T_en = NULL; double *et_T_YnWt_S_en = NULL; double *et_T_AnZt_S_en = NULL; double *et_T_YnYt_T_en = NULL; double *et_T_AnAt_T_en = NULL;
+  length = 0;
+  length_tmp = A_nrows_nb1*T_ncols; An_a2d2_Zt_Sn = &(lf_doublestudy[length]); length += length_tmp; // if (ZR_AnZtSZnAt_bother){ }
+  length_tmp = A_nrows_nb1*T_ncols; An_a2d2_At_Tn = &(lf_doublestudy[length]); length += length_tmp; // if (ZR_AnAtTAnAt_bother){ }
+  if (F_[nbx]->use_At_T_XnXt_X_Xn_flag){
+    length_tmp = T_ncols*Z_nrows_nb2; et_T_YnWt = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnWtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx){ }
+    length_tmp = T_ncols*Z_nrows_nb2; et_T_AnZt = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnZtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx){ }
+    length_tmp = T_ncols*A_ncols; et_T_YnWt_S_Zn = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnWtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx){ }
+    length_tmp = T_ncols*A_ncols; et_T_AnZt_S_Zn = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnZtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx){ }
+    length_tmp = T_ncols*A_nrows_nb2; et_T_YnYt = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnYtTYn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx){ }
+    length_tmp = T_ncols*A_nrows_nb2; et_T_AnAt = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnAtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx){ }
+    length_tmp = T_ncols*A_ncols; et_T_YnYt_T_An = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnYtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx){ }
+    length_tmp = T_ncols*A_ncols; et_T_AnAt_T_An = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnAtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx){ }
+    length_tmp = A_nrows_nb1*T_ncols; YnWt_S_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnWtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx){ }
+    length_tmp = A_nrows_nb1*T_ncols; AnZt_S_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnZtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx){ }
+    length_tmp = A_ncols*T_ncols; At_T_YnWt_S_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnWtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx){ }
+    length_tmp = A_ncols*T_ncols; At_T_AnZt_S_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnZtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx){ }
+    length_tmp = A_nrows_nb1*T_ncols; YnYt_T_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnYtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx){ }
+    length_tmp = A_nrows_nb1*T_ncols; AnAt_T_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnAtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx){ }
+    length_tmp = A_ncols*T_ncols; At_T_YnYt_T_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnYtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx){ }
+    length_tmp = A_ncols*T_ncols; At_T_AnAt_T_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnAtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx){ }
+    length_tmp = T_ncols; et_T_YnWt_S_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnWtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx){ }
+    length_tmp = T_ncols; et_T_AnZt_S_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnZtSZn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx){ }
+    length_tmp = T_ncols; et_T_YnYt_T_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTYnYtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx){ }
+    length_tmp = T_ncols; et_T_AnAt_T_en = &(lf_doublestudy[length]); length += length_tmp; // if (ZC_AtTAnAtTAn_bother && use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx){ }
+    /* if (F_[nbx]->use_At_T_XnXt_X_Xn_flag){ } */}
+  length_doublestudy = length;
+  double *ZR_AnZtSWnYt = NULL; double *ZR_AnZtSZnAt = NULL; double *ZR_AnAtTYnYt = NULL; double *ZR_AnAtTAnAt = NULL; double *ZC_AtTYnWtSZn = NULL; double *ZC_AtTYnYtTAn = NULL; double *ZC_AtTAnZtSZn = NULL; double *ZC_AtTAnAtTAn = NULL;
+  length = 0;
+  if (F_[nbx]->ZR_AnZtSWnYt_bother){ length_tmp = A_nrows_nb1*T_ncols; ZR_AnZtSWnYt = &(output_getscores[length]); length += length_tmp;}
+  if (F_[nbx]->ZR_AnZtSZnAt_bother){ length_tmp = A_nrows_nb1*T_ncols; ZR_AnZtSZnAt = &(output_getscores[length]); length += length_tmp;}
+  if (F_[nbx]->ZR_AnAtTYnYt_bother){ length_tmp = A_nrows_nb1*T_ncols; ZR_AnAtTYnYt = &(output_getscores[length]); length += length_tmp;}
+  if (F_[nbx]->ZR_AnAtTAnAt_bother){ length_tmp = A_nrows_nb1*T_ncols; ZR_AnAtTAnAt = &(output_getscores[length]); length += length_tmp;}
+  if (F_[nbx]->ZC_AtTYnWtSZn_bother){ length_tmp = A_ncols*T_ncols; ZC_AtTYnWtSZn = &(output_getscores[length]); length += length_tmp;}
+  if (F_[nbx]->ZC_AtTAnZtSZn_bother){ length_tmp = A_ncols*T_ncols; ZC_AtTAnZtSZn = &(output_getscores[length]); length += length_tmp;}
+  if (F_[nbx]->ZC_AtTYnYtTAn_bother){ length_tmp = A_ncols*T_ncols; ZC_AtTYnYtTAn = &(output_getscores[length]); length += length_tmp;}
+  if (F_[nbx]->ZC_AtTAnAtTAn_bother){ length_tmp = A_ncols*T_ncols; ZC_AtTAnAtTAn = &(output_getscores[length]); length += length_tmp;}
+  length_getscores = length;
+  int vM=0,vT=0/* ,vS=0 */;
+  /* unsigned char *An_tag=NULL; */
+  /* unsigned char *At_tag=NULL; */
+  unsigned char *Tt_tag=NULL;
+  /* unsigned char *Yt_tag=NULL; */
+  /* unsigned char *Wt_tag=NULL; */
+  /* unsigned char *Zn_tag=NULL; */
+  /* unsigned char *Zt_tag=NULL; */
+  /* unsigned char *St_tag=NULL; */
+  /* unsigned char *mca_tag=NULL,*mca_end=NULL; */
+  /* unsigned char *mcz_tag=NULL,*mcz_end=NULL; */
+  unsigned char *mct_tag=NULL,*mct_end=NULL;
+  /* unsigned char *mcs_tag=NULL,*mcs_end=NULL; */
+  int ns_j=0,ns_b=0,ns_a=0,tab_Tt_stride=0,tab_Tt=0,tab_St_stride=0,tab_St=0;
+  int na_j=0,na_b=0,na_a=0,tab_At_stride=0,tab_At=0,ma_j=0,ma_b=0,ma_a=0,tab_An_stride=0,tab_An=0,tab_YnWt=0;
+  /* int ny_j=0,ny_b=0,ny_a=0,tab_Yt_stride=0,tab_Yt=0,my_j=0,my_b=0,my_a=0,tab_Yn_stride=0,tab_Yn=0; */
+  /* int nw_j=0,nw_b=0,nw=0,tab_Wt_stride=0,tab_Wt=0,mw_j=0,mw_b=0,mw=0,tab_Wn_stride=0,tab_Wn=0; */
+  /* int nz_j=0,nz_b=0,nz_a=0,tab_Zt_stride=0,tab_Zt=0,mz_j=0,mz_b=0,mz_a=0,tab_Zn_stride=0,tab_Zn=0; */
+  double lf_A_a0d2=0,lf_A_a1d2=0,lf_A_a2d2=0,lf_A_a3d2=0,lf_A_a4d2=0;
+  double lf_A_a0d1=0,lf_A_a1d1=0,lf_A_a2d1=0,lf_A_a3d1=0,lf_A_a4d1=0;
+  double lf_Y_a0d1=0,lf_Y_a1d1=0,lf_Y_a2d1=0,lf_Y_a3d1=0,lf_Y_a4d1=0;
+  int ZR_AnZtSWnYt_bother = F_[nbx]->ZR_AnZtSWnYt_bother;
+  int ZR_AnZtSZnAt_bother = F_[nbx]->ZR_AnZtSZnAt_bother;
+  int ZR_AnAtTYnYt_bother = F_[nbx]->ZR_AnAtTYnYt_bother;
+  int ZR_AnAtTAnAt_bother = F_[nbx]->ZR_AnAtTAnAt_bother;
+  int ZC_AtTYnWtSZn_bother = F_[nbx]->ZC_AtTYnWtSZn_bother;
+  int ZC_AtTAnZtSZn_bother = F_[nbx]->ZC_AtTAnZtSZn_bother;
+  int ZC_AtTYnYtTAn_bother = F_[nbx]->ZC_AtTYnYtTAn_bother;
+  int ZC_AtTAnAtTAn_bother = F_[nbx]->ZC_AtTAnAtTAn_bother;
+  if (verbose>1){ printf(" %% [entering get_xxxxle_getscores] tidx %d nb1 %d nb2 %d nbins %d\n",tidx,nb1,nb2,nbins);}  
+  fill_uchar_zero((unsigned char *)output_getscores,length_getscores*sizeof(double));
+  if (ZR_AnZtSWnYt_bother || ZR_AnZtSZnAt_bother || ZR_AnAtTYnYt_bother || ZR_AnAtTAnAt_bother || ZC_AtTYnWtSZn_bother || ZC_AtTAnZtSZn_bother || ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){
+    lf_A_a0d2=0; for (nc=0;nc<A_pcols;nc++){ lf_A_a0d2 += (double)(A_ajdk ? A_ajdk[nc + AJDK_0_2*A_pcols] : 1) * (double)popcount_uchar_array((unsigned char *)&(M_An_nb1->mc_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_A_a1d2=0; for (nc=0;nc<A_pcols;nc++){ lf_A_a1d2 += (double)(A_ajdk ? A_ajdk[nc + AJDK_1_2*A_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_An_nb1->mc_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_A_a2d2=0; for (nc=0;nc<A_pcols;nc++){ lf_A_a2d2 += (double)(A_ajdk ? A_ajdk[nc + AJDK_2_2*A_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_An_nb1->mc_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_A_a3d2=0; for (nc=0;nc<A_pcols;nc++){ lf_A_a3d2 += (double)(A_ajdk ? A_ajdk[nc + AJDK_3_2*A_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_An_nb1->mc_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_A_a4d2=0; for (nc=0;nc<A_pcols;nc++){ lf_A_a4d2 += (double)(A_ajdk ? A_ajdk[nc + AJDK_4_2*A_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_An_nb1->mc_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_A_a0d1=0; for (nc=0;nc<A_pcols;nc++){ lf_A_a0d1 += (double)(A_ajdk ? A_ajdk[nc + AJDK_0_1*A_pcols] : 1) * (double)popcount_uchar_array((unsigned char *)&(M_An_nb1->mc_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_A_a1d1=0; for (nc=0;nc<A_pcols;nc++){ lf_A_a1d1 += (double)(A_ajdk ? A_ajdk[nc + AJDK_1_1*A_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_An_nb1->mc_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_A_a2d1=0; for (nc=0;nc<A_pcols;nc++){ lf_A_a2d1 += (double)(A_ajdk ? A_ajdk[nc + AJDK_2_1*A_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_An_nb1->mc_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_A_a3d1=0; for (nc=0;nc<A_pcols;nc++){ lf_A_a3d1 += (double)(A_ajdk ? A_ajdk[nc + AJDK_3_1*A_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_An_nb1->mc_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_A_a4d1=0; for (nc=0;nc<A_pcols;nc++){ lf_A_a4d1 += (double)(A_ajdk ? A_ajdk[nc + AJDK_4_1*A_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_An_nb1->mc_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_Y_a0d1=0; for (nc=0;nc<Y_pcols;nc++){ lf_Y_a0d1 += (double)(Y_ajdk ? Y_ajdk[nc + AJDK_0_1*Y_pcols] : 1) * (double)popcount_uchar_array((unsigned char *)&(M_Yt_nb1->mr_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_Y_a1d1=0; for (nc=0;nc<Y_pcols;nc++){ lf_Y_a1d1 += (double)(Y_ajdk ? Y_ajdk[nc + AJDK_1_1*Y_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_Yt_nb1->mr_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_Y_a2d1=0; for (nc=0;nc<Y_pcols;nc++){ lf_Y_a2d1 += (double)(Y_ajdk ? Y_ajdk[nc + AJDK_2_1*Y_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_Yt_nb1->mr_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_Y_a3d1=0; for (nc=0;nc<Y_pcols;nc++){ lf_Y_a3d1 += (double)(Y_ajdk ? Y_ajdk[nc + AJDK_3_1*Y_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_Yt_nb1->mr_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    lf_Y_a4d1=0; for (nc=0;nc<Y_pcols;nc++){ lf_Y_a4d1 += (double)(Y_ajdk ? Y_ajdk[nc + AJDK_4_1*Y_pcols] : 0) * (double)popcount_uchar_array((unsigned char *)&(M_Yt_nb1->mr_j[nc*POPLENGTH/BIT8]),1*POPLENGTH/BIT8);}
+    /*   if (ZR_AnZtSWnYt_bother || ZR_AnZtSZnAt_bother || ZR_AnAtTYnYt_bother || ZR_AnAtTAnAt_bother || ZC_AtTYnWtSZn_bother || ZC_AtTAnZtSZn_bother || ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){ } */}
+  if (ZR_AnZtSWnYt_bother || ZR_AnZtSZnAt_bother || ZR_AnAtTYnYt_bother || ZR_AnAtTAnAt_bother){
+    if (verbose>3){ printf(" %% ZR_AnZtSWnYt ZR_AnZtSZnAt ZR_AnAtTYnYt ZR_AnAtTAnAt\n");}
+    switch (output_spacing_Tt){ case SPACING_j: tab_St_stride = M_St_nb2->rpop_j; break; case SPACING_b: tab_St_stride = M_St_nb2->rpop_b; break; case SPACING_a: tab_St_stride = M_St_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */}
+    switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+    ns_j=0; while (ns_j<M_St_nb2->rpop_j){
+      ns_a = M_St_nb2->m_a_[ns_j]; ns_b = M_St_nb2->m_b_[ns_j];
+      switch (output_spacing_Tt){ case SPACING_j: tab_St=ns_j; break; case SPACING_b: tab_St=ns_b; break; case SPACING_a: tab_St=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+      ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	if (ZR_AnZtSWnYt_bother){ ZR_AnZtSWnYt[tab_An + tab_St*tab_An_stride] = (ZR_AnZtSWnYt_bother && use_AnXt_X_XnXt_flag && lf_AnZt_S_WnYt_nbx ? lf_AnZt_S_WnYt_nbx[tab_An + tab_St*tab_An_stride] : (ZR_AnZtSWnYt_bother && use_An_XtXXn_Xt_flag && lf_An_ZtSWn_Yt_nbx ? lf_An_ZtSWn_Yt_nbx[tab_An + tab_St*tab_An_stride] : 0));}
+	if (ZR_AnZtSZnAt_bother){ ZR_AnZtSZnAt[tab_An + tab_St*tab_An_stride] = (ZR_AnZtSZnAt_bother && use_AnXt_X_XnXt_flag && lf_AnZt_S_ZnAt_nbx ? lf_AnZt_S_ZnAt_nbx[tab_An + tab_St*tab_An_stride] : (ZR_AnZtSZnAt_bother && use_An_XtXXn_Xt_flag && lf_An_ZtSZn_At_nbx ? lf_An_ZtSZn_At_nbx[tab_An + tab_St*tab_An_stride] : 0));}
+	if (ZR_AnAtTYnYt_bother){ ZR_AnAtTYnYt[tab_An + tab_St*tab_An_stride] = (ZR_AnAtTYnYt_bother && use_AnXt_X_XnXt_flag && lf_AnAt_T_YnYt_nbx ? lf_AnAt_T_YnYt_nbx[tab_An + tab_St*tab_An_stride] : (ZR_AnAtTYnYt_bother && use_An_XtXXn_Xt_flag && lf_An_AtTYn_Yt_nbx ? lf_An_AtTYn_Yt_nbx[tab_An + tab_St*tab_An_stride] : 0));}
+	if (ZR_AnAtTAnAt_bother){ ZR_AnAtTAnAt[tab_An + tab_St*tab_An_stride] = (ZR_AnAtTAnAt_bother && use_AnXt_X_XnXt_flag && lf_AnAt_T_AnAt_nbx ? lf_AnAt_T_AnAt_nbx[tab_An + tab_St*tab_An_stride] : (ZR_AnAtTAnAt_bother && use_An_XtXXn_Xt_flag && lf_An_AtTAn_At_nbx ? lf_An_AtTAn_At_nbx[tab_An + tab_St*tab_An_stride] : 0));}
+	ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_St_nb2->rpop_j){ } */}
+    if (verbose>3){ raprintf(ZR_AnZtSWnYt,"double",tab_An_stride,tab_St_stride," %% ZR_AnZtSWnYt: ");}
+    if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    if (verbose>3){ raprintf(ZR_AnZtSZnAt,"double",tab_An_stride,tab_St_stride," %% ZR_AnZtSZnAt: ");}
+    if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    if (verbose>3){ raprintf(ZR_AnAtTYnYt,"double",tab_An_stride,tab_St_stride," %% ZR_AnAtTYnYt: ");}
+    if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    if (verbose>3){ raprintf(ZR_AnAtTAnAt,"double",tab_An_stride,tab_St_stride," %% ZR_AnAtTAnAt: ");}
+    /* if (ZR_AnZtSWnYt_bother || ZR_AnZtSZnAt_bother || ZR_AnAtTYnYt_bother || ZR_AnAtTAnAt_bother){ } */}
+  if (ZR_AnZtSZnAt_bother || ZR_AnAtTAnAt_bother){
+    if (verbose>3){ printf(" %% corrections to ZR_AnZtSZnAt, and ZR_AnAtTAnAt (both always necessary)\n");}
+    /*    ZR_AnZtZnAt_1(:,nt0) = diag(AnZt_1*diag(S(:,nt0))*transpose(AnZt_1)) - ...
+	  ( ... ;
+	  + e_An*f_At*D_An.^2*f_An*(e_Zt*S(:,nt0)) ...
+	  -2 * e_An*f_At*D_An.^2*diag(a_An)*Zt*S(:,nt0) ...
+	  + e_An*f_At*D_An.^2*a_An.^2*(e_Zt*S(:,nt0)) ...
+	  -2 * An * diag(a_An)*D_An.^2*f_An*(e_Zt*S(:,nt0)) ...
+	  +4 * An * diag(a_An)*D_An.^2*diag(a_An)*Zt*S(:,nt0) ...
+	  -2 * An * diag(a_An)*D_An.^2*a_An.^2*e_Zt*S(:,nt0) ...
+	  + e_An*a_At.^2*D_An.^2*f_An*(e_Zt*S(:,nt0)) ...
+	  -2 * e_An*a_At.^2*D_An.^2*diag(a_An)*Zt*S(:,nt0) ...
+	  + e_An*a_At.^2*D_An.^2*a_An.^2*e_Zt*S(:,nt0) ...
+	  ) ;
+    */
+    switch (output_spacing_Tt){ case SPACING_j: tab_St_stride = M_St_nb2->rpop_j; break; case SPACING_b: tab_St_stride = M_St_nb2->rpop_b; break; case SPACING_a: tab_St_stride = M_St_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt_stride = tab_St_stride;
+    switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+    ns_j=0; while (ns_j<M_St_nb2->rpop_j){
+      ns_a = M_St_nb2->m_a_[ns_j]; ns_b = M_St_nb2->m_b_[ns_j];
+      switch (output_spacing_Tt){ case SPACING_j: tab_St=ns_j; break; case SPACING_b: tab_St=ns_b; break; case SPACING_a: tab_St=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt = tab_St;
+      ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	if (ZR_AnZtSZnAt_bother){
+	  ZR_AnZtSZnAt[tab_An + tab_St*tab_An_stride] -= 
+	    + 1*lf_A_a0d2*et_Sn_nb2[tab_St]
+	    - 2*a1d2_Zt_Sn_nb2[tab_St]
+	    + 1*lf_A_a2d2*et_Sn_nb2[tab_St]
+	    - 2*lf_An_ajdk_nb1[tab_An + AJDK_1_2*tab_An_stride]*et_Sn_nb2[tab_St]
+	    + 4*An_a2d2_Zt_Sn[tab_An + tab_St*tab_An_stride]
+	    - 2*lf_An_ajdk_nb1[tab_An + AJDK_3_2*tab_An_stride]*et_Sn_nb2[tab_St]
+	    + 1*lf_A_a2d2*et_Sn_nb2[tab_St]
+	    - 2*a3d2_Zt_Sn_nb2[tab_St]
+	    + 1*lf_A_a4d2*et_Sn_nb2[tab_St];
+	  /* if (ZR_AnZtSZnAt_bother){ } */}
+	if (ZR_AnAtTAnAt_bother){
+	  ZR_AnAtTAnAt[tab_An + tab_Tt*tab_An_stride] -= 
+	    + 1*lf_A_a0d2*et_Tn_nb2[tab_Tt]
+	    - 2*a1d2_At_Tn_nb2[tab_Tt]
+	    + 1*lf_A_a2d2*et_Tn_nb2[tab_Tt]
+	    - 2*lf_An_ajdk_nb1[tab_An + AJDK_1_2*tab_An_stride]*et_Tn_nb2[tab_Tt]
+	    + 4*An_a2d2_At_Tn[tab_An + tab_Tt*tab_An_stride]
+	    - 2*lf_An_ajdk_nb1[tab_An + AJDK_3_2*tab_An_stride]*et_Tn_nb2[tab_Tt]
+	    + 1*lf_A_a2d2*et_Tn_nb2[tab_Tt]
+	    - 2*a3d2_At_Tn_nb2[tab_Tt]
+	    + 1*lf_A_a4d2*et_Tn_nb2[tab_Tt];
+	  /* if (ZR_AnAtTAnAt_bother){ } */}
+	ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_St_nb2->rpop_j){ } */}
+    if (verbose>3){ raprintf(ZR_AnZtSZnAt,"double",tab_An_stride,tab_St_stride," %% ZR_AnZtSZnAt: ");}
+    if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    if (verbose>3){ raprintf(ZR_AnAtTAnAt,"double",tab_An_stride,tab_Tt_stride," %% ZR_AnAtTAnAt: ");}
+    /* if (ZR_AnZtSZnAt_bother || ZR_AnAtTAnAt_bother){ } */}
+  if (ZR_AnAtTYnYt_bother || ZR_AnAtTAnAt_bother){
+    if (verbose>3){ printf(" %% corrections to ZR_AnAtTYnYt, and ZR_AnAtTAnAt (necessary if nb1==nb2)\n");}
+    if (nb1==nb2){
+      /* ZR_AnAtYnYt_1(:,nt0) = diag(AnAt_1*diag(T(:,nt0))*transpose(YnYt_1)) - T(:,nt0).*diag(AnAt_1).*diag(YnYt_1); */
+      switch (output_spacing_Tt){ case SPACING_j: tab_St_stride = M_Tt_nb2->rpop_j; break; case SPACING_b: tab_St_stride = M_Tt_nb2->rpop_b; break; case SPACING_a: tab_St_stride = M_Tt_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt_stride = tab_St_stride;
+      switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+      ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
+	ns_a = M_Tt_nb2->m_a_[ns_j]; ns_b = M_Tt_nb2->m_b_[ns_j];
+	Tt_tag = (unsigned char *)(&(M_Tt_nb2->wX[ns_b*M_Tt_nb2->mc_length]));
+	mct_tag = (unsigned char *)(&(M_Tt_nb2->mc_j[0]));
+	mct_end = (unsigned char *)(&(M_Tt_nb2->mc_j[M_Tt_nb2->mc_length]));    
+	switch (output_spacing_Tt){ case SPACING_j: tab_St=ns_j; break; case SPACING_b: tab_St=ns_b; break; case SPACING_a: tab_St=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt = tab_St;
+	ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	  ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	  switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  vT = bget____(Tt_tag,ma_a); vM = bget__on(mct_tag,ma_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",ma_j,ma_b,ma_a);}
+	  if (ZR_AnAtTYnYt_bother){ 
+	    if (lf_AnAt_nbx!=NULL && lf_YnYt_nbx!=NULL){
+	      switch (output_spacing_YnWt){ case SPACING_j: tab_YnWt=ma_j + ma_j*M_An_nb1->rpop_j; break; case SPACING_b: tab_YnWt=ma_b + ma_b*M_An_nb1->rpop_b; break; case SPACING_a: tab_YnWt=ma_a + ma_a*M_An_nb1->nrows; break; /* switch (output_spacing_YnWt){ } */}
+	      ZR_AnAtTYnYt[tab_An + tab_Tt*tab_An_stride] -= vT*(lf_AnAt_nbx!=NULL ? lf_AnAt_nbx[tab_YnWt/* ma_j + ma_j*M_An_nb1->rpop_j *//* tab_An + tab_An*tab_An_stride */] : 0)*(lf_YnYt_nbx!=NULL ? lf_YnYt_nbx[tab_YnWt/* ma_j + ma_j*M_An_nb1->rpop_j *//* tab_An + tab_An*tab_An_stride */] : 0);
+	      /* if (lf_AnAt_nbx!=NULL && lf_YnYt_nbx!=NULL){ } */}
+	    else if (T_AnAt_YnYt_nb1!=NULL){
+	      ZR_AnAtTYnYt[tab_An + tab_Tt*tab_An_stride] -= T_AnAt_YnYt_nb1[tab_Tt + tab_An*tab_Tt_stride];
+	      /* else if (T_AnAt_YnYt_nb1!=NULL){ } */}
+	    else /* if neither */{ printf(" %% Warning! T_AnAt_YnYt_nb1 undefined in get_xxxxle_getscores\n");}
+	    /* if (ZR_AnAtTYnYt_bother){ } */}
+	  if (ZR_AnAtTAnAt_bother){ 
+	    if (lf_AnAt_nbx!=NULL){
+	      switch (output_spacing_YnWt){ case SPACING_j: tab_YnWt=ma_j + ma_j*M_An_nb1->rpop_j; break; case SPACING_b: tab_YnWt=ma_b + ma_b*M_An_nb1->rpop_b; break; case SPACING_a: tab_YnWt=ma_a + ma_a*M_An_nb1->nrows; break; /* switch (output_spacing_YnWt){ } */}
+	      ZR_AnAtTAnAt[tab_An + tab_Tt*tab_An_stride] -= vT*(lf_AnAt_nbx!=NULL ? lf_AnAt_nbx[tab_YnWt/* ma_j + ma_j*M_An_nb1->rpop_j *//* tab_An + tab_An*tab_An_stride */] : 0)*(lf_AnAt_nbx!=NULL ? lf_AnAt_nbx[tab_YnWt/* ma_j + ma_j*M_An_nb1->rpop_j *//* tab_An + tab_An*tab_An_stride */] : 0);
+	      /* if (lf_AnAt_nbx!=NULL){ } */}
+	    else if (T_AnAt_AnAt_nb1!=NULL){
+	      ZR_AnAtTAnAt[tab_An + tab_Tt*tab_An_stride] -= T_AnAt_AnAt_nb1[tab_Tt + tab_An*tab_Tt_stride];
+	      /* else if (T_AnAt_AnAt_nb1!=NULL){ } */}
+	    else /* if neither */{ printf(" %% Warning! T_AnAt_AnAt_nb1 undefined in get_xxxxle_getscores\n");}
+	    /* if (ZR_AnAtTAnAt_bother){ } */}
+	  ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_Tt_nb2->rpop_j){ } */}
+      if (verbose>3){ raprintf(ZR_AnAtTYnYt,"double",tab_An_stride,tab_Tt_stride," %% ZR_AnAtTYnYt: ");}
+      if (verbose>3){ printf(" %% /******************************************************************/\n");}
+      if (verbose>3){ raprintf(ZR_AnAtTAnAt,"double",tab_An_stride,tab_Tt_stride," %% ZR_AnAtTAnAt: ");}
+      /* if (nb1==nb2){ } */}
+    /* if (ZR_AnAtTYnYt_bother || ZR_AnAtTAnAt_bother){ } */}
+  if (ZR_AnAtTAnAt_bother){
+    if (verbose>3){ printf(" %% corrections to ZR_AnAtTAnAt (necessary if nb1==nb2)\n");}
+    if (nb1==nb2){
+      /* 
+	 ZR_AnAtAnAt_1(:,nt0) = diag(AnAt_1*diag(T(:,nt0))*transpose(AnAt_1)) - T(:,nt0).*diag(AnAt_1).*diag(AnAt_1) - ...
+	 ( ... ;
+	 + e_An*f_At*D_An.^2*f_An*(e_At*T(:,nt0)) ...
+	 -2 * e_An*f_At*D_An.^2*diag(a_An)*At*T(:,nt0) ...
+	 + e_An*f_At*D_An.^2*a_An.^2*(e_At*T(:,nt0)) ...
+	 -2 * An * diag(a_An)*D_An.^2*f_An*(e_At*T(:,nt0)) ...
+	 +4 * An * diag(a_An)*D_An.^2*diag(a_An)*At*T(:,nt0) ...
+	 -2 * An * diag(a_An)*D_An.^2*a_An.^2*e_At*T(:,nt0) ...
+	 + e_An*a_At.^2*D_An.^2*f_An*(e_At*T(:,nt0)) ...
+	 -2 * e_An*a_At.^2*D_An.^2*diag(a_An)*At*T(:,nt0) ...
+	 + e_An*a_At.^2*D_An.^2*a_An.^2*e_At*T(:,nt0) ...
+	 ) ...
+	 + ...
+	 T(:,nt0).*( ...
+	 + e_An*f_At*D_An.^2*f_An ...
+	 -4 * An*diag(a_An)*D_An.^2*f_An ...
+	 +6 * e_An*a_At.^2*D_An.^2*f_An ...
+	 -4 * An*diag(a_An.^3)*D_An.^2*f_An ...
+	 +1 * e_An*a_At.^4*D_An.^2*f_An ...
+	 )...
+	 ; */
+      switch (output_spacing_Tt){ case SPACING_j: tab_St_stride = M_Tt_nb2->rpop_j; break; case SPACING_b: tab_St_stride = M_Tt_nb2->rpop_b; break; case SPACING_a: tab_St_stride = M_Tt_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt_stride = tab_St_stride;
+      switch (output_spacing_An){ case SPACING_j: tab_An_stride = M_At_nb1->cpop_j; break; case SPACING_b: tab_An_stride = M_At_nb1->cpop_b; break; case SPACING_a: tab_An_stride = M_At_nb1->ncols; break; default: break; /* switch (output_spacing_An){ } */}
+      ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
+	ns_a = M_Tt_nb2->m_a_[ns_j]; ns_b = M_Tt_nb2->m_b_[ns_j];
+	Tt_tag = (unsigned char *)(&(M_Tt_nb2->wX[ns_b*M_Tt_nb2->mc_length]));
+	mct_tag = (unsigned char *)(&(M_Tt_nb2->mc_j[0]));
+	mct_end = (unsigned char *)(&(M_Tt_nb2->mc_j[M_Tt_nb2->mc_length]));    
+	switch (output_spacing_Tt){ case SPACING_j: tab_St=ns_j; break; case SPACING_b: tab_St=ns_b; break; case SPACING_a: tab_St=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt = tab_St;
+	ma_j=0; while (ma_j<M_An_nb1->rpop_j){
+	  ma_a = M_An_nb1->m_a_[ma_j]; ma_b = M_An_nb1->m_b_[ma_j];
+	  switch (output_spacing_An){ case SPACING_j: tab_An=ma_j; break; case SPACING_b: tab_An=ma_b; break; case SPACING_a: tab_An=ma_a; break; default: break; /* switch (output_spacing_An){ } */}
+	  vT = bget____(Tt_tag,ma_a); vM = bget__on(mct_tag,ma_a); if(!vM){ printf(" %% Warning! bit %d,%d,%d off in M_Tt->mc_j\n",ma_j,ma_b,ma_a);}
+	  ZR_AnAtTAnAt[tab_An + tab_Tt*tab_An_stride] += vT*(+ 1*lf_A_a0d2 - 4*lf_An_ajdk_nb1[tab_An + AJDK_1_2*tab_An_stride] + 6*lf_A_a2d2 - 4*lf_An_ajdk_nb1[tab_An + AJDK_3_2*tab_An_stride] + 1*lf_A_a4d2);
+	  ma_j++; /* while (ma_j<M_An_nb1->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_Tt_nb2->rpop_j){ } */}
+      if (verbose>3){ raprintf(ZR_AnAtTAnAt,"double",tab_An_stride,tab_Tt_stride," %% ZR_AnAtTAnAt: ");}
+      /* if (nb1==nb2){ } */}
+    /* if (ZR_AnAtTAnAt_bother){ } */}
+  if (ZC_AtTYnWtSZn_bother || ZC_AtTAnZtSZn_bother || ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){
+    if (verbose>3){ printf(" %% ZC_AtTYnWtSZn, ZC_AtTAnZtSZn, ZC_AtTYnYtTAn, ZC_AtTAnAtTAn\n");}
+    /*
+      ZC_AtYnWtZn_1(:,nt0) = ...
+      + diag(D_An*At*diag(T(:,nt0))*YnWt_1*diag(S(:,nt0))*Zn) ...
+      - diag(D_An*a_An*e_At*diag(T(:,nt0))*YnWt_1*diag(S(:,nt0))*Zn) ...
+      - diag(D_An*At*diag(T(:,nt0))*YnWt_1*diag(S(:,nt0))*e_Zn*a_At) ...
+      + diag(D_An*a_An*e_At*diag(T(:,nt0))*YnWt_1*diag(S(:,nt0))*e_Zn*a_At) ...
+      ;*/  
+    switch (output_spacing_Tt){ case SPACING_j: tab_St_stride = M_St_nb2->rpop_j; break; case SPACING_b: tab_St_stride = M_St_nb2->rpop_b; break; case SPACING_a: tab_St_stride = M_St_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt_stride = tab_St_stride;
+    switch (output_spacing_At){ case SPACING_j: tab_At_stride = M_At_nb1->rpop_j; break; case SPACING_b: tab_At_stride = M_At_nb1->rpop_b; break; case SPACING_a: tab_At_stride = M_At_nb1->nrows; break; default: break; /* switch (output_spacing_At){ } */}
+    ns_j=0; while (ns_j<M_St_nb2->rpop_j){
+      ns_a = M_St_nb2->m_a_[ns_j]; ns_b = M_St_nb2->m_b_[ns_j];
+      switch (output_spacing_Tt){ case SPACING_j: tab_St=ns_j; break; case SPACING_b: tab_St=ns_b; break; case SPACING_a: tab_St=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt = tab_St;
+      na_j=0; while (na_j<M_At_nb1->rpop_j){
+	na_a = M_At_nb1->m_a_[na_j]; na_b = M_At_nb1->m_b_[na_j];
+	switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_At){ } */}
+	if (ZC_AtTYnWtSZn_bother){
+	  ZC_AtTYnWtSZn[tab_At + tab_St*tab_At_stride] = 
+	    (A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*
+	    (
+	     +(use_AtTXn____XtXXn_flag && lf_AtTYn____WtSZn_nbx ? lf_AtTYn____WtSZn_nbx[tab_At + tab_St*tab_At_stride] : 
+	       (use_At_T_XnXt_X_Xn_flag && lf_At_T_YnWt_S_Zn_nbx ? 
+		lf_At_T_YnWt_S_Zn_nbx[tab_At + tab_St*tab_At_stride]
+		-((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * et_T_YnWt_S_Zn[tab_St + tab_At*tab_St_stride])
+		-((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * At_T_YnWt_S_en[tab_At + tab_St*tab_At_stride])
+		+((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_2_0*A_pcols] : 0) * et_T_YnWt_S_en[tab_St]) : 0))
+	     );
+	  /* if (ZC_AtTYnWtSZn_bother){ } */}
+	if (ZC_AtTAnZtSZn_bother){
+	  ZC_AtTAnZtSZn[tab_At + tab_St*tab_At_stride] = 
+	    (A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*
+	    (
+	     +(use_AtTXn____XtXXn_flag && lf_AtTAn____ZtSZn_nbx ? lf_AtTAn____ZtSZn_nbx[tab_At + tab_St*tab_At_stride] : 
+	       (use_At_T_XnXt_X_Xn_flag && lf_At_T_AnZt_S_Zn_nbx ? 
+		lf_At_T_AnZt_S_Zn_nbx[tab_At + tab_St*tab_At_stride]
+		-((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * et_T_AnZt_S_Zn[tab_St + tab_At*tab_St_stride])
+		-((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * At_T_AnZt_S_en[tab_At + tab_St*tab_At_stride])
+		+((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_2_0*A_pcols] : 0) * et_T_AnZt_S_en[tab_St]) : 0))
+	     );
+	  /* if (ZC_AtTAnZtSZn_bother){ } */}
+	if (ZC_AtTYnYtTAn_bother){
+	  ZC_AtTYnYtTAn[tab_At + tab_Tt*tab_At_stride] = 
+	    (A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*
+	    (
+	     +(use_AtTXn____XtXXn_flag && lf_AtTYn____YtTAn_nbx ? lf_AtTYn____YtTAn_nbx[tab_At + tab_Tt*tab_At_stride] : 
+	       (use_At_T_XnXt_X_Xn_flag && lf_At_T_YnYt_T_An_nbx ? 
+		lf_At_T_YnYt_T_An_nbx[tab_At + tab_Tt*tab_At_stride]
+		-((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * et_T_YnYt_T_An[tab_Tt + tab_At*tab_Tt_stride])
+		-((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * At_T_YnYt_T_en[tab_At + tab_Tt*tab_At_stride])
+		+((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_2_0*A_pcols] : 0) * et_T_YnYt_T_en[tab_Tt]) : 0))
+	     );
+	  /* if (ZC_AtTYnYtTAn_bother){ } */}
+	if (ZC_AtTAnAtTAn_bother){
+	  ZC_AtTAnAtTAn[tab_At + tab_Tt*tab_At_stride] = 
+	    (A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*
+	    (
+	     +(use_AtTXn____XtXXn_flag && lf_AtTAn____AtTAn_nbx ? lf_AtTAn____AtTAn_nbx[tab_At + tab_Tt*tab_At_stride] : 
+	       (use_At_T_XnXt_X_Xn_flag && lf_At_T_AnAt_T_An_nbx ? 
+		lf_At_T_AnAt_T_An_nbx[tab_At + tab_Tt*tab_At_stride]
+		-((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * et_T_AnAt_T_An[tab_Tt + tab_At*tab_Tt_stride])
+		-((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * At_T_AnAt_T_en[tab_At + tab_Tt*tab_At_stride])
+		+((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_2_0*A_pcols] : 0) * et_T_AnAt_T_en[tab_Tt]) : 0))
+	     );
+	  /* if (ZC_AtTAnAtTAn_bother){ } */}
+	na_j++; /* while (na_j<M_At_nb1->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_St_nb2->rpop_j){ } */}
+    if (verbose>3){ raprintf(ZC_AtTYnWtSZn,"double",tab_At_stride,tab_St_stride," %% ZC_AtTYnWtSZn: ");}
+    if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    if (verbose>3){ raprintf(ZC_AtTAnZtSZn,"double",tab_At_stride,tab_St_stride," %% ZC_AtTAnZtSZn: ");}
+    if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    if (verbose>3){ raprintf(ZC_AtTYnYtTAn,"double",tab_At_stride,tab_St_stride," %% ZC_AtTYnYtTAn: ");}
+    if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    if (verbose>3){ raprintf(ZC_AtTAnAtTAn,"double",tab_At_stride,tab_St_stride," %% ZC_AtTAnAtTAn: ");}
+  /* if (ZC_AtTYnWtSZn_bother || ZC_AtTAnZtSZn_bother || ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){ } */}
+  if (ZC_AtTAnZtSZn_bother || ZC_AtTAnAtTAn_bother){
+    if (verbose>3){ printf(" %% corrections to ZC_AtTAnZtSZn and ZC_AtTAnAtTAn (always needed)\n");}
+    /*
+      ZC_AtAnZtZn_1(:,nt0) = diag(D_An*(At-a_An*e_At)*diag(T(:,nt0))*AnZt_1*diag(S(:,nt0))*(Zn-e_Zn*a_At)) - ...
+      (D_An * (...
+      + f_An*e_At ...
+      -2 * diag(a_An)*At ...
+      + a_An.^2*e_At ...
+      )*T(:,nt0)) .* ...
+      (D_An * (...
+      + f_An*e_Zt ...
+      -2 * diag(a_An)*Zt ...
+      + a_An.^2*e_Zt ...
+      )*S(:,nt0));
+    */  
+    switch (output_spacing_Tt){ case SPACING_j: tab_St_stride = M_St_nb2->rpop_j; break; case SPACING_b: tab_St_stride = M_St_nb2->rpop_b; break; case SPACING_a: tab_St_stride = M_St_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt_stride = tab_St_stride;
+    switch (output_spacing_At){ case SPACING_j: tab_At_stride = M_At_nb1->rpop_j; break; case SPACING_b: tab_At_stride = M_At_nb1->rpop_b; break; case SPACING_a: tab_At_stride = M_At_nb1->nrows; break; default: break; /* switch (output_spacing_At){ } */}
+    ns_j=0; while (ns_j<M_St_nb2->rpop_j){
+      ns_a = M_St_nb2->m_a_[ns_j]; ns_b = M_St_nb2->m_b_[ns_j];
+      switch (output_spacing_Tt){ case SPACING_j: tab_St=ns_j; break; case SPACING_b: tab_St=ns_b; break; case SPACING_a: tab_St=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt = tab_St;
+      na_j=0; while (na_j<M_At_nb1->rpop_j){
+	na_a = M_At_nb1->m_a_[na_j]; na_b = M_At_nb1->m_b_[na_j];
+	switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_At){ } */}
+	if (ZC_AtTAnZtSZn_bother){
+	  ZC_AtTAnZtSZn[tab_At + tab_St*tab_At_stride] -= 
+	    (A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*
+	    (
+	     +(1*et_Tn_nb1[(GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)])
+	     -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * lf_AtTn_nb1[tab_At + (GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)*tab_At_stride])
+	     +((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_2_0*A_pcols] : 0) * et_Tn_nb1[(GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)])
+	     )*
+	    (A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*
+	    (
+	     +(1*et_Sn_nb2[tab_St])
+	     -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * lf_ZtSn_nb2[tab_At + tab_St*tab_At_stride])
+	     +((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_2_0*A_pcols] : 0) * et_Sn_nb2[tab_St])
+	     );
+	  /* if (ZC_AtTAnZtSZn_bother){ } */}
+	if (ZC_AtTAnAtTAn_bother){
+	  ZC_AtTAnAtTAn[tab_At + tab_Tt*tab_At_stride] -= 
+	    (A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*
+	    (
+	     +(1*et_Tn_nb1[(GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)])
+	     -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * lf_AtTn_nb1[tab_At + (GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)*tab_At_stride])
+	     +((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_2_0*A_pcols] : 0) * et_Tn_nb1[(GLOBAL_ZC_AtIXnXtXXn ? 0 : tab_Tt)])
+	     )*
+	    (A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*
+	    (
+	     +(1*et_Tn_nb2[tab_Tt])
+	     -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_1_0*A_pcols] : 0) * lf_AtTn_nb2[tab_At + tab_Tt*tab_At_stride])
+	     +((A_ajdk ? A_ajdk[na_a/POPLENGTH  + AJDK_2_0*A_pcols] : 0) * et_Tn_nb2[tab_Tt])
+	     );
+	  /* if (ZC_AtTAnAtTAn_bother){ } */}
+	na_j++; /* while (na_j<M_At_nb1->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_St_nb2->rpop_j){ } */}
+    if (verbose>3){ raprintf(ZC_AtTAnZtSZn,"double",tab_At_stride,tab_St_stride," %% ZC_AtTAnZtSZn: ");}
+    if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    if (verbose>3){ raprintf(ZC_AtTAnAtTAn,"double",tab_At_stride,tab_St_stride," %% ZC_AtTAnAtTAn: ");}
+    /* if (ZC_AtTAnZtSZn_bother || ZC_AtTAnAtTAn_bother){ } */}
+  if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){
+    if (verbose>3){ printf(" %% correcting ZC_AtTYnYtTAn and ZC_AtTAnAtTAn (necessary if nb1==nb2)\n");}
+    /* ZC_AtYnYtAn_1(:,nt0) = diag(D_An*(At-a_An*e_At)*diag(T(:,nt0))*YnYt_1*diag(T(:,nt0))*(An-e_An*a_At)) - ...
+       (...
+       +1 * D_An*f_An*e_At*mc_T(nt0)*e_An*f_Yt*D_Yn*f_Yn ... % + diag(D_An)*transpose(T(:,nt0).^2)*e_An*f_Yt*D_Yn*f_Yn ...
+       -2 * D_An*diag(a_At)*At*mc_T(nt0)*e_An*f_Yt*D_Yn*f_Yn ... % -2 * D_An*transpose(An*diag(a_An))*diag(T(:,nt0).^2)*e_An*f_Yt*D_Yn*f_Yn ...
+       +1 * D_An*a_An.^2*e_At*mc_T(nt0)*e_An*f_Yt*D_Yn*f_Yn ... % + (D_An*a_An.^2)*transpose(T(:,nt0).^2)*e_An*f_Yt*D_Yn*f_Yn ...
+       -2 * D_An*f_An*e_At*mc_T(nt0)*Yn*diag(a_Yn)*D_Yn*f_Yn ... % -2 * diag(D_An)*transpose(T(:,nt0).^2)*Yn*diag(a_Yn)*D_Yn*f_Yn ...
+       +4 * D_An*diag(a_At)*At*mc_T(nt0)*Yn*diag(a_Yn)*D_Yn*f_Yn ... % +4 * D_An*transpose(An*diag(a_An))*diag(T(:,nt0).^2)*Yn*diag(a_Yn)*D_Yn*f_Yn ...
+       -2 * D_An*a_An.^2*e_At*mc_T(nt0)*Yn*diag(a_Yn)*D_Yn*f_Yn ... % -2 * (D_An*a_An.^2)*transpose(T(:,nt0).^2)*Yn*diag(a_Yn)*D_Yn*f_Yn ...
+       +1 * D_An*f_An*e_At*mc_T(nt0)*e_An*a_Yt.^2*D_Yn*f_Yn ... % + diag(D_An)*transpose(T(:,nt0).^2)*e_An*a_Yt.^2*D_Yn*f_Yn ...
+       -2 * D_An*diag(a_At)*At*mc_T(nt0)*e_An*a_Yt.^2*D_Yn*f_Yn ... % -2 * D_An*transpose(An*diag(a_An))*diag(T(:,nt0).^2)*e_An*a_Yt.^2*D_Yn*f_Yn ...
+       +1 * D_An*a_An.^2*e_At*mc_T(nt0)*e_An*a_Yt.^2*D_Yn*f_Yn ...% + (D_An*a_An.^2)*transpose(T(:,nt0).^2)*e_An*a_Yt.^2*D_Yn*f_Yn ...
+       );*/
+    if (nb1==nb2){
+      switch (output_spacing_Tt){ case SPACING_j: tab_St_stride = M_St_nb2->rpop_j; break; case SPACING_b: tab_St_stride = M_St_nb2->rpop_b; break; case SPACING_a: tab_St_stride = M_St_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt_stride = tab_St_stride;
+      switch (output_spacing_At){ case SPACING_j: tab_At_stride = M_At_nb1->rpop_j; break; case SPACING_b: tab_At_stride = M_At_nb1->rpop_b; break; case SPACING_a: tab_At_stride = M_At_nb1->nrows; break; default: break; /* switch (output_spacing_At){ } */}
+      ns_j=0; while (ns_j<M_St_nb2->rpop_j){
+	ns_a = M_St_nb2->m_a_[ns_j]; ns_b = M_St_nb2->m_b_[ns_j];
+	switch (output_spacing_Tt){ case SPACING_j: tab_St=ns_j; break; case SPACING_b: tab_St=ns_b; break; case SPACING_a: tab_St=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt = tab_St;
+	na_j=0; while (na_j<M_At_nb1->rpop_j){
+	  na_a = M_At_nb1->m_a_[na_j]; na_b = M_At_nb1->m_b_[na_j];
+	  switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_At){ } */}
+	  if (ZC_AtTYnYtTAn_bother){	  
+	    ZC_AtTYnYtTAn[tab_At + tab_St*tab_At_stride] -= 
+	      (
+	       +(1*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j)*lf_Y_a0d1)
+	       -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_1_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? lf_AtTn_nb1[tab_At + tab_Tt*tab_At_stride] : et_An_nb1[tab_At])*lf_Y_a0d1)
+	       +(1*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_2_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j)*lf_Y_a0d1)
+	       -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*(GLOBAL_ZC_AtIXnXtXXn ? Tt_Yn_a1d1_nb1[tab_Tt] : et_Yn_a1d1_nb1[0]))
+	       +(4*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_1_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? At_T_Yn_a1d1_nb1[tab_At + tab_Tt*tab_At_stride] : At_Yn_a1d1_nb1[tab_At]))
+	       -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_2_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? Tt_Yn_a1d1_nb1[tab_Tt] : et_Yn_a1d1_nb1[0]))
+	       +(1*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j)*lf_Y_a2d1)
+	       -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_1_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? lf_AtTn_nb1[tab_At + tab_Tt*tab_At_stride] : et_An_nb1[tab_At])*lf_Y_a2d1)
+	       +(1*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_2_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j)*lf_Y_a2d1)
+	       );
+	    /* if (ZC_AtTYnYtTAn_bother){ } */}
+	  if (ZC_AtTAnAtTAn_bother){
+	    ZC_AtTAnAtTAn[tab_At + tab_St*tab_At_stride] -= 
+	      (
+	       +(1*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j)*lf_A_a0d1)
+	       -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_1_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? lf_AtTn_nb1[tab_At + tab_Tt*tab_At_stride] : et_An_nb1[tab_At])*lf_A_a0d1)
+	       +(1*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_2_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j)*lf_A_a0d1)
+	       -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*(GLOBAL_ZC_AtIXnXtXXn ? Tt_An_a1d1_nb1[tab_Tt] : et_An_a1d1_nb1[0]))
+	       +(4*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_1_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? At_T_An_a1d1_nb1[tab_At + tab_Tt*tab_At_stride] : At_An_a1d1_nb1[tab_At]))
+	       -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_2_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? Tt_An_a1d1_nb1[tab_Tt] : et_An_a1d1_nb1[0]))
+	       +(1*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_1*A_pcols] : 1)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j)*lf_A_a2d1)
+	       -(2*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_1_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? lf_AtTn_nb1[tab_At + tab_Tt*tab_At_stride] : et_An_nb1[tab_At])*lf_A_a2d1)
+	       +(1*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_2_1*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j)*lf_A_a2d1)
+	       );
+	    /* if (ZC_AtTAnAtTAn_bother){ } */}
+	  na_j++; /* while (na_j<M_At_nb1->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_St_nb2->rpop_j){ } */}
+      if (verbose>3){ raprintf(ZC_AtTYnYtTAn,"double",tab_At_stride,tab_Tt_stride," %% ZC_AtTYnYtTAn: ");}
+      if (verbose>3){ printf(" %% /******************************************************************/\n");}
+      if (verbose>3){ raprintf(ZC_AtTAnAtTAn,"double",tab_At_stride,tab_Tt_stride," %% ZC_AtTAnAtTAn: ");}
+      /* if (nb1==nb2){ } */}
+    /* if (ZC_AtTYnYtTAn_bother || ZC_AtTAnAtTAn_bother){ } */}
+  if (ZC_AtTAnAtTAn_bother){
+    if (verbose>3){ printf(" %% correcting ZC_At_T_AnAt_T_An (necessary if nb1==nb2)\n");}
+    /*
+      ZC_AtAnAtAn_1(:,nt0) = diag(D_An*(At-a_An*e_At)*diag(T(:,nt0))*AnAt_1*diag(T(:,nt0))*(An-e_An*a_At)) - ...
+      (D_An * (...
+      + f_An*e_At ...
+      -2 * diag(a_An)*At ...
+      + a_An.^2*e_At ...
+      )*T(:,nt0)) .* ...
+      (D_An * (...
+      + f_An*e_At ...
+      -2 * diag(a_An)*At ...
+      + a_An.^2*e_At ...
+      )*T(:,nt0)) ...
+      - ...
+      (...
+      +1 * D_An*f_An*e_At*mc_T(nt0)*e_An*f_At*D_An*f_An ... % + diag(D_An)*transpose(T(:,nt0).^2)*e_An*f_At*D_An*f_An ...
+      -2 * D_An*diag(a_At)*At*mc_T(nt0)*e_An*f_At*D_An*f_An ... % -2 * D_An*transpose(An*diag(a_An))*diag(T(:,nt0).^2)*e_An*f_At*D_An*f_An ...
+      +1 * D_An*a_An.^2*e_At*mc_T(nt0)*e_An*f_At*D_An*f_An ... % + (D_An*a_An.^2)*transpose(T(:,nt0).^2)*e_An*f_At*D_An*f_An ...
+      -2 * D_An*f_An*e_At*mc_T(nt0)*An*diag(a_An)*D_An*f_An ... % -2 * diag(D_An)*transpose(T(:,nt0).^2)*An*diag(a_An)*D_An*f_An ...
+      +4 * D_An*diag(a_At)*At*mc_T(nt0)*An*diag(a_An)*D_An*f_An ... % +4 * D_An*transpose(An*diag(a_An))*diag(T(:,nt0).^2)*An*diag(a_An)*D_An*f_An ...
+      -2 * D_An*a_An.^2*e_At*mc_T(nt0)*An*diag(a_An)*D_An*f_An ... % -2 * (D_An*a_An.^2)*transpose(T(:,nt0).^2)*An*diag(a_An)*D_An*f_An ...
+      +1 * D_An*f_An*e_At*mc_T(nt0)*e_An*a_At.^2*D_An*f_An ... % + diag(D_An)*transpose(T(:,nt0).^2)*e_An*a_At.^2*D_An*f_An ...
+      -2 * D_An*diag(a_At)*At*mc_T(nt0)*e_An*a_At.^2*D_An*f_An ... % -2 * D_An*transpose(An*diag(a_An))*diag(T(:,nt0).^2)*e_An*a_At.^2*D_An*f_An ...
+      +1 * D_An*a_An.^2*e_At*mc_T(nt0)*e_An*a_At.^2*D_An*f_An ...% + (D_An*a_An.^2)*transpose(T(:,nt0).^2)*e_An*a_At.^2*D_An*f_An ...
+      ) ...
+      + ...
+      (D_An.^2*( ...
+      + f_An*e_At ...
+      -4 * diag(a_At)*At ...
+      +6 * a_An.^2*e_At ...
+      -4 * diag(a_At.^3)*At ...
+      + a_An.^4*e_At ...
+      )*mc_T(nt0)*e_An);
+    */
+    if (nb1==nb2){
+      switch (output_spacing_Tt){ case SPACING_j: tab_St_stride = M_St_nb2->rpop_j; break; case SPACING_b: tab_St_stride = M_St_nb2->rpop_b; break; case SPACING_a: tab_St_stride = M_St_nb2->nrows; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt_stride = tab_St_stride;
+      switch (output_spacing_At){ case SPACING_j: tab_At_stride = M_At_nb1->rpop_j; break; case SPACING_b: tab_At_stride = M_At_nb1->rpop_b; break; case SPACING_a: tab_At_stride = M_At_nb1->nrows; break; default: break; /* switch (output_spacing_At){ } */}
+      ns_j=0; while (ns_j<M_St_nb2->rpop_j){
+	ns_a = M_St_nb2->m_a_[ns_j]; ns_b = M_St_nb2->m_b_[ns_j];
+	switch (output_spacing_Tt){ case SPACING_j: tab_St=ns_j; break; case SPACING_b: tab_St=ns_b; break; case SPACING_a: tab_St=ns_a; break; default: break; /* switch (output_spacing_Tt){ } */} tab_Tt = tab_St;
+	na_j=0; while (na_j<M_At_nb1->rpop_j){
+	  na_a = M_At_nb1->m_a_[na_j]; na_b = M_At_nb1->m_b_[na_j];
+	  switch (output_spacing_At){ case SPACING_j: tab_At=na_j; break; case SPACING_b: tab_At=na_b; break; case SPACING_a: tab_At=na_a; break; default: break; /* switch (output_spacing_At){ } */}
+	  ZC_AtTAnAtTAn[tab_At + tab_St*tab_At_stride] += 
+	    (
+	     +(1*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_0_2*A_pcols] : 1)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j))
+	     -(4*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_1_2*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? lf_AtTn_nb1[tab_At + tab_Tt*tab_At_stride] : et_An_nb1[tab_At]))
+	     +(6*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_2_2*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j))
+	     -(4*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_3_2*A_pcols] : 1)*(GLOBAL_ZC_AtIXnXtXXn ? lf_AtTn_nb1[tab_At + tab_Tt*tab_At_stride] : et_An_nb1[tab_At]))
+	     +(1*(A_ajdk ? A_ajdk[na_a/POPLENGTH + AJDK_4_2*A_pcols] : 0)*(GLOBAL_ZC_AtIXnXtXXn ? et_Tn_nb1[tab_Tt] : M_An_nb1->rpop_j))
+	     );
+	  na_j++; /* while (na_j<M_At_nb1->rpop_j){ } */}
+	ns_j++; /* while (ns_j<M_St_nb2->rpop_j){ } */}
+      if (verbose>3){ raprintf(ZC_AtTAnAtTAn,"double",tab_At_stride,tab_Tt_stride," %% ZC_AtTAnAtTAn: ");}
+      /* if (nb1==nb2){ } */}
+    /* if (ZC_AtTAnAtTAn_bother){ } */}
+  if (verbose>1){ printf(" %% [finished get_xxxxle_getscores] tidx %d nb1 %d nb2 %d nbins %d\n",tidx,nb1,nb2,nbins);} 
+  return NULL;
+}
+
+void binary_xxxxle_getscores(int *tidx,void **vpra,pthread_t *thread_in,int output_spacing_An,int output_spacing_At,int output_spacing_Tt,int output_spacing_YnWt,int *nb1_p,int *nb2_p,int *nbins_p,struct bcc_ajdk *D,struct bcc_single **E_,struct bcc_double **F_)
+{
+  /* This function calls get_xxxxle_getscores ; 
+     No reloading of data is performed ; we assume all data is preloaded ;
+     calculation performed in thread *thread_in ; thread number *tidx ;
+     variable space in **vpra (should be at least size 11)
+   */
+  int verbose=0;
+  /* unsigned char *wkspace_mark=NULL; */
+  int nbx=0,nb1=0,nb2=0,nbins=0;
+  int length=0,ip=0;
+  double **output_getscores_p=NULL;
+  if (verbose){ printf(" %% [entering binary_xxxxle_getscores] tidx %d\n",*tidx);}
+  nb1 = *nb1_p; nb2 = *nb2_p; nbins = *nbins_p; nbx = nb1+nb2*nbins;
+  output_getscores_p = &(F_[nbx]->lf_getscores);
+  length = F_[nbx]->length_getscores; 
+  if (*output_getscores_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_getscores_p = (double *)wkspace_alloc(length*sizeof(double));}
+  memset((*output_getscores_p),0,length*sizeof(double));
+  ip=0;
+  vpra[ip++] = tidx; vpra[ip++] = nb1_p; vpra[ip++] = nb2_p; vpra[ip++] = nbins_p; vpra[ip++] = D;; vpra[ip++] = E_; vpra[ip++] = F_; 
+  switch (output_spacing_An){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_An){ } */}
+  switch (output_spacing_At){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_At){ } */}
+  switch (output_spacing_Tt){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_Tt){ } */}
+  switch (output_spacing_YnWt){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_YnWt){ } */}
+  if (*tidx>0){ if (pthread_create(thread_in,NULL,&get_xxxxle_getscores,vpra)){ printf("Warning! cannot create thread %d in binary_xxxxle_getscores\n",*tidx);}}
+  else /* if (*tidx<=0) */{ get_xxxxle_getscores(vpra);} /* must join threads later */;
+  if (verbose>2){ raprintf((*output_getscores_p),"double",1,length," %% (*output_getscores_p): ");}
+  if (verbose){ printf(" %% [finished binary_xxxxle_getscores] tidx %d\n",*tidx);}
+}
+
+void bcc_xxxxle_compute_lf_getscores(int nbins,struct bcc_ajdk *D,struct bcc_single **E_,struct bcc_double **F_)
+{
+  int verbose=GLOBAL_verbose,verbose_timing_quik=0;
+  int nbx=0,nb1=0,nb2=0;
+  if (verbose){ printf(" %% calculating F_[nbx]->lf_getscores.\n");}
+  GLOBAL_tic(0);
+  GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins;
+      GLOBAL_pthread_tic(); 
+      binary_xxxxle_getscores(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),SPACING_a,SPACING_a,SPACING_a,SPACING_b,&(GLOBAL_nbra[nb1]),&(GLOBAL_nbra[nb2]),&nbins,D,E_,F_);
+      GLOBAL_pthread_toc();
+      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+  GLOBAL_pthread_tuc();
+  GLOBAL_toc(0,verbose_timing_quik," %% calculating F_[nbx]->lf_getscores: ");
+  if (verbose>2){
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins;
+	sprintf(D->tmpAchar," %%%% E_[%.1d]->A_bmr_j: ",nb1); bprintf(E_[nb1]->A_bmr_j,D->bitj,1,E_[nb1]->A_nrows,D->tmpAchar);	  
+	if (F_[nbx]->ZR_AnZtSWnYt_bother){
+	  sprintf(D->tmpAchar," %%%% F_[%.1d]->ZR_AnZtSWnYt: ",nbx);
+	  raprintf(F_[nbx]->ZR_AnZtSWnYt,"double",E_[nb1]->A_nrows,D->T_ncols,D->tmpAchar);
+	  /* if bother */}
+	if (F_[nbx]->ZR_AnZtSZnAt_bother){
+	  sprintf(D->tmpAchar," %%%% F_[%.1d]->ZR_AnZtSZnAt: ",nbx);
+	  raprintf(F_[nbx]->ZR_AnZtSZnAt,"double",E_[nb1]->A_nrows,D->T_ncols,D->tmpAchar);
+	  /* if bother */}
+	if (F_[nbx]->ZR_AnAtTYnYt_bother){
+	  sprintf(D->tmpAchar," %%%% F_[%.1d]->ZR_AnAtTYnYt: ",nbx);
+	  raprintf(F_[nbx]->ZR_AnAtTYnYt,"double",E_[nb1]->A_nrows,D->T_ncols,D->tmpAchar);
+	  /* if bother */}
+	if (F_[nbx]->ZR_AnAtTAnAt_bother){  
+	  sprintf(D->tmpAchar," %%%% F_[%.1d]->ZR_AnAtTAnAt: ",nbx);
+	  raprintf(F_[nbx]->ZR_AnAtTAnAt,"double",E_[nb1]->A_nrows,D->T_ncols,D->tmpAchar);
+	  /* if bother */}
+	sprintf(D->tmpAchar," %%%% D_->A_bmc_j: "); bprintf(D->A_bmc_j,D->bitj,1,D->A_ncols,D->tmpAchar);
+	if (F_[nbx]->ZC_AtTYnWtSZn_bother){
+	  sprintf(D->tmpAchar," %%%% F_[%.1d]->ZC_AtTYnWtSZn: ",nbx);
+	  raprintf(F_[nbx]->ZC_AtTYnWtSZn,"double",D->A_ncols,D->T_ncols,D->tmpAchar);
+	  /* if bother */}
+	if (F_[nbx]->ZC_AtTAnZtSZn_bother){
+	  sprintf(D->tmpAchar," %%%% F_[%.1d]->ZC_AtTAnZtSZn: ",nbx);
+	  raprintf(F_[nbx]->ZC_AtTAnZtSZn,"double",D->A_ncols,D->T_ncols,D->tmpAchar);
+	  /* if bother */}
+	if (F_[nbx]->ZC_AtTYnYtTAn_bother){
+	  sprintf(D->tmpAchar," %%%% F_[%.1d]->ZC_AtTYnYtTAn: ",nbx);
+	  raprintf(F_[nbx]->ZC_AtTYnYtTAn,"double",D->A_ncols,D->T_ncols,D->tmpAchar);
+	  /* if bother */}
+	if (F_[nbx]->ZC_AtTAnAtTAn_bother){  
+	  sprintf(D->tmpAchar," %%%% F_[%.1d]->ZC_AtTAnAtTAn: ",nbx);
+	  raprintf(F_[nbx]->ZC_AtTAnAtTAn,"double",D->A_ncols,D->T_ncols,D->tmpAchar);
+	  /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    /* if (verbose>2){ } */}
+}

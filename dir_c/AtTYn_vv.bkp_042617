@@ -1,0 +1,314 @@
+void *get_AtTYn_vv(void *vp)
+{
+  /* This function takes in M_At,M_Tt,M_Yt and calculates :
+     output_AtTYn[na+ny*ncols_A+ns*ncols_A*ncols_Y] = (At(na,:)-a_An*e_At)*diag(T(:,ns))*(Yn(:,ny)-e_An*a_Yn) = ;
+     +  At(na,:) * diag(T(:,ns)) *  Yn(:,ny) ;
+     - a_An*e_At * diag(T(:,ns)) *  Yn(:,ny) ;
+     -  At(na,:) * diag(T(:,ns)) * e_An*a_Yn ;
+     + a_An*e_At * diag(T(:,ns)) * e_An*a_Yn ;
+     For compatibility with earlier versions of AtTYn____WtSZn it may be more convenient to compute;
+     output_AtTYn[na+ny*ncols_A+ns*ncols_A*ncols_Y] = (At(na,:) - 0 )*diag(T(:,ns))*(Yn(:,ny)-e_An*a_Yn) = ;
+     +  At(na,:) * diag(T(:,ns)) *  Yn(:,ny) ;
+     -  At(na,:) * diag(T(:,ns)) * e_An*a_Yn ;
+     however, we do not compute this here (see commented-out "//" computations below). ;
+  */
+  int verbose=0;
+  int ip=0;
+  void **vpra=(void **)vp;
+  int tidx = *(int *)(vpra[ip++]);
+  double *A_ajdk = (double *)(vpra[ip++]);
+  double *lf_AtTn = (double *)(vpra[ip++]);
+  struct M_handle *M_At = (struct M_handle *)(vpra[ip++]);
+  struct M_handle *M_Tt = (struct M_handle *)(vpra[ip++]);
+  struct M_handle *M_Yt = (struct M_handle *)(vpra[ip++]);
+  double *lf_YtTn = (double *)(vpra[ip++]);
+  double *Y_ajdk = (double *)(vpra[ip++]);
+  double *output_AtTYn = (double *)(vpra[ip++]);
+  double *versus_AtTYn = (double *)(vpra[ip++]); double dtmp=0;
+  int output_spacing_AtTn = *(int *)(vpra[ip++]);
+  int output_spacing_a = *(int *)(vpra[ip++]);
+  int output_spacing_y = *(int *)(vpra[ip++]);
+  int output_spacing_t = *(int *)(vpra[ip++]);
+  int ncols_A_p = psize(M_At->nrows)/* rup(M_At->nrows + M_At->nrows_extend,POPLENGTH)/POPLENGTH */;
+  double *D_An = (double *)&(A_ajdk[0 + AJDK_0_1*ncols_A_p]);
+  double *a_An = (double *)&(A_ajdk[0 + AJDK_1_0*ncols_A_p]);
+  int ncols_Y_p = psize(M_Yt->nrows)/* rup(M_Yt->nrows + M_Yt->nrows_extend,POPLENGTH)/POPLENGTH */;
+  double *D_Yn = (double *)&(Y_ajdk[0 + AJDK_0_1*ncols_Y_p]);
+  double *a_Yn = (double *)&(Y_ajdk[0 + AJDK_1_0*ncols_Y_p]);
+  int mx_j=0,mx_chunk=0,mt_j=0,mt_b=0,mt_a=0,tab_tx_stride=0,tab_tx=0,tab_t=0,tab_x=0;
+  int /* na_j=0,na_b=0, */na_a=0,ma_j=0,ma_b=0,ma_a=0,tab_a_stride=0,tab_a=0,tab_AtTn_stride=0,tab_AtTn=0;
+  int /* ny_j=0,ny_b=0,ny_a=0, */my_j=0,my_b=0,my_a=0,tab_y_stride=0,tab_y=0,tab_YtTn_stride=0,tab_YtTn=0;
+  long long int hhAY=0,hhAy=0,hhaY=0,hhay=0,hhay_[M_Tt->rpop_j];
+  unsigned char *A_tag=NULL,*T_tag=NULL,*Y_tag=NULL;
+  __m128i *wAt_tag=NULL;
+  __m128i *wTt_tag=NULL;
+  __m128i *wYt_tag=NULL;
+  __m128i *mcay_tag=NULL,*mcay_end=NULL;
+  __m128i *mctx_tag=NULL,*mctx_end=NULL;
+  unsigned int *ma_b_,*ma_a_;
+  unsigned int *na_b_,*na_a_;
+  unsigned int *my_b_,*my_a_;
+  /* unsigned int *ny_b_,*ny_a_; */
+  unsigned int *mt_b_,*mt_a_;
+  if (verbose>1){ printf(" %% [entering get_AtTYn_vv] tidx %d\n",tidx);}  
+  if (verbose>2){ raprintf(D_An,"double",1,ncols_A_p," %% D_An: "); raprintf(a_An,"double",1,ncols_A_p," %% a_An: ");}
+  if (verbose>2){ bprintf(M_At->mr_b,M_At->bitj,1,M_At->nrows," %% M_At->mr_b: "); bprintf(M_At->mr_j,M_At->bitj,1,M_At->nrows," %% M_At->mr_j: ");}
+  if (verbose>2){ bprintf(M_At->mc_b,M_At->bitj,1,M_At->ncols," %% M_At->mc_b: "); bprintf(M_At->mc_j,M_At->bitj,1,M_At->ncols," %% M_At->mc_j: ");}
+  if (verbose>2){ bprintf(M_Tt->mr_b,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_b: "); bprintf(M_Tt->mr_j,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_j: ");}
+  if (verbose>2){ bprintf(M_Tt->mc_b,M_Tt->bitj,1,M_Tt->ncols," %% M_Tt->mc_b: "); bprintf(M_Tt->mc_j,M_Tt->bitj,1,M_Tt->ncols," %% M_Tt->mc_j: ");}
+  if (verbose>2){ bprintf(M_Yt->mr_b,M_Yt->bitj,1,M_Yt->nrows," %% M_Yt->mr_b: "); bprintf(M_Yt->mr_j,M_Yt->bitj,1,M_Yt->nrows," %% M_Yt->mr_j: ");}
+  if (verbose>2){ bprintf(M_Yt->mc_b,M_Yt->bitj,1,M_Yt->ncols," %% M_Yt->mc_b: "); bprintf(M_Yt->mc_j,M_Yt->bitj,1,M_Yt->ncols," %% M_Yt->mc_j: ");}
+  if (verbose>2){ raprintf(D_Yn,"double",1,ncols_Y_p," %% D_Yn: "); raprintf(a_Yn,"double",1,ncols_Y_p," %% a_Yn: ");}
+  ma_b_ = M_At->m_b_; ma_a_ = M_At->m_a_;
+  na_b_ = M_At->n_b_; na_a_ = M_At->n_a_;
+  my_b_ = M_Yt->m_b_; my_a_ = M_Yt->m_a_;
+  /* ny_b_ = M_Yt->n_b_; ny_a = M_Yt->n_a_; */
+  mt_b_ = M_Tt->m_b_; mt_a_ = M_Tt->m_a_;
+  switch (output_spacing_t){ case SPACING_j: tab_tx_stride = M_Tt->rpop_j; break; case SPACING_b: tab_tx_stride = M_Tt->rpop_b; break; case SPACING_a: tab_tx_stride = M_Tt->nrows; break; default: break; /* switch (output_spacing_t){ } */}
+  switch (output_spacing_AtTn){ case SPACING_j: tab_AtTn_stride = M_At->rpop_j; break; case SPACING_b: tab_AtTn_stride = M_At->rpop_b; break; case SPACING_a: tab_AtTn_stride = M_At->nrows; break; default: break; /* switch (output_spacing_AtTn){ } */}
+  switch (output_spacing_a){ case SPACING_j: tab_a_stride = M_At->rpop_j; break; case SPACING_b: tab_a_stride = M_At->rpop_b; break; case SPACING_a: tab_a_stride = M_At->nrows; break; default: break; /* switch (output_spacing_a){ } */}
+  switch (output_spacing_AtTn){ case SPACING_j: tab_YtTn_stride = M_Yt->rpop_j; break; case SPACING_b: tab_YtTn_stride = M_Yt->rpop_b; break; case SPACING_a: tab_YtTn_stride = M_Yt->nrows; break; default: break; /* switch (output_spacing_AtTn){ } */}
+  switch (output_spacing_y){ case SPACING_j: tab_y_stride = M_Yt->rpop_j; break; case SPACING_b: tab_y_stride = M_Yt->rpop_b; break; case SPACING_a: tab_y_stride = M_Yt->nrows; break; default: break; /* switch (output_spacing_y){ } */}
+  if (verbose>2){ printf(" %% tab_tx_stride %d tab_a_stride %d tab_y_stride %d\n",tab_tx_stride,tab_a_stride,tab_y_stride);}
+  fill_uchar_zero((unsigned char *)output_AtTYn,tab_a_stride*tab_y_stride*tab_tx_stride*sizeof(double));
+  if (GLOBAL_omp_type==GLOBAL_omp_per_nb){
+    mt_j=0;
+    while (mt_j<M_Tt->rpop_j){
+      mt_a = mt_a_[mt_j]; mt_b = mt_b_[mt_j];
+      switch (output_spacing_t){ case SPACING_j: tab_tx=mt_j; break; case SPACING_b: tab_tx=mt_b; break; case SPACING_a: tab_tx=mt_a; break; default: break; /* switch (output_spacing_t){ } */}
+      switch (output_spacing_AtTn){ case SPACING_j: tab_t=mt_j; break; case SPACING_b: tab_t=mt_b; break; case SPACING_a: tab_t=mt_a; break; default: break; /* switch (output_spacing_t){ } */}
+      wTt_tag = (__m128i *)(&(M_Tt->wX[mt_b*M_Tt->mc_length]));
+      mctx_tag = (__m128i *)(&(M_Tt->mc_j[0]));
+      mctx_end = (__m128i *)(&(M_Tt->mc_j[M_Tt->mc_length]));
+      hhay = -M_Tt->cpop_j + 2*popcount_1mask_multiword_adv_end(&wTt_tag,&mctx_tag,&mctx_end); 
+      GLOBAL_ops_count_one(tidx,1,M_Tt->mc_length*BIT8);
+      my_j=0;
+      while (my_j<M_Yt->rpop_j){
+	my_a = my_a_[my_j]; my_b = my_b_[my_j];
+	switch (output_spacing_AtTn){ case SPACING_j: tab_YtTn=my_j; break; case SPACING_b: tab_YtTn=my_b; break; case SPACING_a: tab_YtTn=my_a; break; default: break; /* switch (output_spacing_AtTn){ } */}
+	switch (output_spacing_y){ case SPACING_j: tab_y=my_j; break; case SPACING_b: tab_y=my_b; break; case SPACING_a: tab_y=my_a; break; default: break; /* switch (output_spacing_y){ } */}
+	hhaY = lf_YtTn[tab_YtTn+tab_t*tab_YtTn_stride];
+	ma_j=0;
+	while (ma_j<M_At->rpop_j){
+	  ma_a = ma_a_[ma_j]; ma_b = ma_b_[ma_j];
+	  switch (output_spacing_AtTn){ case SPACING_j: tab_AtTn=ma_j; break; case SPACING_b: tab_AtTn=ma_b; break; case SPACING_a: tab_AtTn=ma_a; break; default: break; /* switch (output_spacing_AtTn){ } */}
+	  switch (output_spacing_a){ case SPACING_j: tab_a=ma_j; break; case SPACING_b: tab_a=ma_b; break; case SPACING_a: tab_a=ma_a; break; default: break; /* switch (output_spacing_a){ } */}
+	  hhAy = lf_AtTn[tab_AtTn+tab_t*tab_AtTn_stride];
+	  tab_x = tab_a + tab_y*tab_a_stride + tab_tx*tab_a_stride*tab_y_stride;
+	  hhAY = +(long long int)(M_At->cpop_j);
+	  wAt_tag = (__m128i*)((unsigned long *)(&(M_At->wX[ma_b*M_At->mc_length])));
+	  wTt_tag = (__m128i*)((unsigned long *)(&(M_Tt->wX[mt_b*M_Tt->mc_length])));
+	  wYt_tag = (__m128i*)((unsigned long *)(&(M_Yt->wX[my_b*M_Yt->mc_length])));
+	  mcay_tag = (__m128i*)((unsigned long *)(&(M_At->mc_j[0]))); 
+	  mcay_end = (__m128i*)((unsigned long *)(&(M_At->mc_j[M_At->mc_length])));
+	  hhAY -= (long long int)(2*popcount_notxorxor_1mask_multiword_adv_end(&wAt_tag,&wTt_tag,&wYt_tag,&mcay_tag,&mcay_end));
+	  output_AtTYn[tab_x] = /* D_An[ma_a/POPLENGTH]* */(hhAY - hhAy*a_Yn[my_a/POPLENGTH] - a_An[ma_a/POPLENGTH]*hhaY + a_An[ma_a/POPLENGTH]*hhay*a_Yn[my_a/POPLENGTH])/* *D_Yn[my_a/POPLENGTH] */;
+	  //output_AtTYn[tab_x] = /* D_An[ma_a/POPLENGTH]* */(hhAY - hhAy*a_Yn[my_a/POPLENGTH] /* - a_An[ma_a/POPLENGTH]*hhaY + a_An[ma_a/POPLENGTH]*hhay*a_Yn[my_a/POPLENGTH] */)/* *D_Yn[my_a/POPLENGTH] */;
+	  ma_j++; /* while (ma_j<M_At->rpop_j){ } */}
+	my_j++; /* while (my_j<M_Yt->rpop_j){ } */}
+      GLOBAL_ops_count_one(tidx,M_Yt->rpop_j*M_At->rpop_j*3,M_Yt->rpop_j*M_At->rpop_j*M_At->mc_length*BIT8);
+      mt_j++; /* while (mt_j<M_Tt->rpop_j){ } */}
+    /* if (GLOBAL_omp_type==GLOBAL_omp_per_nb){ } */}
+  else if (GLOBAL_omp_type==GLOBAL_omp_per_ns){
+    for (mt_j=0;mt_j<M_Tt->rpop_j;mt_j++){
+      mt_a = mt_a_[mt_j]; mt_b = mt_b_[mt_j];
+      switch (output_spacing_t){ case SPACING_j: tab_tx=mt_j; break; case SPACING_b: tab_tx=mt_b; break; case SPACING_a: tab_tx=mt_a; break; default: break; /* switch (output_spacing_t){ } */}
+      switch (output_spacing_AtTn){ case SPACING_j: tab_t=mt_j; break; case SPACING_b: tab_t=mt_b; break; case SPACING_a: tab_t=mt_a; break; default: break; /* switch (output_spacing_t){ } */}
+      wTt_tag = (__m128i *)(&(M_Tt->wX[mt_b*M_Tt->mc_length]));
+      mctx_tag = (__m128i *)(&(M_Tt->mc_j[0]));
+      mctx_end = (__m128i *)(&(M_Tt->mc_j[M_Tt->mc_length]));
+      hhay_[mt_j] = -M_Tt->cpop_j + 2*popcount_1mask_multiword_adv_end(&wTt_tag,&mctx_tag,&mctx_end); 
+      /* for (mt_j=0;mt_j<M_Tt->rpop_j;mt_j++){ } */}
+    GLOBAL_ops_count_one(tidx,M_Tt->rpop_j,M_Tt->rpop_j*M_Tt->mc_length*BIT8);
+    mx_chunk=128; 
+#pragma omp parallel shared(mx_chunk) private(mx_j,mt_j,mt_a,mt_b,ma_j,ma_a,ma_b,my_j,my_a,my_b,tab_AtTn,tab_YtTn,tab_tx,tab_t,tab_y,tab_a,tab_x,hhaY,hhAy,hhAY,wAt_tag,wTt_tag,wYt_tag,mcay_tag,mcay_end)
+    { /* begin omp parallel */
+      mx_j=0; tab_AtTn=0; tab_YtTn=0; tab_tx=0; tab_t=0; tab_y=0; tab_a=0;
+#pragma omp for schedule(dynamic,mx_chunk)
+      for (mx_j=0;mx_j<M_Tt->rpop_j*M_Yt->rpop_j*M_At->rpop_j;mx_j++){
+	mt_j = mx_j / (M_Yt->rpop_j*M_At->rpop_j); 
+	my_j = (mx_j % (M_Yt->rpop_j*M_At->rpop_j)) / M_At->rpop_j ;
+	ma_j = (mx_j % M_At->rpop_j) ;
+	mt_a = mt_a_[mt_j]; mt_b = mt_b_[mt_j];
+	switch (output_spacing_t){ case SPACING_j: tab_tx=mt_j; break; case SPACING_b: tab_tx=mt_b; break; case SPACING_a: tab_tx=mt_a; break; default: break; /* switch (output_spacing_t){ } */}
+	switch (output_spacing_AtTn){ case SPACING_j: tab_t=mt_j; break; case SPACING_b: tab_t=mt_b; break; case SPACING_a: tab_t=mt_a; break; default: break; /* switch (output_spacing_t){ } */}
+	my_a = my_a_[my_j]; my_b = my_b_[my_j];
+	switch (output_spacing_AtTn){ case SPACING_j: tab_YtTn=my_j; break; case SPACING_b: tab_YtTn=my_b; break; case SPACING_a: tab_YtTn=my_a; break; default: break; /* switch (output_spacing_AtTn){ } */}
+	switch (output_spacing_y){ case SPACING_j: tab_y=my_j; break; case SPACING_b: tab_y=my_b; break; case SPACING_a: tab_y=my_a; break; default: break; /* switch (output_spacing_y){ } */}
+	hhaY = lf_YtTn[tab_YtTn+tab_t*tab_YtTn_stride];
+	ma_a = ma_a_[ma_j]; ma_b = ma_b_[ma_j];
+	switch (output_spacing_AtTn){ case SPACING_j: tab_AtTn=ma_j; break; case SPACING_b: tab_AtTn=ma_b; break; case SPACING_a: tab_AtTn=ma_a; break; default: break; /* switch (output_spacing_AtTn){ } */}
+	switch (output_spacing_a){ case SPACING_j: tab_a=ma_j; break; case SPACING_b: tab_a=ma_b; break; case SPACING_a: tab_a=ma_a; break; default: break; /* switch (output_spacing_a){ } */}
+	hhAy = lf_AtTn[tab_AtTn+tab_t*tab_AtTn_stride];
+	tab_x = tab_a + tab_y*tab_a_stride + tab_tx*tab_a_stride*tab_y_stride;
+	hhAY = +(long long int)(M_At->cpop_j);
+	wAt_tag = (__m128i*)((unsigned long *)(&(M_At->wX[ma_b*M_At->mc_length])));
+	wTt_tag = (__m128i*)((unsigned long *)(&(M_Tt->wX[mt_b*M_Tt->mc_length])));
+	wYt_tag = (__m128i*)((unsigned long *)(&(M_Yt->wX[my_b*M_Yt->mc_length])));
+	mcay_tag = (__m128i*)((unsigned long *)(&(M_At->mc_j[0]))); 
+	mcay_end = (__m128i*)((unsigned long *)(&(M_At->mc_j[M_At->mc_length])));
+	hhAY -= (long long int)(2*popcount_notxorxor_1mask_multiword_adv_end(&wAt_tag,&wTt_tag,&wYt_tag,&mcay_tag,&mcay_end));
+#pragma omp critical
+	output_AtTYn[tab_x] = /* D_An[ma_a/POPLENGTH]* */(hhAY - hhAy*a_Yn[my_a/POPLENGTH] - a_An[ma_a/POPLENGTH]*hhaY + a_An[ma_a/POPLENGTH]*hhay_[mt_j]*a_Yn[my_a/POPLENGTH])/* *D_Yn[my_a/POPLENGTH] */;
+	/* for (mx_j=0;mx_j<M_Tt->rpop_j*M_Yt->rpop_j*M_At->rpop_j;mx_j++){ } */}
+      /* end omp parallel */}
+    GLOBAL_ops_count_one(tidx,M_Tt->rpop_j*M_Yt->rpop_j*M_At->rpop_j*3,M_Tt->rpop_j*M_Yt->rpop_j*M_At->rpop_j*M_At->mc_length*BIT8);
+    /* else if (GLOBAL_omp_type==GLOBAL_omp_per_ns){ } */}
+  if (verbose>-1 && versus_AtTYn!=NULL){
+    if (verbose>1){ raprintf(output_AtTYn,"double",tab_a_stride,tab_y_stride*tab_tx_stride," %% output_AtTYn: ");}
+    fill_uchar_zero((unsigned char *)versus_AtTYn,tab_a_stride*tab_y_stride*tab_tx_stride*sizeof(double));
+    mt_j=0;
+    while (mt_j<M_Tt->rpop_j){
+      mt_a = mt_a_[mt_j]; mt_b = mt_b_[mt_j];
+      switch (output_spacing_t){ case SPACING_j: tab_tx=mt_j; break; case SPACING_b: tab_tx=mt_b; break; case SPACING_a: tab_tx=mt_a; break; default: break; /* switch (output_spacing_t){ } */}
+      T_tag = (unsigned char *)(&(M_Tt->wX[mt_b*M_Tt->mc_length]));
+      my_j=0;
+      while (my_j<M_Yt->rpop_j){
+	my_a = my_a_[my_j]; my_b = my_b_[my_j];
+	switch (output_spacing_y){ case SPACING_j: tab_y=my_j; break; case SPACING_b: tab_y=my_b; break; case SPACING_a: tab_y=my_a; break; default: break; /* switch (output_spacing_y){ } */}
+	Y_tag = (unsigned char *)(&(M_Yt->wX[my_b*M_Yt->mc_length]));
+	ma_j=0;
+	while (ma_j<M_At->rpop_j){
+	  ma_a = ma_a_[ma_j]; ma_b = ma_b_[ma_j];
+	  switch (output_spacing_a){ case SPACING_j: tab_a=ma_j; break; case SPACING_b: tab_a=ma_b; break; case SPACING_a: tab_a=ma_a; break; default: break; /* switch (output_spacing_a){ } */}
+	  A_tag = (unsigned char *)(&(M_At->wX[ma_b*M_At->mc_length]));
+	  tab_x = tab_a + tab_y*tab_a_stride + tab_tx*tab_a_stride*tab_y_stride;
+	  dtmp=0;
+	  for (na_a=0;na_a<M_At->ncols;na_a++){
+	    dtmp += (bget____(A_tag,na_a) - a_An[ma_a/POPLENGTH])*bget____(T_tag,na_a)*(bget____(Y_tag,na_a) - a_Yn[my_a/POPLENGTH])*bget__on(M_At->mc_j,na_a);
+	    //dtmp += (bget____(A_tag,na_a) /* - a_An[ma_a/POPLENGTH] */)*bget____(T_tag,na_a)*(bget____(Y_tag,na_a) - a_Yn[my_a/POPLENGTH])*bget__on(M_At->mc_j,na_a);
+	    /* for (na_a=0;na_a<M_At->ncols;na_a++){ } */}
+	  versus_AtTYn[tab_x] = dtmp;
+	  ma_j++;/* while (ma_j<M_At->rpop_j){ } */}
+	my_j++;/* while (my_j<M_Yt->rpop_j){ } */}
+      mt_j++;/* while (mt_j<M_Tt->rpop_j){ } */}
+    if (verbose>1){ raprintf(versus_AtTYn,"double",tab_a_stride,tab_y_stride*tab_tx_stride," %% versus_AtTYn: ");}
+    if (verbose>-1){ printf(" %% [finished get_AtTYn_vv] error %0.16f, tidx %d rpop_b %d(%d) cpop_b %d(%d) xpop_b %d(%d)\n",dra_diff(output_AtTYn,versus_AtTYn,tab_a_stride*tab_y_stride*tab_tx_stride,1),tidx,(int)(M_At->rpop_b),(int)(M_At->rpop_j),(int)(M_At->cpop_b),(int)(M_At->cpop_j),(int)(M_Yt->rpop_b),(int)(M_Yt->rpop_j));}  
+    /* if (verbose>0){ } */}
+  if (verbose>1){ printf(" %% [finished get_AtTYn_vv] tidx %d\n",tidx);}
+  return NULL;
+}
+
+void binary_AtTYn_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int output_spacing_AtTn,int output_spacing_a,int output_spacing_y,int output_spacing_t,double *A_ajdk,double *lf_AtTn,struct M_handle *M_At,struct M_handle *M_Tt,struct M_handle *M_Yt,double *lf_YtTn,double *Y_ajdk,double **output_AtTYn_p,double *versus_wk2)
+{
+  /* This function uses the M_handles M_At, M_Tt and M_Yt to run a series of parallel calls to get_AtTYn_vv ; 
+     No reloading of data is performed ; we assume all data is preloaded ;
+     calculation performed in thread *thread_in ; thread number *tidx ;
+     variable space in **vpra (should be at least size 14)
+   */
+  int verbose=0;
+  /* unsigned char *wkspace_mark=NULL; */
+  int length_a=0,length_y=0,length_t=0,length=0,ip=0;
+  if (verbose){ printf(" %% [entering binary_AtTYn_vv__run] tidx %d \n",*tidx);}
+  if (verbose){ M_handle_printf(M_At,verbose," %% M_At: ");}
+  if (verbose){ M_handle_printf(M_Tt,verbose," %% M_Tt: ");}
+  if (verbose){ M_handle_printf(M_Yt,verbose," %% M_Yt: ");}
+  switch (output_spacing_a){ case SPACING_j: length_a = M_At->rpop_j; break; case SPACING_b: length_a = M_At->rpop_b; break; case SPACING_a: length_a = M_At->nrows; break; default: break; /* switch (output_spacing_a){ } */}
+  switch (output_spacing_y){ case SPACING_j: length_y = M_Yt->rpop_j; break; case SPACING_b: length_y = M_Yt->rpop_b; break; case SPACING_a: length_y = M_Yt->nrows; break; default: break; /* switch (output_spacing_y){ } */}
+  switch (output_spacing_t){ case SPACING_j: length_t = M_Tt->rpop_j; break; case SPACING_b: length_t = M_Tt->rpop_b; break; case SPACING_a: length_t = M_Tt->nrows; break; default: break; /* switch (output_spacing_t){ } */}
+  length = length_a*length_y*length_t; if (verbose){ printf(" %% length %d*%d*%d=%d\n",length_a,length_y,length_t,length);}
+  length = length_a*length_y*length_t; if (*output_AtTYn_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_AtTYn_p = (double *)wkspace_all0c(length*sizeof(double));}
+  if (verbose>2){ bprintf(M_At->mr_b,M_At->bitj,1,M_At->nrows," %% M_At->mr_b: ");}
+  if (verbose>2){ bprintf(M_At->mr_j,M_At->bitj,1,M_At->nrows," %% M_At->mr_j: ");}
+  if (verbose>2){ bprintf(M_At->mc_b,M_At->bitj,1,M_At->ncols," %% M_At->mc_b: ");}
+  if (verbose>2){ bprintf(M_At->mc_j,M_At->bitj,1,M_At->ncols," %% M_At->mc_j: ");}
+  if (verbose>2){ bprintf(M_Yt->mr_b,M_Yt->bitj,1,M_Yt->nrows," %% M_Yt->mr_b: ");}
+  if (verbose>2){ bprintf(M_Yt->mr_j,M_Yt->bitj,1,M_Yt->nrows," %% M_Yt->mr_j: ");}
+  if (verbose>2){ bprintf(M_Yt->mc_b,M_Yt->bitj,1,M_Yt->ncols," %% M_Yt->mc_b: ");}
+  if (verbose>2){ bprintf(M_Yt->mc_j,M_Yt->bitj,1,M_Yt->ncols," %% M_Yt->mc_j: ");}
+  length = length_a*length_y*length_t; memset((*output_AtTYn_p),0,length*sizeof(double));
+  ip=0;
+  vpra[ip++] = tidx; vpra[ip++] = A_ajdk; vpra[ip++] = lf_AtTn; vpra[ip++] = M_At; vpra[ip++] = M_Tt; vpra[ip++] = M_Yt; vpra[ip++] = lf_YtTn; vpra[ip++] = Y_ajdk; vpra[ip++] = *output_AtTYn_p; vpra[ip++] = versus_wk2;
+  switch (output_spacing_AtTn){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_AtTn){ } */}
+  switch (output_spacing_a){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_a){ } */}
+  switch (output_spacing_y){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_y){ } */}
+  switch (output_spacing_t){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_t){ } */}
+  if (*tidx>0){ if (pthread_create(thread_in,NULL,&get_AtTYn_vv,vpra)){ printf("Warning! cannot create thread %d in binary_AtTYn\n",*tidx);}}
+  else /* if (*tidx<=0) */{ get_AtTYn_vv(vpra);} /* must join threads later */;
+  if (verbose>2){ raprintf((*output_AtTYn_p),"double",length_a,length_y*length_t," %% (*output_AtTYn_p): ");}
+  if (verbose){ printf(" %% [finished binary_AtTYn_vv__run] tidx %d\n",*tidx);}
+}  
+
+void binary_AtTYn_vv_test(int iteration_max,int nrows_An_in,int ncols_An_in,int ncols_Yn_in,int ncols_Tn_in)
+{
+  /* test for errors with input file: AtTYn_vv_error.in ;
+     GLOBAL_verbose= 1;
+     GLOBAL_thread_count= 8;
+     GLOBAL_omp_type= 0;
+     GLOBAL_TTYPE= AtTYn_vv;
+     GLOBAL_VERSUS= 1;
+     GLOBAL_TSTN1= 192;
+     GLOBAL_TSTN2= 133;
+     GLOBAL_TSTN3= 152;
+     GLOBAL_TSTN4= 3;
+     GLOBAL_TSTN5= 1;
+     END= 0;
+  */
+  /* test for speed with input file: AtTYn_vv_speed.in ;
+     GLOBAL_verbose= 1;
+     GLOBAL_thread_count= 8;
+     GLOBAL_omp_type= 0;
+     GLOBAL_TTYPE= AtTYn_vv;
+     GLOBAL_VERSUS= 0;
+     GLOBAL_TSTN1= 1920000;
+     GLOBAL_TSTN2= 1920;
+     GLOBAL_TSTN3= 1920;
+     GLOBAL_TSTN4= 3;
+     GLOBAL_TSTN5= 8;
+     END= 0;
+  */
+  int verbose=GLOBAL_verbose;
+  char error_vs_speed[8];
+  int n_copies = GLOBAL_thread_count,*nrows_A=NULL,ncols_A = ncols_An_in,*nrows_Z=NULL,ncols_Y = ncols_Yn_in,ncols_T = ncols_Tn_in;
+  struct M_handle **M_An=NULL,**M_At=NULL,**M_Zn=NULL,**M_Zt=NULL,**M_Yn=NULL,**M_Yt=NULL,**M_Wn=NULL,**M_Wt=NULL,**M_Tn=NULL,**M_Tt=NULL,**M_Sn=NULL,**M_St=NULL;
+  double *A_p=NULL,*A_ajdk=NULL,**lf_An_ajdk=NULL,**lf_Zn_ajdk=NULL,*Y_p=NULL,*Y_ajdk=NULL,**lf_Yn_ajdk=NULL,**lf_Wn_ajdk=NULL;
+  int np=0,n_type=0,n_spacing_A=0,n_spacing_B=0;
+  double **lf_AtTn=NULL,**lf_YtTn=NULL;
+  int nl=0; double **output=NULL;
+  if (verbose){ printf(" %% [entering binary_AtTYn_vv_test], iteration_max %d nrows_An_in %d ncols_An_in %d ncols_Yn_in %d ncols_Tn_in %d\n",iteration_max,nrows_An_in,ncols_An_in,ncols_Yn_in,ncols_Tn_in);}
+  if (GLOBAL_VERSUS==1){ sprintf(error_vs_speed,"error");} if (GLOBAL_VERSUS==0){ sprintf(error_vs_speed,"speed");}
+  nrows_A = (int *) wkspace_all0c(sizeof(int)*n_copies); for (np=0;np<n_copies;np++){ nrows_A[np] = maximum(1,nrows_An_in + (np%3) - 1);}
+  nrows_Z = (int *) wkspace_all0c(sizeof(int)*n_copies); for (np=0;np<n_copies;np++){ nrows_Z[np] = maximum(1,nrows_An_in + (np%5) - 2);}
+  binary_M_setup_test(error_vs_speed,0.5,n_copies,nrows_A,ncols_A,nrows_Z,ncols_Y,ncols_T,&M_An,&M_At,&M_Zn,&M_Zt,&M_Yn,&M_Yt,&M_Wn,&M_Wt,&M_Tn,&M_Tt,&M_Sn,&M_St,&A_p,&A_ajdk,&lf_An_ajdk,&lf_Zn_ajdk,&Y_p,&Y_ajdk,&lf_Yn_ajdk,&lf_Wn_ajdk);
+  GLOBAL_versus_wk2_init(ncols_A*ncols_Y*ncols_T);
+  output = (double **)wkspace_all0c(sizeof(double *)*GLOBAL_thread_count);
+  for (np=0;np<GLOBAL_thread_count;np++){
+    output[np] = (double *)wkspace_all0c(sizeof(double)*ncols_A*ncols_Y*ncols_T);
+    /* for (np=0;np<GLOBAL_thread_count;np++){ } */}
+  lf_AtTn = (double **)wkspace_all0c(sizeof(double *)*GLOBAL_thread_count);
+  for (np=0;np<GLOBAL_thread_count;np++){
+    lf_AtTn[np] = (double *)wkspace_all0c(sizeof(double)*ncols_A*ncols_T);
+    /* for (np=0;np<GLOBAL_thread_count;np++){ } */}
+  lf_YtTn = (double **)wkspace_all0c(sizeof(double *)*GLOBAL_thread_count);
+  for (np=0;np<GLOBAL_thread_count;np++){
+    lf_YtTn[np] = (double *)wkspace_all0c(sizeof(double)*ncols_Y*ncols_T);
+    /* for (np=0;np<GLOBAL_thread_count;np++){ } */}
+  for (n_type=1;n_type<=1;n_type++){ for (n_spacing_B=0;n_spacing_B<=2;n_spacing_B++){ for (n_spacing_A=0;n_spacing_A<=2;n_spacing_A++){
+	if (verbose){ printf(" %% %s; %s; %s\n",TYPE_name[n_type],SPACING_name[n_spacing_B],SPACING_name[n_spacing_A]);}
+	GLOBAL_nf_cur=0; GLOBAL_nf_opn=0; 
+	for (np=0;np<GLOBAL_thread_count;np++){
+	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,n_spacing_A,n_spacing_A,M_At[np],M_Tt[np],NULL,NULL,NULL,&(lf_AtTn[np]),NULL);
+	  GLOBAL_pthread_toc(); 
+	  /* for (np=0;np<GLOBAL_thread_count;np++){ } */}
+	GLOBAL_pthread_tuc();
+	GLOBAL_nf_cur=0; GLOBAL_nf_opn=0; 
+	for (np=0;np<GLOBAL_thread_count;np++){
+	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,n_spacing_A,n_spacing_A,M_Yt[np],M_Tt[np],NULL,NULL,NULL,&(lf_YtTn[np]),NULL);
+	  GLOBAL_pthread_toc(); 
+	  /* for (np=0;np<GLOBAL_thread_count;np++){ } */}
+	GLOBAL_pthread_tuc();
+	GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+	GLOBAL_nf_cur=0; GLOBAL_nf_opn=0; 
+	for (nl=0;nl<iteration_max;nl++){
+	  GLOBAL_pthread_tic(); np = GLOBAL_nf_cur;
+	  binary_AtTYn_vv__run(&(GLOBAL_ira[np]),GLOBAL_vpra[np],&(GLOBAL_threads[np]),n_spacing_A,n_spacing_B,n_spacing_B,n_spacing_B,A_ajdk,lf_AtTn[np],M_At[np],M_Tt[np],M_Yt[np],lf_YtTn[np],Y_ajdk,&(output[np]),GLOBAL_versus_wk2_[np]);
+	  GLOBAL_pthread_toc();
+	  /* for (nl=0;nl<iteration_max;nl++){ } */}
+	GLOBAL_pthread_tuc(); 
+	GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% AtTYn: ");
+	GLOBAL_ops_toc(-1,0,verbose," %% total time: ");  
+	/* for (n_type=1;n_type<=1;n_type++){ for (n_spacing_B=0;n_spacing_B<=2;n_spacing_B++){ for (n_spacing_A=0;n_spacing_A<=2;n_spacing_A++){ }}} */}}}
+  if (verbose){ printf(" %% [finished binary_AtTYn_vv_test]\n");}
+}

@@ -1,0 +1,14 @@
+GLOBAL_verbose= 1;
+GLOBAL_thread_count= 8;
+GLOBAL_omp_type= 1;
+GLOBAL_TEST_TYPE= AnZt_S_WnYt_vv;
+GLOBAL_TEST_TYP2= error;
+GLOBAL_NBINS= 4;
+GLOBAL_TEST_mrand= 0.85;
+GLOBAL_TEST_A_n_rows= 80;
+GLOBAL_TEST_A_n_cols= 2192;
+GLOBAL_TEST_Z_n_rows= 73;
+GLOBAL_TEST_Y_n_cols= 2132;
+GLOBAL_TEST_T_n_cols= 4;
+GLOBAL_TEST_niter= 1;
+END= 0;

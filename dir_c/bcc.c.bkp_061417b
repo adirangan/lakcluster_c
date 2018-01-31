@@ -1,0 +1,2210 @@
+void bcc_ajdk_load(struct bcc_ajdk *D)
+{
+  /* load from file */
+  int verbose=0;
+  int nc=0;
+  int bitj_tmp=0,nrows_tmp=0,ncols_tmp=0;
+  if (verbose){ printf(" %% [entering bcc_ajdk_load]\n");}
+  D->A_ncols=GLOBAL_A_n_cols;D->Y_ncols=GLOBAL_Y_n_cols;D->T_ncols=GLOBAL_T_n_cols;
+  /* loading A_bmc_b */
+  D->A_cbother = (D->A_ncols>0);
+  D->A_ncols_extend = (D->bitj - (D->A_ncols % D->bitj)) % D->bitj; 
+  D->A_mc_length = bsize(D->A_ncols)/* rup(D->A_ncols+D->A_ncols_extend,POPLENGTH)/BIT8 */;
+  if (verbose>1){ printf(" %%%% A_ncols %d, A_ncols_extend %d A_mc_length %d\n",D->A_ncols,D->A_ncols_extend,D->A_mc_length);}
+  D->A_bmc_b = wkspace_all0c(D->A_mc_length); if (!D->A_bmc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} 
+  D->A_bmc_j = wkspace_all0c(D->A_mc_length); if (!D->A_bmc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} 
+  D->A_bmc_j_rmv = wkspace_all0c(D->A_mc_length); if (!D->A_bmc_j_rmv){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} 
+  D->A_bmc_j_rtn = wkspace_all0c(D->A_mc_length); if (!D->A_bmc_j_rtn){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} 
+  if (GLOBAL_A_n_cind==NULL || !strcmp(GLOBAL_A_n_cind,"\0")){ for (nc=0;nc<D->A_ncols;nc++){ bset__on(D->A_bmc_b,nc);}}
+  else{ binary_read(GLOBAL_A_n_cind,&bitj_tmp,&nrows_tmp,&ncols_tmp,&(D->A_bmc_b)); if (nrows_tmp!=D->A_ncols){ printf(" %% Warning! A_: %s; improper mc_b_ %s, nrows %d instead of %d\n",GLOBAL_A_n_name,GLOBAL_A_n_cind,nrows_tmp,D->A_ncols);}}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_b: "); if (verbose>2){ bprintf(D->A_bmc_b,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  for (nc=0;nc<D->A_mc_length;nc++){ D->A_bmc_j[nc] = D->A_bmc_b[nc];}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_j: "); if (verbose>2){ bprintf(D->A_bmc_j,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  D->A_cpop_b= popcount_uchar_array(D->A_bmc_b,D->A_mc_length); D->A_cpop_j = popcount_uchar_array(D->A_bmc_j,D->A_mc_length); if (verbose>1){ printf(" %%%% D->A_cpop_b %d D->A_cpop_j %d\n",D->A_cpop_b,D->A_cpop_j);}
+  D->A_umc_b = (unsigned char *) wkspace_all0c(D->A_ncols*sizeof(unsigned char)); if (!D->A_umc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_b[nc] = bget__on(D->A_bmc_b,nc);}
+  D->A_umc_j = (unsigned char *) wkspace_all0c(D->A_ncols*sizeof(unsigned char)); if (!D->A_umc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j[nc] = bget__on(D->A_bmc_j,nc);}
+  D->A_umc_j_rmv = (unsigned char *) wkspace_all0c(D->A_ncols*sizeof(unsigned char)); if (!D->A_umc_j_rmv){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j_rmv[nc] = bget__on(D->A_bmc_j_rmv,nc);}
+  D->A_umc_j_rtn = (unsigned char *) wkspace_all0c(D->A_ncols*sizeof(unsigned char)); if (!D->A_umc_j_rtn){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j_rtn[nc] = bget__on(D->A_bmc_j_rtn,nc);}
+  /* loading Y_bmc_b */
+  D->Y_cbother = (D->Y_ncols>0);
+  D->Y_ncols_extend = (D->bitj - (D->Y_ncols % D->bitj)) % D->bitj; 
+  D->Y_mc_length = bsize(D->Y_ncols)/* rup(D->Y_ncols+D->Y_ncols_extend,POPLENGTH)/BIT8 */;
+  if (verbose>1){ printf(" %%%% Y_ncols %d, Y_ncols_extend %d Y_mc_length %d\n",D->Y_ncols,D->Y_ncols_extend,D->Y_mc_length);}
+  D->Y_bmc_b = wkspace_all0c(D->Y_mc_length); if (!D->Y_bmc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} 
+  D->Y_bmc_j = wkspace_all0c(D->Y_mc_length); if (!D->Y_bmc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} 
+  if (GLOBAL_Y_n_cind==NULL || !strcmp(GLOBAL_Y_n_cind,"\0")){ for (nc=0;nc<D->Y_ncols;nc++){ bset__on(D->Y_bmc_b,nc);}}
+  else{ binary_read(GLOBAL_Y_n_cind,&bitj_tmp,&nrows_tmp,&ncols_tmp,&(D->Y_bmc_b)); if (nrows_tmp!=D->Y_ncols){ printf(" %% Warning! Y_: %s; improper mc_b_ %s, nrows %d instead of %d\n",GLOBAL_Y_n_name,GLOBAL_Y_n_cind,nrows_tmp,D->Y_ncols);}}
+  sprintf(D->tmpYnchar," %%%% D->Y_bmc_b: "); if (verbose>2){ bprintf(D->Y_bmc_b,D->bitj,1,D->Y_ncols,D->tmpYnchar);}
+  for (nc=0;nc<D->Y_mc_length;nc++){ D->Y_bmc_j[nc] = D->Y_bmc_b[nc];}
+  sprintf(D->tmpYnchar," %%%% D->Y_bmc_j: "); if (verbose>2){ bprintf(D->Y_bmc_j,D->bitj,1,D->Y_ncols,D->tmpYnchar);}
+  D->Y_cpop_b= popcount_uchar_array(D->Y_bmc_b,D->Y_mc_length); D->Y_cpop_j = popcount_uchar_array(D->Y_bmc_j,D->Y_mc_length);
+  D->Y_umc_b = (unsigned char *) wkspace_all0c(D->Y_ncols*sizeof(unsigned char)); if (!D->Y_umc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} for (nc=0;nc<D->Y_ncols;nc++){ D->Y_umc_b[nc] = bget__on(D->Y_bmc_b,nc);}
+  D->Y_umc_j = (unsigned char *) wkspace_all0c(D->Y_ncols*sizeof(unsigned char)); if (!D->Y_umc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} for (nc=0;nc<D->Y_ncols;nc++){ D->Y_umc_j[nc] = bget__on(D->Y_bmc_j,nc);}
+  /* loading T_bmc_b */
+  D->T_ncols_extend = (D->bitj - (D->T_ncols % D->bitj)) % D->bitj; 
+  D->T_mc_length = bsize(D->T_ncols)/* rup(D->T_ncols+D->T_ncols_extend,POPLENGTH)/BIT8 */;
+  if (verbose>1){ printf(" %%%% T_ncols %d, T_ncols_extend %d T_mc_length %d\n",D->T_ncols,D->T_ncols_extend,D->T_mc_length);}
+  D->T_bmc_b = wkspace_all0c(D->T_mc_length); if (!D->T_bmc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} 
+  D->T_bmc_j = wkspace_all0c(D->T_mc_length); if (!D->T_bmc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} 
+  if (GLOBAL_T_n_cind==NULL || !strcmp(GLOBAL_T_n_cind,"\0")){ for (nc=0;nc<D->T_ncols;nc++){ bset__on(D->T_bmc_b,nc);}}
+  else{ binary_read(GLOBAL_T_n_cind,&bitj_tmp,&nrows_tmp,&ncols_tmp,&(D->T_bmc_b)); if (nrows_tmp!=D->T_ncols){ printf(" %% Warning! T_: %s; improper mc_b_ %s, nrows %d instead of %d\n",GLOBAL_T_n_name,GLOBAL_T_n_cind,nrows_tmp,D->T_ncols);}}
+  sprintf(D->tmpTnchar," %%%% D->T_bmc_b: "); if (verbose>2){ bprintf(D->T_bmc_b,D->bitj,1,D->T_ncols,D->tmpTnchar);}
+  for (nc=0;nc<D->T_mc_length;nc++){ D->T_bmc_j[nc] = D->T_bmc_b[nc];}
+  sprintf(D->tmpTnchar," %%%% D->T_bmc_j: "); if (verbose>2){ bprintf(D->T_bmc_j,D->bitj,1,D->T_ncols,D->tmpTnchar);}
+  D->T_cpop_b= popcount_uchar_array(D->T_bmc_b,D->T_mc_length); D->T_cpop_j = popcount_uchar_array(D->T_bmc_j,D->T_mc_length);
+  D->T_umc_b = (unsigned char *) wkspace_all0c(D->T_ncols*sizeof(unsigned char)); if (!D->T_umc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} for (nc=0;nc<D->T_ncols;nc++){ D->T_umc_b[nc] = bget__on(D->T_bmc_b,nc);}
+  D->T_umc_j = (unsigned char *) wkspace_all0c(D->T_ncols*sizeof(unsigned char)); if (!D->T_umc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} for (nc=0;nc<D->T_ncols;nc++){ D->T_umc_j[nc] = bget__on(D->T_bmc_j,nc);}
+  D->QC_AtTYnWtSZn_nrm = NULL; D->QC_AtTAnZtSZn_nrm = NULL; D->QC_AtTYnYtTAn_nrm = NULL; D->QC_AtTAnAtTAn_nrm = NULL;
+  D->QC_sra=NULL; D->QC_ira_a=NULL; D->QC_ira_b=NULL; D->QC_ira_j=NULL;
+  D->QR_sra=NULL; D->QR_ira_a=NULL; D->QR_ira_b=NULL; D->QR_ira_j=NULL; D->QR_nbra=NULL; D->QR_mr_a=NULL; D->QR_mr_b=NULL; D->QR_mr_j=NULL;
+  D->nb_rem=0;D->nb_srt=0; D->out_iteration=0; D->out_xdrop_ij=0; D->out_trace=NULL; D->out_xdrop_a=NULL; D->out_xdrop_b=NULL; D->out_trace_length = 0;
+  if (verbose){ printf(" %% [finished bcc_ajdk_load] D->A_ncols=%d D->Y_ncols=%d D->T_ncols=%d \n",D->A_ncols,D->Y_ncols,D->T_ncols);}
+}
+
+void bcc_ajdk_init(double mrnd,struct bcc_ajdk *D)
+{
+  /* initialize based on test parameters */
+  int verbose=0;
+  int nc=0;
+  int bitj_tmp=0,nrows_tmp=0,ncols_tmp=0;
+  unsigned char *bb=NULL,*bj=NULL;
+  double dtmp=0; int nx=0;
+  if (verbose){ printf(" %% [entering bcc_ajdk_init]\n");}
+  D->A_ncols=GLOBAL_TEST_A_n_cols;D->Y_ncols=GLOBAL_TEST_Y_n_cols;D->T_ncols=GLOBAL_TEST_T_n_cols;
+  /* initializing A_bmc_b */
+  D->A_cbother = (D->A_ncols>0);
+  D->A_ncols_extend = (D->bitj - (D->A_ncols % D->bitj)) % D->bitj; 
+  D->A_mc_length = bsize(D->A_ncols)/* rup(D->A_ncols+D->A_ncols_extend,POPLENGTH)/BIT8 */;
+  if (verbose>1){ printf(" %%%% A_ncols %d, A_ncols_extend %d A_mc_length %d\n",D->A_ncols,D->A_ncols_extend,D->A_mc_length);}
+  D->A_bmc_b = wkspace_all0c(D->A_mc_length); if (!D->A_bmc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} 
+  D->A_bmc_j = wkspace_all0c(D->A_mc_length); if (!D->A_bmc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} 
+  bb = D->A_bmc_b; bj = D->A_bmc_j; for (nx=0;nx<D->A_ncols;nx++){ dtmp = rand01; if (dtmp>mrnd*mrnd){ bset__on(bb,nx);} if (dtmp>mrnd){ bset__on(bj,nx);}}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_b: "); if (verbose>2){ bprintf(D->A_bmc_b,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_j: "); if (verbose>2){ bprintf(D->A_bmc_j,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  D->A_bmc_j_rmv = wkspace_all0c(D->A_mc_length); if (!D->A_bmc_j_rmv){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} 
+  D->A_bmc_j_rtn = wkspace_all0c(D->A_mc_length); if (!D->A_bmc_j_rtn){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} 
+  D->A_cpop_b= popcount_uchar_array(D->A_bmc_b,D->A_mc_length); D->A_cpop_j = popcount_uchar_array(D->A_bmc_j,D->A_mc_length); if (verbose>1){ printf(" %%%% D->A_cpop_b %d D->A_cpop_j %d\n",D->A_cpop_b,D->A_cpop_j);}
+  D->A_umc_b = (unsigned char *) wkspace_all0c(D->A_ncols*sizeof(unsigned char)); if (!D->A_umc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_b[nc] = bget__on(D->A_bmc_b,nc);}
+  D->A_umc_j = (unsigned char *) wkspace_all0c(D->A_ncols*sizeof(unsigned char)); if (!D->A_umc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j[nc] = bget__on(D->A_bmc_j,nc);}
+  D->A_umc_j_rmv = (unsigned char *) wkspace_all0c(D->A_ncols*sizeof(unsigned char)); if (!D->A_umc_j_rmv){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j_rmv[nc] = bget__on(D->A_bmc_j_rmv,nc);}
+  D->A_umc_j_rtn = (unsigned char *) wkspace_all0c(D->A_ncols*sizeof(unsigned char)); if (!D->A_umc_j_rtn){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j_rtn[nc] = bget__on(D->A_bmc_j_rtn,nc);}
+  /* initializing Y_bmc_b */
+  D->Y_cbother = (D->Y_ncols>0);
+  D->Y_ncols_extend = (D->bitj - (D->Y_ncols % D->bitj)) % D->bitj; 
+  D->Y_mc_length = bsize(D->Y_ncols)/* rup(D->Y_ncols+D->Y_ncols_extend,POPLENGTH)/BIT8 */;
+  if (verbose>1){ printf(" %%%% Y_ncols %d, Y_ncols_extend %d Y_mc_length %d\n",D->Y_ncols,D->Y_ncols_extend,D->Y_mc_length);}
+  D->Y_bmc_b = wkspace_all0c(D->Y_mc_length); if (!D->Y_bmc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} 
+  D->Y_bmc_j = wkspace_all0c(D->Y_mc_length); if (!D->Y_bmc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} 
+  bb = D->Y_bmc_b; bj = D->Y_bmc_j; for (nx=0;nx<D->Y_ncols;nx++){ dtmp = rand01; if (dtmp>mrnd*mrnd){ bset__on(bb,nx);} if (dtmp>mrnd){ bset__on(bj,nx);}}
+  sprintf(D->tmpYnchar," %%%% D->Y_bmc_b: "); if (verbose>2){ bprintf(D->Y_bmc_b,D->bitj,1,D->Y_ncols,D->tmpYnchar);}
+  sprintf(D->tmpYnchar," %%%% D->Y_bmc_j: "); if (verbose>2){ bprintf(D->Y_bmc_j,D->bitj,1,D->Y_ncols,D->tmpYnchar);}
+  D->Y_cpop_b= popcount_uchar_array(D->Y_bmc_b,D->Y_mc_length); D->Y_cpop_j = popcount_uchar_array(D->Y_bmc_j,D->Y_mc_length);
+  D->Y_umc_b = (unsigned char *) wkspace_all0c(D->Y_ncols*sizeof(unsigned char)); if (!D->Y_umc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} for (nc=0;nc<D->Y_ncols;nc++){ D->Y_umc_b[nc] = bget__on(D->Y_bmc_b,nc);}
+  D->Y_umc_j = (unsigned char *) wkspace_all0c(D->Y_ncols*sizeof(unsigned char)); if (!D->Y_umc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} for (nc=0;nc<D->Y_ncols;nc++){ D->Y_umc_j[nc] = bget__on(D->Y_bmc_j,nc);}
+  /* initializing T_bmc_b */
+  D->T_ncols_extend = (D->bitj - (D->T_ncols % D->bitj)) % D->bitj; 
+  D->T_mc_length = bsize(D->T_ncols)/* rup(D->T_ncols+D->T_ncols_extend,POPLENGTH)/BIT8 */;
+  if (verbose>1){ printf(" %%%% T_ncols %d, T_ncols_extend %d T_mc_length %d\n",D->T_ncols,D->T_ncols_extend,D->T_mc_length);}
+  D->T_bmc_b = wkspace_all0c(D->T_mc_length); if (!D->T_bmc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} 
+  D->T_bmc_j = wkspace_all0c(D->T_mc_length); if (!D->T_bmc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} 
+  bb = D->T_bmc_b; bj = D->T_bmc_j; for (nx=0;nx<D->T_ncols;nx++){ dtmp = rand01; if (dtmp>mrnd*mrnd){ bset__on(bb,nx);} if (dtmp>mrnd){ bset__on(bj,nx);}} bset__on(bb,0); bset__on(bj,0); bset__on(bb,D->T_ncols-1), bset__on(bj,D->T_ncols-1);
+  sprintf(D->tmpTnchar," %%%% D->T_bmc_b: "); if (verbose>2){ bprintf(D->T_bmc_b,D->bitj,1,D->T_ncols,D->tmpTnchar);}
+  sprintf(D->tmpTnchar," %%%% D->T_bmc_j: "); if (verbose>2){ bprintf(D->T_bmc_j,D->bitj,1,D->T_ncols,D->tmpTnchar);}
+  D->T_cpop_b= popcount_uchar_array(D->T_bmc_b,D->T_mc_length); D->T_cpop_j = popcount_uchar_array(D->T_bmc_j,D->T_mc_length);
+  D->T_umc_b = (unsigned char *) wkspace_all0c(D->T_ncols*sizeof(unsigned char)); if (!D->T_umc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} for (nc=0;nc<D->T_ncols;nc++){ D->T_umc_b[nc] = bget__on(D->T_bmc_b,nc);}
+  D->T_umc_j = (unsigned char *) wkspace_all0c(D->T_ncols*sizeof(unsigned char)); if (!D->T_umc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} for (nc=0;nc<D->T_ncols;nc++){ D->T_umc_j[nc] = bget__on(D->T_bmc_j,nc);}
+  D->QC_AtTYnWtSZn_nrm = NULL; D->QC_AtTAnZtSZn_nrm = NULL; D->QC_AtTYnYtTAn_nrm = NULL; D->QC_AtTAnAtTAn_nrm = NULL;
+  D->QC_sra=NULL; D->QC_ira_a=NULL; D->QC_ira_b=NULL; D->QC_ira_j=NULL;
+  D->QR_sra=NULL; D->QR_ira_a=NULL; D->QR_ira_b=NULL; D->QR_ira_j=NULL; D->QR_nbra=NULL; D->QR_mr_a=NULL; D->QR_mr_b=NULL; D->QR_mr_j=NULL;
+  D->nb_rem=0;D->nb_srt=0; D->out_iteration=0; D->out_xdrop_ij=0; D->out_trace=NULL; D->out_xdrop_a=NULL; D->out_xdrop_b=NULL; D->out_trace_length = 0;
+  if (verbose){ printf(" %% [finished bcc_ajdk_init] D->A_ncols=%d D->Y_ncols=%d D->T_ncols=%d \n",D->A_ncols,D->Y_ncols,D->T_ncols);}
+}
+
+void bcc_single_load_M_An(struct bcc_single *E)
+{
+  /* load from file */
+  int verbose=0;
+  struct bcc_ajdk *D=E->D;
+  int nb_given = E->nb;
+  int nr=0,nb=0,nc=0;
+  int bitj_tmp=0,nrows_tmp=0,ncols_tmp=0,nrows_tmp_extend,brows_tmp;
+  unsigned char *bXra_tmp=NULL;
+  if (verbose){ printf(" %% [entering bcc_single_load_M_An]\n");}
+  /* loading A_bmr_b etc */
+  nb = nb_given; 
+  /* loading A */
+  binary_read_getsize(GLOBAL_A_t_name_[nb],&(D->bitj),&(D->A_ncols),&(E->A_nrows)); //E->A_nrows_total += E->A_nrows;
+  E->A_rbother = (E->A_nrows>0);
+  E->A_nrows_extend = (D->bitj - (E->A_nrows % D->bitj)) % D->bitj;
+  E->A_mr_length = bsize(E->A_nrows)/* rup(E->A_nrows+E->A_nrows_extend,POPLENGTH)/BIT8 */;
+  E->A_bmr_b = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_b){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");}
+  E->A_bmr_j = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_j){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");}
+  E->A_bmr_j_rmv = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_j_rmv){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");}
+  E->A_bmr_j_rtn = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_j_rtn){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");}
+  if (GLOBAL_A_n_rind_[nb]==NULL || !strcmp(GLOBAL_A_n_rind_[nb],"\0")){ for (nr=0;nr<E->A_nrows;nr++){ bset__on(E->A_bmr_b,nr);}}
+  else{ binary_read(GLOBAL_A_n_rind_[nb],&bitj_tmp,&nrows_tmp,&ncols_tmp,&(E->A_bmr_b)); if (nrows_tmp!=E->A_nrows || bitj_tmp!=D->bitj){ printf(" %% Warning! A_: %s; improper mr_b_ %s, nrows %d instead of %d, bitj %d vs %d\n",GLOBAL_A_t_name_[nb],GLOBAL_A_n_rind_[nb],nrows_tmp,E->A_nrows,bitj_tmp,D->bitj);}}
+  for (nr=0;nr<E->A_mr_length;nr++){ E->A_bmr_j[nr] = E->A_bmr_b[nr];}
+  E->A_rpop_b = popcount_uchar_array(E->A_bmr_b,E->A_mr_length);
+  E->A_rpop_j = popcount_uchar_array(E->A_bmr_j,E->A_mr_length);
+  if (verbose>1){ printf(" %% reading GLOBAL_A_t_name_[%d] = %s\n",nb,GLOBAL_A_t_name_[nb]);}
+  if (verbose>1){ printf(" %% read GLOBAL_A_t_name_[%d] %d-x-%d (bitj %d)\n",nb,D->A_ncols,E->A_nrows,D->bitj);}
+  if (verbose>1){ printf(" %% A_nrows_extend_[%d] %d\n",nb,E->A_nrows_extend);}
+  if (verbose>1){ printf(" %% A_mr_length_[%d] %d\n",nb,E->A_mr_length);}
+  if (verbose>1){ printf(" %% reading GLOBAL_A_n_rind_[%d] = %s\n",nb,GLOBAL_A_n_rind_[nb]);} 
+  sprintf(D->tmpAnchar," %%%% E->A_bmr_b_[%.2d]:",nb); if (verbose>2){ bprintf(E->A_bmr_b,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+  sprintf(D->tmpAnchar," %%%% E->A_bmr_j_[%.2d]: ",nb); if (verbose>2){ bprintf(E->A_bmr_j,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+  if (verbose>1){ printf(" %% A_rpop_b_[%d]= %d\n",nb,E->A_rpop_b);}
+  if (verbose>1){ printf(" %% A_rpop_j_[%d] = %d\n",nb,E->A_rpop_j);}
+  E->A_umr_b = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_b){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_b[nr] = bget__on(E->A_bmr_b,nr);}
+  E->A_umr_j = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_j){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j[nr] = bget__on(E->A_bmr_j,nr);}
+  E->A_umr_j_rmv = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_j_rmv){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j_rmv[nr] = bget__on(E->A_bmr_j_rmv,nr);}
+  E->A_umr_j_rtn = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_j_rtn){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j_rtn[nr] = bget__on(E->A_bmr_j_rtn,nr);}
+  if (verbose>1){ printf(" %% generating M_An_[%d]\n",nb);}
+  E->M_An = binary_A_v_gen(D->bitj,E->A_nrows,D->A_ncols,GLOBAL_A_t_name_[nb],NULL,E->A_bmr_b,D->A_bmc_b); M_mxget(E->M_An);
+  E->M_At = binary_A_v_gen(D->bitj,D->A_ncols,E->A_nrows,GLOBAL_A_n_name_[nb],NULL,D->A_bmc_b,E->A_bmr_b); M_mxget(E->M_At);
+  /* loading Z */
+  if (GLOBAL_Z_t_name_[nb]==NULL || !strcmp(GLOBAL_Z_t_name_[nb],"\0")){ bitj_tmp=D->bitj;ncols_tmp=D->A_ncols;E->Z_nrows=0;}
+  else{ binary_read_getsize(GLOBAL_Z_t_name_[nb],&bitj_tmp,&ncols_tmp,&(E->Z_nrows));} //E->Z_nrows_total += E->Z_nrows;
+  if (bitj_tmp!=D->bitj || ncols_tmp!=D->A_ncols){ printf(" %% Warning! Z_: %s; improper bitj %d vs %d, ncols %d vs %d\n",GLOBAL_Z_t_name_[nb],bitj_tmp,D->bitj,ncols_tmp,D->A_ncols);} 
+  E->Z_rbother = (E->Z_nrows>0);
+  E->Z_nrows_extend = (D->bitj - (E->Z_nrows % D->bitj)) % D->bitj;
+  E->Z_mr_length = bsize(E->Z_nrows)/* rup(E->Z_nrows+E->Z_nrows_extend,POPLENGTH)/BIT8 */;
+  E->Z_bmr_b = wkspace_all0c(E->Z_mr_length); if (!E->Z_bmr_b){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");}
+  E->Z_bmr_j = wkspace_all0c(E->Z_mr_length); if (!E->Z_bmr_j){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");}
+  if (GLOBAL_Z_n_rind_[nb]==NULL || !strcmp(GLOBAL_Z_n_rind_[nb],"\0")){ for (nr=0;nr<E->Z_nrows;nr++){ bset__on(E->Z_bmr_b,nr);}}
+  else{ binary_read(GLOBAL_Z_n_rind_[nb],&bitj_tmp,&nrows_tmp,&ncols_tmp,&(E->Z_bmr_b)); if (nrows_tmp!=E->Z_nrows || bitj_tmp!=D->bitj){ printf(" %% Warning! Z_: %s; improper mr_b_ %s, nrows %d instead of %d, bitj %d vs %d\n",GLOBAL_Z_t_name_[nb],GLOBAL_Z_n_rind_[nb],nrows_tmp,E->Z_nrows,bitj_tmp,D->bitj);}}
+  for (nr=0;nr<E->Z_mr_length;nr++){ E->Z_bmr_j[nr] = E->Z_bmr_b[nr];}
+  E->Z_rpop_b = popcount_uchar_array(E->Z_bmr_b,E->Z_mr_length);
+  E->Z_rpop_j = popcount_uchar_array(E->Z_bmr_j,E->Z_mr_length);
+  if (verbose>1){ printf(" %% reading GLOBAL_Z_t_name_[%d] = %s\n",nb,GLOBAL_Z_t_name_[nb]);}
+  if (verbose>1){ printf(" %% read GLOBAL_Z_t_name_[%d] %d-x-%d (bitj %d)\n",nb,D->A_ncols,E->Z_nrows,D->bitj);}
+  if (verbose>1){ printf(" %% Z_nrows_extend_[%d] %d\n",nb,E->Z_nrows_extend);}
+  if (verbose>1){ printf(" %% Z_mr_length_[%d] %d\n",nb,E->Z_mr_length);}
+  if (verbose>1){ printf(" %% reading Z_n_rind_[%d] = %s\n",nb,GLOBAL_Z_n_rind_[nb]);} 
+  sprintf(D->tmpZnchar," %%%% E->Z_bmr_b_[%.2d]:",nb); if (verbose>2){ bprintf(E->Z_bmr_b,D->bitj,1,E->Z_nrows,D->tmpZnchar);}
+  sprintf(D->tmpZnchar," %%%% E->Z_bmr_j_[%.2d]: ",nb); if (verbose>2){ bprintf(E->Z_bmr_j,D->bitj,1,E->Z_nrows,D->tmpZnchar);}
+  if (verbose>1){ printf(" %% Z_rpop_b_[%d]= %d\n",nb,E->Z_rpop_b);}
+  if (verbose>1){ printf(" %% Z_rpop_j_[%d] = %d\n",nb,E->Z_rpop_j);}
+  E->Z_umr_b = (unsigned char *) wkspace_all0c(E->Z_nrows*sizeof(unsigned char)); if (!E->Z_umr_b){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");} for (nr=0;nr<E->Z_nrows;nr++){ E->Z_umr_b[nr] = bget__on(E->Z_bmr_b,nr);}
+  E->Z_umr_j = (unsigned char *) wkspace_all0c(E->Z_nrows*sizeof(unsigned char)); if (!E->Z_umr_j){ printf(" %% Warning! not enough memory in bcc_single_load_M_An\n");} for (nr=0;nr<E->Z_nrows;nr++){ E->Z_umr_j[nr] = bget__on(E->Z_bmr_j,nr);}
+  if (verbose>1){ printf(" %% generating M_Zn_[%d]\n",nb);}
+  if (GLOBAL_Z_t_name_[nb]==NULL || !strcmp(GLOBAL_Z_t_name_[nb],"\0")){ E->M_Zn = binary_A_v_gen(D->bitj,E->Z_nrows,D->A_ncols,NULL,NULL,E->Z_bmr_b,D->A_bmc_b);}
+  else{ E->M_Zn = binary_A_v_gen(D->bitj,E->Z_nrows,D->A_ncols,GLOBAL_Z_t_name_[nb],NULL,E->Z_bmr_b,D->A_bmc_b);} M_mxget(E->M_Zn);
+  if (GLOBAL_Z_n_name_[nb]==NULL || !strcmp(GLOBAL_Z_n_name_[nb],"\0")){ E->M_Zt = binary_A_v_gen(D->bitj,D->A_ncols,E->Z_nrows,NULL,NULL,D->A_bmc_b,E->Z_bmr_b);}
+  else{ E->M_Zt = binary_A_v_gen(D->bitj,D->A_ncols,E->Z_nrows,GLOBAL_Z_n_name_[nb],NULL,D->A_bmc_b,E->Z_bmr_b);} M_mxget(E->M_Zt);
+  /* loading Y */
+  if (GLOBAL_Y_t_name_[nb]==NULL || !strcmp(GLOBAL_Y_t_name_[nb],"\0")){ bitj_tmp=D->bitj;D->Y_ncols=0;nrows_tmp=E->A_nrows;}
+  else{ binary_read_getsize(GLOBAL_Y_t_name_[nb],&bitj_tmp,&(D->Y_ncols),&nrows_tmp);}
+  if (bitj_tmp!=D->bitj || nrows_tmp!=E->A_nrows){ printf(" %% Warning! Y_: %s; improper bitj %d vs %d, nrows %d vs %d\n",GLOBAL_Y_t_name_[nb],bitj_tmp,D->bitj,nrows_tmp,E->A_nrows);}
+  if (GLOBAL_Y_t_name_[nb]==NULL || !strcmp(GLOBAL_Y_t_name_[nb],"\0")){ E->M_Yn = binary_A_v_gen(D->bitj,E->A_nrows,D->Y_ncols,NULL,NULL,E->A_bmr_b,D->Y_bmc_b);}
+  else{ E->M_Yn = binary_A_v_gen(D->bitj,E->A_nrows,D->Y_ncols,GLOBAL_Y_t_name_[nb],NULL,E->A_bmr_b,D->Y_bmc_b);} M_mxget(E->M_Yn);
+  if (GLOBAL_Y_n_name_[nb]==NULL || !strcmp(GLOBAL_Y_n_name_[nb],"\0")){ E->M_Yt = binary_A_v_gen(D->bitj,D->Y_ncols,E->A_nrows,NULL,NULL,D->Y_bmc_b,E->A_bmr_b);}
+  else{ E->M_Yt = binary_A_v_gen(D->bitj,D->Y_ncols,E->A_nrows,GLOBAL_Y_n_name_[nb],NULL,D->Y_bmc_b,E->A_bmr_b);} M_mxget(E->M_Yt);
+  /* loading W */
+  if (GLOBAL_W_t_name_[nb]==NULL || !strcmp(GLOBAL_W_t_name_[nb],"\0")){ bitj_tmp=D->bitj;ncols_tmp=D->Y_ncols;nrows_tmp=E->Z_nrows;}
+  else{ binary_read_getsize(GLOBAL_W_t_name_[nb],&bitj_tmp,&ncols_tmp,&nrows_tmp);}
+  if (bitj_tmp!=D->bitj || ncols_tmp!=D->Y_ncols || nrows_tmp!=E->Z_nrows){ printf(" %% Warning! W_: %s; improper bitj %d vs %d, ncols %d vs %d, nrows %d vs %d\n",GLOBAL_W_t_name_[nb],bitj_tmp,D->bitj,ncols_tmp,D->Y_ncols,nrows_tmp,E->Z_nrows);}
+  if (GLOBAL_W_t_name_[nb]==NULL || !strcmp(GLOBAL_W_t_name_[nb],"\0")){ E->M_Wn = binary_A_v_gen(D->bitj,E->Z_nrows,D->Y_ncols,NULL,NULL,E->Z_bmr_b,D->Y_bmc_b);}
+  else{ E->M_Wn = binary_A_v_gen(D->bitj,E->Z_nrows,D->Y_ncols,GLOBAL_W_t_name_[nb],NULL,E->Z_bmr_b,D->Y_bmc_b);} M_mxget(E->M_Wn);
+  if (GLOBAL_W_n_name_[nb]==NULL || !strcmp(GLOBAL_W_n_name_[nb],"\0")){ E->M_Wt = binary_A_v_gen(D->bitj,D->Y_ncols,E->Z_nrows,NULL,NULL,D->Y_bmc_b,E->Z_bmr_b);}
+  else{ E->M_Wt = binary_A_v_gen(D->bitj,D->Y_ncols,E->Z_nrows,GLOBAL_W_n_name_[nb],NULL,D->Y_bmc_b,E->Z_bmr_b);} M_mxget(E->M_Wt);
+  /* loading T */
+  if (GLOBAL_T_t_name_[nb]==NULL || !strcmp(GLOBAL_T_t_name_[nb],"\0")){ bitj_tmp=D->bitj;D->T_ncols=1;nrows_tmp=E->A_nrows;}
+  else{ binary_read_getsize(GLOBAL_T_t_name_[nb],&bitj_tmp,&(D->T_ncols),&nrows_tmp);}
+  if (bitj_tmp!=D->bitj || nrows_tmp!=E->A_nrows){ printf(" %% Warning! T_: %s; improper bitj %d vs %d, nrows %d vs %d\n",GLOBAL_T_t_name_[nb],bitj_tmp,D->bitj,nrows_tmp,E->A_nrows);}
+  if (GLOBAL_T_t_name_[nb]==NULL || !strcmp(GLOBAL_T_t_name_[nb],"\0")){ 
+    bitj_tmp = BITJ; nrows_tmp = 1; ncols_tmp = E->A_nrows; nrows_tmp_extend = (bitj_tmp - (nrows_tmp % bitj_tmp)) % bitj_tmp; brows_tmp = bsize(nrows_tmp)/* (rup(nrows_tmp + nrows_tmp_extend,POPLENGTH))/BIT8 */;
+    bXra_tmp = wkspace_all0c(ncols_tmp*brows_tmp); for (nc=0;nc<ncols_tmp;nc++){ bXra_tmp[nc*brows_tmp] |=  (1 << 7);}
+    E->M_Tn = binary_A_v_gen(D->bitj,E->A_nrows,D->T_ncols,NULL,bXra_tmp,E->A_bmr_b,D->T_bmc_b);}
+  else{ E->M_Tn = binary_A_v_gen(D->bitj,E->A_nrows,D->T_ncols,GLOBAL_T_t_name_[nb],NULL,E->A_bmr_b,D->T_bmc_b);} M_mxget(E->M_Tn);
+  if (GLOBAL_T_n_name_[nb]==NULL || !strcmp(GLOBAL_T_n_name_[nb],"\0")){ 
+    bitj_tmp = BITJ; nrows_tmp = E->A_nrows; ncols_tmp = 1; nrows_tmp_extend = (bitj_tmp - (nrows_tmp % bitj_tmp)) % bitj_tmp; brows_tmp = bsize(nrows_tmp)/* (rup(nrows_tmp + nrows_tmp_extend,POPLENGTH))/BIT8 */;
+    bXra_tmp = wkspace_all0c(ncols_tmp*brows_tmp); for (nr=0;nr<nrows_tmp;nr++){ bset__on(bXra_tmp,nr);}
+    E->M_Tt = binary_A_v_gen(D->bitj,D->T_ncols,E->A_nrows,NULL,bXra_tmp,D->T_bmc_b,E->A_bmr_b);}
+  else{ E->M_Tt = binary_A_v_gen(D->bitj,D->T_ncols,E->A_nrows,GLOBAL_T_n_name_[nb],NULL,D->T_bmc_b,E->A_bmr_b);} M_mxget(E->M_Tt);
+  /* loading S */
+  if (GLOBAL_S_t_name_[nb]==NULL || !strcmp(GLOBAL_S_t_name_[nb],"\0")){ bitj_tmp=D->bitj;ncols_tmp=D->T_ncols;nrows_tmp=E->Z_nrows;}
+  else{ binary_read_getsize(GLOBAL_S_t_name_[nb],&bitj_tmp,&ncols_tmp,&nrows_tmp);}
+  if (bitj_tmp!=D->bitj || ncols_tmp!=D->T_ncols || nrows_tmp!=E->Z_nrows){ printf(" %% Warning! S_: %s; improper bitj %d vs %d, ncols %d vs %d, nrows %d vs %d\n",GLOBAL_S_t_name_[nb],bitj_tmp,D->bitj,ncols_tmp,D->T_ncols,nrows_tmp,E->Z_nrows);}
+  if (GLOBAL_S_t_name_[nb]==NULL || !strcmp(GLOBAL_S_t_name_[nb],"\0")){ 
+    bitj_tmp = BITJ; nrows_tmp = 1; ncols_tmp = E->Z_nrows; nrows_tmp_extend = (bitj_tmp - (nrows_tmp % bitj_tmp)) % bitj_tmp; brows_tmp = bsize(nrows_tmp)/* (rup(nrows_tmp + nrows_tmp_extend,POPLENGTH))/BIT8 */;
+    bXra_tmp = wkspace_all0c(ncols_tmp*brows_tmp); for (nc=0;nc<ncols_tmp;nc++){ bXra_tmp[nc*brows_tmp] |=  (1 << 7);}
+    E->M_Sn = binary_A_v_gen(D->bitj,E->Z_nrows,D->T_ncols,NULL,bXra_tmp,E->Z_bmr_b,D->T_bmc_b);}
+  else{ E->M_Sn = binary_A_v_gen(D->bitj,E->Z_nrows,D->T_ncols,GLOBAL_S_t_name_[nb],NULL,E->Z_bmr_b,D->T_bmc_b);} M_mxget(E->M_Sn);
+  if (GLOBAL_S_n_name_[nb]==NULL || !strcmp(GLOBAL_S_n_name_[nb],"\0")){ 
+    bitj_tmp = BITJ; nrows_tmp = E->Z_nrows; ncols_tmp = 1; nrows_tmp_extend = (bitj_tmp - (nrows_tmp % bitj_tmp)) % bitj_tmp; brows_tmp = bsize(nrows_tmp)/* (rup(nrows_tmp + nrows_tmp_extend,POPLENGTH))/BIT8 */;
+    bXra_tmp = wkspace_all0c(ncols_tmp*brows_tmp); for (nr=0;nr<nrows_tmp;nr++){ bset__on(bXra_tmp,nr);}
+    E->M_St = binary_A_v_gen(D->bitj,D->T_ncols,E->Z_nrows,NULL,bXra_tmp,D->T_bmc_b,E->Z_bmr_b);}
+  else{ E->M_St = binary_A_v_gen(D->bitj,D->T_ncols,E->Z_nrows,GLOBAL_S_n_name_[nb],NULL,D->T_bmc_b,E->Z_bmr_b);} M_mxget(E->M_St);
+  E->QR_AnZtSWnYt_nrm = NULL; E->QR_AnZtSZnAt_nrm = NULL; E->QR_AnAtTYnYt_nrm = NULL; E->QR_AnAtTAnAt_nrm = NULL; E->QR_mr_a=NULL; E->QR_mr_b=NULL;
+  /* initializing a,j,y,t,k,h,u,r,z,v */
+  E->M_an = NULL; E->M_at = NULL; E->M_jn = NULL; E->M_jt = NULL; E->M_yn = NULL; E->M_yt; E->M_tt;
+  E->M_kn = NULL; E->M_kt = NULL; E->M_hn = NULL; E->M_ht = NULL; E->M_un = NULL; E->M_ut; E->M_rt;
+  E->M_zn = NULL; E->M_zt = NULL; E->M_vn = NULL; E->M_vt = NULL;
+  E->M_an = binary_A_v_gen(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
+  E->M_jn = binary_A_v_gen(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
+  E->M_kn = binary_A_v_gen(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
+  E->M_hn = binary_A_v_gen(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
+  E->M_at = binary_A_v_gen(D->bitj,D->A_ncols,E->A_nrows,NULL,E->M_At->wX,E->M_At->mr_b,E->M_At->mc_b);
+  E->M_jt = binary_A_v_gen(D->bitj,D->A_ncols,E->A_nrows,NULL,E->M_At->wX,E->M_At->mr_b,E->M_At->mc_b);
+  E->M_kt = binary_A_v_gen(D->bitj,D->A_ncols,E->A_nrows,NULL,E->M_At->wX,E->M_At->mr_b,E->M_At->mc_b);
+  E->M_ht = binary_A_v_gen(D->bitj,D->A_ncols,E->A_nrows,NULL,E->M_At->wX,E->M_At->mr_b,E->M_At->mc_b);
+  E->M_yn = binary_A_v_gen(D->bitj,E->A_nrows,D->Y_ncols,NULL,E->M_Yn->wX,E->M_Yn->mr_b,E->M_Yn->mc_b);
+  E->M_un = binary_A_v_gen(D->bitj,E->A_nrows,D->Y_ncols,NULL,E->M_Yn->wX,E->M_Yn->mr_b,E->M_Yn->mc_b);
+  E->M_yt = binary_A_v_gen(D->bitj,D->Y_ncols,E->A_nrows,NULL,E->M_Yt->wX,E->M_Yt->mr_b,E->M_Yt->mc_b);
+  E->M_ut = binary_A_v_gen(D->bitj,D->Y_ncols,E->A_nrows,NULL,E->M_Yt->wX,E->M_Yt->mr_b,E->M_Yt->mc_b);
+  E->M_zn = binary_A_v_gen(D->bitj,E->Z_nrows,D->A_ncols,NULL,E->M_Zn->wX,E->M_Zn->mr_b,E->M_Zn->mc_b);
+  E->M_vn = binary_A_v_gen(D->bitj,E->Z_nrows,D->A_ncols,NULL,E->M_Zn->wX,E->M_Zn->mr_b,E->M_Zn->mc_b);
+  E->M_zt = binary_A_v_gen(D->bitj,D->A_ncols,E->Z_nrows,NULL,E->M_Zt->wX,E->M_Zt->mr_b,E->M_Zt->mc_b);
+  E->M_vt = binary_A_v_gen(D->bitj,D->A_ncols,E->Z_nrows,NULL,E->M_Zt->wX,E->M_Zt->mr_b,E->M_Zt->mc_b);
+  E->M_tt = binary_A_v_gen(D->bitj,D->T_ncols,E->A_nrows,NULL,E->M_Tt->wX,E->M_Tt->mr_b,E->M_Tt->mc_b);
+  E->M_rt = binary_A_v_gen(D->bitj,D->T_ncols,E->A_nrows,NULL,E->M_Tt->wX,E->M_Tt->mr_b,E->M_Tt->mc_b);
+  if (verbose){ printf(" %% [finished bcc_single_load_M_An]\n");}
+}
+
+void bcc_single_init_M_An(char *error_vs_speed,double mrnd,struct bcc_single *E)
+{
+  /* initialize based on test parameters */
+  int verbose=0;
+  struct bcc_ajdk *D=E->D;
+  int nb_given = E->nb;
+  int nr=0,nb=0,nc=0;
+  int bitj_tmp=0,nrows_tmp=0,ncols_tmp=0,nrows_tmp_extend,brows_tmp;
+  unsigned char *bXra_tmp=NULL;
+  unsigned char *bb=NULL,*bj=NULL,*bn=NULL,*bt=NULL,*bn2=NULL,*bt2=NULL;
+  double dtmp=0; int nx=0;
+  if (verbose){ printf(" %% [entering bcc_single_init_M_An]\n");}
+  nb = nb_given;
+  /* initializing A */
+  E->A_nrows = maximum(0,GLOBAL_TEST_A_n_rows + (nb_given % 3) - 1);
+  E->A_rbother = (E->A_nrows>0);
+  E->A_nrows_extend = (D->bitj - (E->A_nrows % D->bitj)) % D->bitj;
+  E->A_mr_length = bsize(E->A_nrows)/* rup(E->A_nrows+E->A_nrows_extend,POPLENGTH)/BIT8 */;
+  E->A_bmr_b = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_b){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");}
+  E->A_bmr_j = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_j){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");}
+  bb = E->A_bmr_b; bj = E->A_bmr_j; for (nx=0;nx<E->A_nrows;nx++){ dtmp = rand01; if (dtmp>mrnd*mrnd){ bset__on(bb,nx);} if (dtmp>mrnd){ bset__on(bj,nx);}}
+  sprintf(D->tmpAnchar," %%%% E->A_bmr_b: "); if (verbose>2){ bprintf(E->A_bmr_b,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+  sprintf(D->tmpAnchar," %%%% E->A_bmr_j: "); if (verbose>2){ bprintf(E->A_bmr_j,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+  E->A_bmr_j_rmv = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_j_rmv){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");}
+  E->A_bmr_j_rtn = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_j_rtn){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");}
+  E->A_rpop_b = popcount_uchar_array(E->A_bmr_b,E->A_mr_length);
+  E->A_rpop_j = popcount_uchar_array(E->A_bmr_j,E->A_mr_length);
+  E->A_umr_b = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_b){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_b[nr] = bget__on(E->A_bmr_b,nr);}
+  E->A_umr_j = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_j){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j[nr] = bget__on(E->A_bmr_j,nr);}
+  E->A_umr_j_rmv = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_j_rmv){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j_rmv[nr] = bget__on(E->A_bmr_j_rmv,nr);}
+  E->A_umr_j_rtn = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_j_rtn){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j_rtn[nr] = bget__on(E->A_bmr_j_rtn,nr);}
+  if (verbose>1){ printf(" %% generating E->M_An\n",nb);}
+  bn = NULL; bt = NULL; E->M_An = NULL; E->M_At = NULL;
+  binary_M_setup_test_excerpt_1(error_vs_speed,0.5,E->A_nrows,D->A_ncols,E->A_bmr_b,D->A_bmc_b,&(bn),&(bt));
+  binary_M_setup_test_excerpt_2(E->A_nrows,D->A_ncols,bn,bt,E->A_bmr_b,E->A_bmr_j,D->A_bmc_b,D->A_bmc_j,&(E->M_An),&(E->M_At));
+  /* initializing Z */
+  E->Z_nrows = maximum(0,GLOBAL_TEST_Z_n_rows + (nb_given % 5) - 2);
+  E->Z_rbother = (E->Z_nrows>0);
+  E->Z_nrows_extend = (D->bitj - (E->Z_nrows % D->bitj)) % D->bitj;
+  E->Z_mr_length = bsize(E->Z_nrows)/* rup(E->Z_nrows+E->Z_nrows_extend,POPLENGTH)/BIT8 */;
+  E->Z_bmr_b = wkspace_all0c(E->Z_mr_length); if (!E->Z_bmr_b){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");}
+  E->Z_bmr_j = wkspace_all0c(E->Z_mr_length); if (!E->Z_bmr_j){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");}
+  bb = E->Z_bmr_b; bj = E->Z_bmr_j; for (nx=0;nx<E->Z_nrows;nx++){ dtmp = rand01; if (dtmp>mrnd*mrnd){ bset__on(bb,nx);} if (dtmp>mrnd){ bset__on(bj,nx);}}
+  sprintf(D->tmpZnchar," %%%% E->Z_bmr_b: "); if (verbose>2){ bprintf(E->Z_bmr_b,D->bitj,1,E->Z_nrows,D->tmpZnchar);}
+  sprintf(D->tmpZnchar," %%%% E->Z_bmr_j: "); if (verbose>2){ bprintf(E->Z_bmr_j,D->bitj,1,E->Z_nrows,D->tmpZnchar);}
+  E->Z_rpop_b = popcount_uchar_array(E->Z_bmr_b,E->Z_mr_length);
+  E->Z_rpop_j = popcount_uchar_array(E->Z_bmr_j,E->Z_mr_length);
+  E->Z_umr_b = (unsigned char *) wkspace_all0c(E->Z_nrows*sizeof(unsigned char)); if (!E->Z_umr_b){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");} for (nr=0;nr<E->Z_nrows;nr++){ E->Z_umr_b[nr] = bget__on(E->Z_bmr_b,nr);}
+  E->Z_umr_j = (unsigned char *) wkspace_all0c(E->Z_nrows*sizeof(unsigned char)); if (!E->Z_umr_j){ printf(" %% Warning! not enough memory in bcc_single_init_M_An\n");} for (nr=0;nr<E->Z_nrows;nr++){ E->Z_umr_j[nr] = bget__on(E->Z_bmr_j,nr);}
+  if (verbose>1){ printf(" %% generating E->M_Zn\n",nb);}
+  bn = NULL; bt = NULL; E->M_Zn = NULL; E->M_Zt = NULL;
+  binary_M_setup_test_excerpt_1(error_vs_speed,0.5,E->Z_nrows,D->A_ncols,E->Z_bmr_b,D->A_bmc_b,&(bn),&(bt));
+  binary_M_setup_test_excerpt_2(E->Z_nrows,D->A_ncols,bn,bt,E->Z_bmr_b,E->Z_bmr_j,D->A_bmc_b,D->A_bmc_j,&(E->M_Zn),&(E->M_Zt));
+  /* initializing Y */
+  bn = NULL; bt = NULL; E->M_Yn = NULL; E->M_Yt = NULL;
+  binary_M_setup_test_excerpt_1(error_vs_speed,0.5,E->A_nrows,D->Y_ncols,E->A_bmr_b,D->Y_bmc_b,&(bn),&(bt));
+  binary_M_setup_test_excerpt_2(E->A_nrows,D->Y_ncols,bn,bt,E->A_bmr_b,E->A_bmr_j,D->Y_bmc_b,D->Y_bmc_j,&(E->M_Yn),&(E->M_Yt));
+  /* initializing W */
+  bn = NULL; bt = NULL; E->M_Wn = NULL; E->M_Wt = NULL;
+  binary_M_setup_test_excerpt_1(error_vs_speed,0.5,E->Z_nrows,D->Y_ncols,E->Z_bmr_b,D->Y_bmc_b,&(bn),&(bt));
+  binary_M_setup_test_excerpt_2(E->Z_nrows,D->Y_ncols,bn,bt,E->Z_bmr_b,E->Z_bmr_j,D->Y_bmc_b,D->Y_bmc_j,&(E->M_Wn),&(E->M_Wt));
+  /* initializing T */
+  bn = NULL; bt = NULL; E->M_Tn = NULL; E->M_Tt = NULL;
+  binary_M_setup_test_excerpt_1(error_vs_speed,0.5,E->A_nrows,D->T_ncols,E->A_bmr_b,D->T_bmc_b,&(bn),&(bt));
+  for (nx=0;nx<E->A_rpop_b;nx++){ bn2 = &(bn[nx*bsize(D->T_ncols)]); bset__on(bn2,0);}
+  for (nx=0;nx<E->A_nrows;nx++){ bt2 = &(bt[0*bsize(E->A_nrows)]); bset__on(bt2,nx);}
+  binary_M_setup_test_excerpt_2(E->A_nrows,D->T_ncols,bn,bt,E->A_bmr_b,E->A_bmr_j,D->T_bmc_b,D->T_bmc_j,&(E->M_Tn),&(E->M_Tt));
+  /* initializing S */
+  bn = NULL; bt = NULL; E->M_Sn = NULL; E->M_St = NULL;
+  binary_M_setup_test_excerpt_1(error_vs_speed,0.5,E->Z_nrows,D->T_ncols,E->Z_bmr_b,D->T_bmc_b,&(bn),&(bt));
+  for (nx=0;nx<E->Z_rpop_b;nx++){ bn2 = &(bn[nx*bsize(D->T_ncols)]); bset__on(bn2,0);}
+  for (nx=0;nx<E->Z_nrows;nx++){ bt2 = &(bt[0*bsize(E->Z_nrows)]); bset__on(bt2,nx);}
+  binary_M_setup_test_excerpt_2(E->Z_nrows,D->T_ncols,bn,bt,E->Z_bmr_b,E->Z_bmr_j,D->T_bmc_b,D->T_bmc_j,&(E->M_Sn),&(E->M_St));
+  /* initializing E->QR_AnZtSWnYt_nrm */
+  E->QR_AnZtSWnYt_nrm = NULL; E->QR_AnZtSZnAt_nrm = NULL; E->QR_AnAtTYnYt_nrm = NULL; E->QR_AnAtTAnAt_nrm = NULL; E->QR_mr_a=NULL; E->QR_mr_b=NULL;
+  /* initializing a,j,y,t,k,h,u,r,z,v */
+  E->M_an = NULL; E->M_at = NULL; E->M_jn = NULL; E->M_jt = NULL; E->M_yn = NULL; E->M_yt; E->M_tt;
+  E->M_kn = NULL; E->M_kt = NULL; E->M_hn = NULL; E->M_ht = NULL; E->M_un = NULL; E->M_ut; E->M_rt;
+  E->M_zn = NULL; E->M_zt = NULL; E->M_vn = NULL; E->M_vt = NULL;
+  E->M_an = binary_A_v_gen(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
+  E->M_jn = binary_A_v_gen(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
+  E->M_kn = binary_A_v_gen(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
+  E->M_hn = binary_A_v_gen(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
+  E->M_at = binary_A_v_gen(D->bitj,D->A_ncols,E->A_nrows,NULL,E->M_At->wX,E->M_At->mr_b,E->M_At->mc_b);
+  E->M_jt = binary_A_v_gen(D->bitj,D->A_ncols,E->A_nrows,NULL,E->M_At->wX,E->M_At->mr_b,E->M_At->mc_b);
+  E->M_kt = binary_A_v_gen(D->bitj,D->A_ncols,E->A_nrows,NULL,E->M_At->wX,E->M_At->mr_b,E->M_At->mc_b);
+  E->M_ht = binary_A_v_gen(D->bitj,D->A_ncols,E->A_nrows,NULL,E->M_At->wX,E->M_At->mr_b,E->M_At->mc_b);
+  E->M_yn = binary_A_v_gen(D->bitj,E->A_nrows,D->Y_ncols,NULL,E->M_Yn->wX,E->M_Yn->mr_b,E->M_Yn->mc_b);
+  E->M_un = binary_A_v_gen(D->bitj,E->A_nrows,D->Y_ncols,NULL,E->M_Yn->wX,E->M_Yn->mr_b,E->M_Yn->mc_b);
+  E->M_yt = binary_A_v_gen(D->bitj,D->Y_ncols,E->A_nrows,NULL,E->M_Yt->wX,E->M_Yt->mr_b,E->M_Yt->mc_b);
+  E->M_ut = binary_A_v_gen(D->bitj,D->Y_ncols,E->A_nrows,NULL,E->M_Yt->wX,E->M_Yt->mr_b,E->M_Yt->mc_b);
+  E->M_zn = binary_A_v_gen(D->bitj,E->Z_nrows,D->A_ncols,NULL,E->M_Zn->wX,E->M_Zn->mr_b,E->M_Zn->mc_b);
+  E->M_vn = binary_A_v_gen(D->bitj,E->Z_nrows,D->A_ncols,NULL,E->M_Zn->wX,E->M_Zn->mr_b,E->M_Zn->mc_b);
+  E->M_zt = binary_A_v_gen(D->bitj,D->A_ncols,E->Z_nrows,NULL,E->M_Zt->wX,E->M_Zt->mr_b,E->M_Zt->mc_b);
+  E->M_vt = binary_A_v_gen(D->bitj,D->A_ncols,E->Z_nrows,NULL,E->M_Zt->wX,E->M_Zt->mr_b,E->M_Zt->mc_b);
+  E->M_tt = binary_A_v_gen(D->bitj,D->T_ncols,E->A_nrows,NULL,E->M_Tt->wX,E->M_Tt->mr_b,E->M_Tt->mc_b);
+  E->M_rt = binary_A_v_gen(D->bitj,D->T_ncols,E->A_nrows,NULL,E->M_Tt->wX,E->M_Tt->mr_b,E->M_Tt->mc_b);
+  if (verbose){ printf(" %% [finished bcc_single_init_M_An]\n");}
+}
+
+void bcc_get_xdrop(struct bcc_ajdk *D,int *rdrop_p,int *cdrop_p)
+{
+  int verbose=0; double dbl1=1.000000-0.000001; double lrij=D->A_rpop_j_total,lcij=D->A_cpop_j; 
+  double gamma = GLOBAL_gamma,gamma_tmp_row=0,ammag_tmp_row=0,gamma_tmp_col=0,ammag_tmp_col=0; int rdrop=0;int cdrop=0;
+  if (verbose){ printf(" %% [entering bcc_gamma_xdrop] gamma %0.3f, lrij %d lcij %d\n",gamma,(int)lrij,(int)lcij);}
+  /*
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % if gamma=0, then we set up gamma_tmp_row to remove a single row ;
+    if (gamma>0); gamma_tmp_row = max(gamma,(1-1e-6)/length(tmp_rij)); ammag_tmp_row = min(1-gamma,(length(tmp_rij)-1)/length(tmp_rij));
+    elseif gamma<=0; gamma_tmp_row = (1-1e-6)/length(tmp_rij); ammag_tmp_row = (length(tmp_rij)-1)/length(tmp_rij);
+    end;%if gamma==0;
+    % setting up ammag_tmp_col to remove as many cols as necessary so that log(ncols_pos)/log(nrows_pos) = log(ncols_pre)/log(nrows_pre) ;
+    % i.e., log(ammag_tmp_col*ncols_pre)/log(ammag_tmp_row*nrows_pre) = log(ncols_pre)/log(nrows_pre) ;
+    % i.e., log(ammag_tmp_col*ncols_pre) = (log(ammag_tmp_row) + log(nrows_pre))*log(ncols_pre)/log(nrows_pre) ;
+    % i.e., log(ammag_tmp_col) = log(ammag_tmp_row)*log(ncols_pre)/log(nrows_pre) ;
+    % i.e., ammag_tmp_col = exp(log(ammag_tmp_row)*log(ncols_pre)/log(nrows_pre));
+    ammag_tmp_col = exp(log(ammag_tmp_row)*log(length(tmp_cij))/log(length(tmp_rij)));
+    gamma_tmp_col = 1-ammag_tmp_col-1e-6;
+    rdrop = r_rem{iteration}(tmp_rij(1:ceil(gamma_tmp_row*end))); cdrop = c_rem{iteration}(tmp_cij(1:ceil(gamma_tmp_col*end)));
+    rkeep = r_rem{iteration}(tmp_rij(ceil(gamma_tmp_row*end)+1:end)); ckeep = c_rem{iteration}(tmp_cij(ceil(gamma_tmp_col*end)+1:end));
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Note that we can perform similar row and col removal using sqrt or linear scaling, e.g., :
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    M=5e3;N=300e3;g=0.1;nr=M;nc=N;ii=1;nr_(ii)=nr;nc_(ii)=nc;
+    while(nr>1); gr=g;ar=min(1-g,(nr-1)/nr);ac=exp(log(ar)*log(nc)/log(nr));gc=1-1e-6-ac;
+    rdrop=ceil(gr*nr);cdrop=ceil(gc*nc);nr=nr-rdrop;nc=nc-cdrop;ii=ii+1;nr_(ii)=nr;nc_(ii)=nc;end; % log-scaling ;
+    figure;subplot(2,3,1);plot(nr_,nc_,'o-');subplot(2,3,2);plot(log(nr_),log(nc_),'o-'); subplot(2,3,3);plot(sqrt(nr_),sqrt(nc_),'o-'); 
+    subplot(2,3,4);plot(1:ii,nr_./nc_,'o-');subplot(2,3,5);plot(1:ii,log(nr_)./log(nc_),'o-');subplot(2,3,6);plot(1:ii,sqrt(nr_)./sqrt(nc_),'o-'); 
+    M=5e3;N=300e3;g=0.1;nr=M;nc=N;ii=1;nr_(ii)=nr;nc_(ii)=nc;
+    while(nr>1); gr=g;gc=g;
+    rdrop=ceil(gr*nr);cdrop=ceil(gc*nc);nr=nr-rdrop;nc=nc-cdrop;ii=ii+1;nr_(ii)=nr;nc_(ii)=nc;end; % linear scaling ;
+    figure;subplot(2,3,1);plot(nr_,nc_,'o-');subplot(2,3,2);plot(log(nr_),log(nc_),'o-'); subplot(2,3,3);plot(sqrt(nr_),sqrt(nc_),'o-'); 
+    subplot(2,3,4);plot(1:ii,nr_./nc_,'o-');subplot(2,3,5);plot(1:ii,log(nr_)./log(nc_),'o-');subplot(2,3,6);plot(1:ii,sqrt(nr_)./sqrt(nc_),'o-'); 
+    M=5e3;N=300e3;g=0.1;nr=M;nc=N;ii=1;nr_(ii)=nr;nc_(ii)=nc;
+    while(nr>1); gr=g;ar=min(1-g,(nr-1)/nr);ac=(1/nc)*(sqrt(ar*nr)*sqrt(nc)/sqrt(nr)).^2;gc=1-1e-6-ac;
+    rdrop=ceil(gr*nr);cdrop=ceil(gc*nc);nr=nr-rdrop;nc=nc-cdrop;ii=ii+1;nr_(ii)=nr;nc_(ii)=nc;end; % sqrt-scaling ;
+    figure;subplot(2,3,1);plot(nr_,nc_,'o-');subplot(2,3,2);plot(log(nr_),log(nc_),'o-'); subplot(2,3,3);plot(sqrt(nr_),sqrt(nc_),'o-'); 
+    subplot(2,3,4);plot(1:ii,nr_./nc_,'o-');subplot(2,3,5);plot(1:ii,log(nr_)./log(nc_),'o-');subplot(2,3,6);plot(1:ii,sqrt(nr_)./sqrt(nc_),'o-'); 
+  */
+  if (lrij<=2){ /* drop everything */ rdrop = lrij; cdrop = lcij;}
+  else /* if lrij>2 */{
+    if (gamma>0){ gamma_tmp_row = maximum(gamma,(dbl1)/lrij); ammag_tmp_row = minimum(1-gamma,(lrij-1)/lrij);}
+    else /* if gamma<=0 */{ gamma_tmp_row = (dbl1)/lrij; ammag_tmp_row = (lrij-1)/lrij;}
+    switch (GLOBAL_gamma_type){
+    case GLOBAL_gamma__log: ammag_tmp_col = exp(log(ammag_tmp_row)*log(lcij)/log(lrij)); break;
+    case GLOBAL_gamma_sqrt: ammag_tmp_col = sqrt(ammag_tmp_row*lrij)*sqrt(lcij)/sqrt(lrij)/((double)maximum(1,lcij)); break;
+    case GLOBAL_gamma__lin: ammag_tmp_col = ammag_tmp_row; break;
+    case GLOBAL_gamma_rows: ammag_tmp_col = 0; break;
+    default: printf(" %% Warning! GLOBAL_gamma_type %d\n",GLOBAL_gamma_type); break; /* switch (GLOBAL_gamma_type){ } */}
+    gamma_tmp_col = dbl1-ammag_tmp_col; rdrop = ceil(gamma_tmp_row*lrij); cdrop = ceil(gamma_tmp_col*lcij); if (GLOBAL_gamma_type==GLOBAL_gamma_rows){ cdrop=0;}
+    /* if lrij>2 */}
+  rdrop = minimum(rdrop,lrij); cdrop = minimum(cdrop,lcij);
+  if (rdrop_p!=NULL){ *rdrop_p=rdrop;}
+  if (cdrop_p!=NULL){ *cdrop_p=cdrop;}
+  if (verbose){ printf(" %% [finished bcc_gamma_xdrop] rdrop %d cdrop %d\n",rdrop,cdrop);}
+}
+
+void bcc_single_init_lf(struct bcc_single *E)
+{
+  int verbose=0; /* double gamma = GLOBAL_gamma; */
+  struct bcc_ajdk *D = E->D;
+  int ns_b=0,n1a=0,n1b=0,n2a=0,n2b=0;
+  int cdrop=0,ckeep=0;
+  E->lf_At_rsum=NULL; E->lf_Zt_rsum=NULL; E->lf_Wt_rsum=NULL; E->lf_Yt_rsum=NULL;
+  E->length = D->A_ncols; E->lf_At_rsum = L_handle_make(E->length); if (!E->lf_At_rsum){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = D->A_ncols; E->lf_Zt_rsum = L_handle_make(E->length); if (!E->lf_Zt_rsum){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = D->Y_ncols; E->lf_Wt_rsum = L_handle_make(E->length); if (!E->lf_Wt_rsum){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = D->Y_ncols; E->lf_Yt_rsum = L_handle_make(E->length); if (!E->lf_Yt_rsum){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  if (verbose){ printf(" %% initializing E->lf_AtTn, E->lf_ZtSn, E->lf_YtTn, E->lf_WtSn.\n");}
+  E->lf_AtTn = NULL; E->lf_ZtSn = NULL; E->lf_YtTn = NULL; E->lf_WtSn = NULL;
+  E->length = D->A_ncols*D->T_ncols; E->lf_AtTn = L_handle_make(E->length); if (!E->lf_AtTn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = D->A_ncols*D->T_ncols; E->lf_ZtSn = L_handle_make(E->length); if (!E->lf_ZtSn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = D->Y_ncols*D->T_ncols; E->lf_YtTn = L_handle_make(E->length); if (!E->lf_YtTn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = D->Y_ncols*D->T_ncols; E->lf_WtSn = L_handle_make(E->length); if (!E->lf_WtSn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  if (verbose>1){ printf(" %% initializing E->lf_An_ajdk, etc\n");}
+  E->lf_An_ajdk = NULL; E->lf_Zn_ajdk = NULL; E->lf_Yn_ajdk = NULL; E->lf_Wn_ajdk = NULL;
+  E->length = E->A_nrows*AJDK_TOT; E->lf_An_ajdk = L_handle_make(E->length); if (!E->lf_An_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = E->Z_nrows*AJDK_TOT; E->lf_Zn_ajdk = L_handle_make(E->length); if (!E->lf_Zn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = E->A_nrows*AJDK_TOT; E->lf_Yn_ajdk = L_handle_make(E->length); if (!E->lf_Yn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = E->Z_nrows*AJDK_TOT; E->lf_Wn_ajdk = L_handle_make(E->length); if (!E->lf_Wn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  if (verbose>1){ printf(" %% initializing E->lf_ZtSWn, etc\n");}
+  E->lf_ZtSWn = NULL; E->lf_ZtSZn = NULL; E->lf_AtTYn = NULL; E->lf_AtTAn = NULL; 
+  if (strstr(D->QR_strategy,"ZtSWn") || strstr(D->QC_strategy,"ZtSWn")){
+    E->length = E->Z_rbother*E->M_Zn->cpop_b*E->M_Wn->cpop_b*D->T_cpop_b; E->lf_ZtSWn = L_handle_make(E->length); if (!E->lf_ZtSWn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = E->Z_rbother*E->M_Zn->cpop_b*E->M_Zn->cpop_b*D->T_cpop_b; E->lf_ZtSZn = L_handle_make(E->length); if (!E->lf_ZtSZn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = E->A_rbother*E->M_An->cpop_b*E->M_Yn->cpop_b*D->T_cpop_b; E->lf_AtTYn = L_handle_make(E->length); if (!E->lf_AtTYn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = E->A_rbother*E->M_An->cpop_b*E->M_An->cpop_b*D->T_cpop_b; E->lf_AtTAn = L_handle_make(E->length); if (!E->lf_AtTAn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    /* if strategy */}
+  E->M_ZtSWn_ = NULL; E->M_ZtSZn_ = NULL; E->M_AtTYn_ = NULL; E->M_AtTAn_ = NULL;
+  if (strstr(D->QR_strategy,"ZtSWn")){
+    E->M_ZtSWn_ = (struct M_handle **) wkspace_all0c(sizeof(struct M_handle *)*D->T_cpop_b);
+    n1a = E->M_Zt->nrows; n1b = E->M_Zt->rpop_b; n2a = E->M_Wt->nrows; n2b = E->M_Wt->rpop_b;
+    if (0){}
+    else if (n2b<=n1b){ E->M_ZtSWn_trm = 0; for (ns_b=0;ns_b<D->T_cpop_b;ns_b++){ E->M_ZtSWn_[ns_b] = binary_X_w_gen(BITJ,GLOBAL_B_MLT,n1a,n2b);}}
+    else if (n1b<=n2b){ E->M_ZtSWn_trm = 1; for (ns_b=0;ns_b<D->T_cpop_b;ns_b++){ E->M_ZtSWn_[ns_b] = binary_X_w_gen(BITJ,GLOBAL_B_MLT,n2a,n1b);}}
+    E->M_ZtSZn_ = (struct M_handle **) wkspace_all0c(sizeof(struct M_handle *)*D->T_cpop_b);
+    n1a = E->M_Zt->nrows; n1b = E->M_Zt->rpop_b; n2a = E->M_Zt->nrows; n2b = E->M_Zt->rpop_b;
+    if (0){}
+    else if (n2b<=n1b){ E->M_ZtSZn_trm = 0; for (ns_b=0;ns_b<D->T_cpop_b;ns_b++){ E->M_ZtSZn_[ns_b] = binary_X_w_gen(BITJ,GLOBAL_B_MLT,n1a,n2b);}}
+    else if (n1b<=n2b){ E->M_ZtSZn_trm = 1; for (ns_b=0;ns_b<D->T_cpop_b;ns_b++){ E->M_ZtSZn_[ns_b] = binary_X_w_gen(BITJ,GLOBAL_B_MLT,n2a,n1b);}}
+    E->M_AtTYn_ = (struct M_handle **) wkspace_all0c(sizeof(struct M_handle *)*D->T_cpop_b);
+    n1a = E->M_At->nrows; n1b = E->M_At->rpop_b; n2a = E->M_Yt->nrows; n2b = E->M_Yt->rpop_b;
+    if (0){}
+    else if (n2b<=n1b){ E->M_AtTYn_trm = 0; for (ns_b=0;ns_b<D->T_cpop_b;ns_b++){ E->M_AtTYn_[ns_b] = binary_X_w_gen(BITJ,GLOBAL_B_MLT,n1a,n2b);}}
+    else if (n1b<=n2b){ E->M_AtTYn_trm = 1; for (ns_b=0;ns_b<D->T_cpop_b;ns_b++){ E->M_AtTYn_[ns_b] = binary_X_w_gen(BITJ,GLOBAL_B_MLT,n2a,n1b);}}
+    E->M_AtTAn_ = (struct M_handle **) wkspace_all0c(sizeof(struct M_handle *)*D->T_cpop_b);
+    n1a = E->M_At->nrows; n1b = E->M_At->rpop_b; n2a = E->M_At->nrows; n2b = E->M_At->rpop_b;
+    if (0){}
+    else if (n2b<=n1b){ E->M_AtTAn_trm = 0; for (ns_b=0;ns_b<D->T_cpop_b;ns_b++){ E->M_AtTAn_[ns_b] = binary_X_w_gen(BITJ,GLOBAL_B_MLT,n1a,n2b);}}
+    else if (n1b<=n2b){ E->M_AtTAn_trm = 1; for (ns_b=0;ns_b<D->T_cpop_b;ns_b++){ E->M_AtTAn_[ns_b] = binary_X_w_gen(BITJ,GLOBAL_B_MLT,n2a,n1b);}}
+    /* if strategy */}
+  if (verbose>1){ printf(" %% initializing E->lrup\n");}
+  bcc_get_xdrop(D,NULL,&cdrop); ckeep=D->A_cpop_j-cdrop;
+  /* QR lrup */
+  E->lf_jn_ajdk=NULL;E->lf_vn_ajdk=NULL;
+  if (strstr(D->QR_strategy,"YnWt") || strstr(D->QC_strategy,"YnWt")){
+    E->length = E->A_nrows*AJDK_TOT; E->lf_jn_ajdk = L_handle_make(E->length); if (!E->lf_jn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = E->Z_nrows*AJDK_TOT; E->lf_vn_ajdk = L_handle_make(E->length); if (!E->lf_vn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    /* if strategy */}
+  /* QC ZtSWn lrup */
+  E->lf_ktrn=NULL;E->lf_utrn=NULL;
+  if (strstr(D->QR_strategy,"ZtSWn") || strstr(D->QC_strategy,"ZtSWn")){
+    E->length = D->A_ncols*D->T_ncols; E->lf_ktrn = L_handle_make(E->length); if (!E->lf_ktrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = D->Y_ncols*D->T_ncols; E->lf_utrn = L_handle_make(E->length); if (!E->lf_utrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    /* if strategy */}
+  E->lf_ktrun=NULL;E->lf_ktrkn=NULL;
+  if (strstr(D->QR_strategy,"ZtSWn") || strstr(D->QC_strategy,"ZtSWn")){
+    E->length = E->A_rbother*E->M_An->cpop_b*E->M_Yn->cpop_b*D->T_cpop_b; E->lf_ktrun = L_handle_make(E->length); if (!E->lf_ktrun){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = E->A_rbother*E->M_An->cpop_b*E->M_An->cpop_b*D->T_cpop_b; E->lf_ktrkn = L_handle_make(E->length) ;if (!E->lf_ktrkn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    /* if strategy */}  
+  /* QC YnWt lrup */
+  E->lf_kn_ajdk=NULL; E->lf_zn_ajdk=NULL; E->lf_hn_ajdk=NULL; /* E->lf_vn_ajdk=NULL; */ E->lf_an_ajdk=NULL;
+  if (strstr(D->QC_strategy,"YnWt")){
+    E->length = E->A_nrows*AJDK_TOT; E->lf_kn_ajdk = L_handle_make(E->length); if (!E->lf_kn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = E->Z_nrows*AJDK_TOT; E->lf_zn_ajdk = L_handle_make(E->length); if (!E->lf_zn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = E->A_nrows*AJDK_TOT; E->lf_hn_ajdk = L_handle_make(E->length); if (!E->lf_hn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    if (E->lf_vn_ajdk==NULL){ E->length = E->Z_nrows*AJDK_TOT; E->lf_vn_ajdk = L_handle_make(E->length); if (!E->lf_vn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}}
+    E->length = E->A_nrows*AJDK_TOT; E->lf_an_ajdk = L_handle_make(E->length); if (!E->lf_an_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    /* if strategy */}
+  /* QC YnWt lrup */
+  E->lf_attn=NULL; E->lf_jttn=NULL; E->lf_ztsn=NULL; E->lf_vtsn=NULL; /* E->lf_ktrn=NULL; */ E->lf_htrn=NULL;
+  if (strstr(D->QC_strategy,"YnWt")){
+    E->length = D->A_ncols*D->T_ncols; E->lf_attn = L_handle_make(E->length); if (!E->lf_attn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = D->A_ncols*D->T_ncols; E->lf_jttn = L_handle_make(E->length); if (!E->lf_jttn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = D->A_ncols*D->T_ncols; E->lf_ztsn = L_handle_make(E->length); if (!E->lf_ztsn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = D->A_ncols*D->T_ncols; E->lf_vtsn = L_handle_make(E->length); if (!E->lf_vtsn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    if (E->lf_ktrn==NULL){ E->length = D->A_ncols*D->T_ncols; E->lf_ktrn = L_handle_make(E->length); if (!E->lf_ktrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}}
+    E->length = D->A_ncols*D->T_ncols; E->lf_htrn = L_handle_make(E->length); if (!E->lf_htrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    /* if strategy */}
+  E->lf_attjn=NULL; E->lf_ztsvn=NULL; E->lf_ktrhn=NULL;
+  if (strstr(D->QC_strategy,"YnWt")){
+    E->length = E->A_rbother*ckeep*cdrop*D->T_ncols; E->lf_attjn = L_handle_make(E->length); if (!E->lf_attjn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = E->Z_rbother*ckeep*cdrop*D->T_ncols; E->lf_ztsvn = L_handle_make(E->length); if (!E->lf_ztsvn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = E->A_rbother*ckeep*cdrop*D->T_ncols; E->lf_ktrhn = L_handle_make(E->length); if (!E->lf_ktrhn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    /* if strategy */}
+  if (verbose>1){ printf(" %% initializing singlestudy\n");}
+  E->length = D->A_ncols; E->lf_At_Yn_a1d1 = L_handle_make(E->length);
+  E->length = D->A_ncols; E->lf_At_An_a1d1 = L_handle_make(E->length);
+  E->length = D->T_ncols; E->lf_a1d2_Zt_Sn = L_handle_make(E->length);
+  E->length = D->T_ncols; E->lf_a2d2_Zt_Sn = L_handle_make(E->length);
+  E->length = D->T_ncols; E->lf_a3d2_Zt_Sn = L_handle_make(E->length);
+  E->length = D->T_ncols; E->lf_a1d2_At_Tn = L_handle_make(E->length);
+  E->length = D->T_ncols; E->lf_a2d2_At_Tn = L_handle_make(E->length);
+  E->length = D->T_ncols; E->lf_a3d2_At_Tn = L_handle_make(E->length);
+  E->length = D->T_ncols; E->lf_et_Tn = L_handle_make(E->length);
+  E->length = D->T_ncols; E->lf_et_Sn = L_handle_make(E->length);
+  E->length = D->A_ncols; E->lf_et_An = L_handle_make(E->length);
+  E->length = D->A_ncols; E->lf_a1d1_At_en = L_handle_make(E->length);
+  E->length = D->A_ncols; E->lf_a1d2_At_en = L_handle_make(E->length);
+  E->length = D->A_ncols; E->lf_a3d2_At_en = L_handle_make(E->length);
+  E->length = 1; E->lf_et_Yn_a1d1 = L_handle_make(E->length);
+  E->length = D->T_ncols; E->lf_Tt_Yn_a1d1 = L_handle_make(E->length);
+  E->length = D->A_ncols*D->T_ncols; E->lf_At_T_Yn_a1d1 = L_handle_make(E->length);
+  E->length = 1; E->lf_et_An_a1d1 = L_handle_make(E->length);
+  E->length = D->T_ncols; E->lf_Tt_An_a1d1 = L_handle_make(E->length);
+  E->length = D->A_ncols*D->T_ncols; E->lf_At_T_An_a1d1 = L_handle_make(E->length);
+  E->length = D->T_ncols*E->A_nrows; E->lf_T_AnAt_YnYt = L_handle_make(E->length);
+  E->length = D->T_ncols*E->A_nrows; E->lf_T_AnAt_AnAt = L_handle_make(E->length); if (!E->lf_T_AnAt_AnAt){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+}
+
+void bcc_double_init_lf_excerpt(int n1a,int n1b,int n2a,int n2b,struct L_handle **L_p,int *trm_flag_p,struct M_handle **M_p)
+{
+  int length=0;
+  length  = n1b*n2b; *L_p = L_handle_make(length); if (!(*L_p)){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  if (0){}
+  else if (n2b<=n1b){ *trm_flag_p = 0; *M_p = binary_X_w_gen(BITJ,GLOBAL_B_MLT,n1a,n2b);}
+  else if (n1b<=n2b){ *trm_flag_p = 1; *M_p = binary_X_w_gen(BITJ,GLOBAL_B_MLT,n2a,n1b);}
+}
+
+void bcc_double_init_lf(struct bcc_double *F)
+{
+  int verbose=0;
+  struct bcc_ajdk *D=F->D;
+  int n1a=0,n2a=0,n1b,n2b=0;
+  int rdrop=0;
+  GLOBAL_tic(0);
+  if (verbose>1){ printf(" %% bcc_double_init_lf: %d,%d\n",F->nb1,F->nb2);}
+  if (verbose>1){ printf(" %% initializing F->lf_YnWt, etc\n");}
+  F->lf_YnWt = NULL; F->lf_AnZt = NULL; F->lf_YnYt = NULL; F->lf_AnAt = NULL; F->M_YnWt = NULL; F->M_AnZt = NULL; F->M_YnYt = NULL; F->M_AnAt = NULL;
+  if (strstr(D->QR_strategy,"YnWt") || strstr(D->QC_strategy,"YnWt")){
+    n1a = F->E_nb1->M_Yn->nrows; n1b = F->E_nb1->M_Yn->rpop_b; n2a = F->E_nb2->M_Wn->nrows; n2b = F->E_nb2->M_Wn->rpop_b; 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_YnWt),&(F->M_YnWt_trm),&(F->M_YnWt));
+    n1a = F->E_nb1->M_An->nrows; n1b = F->E_nb1->M_An->rpop_b; n2a = F->E_nb2->M_Zn->nrows; n2b = F->E_nb2->M_Zn->rpop_b; 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_AnZt),&(F->M_AnZt_trm),&(F->M_AnZt));
+    n1a = F->E_nb1->M_Yn->nrows; n1b = F->E_nb1->M_Yn->rpop_b; n2a = F->E_nb2->M_Yn->nrows; n2b = F->E_nb2->M_Yn->rpop_b; 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_YnYt),&(F->M_YnYt_trm),&(F->M_YnYt));
+    n1a = F->E_nb1->M_An->nrows; n1b = F->E_nb1->M_An->rpop_b; n2a = F->E_nb2->M_An->nrows; n2b = F->E_nb2->M_An->rpop_b; 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_AnAt),&(F->M_AnAt_trm),&(F->M_AnAt));
+    /* if strategy */}
+  bcc_get_xdrop(D,&rdrop,NULL);
+  /* QR lrup */
+  F->lf_jnvt=NULL; F->lf_jnjt=NULL;
+  if (strstr(D->QR_strategy,"YnWt") || strstr(D->QC_strategy,"YnWt")){
+    n1a = F->E_nb1->M_An->nrows; n1b = F->E_nb1->M_An->rpop_b; 
+    n2a = F->E_nb2->M_Zn->nrows; n2b = F->E_nb2->M_Zn->rpop_b; 
+    F->length = n1b*n2b; F->lf_jnvt = L_handle_make(F->length); if (!F->lf_jnvt){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+    n1a = F->E_nb1->M_An->nrows; n1b = F->E_nb1->M_An->rpop_b; 
+    n2a = F->E_nb2->M_An->nrows; n2b = F->E_nb2->M_An->rpop_b; 
+    F->length = n1b*n2b; F->lf_jnjt = L_handle_make(F->length); if (!F->lf_jnjt){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+    /* if strategy */}
+  /* QC lrup */
+  F->lf_unwt=NULL; F->lf_knzt=NULL; F->lf_hnvt=NULL; F->lf_ynut=NULL; F->lf_unyt=NULL; F->lf_unut=NULL; F->lf_ankt=NULL; F->lf_knat=NULL; F->lf_knkt=NULL;
+  if (strstr(D->QC_strategy,"YnWt")){
+    n1a = D->Y_cbother*F->E_nb1->M_An->nrows; n1b = D->Y_cbother*minimum(rdrop,F->E_nb1->M_An->rpop_b);
+    n2a = D->Y_cbother*F->E_nb2->M_Zn->nrows; n2b = D->Y_cbother*F->E_nb2->M_Zn->rpop_b; 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_unwt),&(F->M_unwt_trm),&(F->M_unwt));
+    n1a = D->A_cbother*F->E_nb1->M_An->nrows; n1b = D->A_cbother*minimum(rdrop,F->E_nb1->M_An->rpop_b);
+    n2a = D->A_cbother*F->E_nb2->M_Zn->nrows; n2b = D->A_cbother*F->E_nb2->M_Zn->rpop_b; 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_knzt),&(F->M_knzt_trm),&(F->M_knzt));
+    n1a = D->A_cbother*F->E_nb1->M_An->nrows; n1b = D->A_cbother*minimum(rdrop,F->E_nb1->M_An->rpop_b);
+    n2a = D->A_cbother*F->E_nb2->M_Zn->nrows; n2b = D->A_cbother*F->E_nb2->M_Zn->rpop_b; 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_hnvt),&(F->M_hnvt_trm),&(F->M_hnvt));
+    n1a = D->Y_cbother*F->E_nb1->M_An->nrows; n1b = D->Y_cbother*F->E_nb1->M_An->rpop_b;
+    n2a = D->Y_cbother*F->E_nb2->M_An->nrows; n2b = D->Y_cbother*minimum(rdrop,F->E_nb2->M_An->rpop_b); 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_ynut),&(F->M_ynut_trm),&(F->M_ynut));
+    n1a = D->Y_cbother*F->E_nb1->M_An->nrows; n1b = D->Y_cbother*minimum(rdrop,F->E_nb1->M_An->rpop_b);
+    n2a = D->Y_cbother*F->E_nb2->M_An->nrows; n2b = D->Y_cbother*F->E_nb2->M_An->rpop_b; 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_unyt),&(F->M_unyt_trm),&(F->M_unyt));
+    n1a = D->Y_cbother*F->E_nb1->M_An->nrows; n1b = D->Y_cbother*minimum(rdrop,F->E_nb1->M_An->rpop_b);
+    n2a = D->Y_cbother*F->E_nb2->M_An->nrows; n2b = D->Y_cbother*minimum(rdrop,F->E_nb2->M_An->rpop_b); 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_unut),&(F->M_unut_trm),&(F->M_unut));
+    n1a = D->A_cbother*F->E_nb1->M_An->nrows; n1b = D->A_cbother*F->E_nb1->M_An->rpop_b;
+    n2a = D->A_cbother*F->E_nb2->M_An->nrows; n2b = D->A_cbother*minimum(rdrop,F->E_nb2->M_An->rpop_b); 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_ankt),&(F->M_ankt_trm),&(F->M_ankt));
+    n1a = D->A_cbother*F->E_nb1->M_An->nrows; n1b = D->A_cbother*minimum(rdrop,F->E_nb1->M_An->rpop_b);
+    n2a = D->A_cbother*F->E_nb2->M_An->nrows; n2b = D->A_cbother*F->E_nb2->M_An->rpop_b; 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_knat),&(F->M_knat_trm),&(F->M_knat));
+    n1a = D->A_cbother*F->E_nb1->M_An->nrows; n1b = D->A_cbother*minimum(rdrop,F->E_nb1->M_An->rpop_b);
+    n2a = D->A_cbother*F->E_nb2->M_An->nrows; n2b = D->A_cbother*minimum(rdrop,F->E_nb2->M_An->rpop_b); 
+    bcc_double_init_lf_excerpt(n1a,n1b,n2a,n2b,&(F->lf_knkt),&(F->M_knkt_trm),&(F->M_knkt));
+    /* if strategy */}
+  if (verbose>1){ printf(" %% initializing lf_ \n");}
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnZtSWnYt = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnZtSZnAt = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnAtTYnYt = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnAtTAnAt = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnZt_S_WnYt = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnZt_S_ZnAt = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnAt_T_YnYt = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnAt_T_AnAt = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_An_ZtSWn_Yt = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_An_ZtSZn_At = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_An_AtTYn_Yt = L_handle_make(F->length);
+  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_An_AtTAn_At = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_AtTYnWtSZn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_AtTAnZtSZn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_AtTYnYtTAn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_AtTAnAtTAn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_AtTYn____WtSZn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_AtTAn____ZtSZn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_AtTYn____YtTAn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_AtTAn____AtTAn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_At_T_YnWt_S_Zn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_At_T_AnZt_S_Zn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_At_T_YnYt_T_An = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->lf_At_T_AnAt_T_An = L_handle_make(F->length); if (!F->lf_At_T_AnAt_T_An){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  if (verbose>1){ printf(" %% initializing doublestudy\n");}
+  F->length = F->E_nb1->A_nrows*F->D->T_ncols; F->lf_An_a2d2_Zt_Sn = L_handle_make(F->length); if (!F->lf_An_a2d2_Zt_Sn){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  F->length = F->E_nb1->A_nrows*F->D->T_ncols; F->lf_An_a2d2_At_Tn = L_handle_make(F->length); if (!F->lf_An_a2d2_At_Tn){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  if (verbose>1){ printf(" %% initializing F->QX\n");}
+  F->QR_AnZtSWnYt=NULL; F->QR_AnZtSZnAt=NULL; F->QR_AnAtTYnYt=NULL; F->QR_AnAtTAnAt=NULL; F->QC_AtTYnWtSZn=NULL; F->QC_AtTAnZtSZn=NULL; F->QC_AtTYnYtTAn=NULL; F->QC_AtTAnAtTAn=NULL;
+  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnZtSWnYt = L_handle_make(F->length);
+  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnZtSZnAt = L_handle_make(F->length);
+  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnAtTYnYt = L_handle_make(F->length);
+  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnAtTAnAt = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->QC_AtTYnWtSZn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->QC_AtTAnZtSZn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->QC_AtTYnYtTAn = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->QC_AtTAnAtTAn = L_handle_make(F->length); if (!F->QC_AtTAnAtTAn){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  if (verbose>1){ printf(" %% initializing F->QX_uu\n");}
+  F->QR_AnZtSWnYt_uu=NULL; F->QR_AnZtSZnAt_uu=NULL; F->QR_AnAtTYnYt_uu=NULL; F->QR_AnAtTAnAt_uu=NULL; F->QC_AtTYnWtSZn_uu=NULL; F->QC_AtTAnZtSZn_uu=NULL; F->QC_AtTYnYtTAn_uu=NULL; F->QC_AtTAnAtTAn_uu=NULL;
+  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnZtSWnYt_uu = L_handle_make(F->length);
+  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnZtSZnAt_uu = L_handle_make(F->length);
+  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnAtTYnYt_uu = L_handle_make(F->length);
+  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnAtTAnAt_uu = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->QC_AtTYnWtSZn_uu = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->QC_AtTAnZtSZn_uu = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->QC_AtTYnYtTAn_uu = L_handle_make(F->length);
+  F->length = D->A_ncols*D->T_ncols; F->QC_AtTAnAtTAn_uu = L_handle_make(F->length); if (!F->QC_AtTAnAtTAn_uu){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  GLOBAL_toc(0,verbose," %% initializing data_structures: ");
+}
+
+void mda_dmp(char *fname,int nrows,int ncols,double *ra)
+{
+  FILE *fp=NULL; int tmp_d=0;
+  if ((fp=fopen(fname,"w"))==NULL){ printf(" %% Warning! could not open %s when writing to disc.\n",fname); exit(RET_READ_FAIL);}
+  tmp_d = 2; fwrite(&tmp_d,sizeof(int),1,fp); tmp_d = nrows; fwrite(&tmp_d,sizeof(int),1,fp); tmp_d = ncols; fwrite(&tmp_d,sizeof(int),1,fp); fwrite(ra,sizeof(double),nrows*ncols,fp);
+  fclose(fp);fp=NULL;
+}
+
+void bcc_load_A_p(struct bcc_ajdk *D)
+{
+  /* calculates A_p and Y_p for each column using row-mask mr_b, not mr_j */
+  int verbose=0; char tempchar[FNAMESIZE];
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0,nc=0,nc_p=0,nc_start=0,nc_final=0;
+  int A_pcols=0,Y_pcols=0,A_ncols=0,Y_ncols=0,A_rpop_b_total=0,Z_rpop_b_total=0;
+  double *A_rsum=NULL,*A_p=NULL,**A_ajdk_p=NULL,*Y_rsum=NULL,*Y_p=NULL,**Y_ajdk_p=NULL;
+  unsigned char *A_bmc_b=NULL,*Y_bmc_b=NULL;
+  double tmp_sum=0,tmp_num=0;
+  if (verbose){ printf(" %% [entering bcc_load_A_p]\n");}
+  D->A_pcols = psize(D->A_ncols)/* rup(D->A_ncols+D->A_ncols_extend,POPLENGTH)/POPLENGTH */; D->Y_pcols = psize(D->Y_ncols)/* rup(D->Y_ncols+D->Y_ncols_extend,POPLENGTH)/POPLENGTH */;
+  D->A_nrows_total=0; D->A_rpop_b_total=0; D->A_rpop_j_total=0;
+  D->Z_nrows_total=0; D->Z_rpop_b_total=0; D->Z_rpop_j_total=0;
+  for (nb=0;nb<nbins;nb++){
+    D->A_nrows_total += E_[nb]->A_nrows; D->A_rpop_b_total += E_[nb]->A_rpop_b; D->A_rpop_j_total += E_[nb]->A_rpop_j;
+    D->Z_nrows_total += E_[nb]->Z_nrows; D->Z_rpop_b_total += E_[nb]->Z_rpop_b; D->Z_rpop_j_total += E_[nb]->Z_rpop_j;
+    /* for (nb=0;nb<nbins;nb++){ }*/}
+  D->A_rsum = (double *) wkspace_all0c(D->A_ncols*sizeof(double)); 
+  D->A_p = (double *) wkspace_all0c(D->A_pcols*sizeof(double)); 
+  D->A_ajdk = (double *) wkspace_all0c(AJDK_TOT*D->A_pcols*sizeof(double)); 
+  D->Y_rsum = (double *) wkspace_all0c(D->Y_ncols*sizeof(double)); 
+  D->Y_p = (double *) wkspace_all0c(D->Y_pcols*sizeof(double)); 
+  D->Y_ajdk = (double *) wkspace_all0c(AJDK_TOT*D->Y_pcols*sizeof(double)); 
+  if (verbose){ printf(" %% D->A_ncols %d D->Y_ncols %d D->A_pcols %d D->Y_pcols %d\n",D->A_ncols,D->Y_ncols,D->A_pcols,D->Y_pcols);}
+  A_ncols = D->A_ncols; Y_ncols = D->Y_ncols; A_pcols = D->A_pcols; Y_pcols = D->Y_pcols; A_rpop_b_total = D->A_rpop_b_total; Z_rpop_b_total = D->Z_rpop_b_total;
+  A_rsum = D->A_rsum; A_p = D->A_p; A_ajdk_p = &(D->A_ajdk); A_bmc_b = D->A_bmc_b; 
+  Y_rsum = D->Y_rsum; Y_p = D->Y_p; Y_ajdk_p = &(D->Y_ajdk); Y_bmc_b = D->Y_bmc_b;
+  if (verbose){ printf(" %% calculating E_[nb]->lf_At_rsum etc.\n");}
+  GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+  for (nb=0;nb<nbins;nb++){
+    for (nc=0;nc<D->A_ncols;nc++){ E_[nb]->lf_At_rsum->lf[nc]=0;}
+    GLOBAL_pthread_tic(); binary_An_v__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),TYPE_00,SPACING_a,E_[nb]->M_At,&(E_[nb]->lf_At_rsum)); GLOBAL_pthread_toc();
+    for (nc=0;nc<D->A_ncols;nc++){ E_[nb]->lf_Zt_rsum->lf[nc]=0;}
+    GLOBAL_pthread_tic(); binary_An_v__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),TYPE_00,SPACING_a,E_[nb]->M_Zt,&(E_[nb]->lf_Zt_rsum)); GLOBAL_pthread_toc();
+    for (nc=0;nc<D->Y_ncols;nc++){ E_[nb]->lf_Yt_rsum->lf[nc]=0;}
+    GLOBAL_pthread_tic(); binary_An_v__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),TYPE_00,SPACING_a,E_[nb]->M_Yt,&(E_[nb]->lf_Yt_rsum)); GLOBAL_pthread_toc();
+    for (nc=0;nc<D->Y_ncols;nc++){ E_[nb]->lf_Wt_rsum->lf[nc]=0;}
+    GLOBAL_pthread_tic(); binary_An_v__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),TYPE_00,SPACING_a,E_[nb]->M_Wt,&(E_[nb]->lf_Wt_rsum)); GLOBAL_pthread_toc();
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  GLOBAL_pthread_tuc();
+  if (verbose){ printf(" %% calculating A_rsum and E_[nb]->Y_rsum\n");}
+  for (nc=0;nc<A_ncols;nc++){ A_rsum[nc]=0;}
+  for (nb=0;nb<nbins;nb++){ 
+    dra_plusequals(A_rsum,D->A_ncols,E_[nb]->lf_At_rsum->lf);
+    dra_plusequals(A_rsum,D->A_ncols,E_[nb]->lf_Zt_rsum->lf);
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){
+    for (nb=0;nb<nbins;nb++){
+      sprintf(D->tmpAnchar," %%%% E_[nb]->lf_At_[%d]_rsum->lf: ",nb); lfprintf(E_[nb]->lf_At_rsum,D->tmpAnchar);
+      sprintf(D->tmpZnchar," %%%% E_[nb]->lf_Zt_[%d]_rsum->lf: ",nb); lfprintf(E_[nb]->lf_Zt_rsum,D->tmpZnchar);
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    /* if (verbose){ } */}
+  if (verbose){ raprintf(A_rsum,"double",1,A_ncols," %% A_rsum: ");}
+  for (nc=0;nc<A_ncols;nc++){ Y_rsum[nc]=0;}
+  for (nb=0;nb<nbins;nb++){ 
+    dra_plusequals(Y_rsum,D->Y_ncols,E_[nb]->lf_Yt_rsum->lf);
+    dra_plusequals(Y_rsum,D->Y_ncols,E_[nb]->lf_Wt_rsum->lf);
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){
+    for (nb=0;nb<nbins;nb++){
+      sprintf(D->tmpYnchar," %%%% E_[nb]->lf_Yt_[%d]_rsum->lf: ",nb); lfprintf(E_[nb]->lf_Yt_rsum,D->tmpYnchar);
+      sprintf(D->tmpWnchar," %%%% E_[nb]->lf_Wt_[%d]_rsum->lf: ",nb); lfprintf(E_[nb]->lf_Wt_rsum,D->tmpWnchar);
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    raprintf(Y_rsum,"double",1,Y_ncols," %% Y_rsum: ");
+    /* if (verbose){ } */}
+  if (verbose){ printf(" %% calculating A_p\n");}
+  for (nc_p=0;nc_p<A_pcols;nc_p++){ A_p[nc_p]=0.5;}
+  if (GLOBAL_TEST_sparse){
+    for (nc_p=0;nc_p<A_pcols;nc_p++){ 
+      nc_start = minimum(A_ncols-1,maximum(0,0 + (nc_p+0)*POPLENGTH - 0));
+      nc_final = minimum(A_ncols-1,maximum(0,0 + (nc_p+1)*POPLENGTH - 1));
+      if (verbose){ printf(" %% nc_p %d: [%d..%d]:",nc_p,nc_start,nc_final);}
+      tmp_sum = 0; tmp_num=0;
+      for (nc=nc_start;nc<=nc_final;nc++){
+	if (bget__on(A_bmc_b,nc)){ tmp_sum += A_rsum[nc]; tmp_num+=1;}
+	/* for (nc=nc_start;nc<=nc_final;nc++){ } */}
+      if (verbose){ printf(" tmp_sum %f tmp_num %f*(%d+%d);",tmp_sum,tmp_num,A_rpop_b_total,Z_rpop_b_total);}
+      if (tmp_num==0){ A_p[nc_p] = 0.5;}
+      else /* if (tmp_num>0) */{ A_p[nc_p] = crop((tmp_sum)/(tmp_num*(A_rpop_b_total+Z_rpop_b_total)),0.01,0.99);}
+      if (verbose){ printf(" A_p %f\n",A_p[nc_p]);}
+      /*  for (nc_p=0;nc_p<A_pcols;nc_p++){ } */}
+    /* if (GLOBAL_TEST_sparse){ } */}
+  calc_A_ajdk(A_p,A_pcols,A_ajdk_p); if (verbose){ raprintf(*A_ajdk_p,"double",A_pcols,AJDK_TOT," %% A_ajdk: ");}
+  if (verbose){ printf(" %% calculating Y_p\n");}
+  for (nc_p=0;nc_p<Y_pcols;nc_p++){ Y_p[nc_p]=0.5;}
+  if (GLOBAL_TEST_sparse){
+    for (nc_p=0;nc_p<Y_pcols;nc_p++){ 
+      nc_start = minimum(Y_ncols-1,maximum(0,0 + (nc_p+0)*POPLENGTH - 0));
+      nc_final = minimum(Y_ncols-1,maximum(0,0 + (nc_p+1)*POPLENGTH - 1));
+      if (verbose){ printf(" %% nc_p %d: [%d..%d]:",nc_p,nc_start,nc_final);}
+      tmp_sum = 0; tmp_num=0;
+      for (nc=nc_start;nc<=nc_final;nc++){
+	if (bget__on(Y_bmc_b,nc)){ tmp_sum += Y_rsum[nc]; tmp_num+=1;}
+	/* for (nc=nc_start;nc<=nc_final;nc++){ } */}
+      if (verbose){ printf(" tmp_sum %f tmp_num %f*(%d+%d);",tmp_sum,tmp_num,A_rpop_b_total,Z_rpop_b_total);}
+      if (tmp_num==0){ Y_p[nc_p] = 0.5;}
+      else /* if (tmp_num>0) */{ Y_p[nc_p] = crop((tmp_sum)/(tmp_num*(A_rpop_b_total+Z_rpop_b_total)),0.01,0.99);}
+      if (verbose){ printf(" Y_p %f\n",Y_p[nc_p]);}
+      /*  for (nc_p=0;nc_p<Y_pcols;nc_p++){ } */}
+    /* if (GLOBAL_TEST_sparse){ } */}
+  calc_A_ajdk(Y_p,Y_pcols,Y_ajdk_p); if (verbose){ raprintf(*Y_ajdk_p,"double",Y_pcols,AJDK_TOT," %% Y_ajdk: ");}
+  sprintf(tempchar,"%s/A_rsum.mda",GLOBAL_DIR_NAME); mda_dmp(tempchar,A_ncols,1,A_rsum);
+  sprintf(tempchar,"%s/A_p.mda",GLOBAL_DIR_NAME); mda_dmp(tempchar,A_pcols,1,A_p);
+  sprintf(tempchar,"%s/Y_p.mda",GLOBAL_DIR_NAME); mda_dmp(tempchar,Y_pcols,1,Y_p);
+  if (verbose){ printf(" %% [finished bcc_load_A_p]\n");}
+}
+
+void bcc_init_A_p(double mrnd,struct bcc_ajdk *D)
+{
+  /* initializes A_p and Y_p for each column using row-mask mr_b, not mr_j */
+  int verbose=0;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0,nc=0;
+  if (verbose){ printf(" %% [entering bcc_init_A_p]\n");}
+  D->A_nrows_total=0; D->A_rpop_b_total=0; D->A_rpop_j_total=0;
+  D->Z_nrows_total=0; D->Z_rpop_b_total=0; D->Z_rpop_j_total=0;
+  for (nb=0;nb<nbins;nb++){
+    D->A_nrows_total += E_[nb]->A_nrows; D->A_rpop_b_total += E_[nb]->A_rpop_b; D->A_rpop_j_total += E_[nb]->A_rpop_j;
+    D->Z_nrows_total += E_[nb]->Z_nrows; D->Z_rpop_b_total += E_[nb]->Z_rpop_b; D->Z_rpop_j_total += E_[nb]->Z_rpop_j;
+    /* for (nb=0;nb<nbins;nb++){ }*/}
+  if (verbose){ printf(" %% D->A_nrows_total %d D->Z_nrows_total %d\n",D->A_nrows_total,D->Z_nrows_total);}
+  if (verbose){ printf(" %% D->A_rpop_b_total %d D->Z_rpop_b_total %d\n",D->A_rpop_b_total,D->Z_rpop_b_total);}
+  if (verbose){ printf(" %% D->A_rpop_j_total %d D->Z_rpop_j_total %d\n",D->A_rpop_j_total,D->Z_rpop_j_total);}
+  D->A_pcols = psize(D->A_ncols); 
+  D->A_p = (double *)wkspace_all0c(D->A_pcols*sizeof(double));
+  for (nc=0;nc<D->A_pcols;nc++){ D->A_p[nc] = maximum(0.1,minimum(0.9,rand01));} if (GLOBAL_TEST_sparse==0){ printf(" %% turning off D and a\n"); for (nc=0;nc<D->A_pcols;nc++){ D->A_p[nc] = 0.5;}}
+  D->A_ajdk = (double *)wkspace_all0c(AJDK_TOT*D->A_pcols*sizeof(double)); 
+  calc_A_ajdk(D->A_p,D->A_pcols,&(D->A_ajdk));
+  D->Y_pcols = psize(D->Y_ncols);
+  D->Y_p = (double *)wkspace_all0c(D->Y_pcols*sizeof(double));
+  for (nc=0;nc<D->Y_pcols;nc++){ D->Y_p[nc] = maximum(0.1,minimum(0.9,rand01));} if (GLOBAL_TEST_sparse==0){ printf(" %% turning off D and a\n"); for (nc=0;nc<D->Y_pcols;nc++){ D->Y_p[nc] = 0.5;}}
+  D->Y_ajdk = (double *)wkspace_all0c(AJDK_TOT*D->Y_pcols*sizeof(double));
+  calc_A_ajdk(D->Y_p,D->Y_pcols,&(D->Y_ajdk));
+  if (verbose){ printf(" %% [finished bcc_init_A_p]\n");}
+}
+
+void bcc_init_QX(struct bcc_ajdk *D)
+{
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb1=0; struct bcc_single *E=NULL; int mx_a=0,mx_b=0,mx_j=0,mr_a=0,mr_b=0,mr_j=0;
+  for (nb1=0;nb1<nbins;nb1++){ D->A_nrows_total += E_[nb1]->A_nrows;}
+  D->out_iteration=0; D->out_trace_length = 6; D->out_trace = (double *)wkspace_all0c((D->A_ncols+D->A_nrows_total)*D->out_trace_length*sizeof(double)); if (!D->out_trace){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->out_xdrop_a = (int *)wkspace_all0c((D->A_ncols+D->A_nrows_total)*2*sizeof(int)); if (!D->out_xdrop_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->out_xdrop_b = (int *)wkspace_all0c((D->A_ncols+D->A_nrows_total)*2*sizeof(int)); if (!D->out_xdrop_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QC_AtTYnWtSZn_nrm = (double *) wkspace_all0c(D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double)); if (!D->QC_AtTYnWtSZn_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
+  D->QC_AtTAnZtSZn_nrm = (double *) wkspace_all0c(D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double)); if (!D->QC_AtTAnZtSZn_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
+  D->QC_AtTYnYtTAn_nrm = (double *) wkspace_all0c(D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double)); if (!D->QC_AtTYnYtTAn_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
+  D->QC_AtTAnAtTAn_nrm = (double *) wkspace_all0c(D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double)); if (!D->QC_AtTAnAtTAn_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
+  D->QC_sra=(double *)wkspace_all0c(D->A_ncols*sizeof(double)); if (!D->QC_sra){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QC_ira_a=(int *)wkspace_all0c(D->A_ncols*sizeof(int)); if (!D->QC_ira_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QC_ira_b=(int *)wkspace_all0c(D->A_ncols*sizeof(int)); if (!D->QC_ira_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QC_ira_j=(int *)wkspace_all0c(D->A_ncols*sizeof(int)); if (!D->QC_ira_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_sra=(double *)wkspace_all0c(D->A_nrows_total*sizeof(double)); if (!D->QR_sra){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_mr_a=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_mr_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_mr_b=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_mr_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_mr_j=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_mr_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_ira_a=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_ira_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_ira_b=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_ira_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_ira_j=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_ira_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_nbra=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_nbra){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  mx_a=0; mx_b=0;
+  for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];
+    E->QR_mr_a = (int *)wkspace_all0c(E->A_nrows*sizeof(int)); if (!E->QR_mr_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+    E->QR_mr_b = (int *)wkspace_all0c(E->A_nrows*sizeof(int)); if (!E->QR_mr_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+    E->QR_mr_j = (int *)wkspace_all0c(E->A_nrows*sizeof(int)); if (!E->QR_mr_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+    mr_a=0;mr_b=0;mr_j=0;
+    while (mr_a<E->A_nrows){
+      E->QR_mr_a[mr_a] = mx_a;
+      if (bget__on(E->A_bmr_b,mr_a)){
+	E->QR_mr_b[mr_a] = mx_b;
+	if (bget__on(E->A_bmr_j,mr_a)){
+	  E->QR_mr_j[mr_a] = mx_j;
+	  mr_j++; mx_j++; /* if (bget__on(E->A_bmr_j,mr_a)){ } */}
+	mr_b++; mx_b++; /* if (bget__on(E->A_bmr_b,mr_b)){ } */}
+      mr_a++; mx_a++; /* while (mr_a<E->A_nrows){ } */}
+    E->QR_AnZtSWnYt_nrm = (double *) wkspace_all0c(E->A_nrows*D->T_ncols*nbins*sizeof(double)); if (!E->QR_AnZtSWnYt_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
+    E->QR_AnZtSZnAt_nrm = (double *) wkspace_all0c(E->A_nrows*D->T_ncols*nbins*sizeof(double)); if (!E->QR_AnZtSZnAt_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
+    E->QR_AnAtTYnYt_nrm = (double *) wkspace_all0c(E->A_nrows*D->T_ncols*nbins*sizeof(double)); if (!E->QR_AnAtTYnYt_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
+    E->QR_AnAtTAnAt_nrm = (double *) wkspace_all0c(E->A_nrows*D->T_ncols*nbins*sizeof(double)); if (!E->QR_AnAtTAnAt_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
+    /*  for (nb1=0;nb1<nbins;nb1++){ } */}
+}
+
+void M_mxset(struct M_handle *M_An,unsigned char *mr_j,unsigned char *mc_j)
+{
+  /* This function updates masks mr_j and mc_j for M_An based on the input masks mr_j, mc_j; */
+  int verbose=0;
+  int nr=0,nc=0;
+  if (verbose){ printf(" %% [entering M_mxset] \n");}
+  if (verbose){ M_handle_printf(M_An,verbose," %% M_An: ");}
+  if (mr_j!=NULL){ 
+    for (nr=0;nr<M_An->mr_length;nr++){ M_An->mr_j[nr] = mr_j[nr] & M_An->mr_b[nr];} M_An->rpop_j = popcount_uchar_array(M_An->mr_j,M_An->mr_length);
+    /* if (mr_j!=NULL){ } */}
+  if (mc_j!=NULL){
+    for (nc=0;nc<M_An->mc_length;nc++){ M_An->mc_j[nc] = mc_j[nc] & M_An->mc_b[nc];} M_An->cpop_j = popcount_uchar_array(M_An->mc_j,M_An->mc_length);
+    /* if (mc_j!=NULL){ } */}
+  M_mxget(M_An); 
+  if (verbose){ printf(" %% [finished M_mxset] \n");}
+}
+
+void bcc_M_mxset(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0;
+  if (verbose){ printf(" %% setting M_An->mr_j, etc.\n");}
+  D->A_cpop_j = popcount_uchar_array(D->A_bmc_j,D->A_mc_length);
+  D->Y_cpop_j = popcount_uchar_array(D->Y_bmc_j,D->Y_mc_length);
+  D->T_cpop_j = popcount_uchar_array(D->T_bmc_j,D->T_mc_length);
+  D->A_rpop_j_total=0;D->Z_rpop_j_total=0;
+  for (nb=0;nb<nbins;nb++){ 
+    E_[nb]->A_rpop_j = popcount_uchar_array(E_[nb]->A_bmr_j,E_[nb]->A_mr_length); D->A_rpop_j_total += E_[nb]->A_rpop_j;
+    E_[nb]->Z_rpop_j = popcount_uchar_array(E_[nb]->Z_bmr_j,E_[nb]->Z_mr_length); D->Z_rpop_j_total += E_[nb]->Z_rpop_j;
+    M_mxset(E_[nb]->M_An,E_[nb]->A_bmr_j,D->A_bmc_j); M_mxset(E_[nb]->M_At,D->A_bmc_j,E_[nb]->A_bmr_j);
+    M_mxset(E_[nb]->M_Zn,E_[nb]->Z_bmr_j,D->A_bmc_j); M_mxset(E_[nb]->M_Zt,D->A_bmc_j,E_[nb]->Z_bmr_j);
+    M_mxset(E_[nb]->M_Yn,E_[nb]->A_bmr_j,D->Y_bmc_j); M_mxset(E_[nb]->M_Yt,D->Y_bmc_j,E_[nb]->A_bmr_j);
+    M_mxset(E_[nb]->M_Wn,E_[nb]->Z_bmr_j,D->Y_bmc_j); M_mxset(E_[nb]->M_Wt,D->Y_bmc_j,E_[nb]->Z_bmr_j);
+    M_mxset(E_[nb]->M_Tn,E_[nb]->A_bmr_j,D->T_bmc_j); M_mxset(E_[nb]->M_Tt,D->T_bmc_j,E_[nb]->A_bmr_j);
+    M_mxset(E_[nb]->M_Sn,E_[nb]->Z_bmr_j,D->T_bmc_j); M_mxset(E_[nb]->M_St,D->T_bmc_j,E_[nb]->Z_bmr_j);
+    /* for (nb=0;nb<nbins;nb++){ } */}
+}
+
+void bcc_load(struct bcc_ajdk **D_p,struct bcc_single ***E_p,struct bcc_double ***F_p,char *QR_strategy,char *QC_strategy)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = GLOBAL_NBINS, nbx=0,nb1=0,nb2=0;
+  struct bcc_ajdk *D=NULL;
+  struct bcc_single *E=NULL,*E_nb1=NULL,*E_nb2=NULL;
+  struct bcc_double *F=NULL;
+  if (verbose){ printf(" %% [entering bcc_load] \n");}
+  if (*D_p==NULL){
+    (*D_p) = (struct bcc_ajdk *) wkspace_all0c(sizeof(struct bcc_ajdk)); D = (*D_p); D->bitj = BITJ;
+    sprintf(D->QR_strategy,"%s",QR_strategy); sprintf(D->QC_strategy,"%s",QC_strategy);
+    /* if (*D_p==NULL){ } */}
+  if (*E_p==NULL){
+    (*E_p) = (struct bcc_single **) wkspace_all0c(nbins*sizeof(struct bcc_single *));
+    for (nb1=0;nb1<nbins;nb1++){ (*E_p)[nb1] = (struct bcc_single *) wkspace_all0c(sizeof(struct bcc_single)*1); E = (*E_p)[nb1]; E->D = (*D_p); E->nb=nb1;}
+    /* if (*E_p==NULL){ } */}
+  if (*F_p==NULL){
+    (*F_p) = (struct bcc_double **) wkspace_all0c(nbins*nbins*sizeof(struct bcc_double *));
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins;
+	(*F_p)[nbx] = (struct bcc_double *) wkspace_all0c(sizeof(struct bcc_double)*1); F = (*F_p)[nbx]; F->D = (*D_p); F->nb1=nb1; F->nb2=nb2; F->E_nb1 = (*E_p)[nb1]; F->E_nb2 = (*E_p)[nb2];
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    /* if (*F_p==NULL){ } */}
+  D = (*D_p); 
+  GLOBAL_tic(0);
+  if (verbose){ printf(" %% calling bcc_ajdk_load: \n");}
+  bcc_ajdk_load(D);
+  if (verbose){ wkspace_printf();}
+  for (nb1=0;nb1<nbins;nb1++){ E = (*E_p)[nb1];
+    if (verbose){ printf(" %% calling bcc_single_load_M_An for nb1 %d: \n",nb1);} 
+    bcc_single_load_M_An(E);
+    if (verbose){ wkspace_printf();}
+    /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  if (verbose){ printf(" %% calling bcc_load_A_p: \n");}
+  bcc_load_A_p(D);
+  if (verbose){ wkspace_printf();}
+  for (nb1=0;nb1<nbins;nb1++){ E = (*E_p)[nb1];
+    if (verbose){ printf(" %% calling bcc_single_init_lf for nb1 %d: \n",nb1);}
+    bcc_single_init_lf(E);
+    if (verbose){ wkspace_printf();}
+    /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  GLOBAL_toc(0,verbose," %% generating data matrices: ");
+  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; E_nb1 = (*E_p)[nb1]; E_nb2 = (*E_p)[nb2]; F = (*F_p)[nbx];
+      if (verbose){ printf(" %% calling bcc_double_init_lf for nb1 %d nb2 %d nbx %d: \n",nb1,nb2,nbx);}
+      bcc_double_init_lf(F); 
+      if (verbose){ wkspace_printf();}
+      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+  if (verbose){ printf(" %% calling bcc_init_QX\n");}
+  bcc_init_QX(D);
+  if (verbose){ printf(" %% calling bcc_M_mxset\n");}
+  bcc_M_mxset(D);
+  if (verbose){ wkspace_printf();}
+}
+
+void bcc_init(char *error_vs_speed,double mrnd,struct bcc_ajdk **D_p,struct bcc_single ***E_p,struct bcc_double ***F_p,char *QR_strategy,char *QC_strategy)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = GLOBAL_NBINS, nbx=0,nb1=0,nb2=0;
+  struct bcc_ajdk *D=NULL;
+  struct bcc_single *E=NULL,*E_nb1=NULL,*E_nb2=NULL;
+  struct bcc_double *F=NULL;
+  if (verbose){ printf(" %% [entering bcc_init] \n");}
+  if (*D_p==NULL){
+    (*D_p) = (struct bcc_ajdk *) wkspace_all0c(sizeof(struct bcc_ajdk)); D = (*D_p); D->bitj = BITJ; D->nbins = nbins; D->E_ = NULL; D->F_ = NULL;
+    sprintf(D->QR_strategy,"%s",QR_strategy); sprintf(D->QC_strategy,"%s",QC_strategy);
+    /* if (*D_p==NULL){ } */}
+  if (*E_p==NULL){
+    (*E_p) = (struct bcc_single **) wkspace_all0c(nbins*sizeof(struct bcc_single *));
+    for (nb1=0;nb1<nbins;nb1++){ (*E_p)[nb1] = (struct bcc_single *) wkspace_all0c(sizeof(struct bcc_single)*1); E = (*E_p)[nb1]; E->D = (*D_p); E->nb=nb1; }
+    (*D_p)->E_ = (*E_p);
+    /* if (*E_p==NULL){ } */}
+  if (*F_p==NULL){
+    (*F_p) = (struct bcc_double **) wkspace_all0c(nbins*nbins*sizeof(struct bcc_double *));
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins;
+	(*F_p)[nbx] = (struct bcc_double *) wkspace_all0c(sizeof(struct bcc_double)*1); F = (*F_p)[nbx]; F->D = (*D_p); F->nb1=nb1; F->nb2=nb2; F->E_nb1 = (*E_p)[nb1]; F->E_nb2 = (*E_p)[nb2];
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    (*D_p)->F_ = (*F_p);
+    /* if (*F_p==NULL){ } */}
+  D = (*D_p); 
+  GLOBAL_tic(0);
+  if (verbose){ printf(" %% calling bcc_ajdk_init: \n");}
+  bcc_ajdk_init(mrnd,D);
+  if (verbose){ wkspace_printf();}
+  for (nb1=0;nb1<nbins;nb1++){ E = (*E_p)[nb1];
+    if (verbose){ printf(" %% calling bcc_single_init_M_An for nb1 %d: \n",nb1);} 
+    bcc_single_init_M_An(error_vs_speed,mrnd,E);
+    if (verbose){ wkspace_printf();}
+    /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  if (verbose){ printf(" %% calling bcc_init_A_p: \n");}
+  bcc_init_A_p(mrnd,D);
+  if (verbose){ wkspace_printf();}
+  for (nb1=0;nb1<nbins;nb1++){ E = (*E_p)[nb1];
+    if (verbose){ printf(" %% calling bcc_single_init_lf for nb1 %d: \n",nb1);}
+    bcc_single_init_lf(E);
+    if (verbose){ wkspace_printf();}
+    /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  GLOBAL_toc(0,verbose," %% generating data matrices: ");
+  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; E_nb1 = (*E_p)[nb1]; E_nb2 = (*E_p)[nb2]; F = (*F_p)[nbx];
+      if (verbose){ printf(" %% calling bcc_double_init_lf for nb1 %d nb2 %d nbx %d: \n",nb1,nb2,nbx);}
+      bcc_double_init_lf(F); 
+      if (verbose){ wkspace_printf();}
+      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+  if (verbose){ printf(" %% calling bcc_init_QX\n");}
+  bcc_init_QX(D);
+  if (verbose){ printf(" %% calling bcc_M_mxset\n");}
+  bcc_M_mxset(D);
+  if (verbose){ wkspace_printf();}
+}
+
+void bcc_init_test()
+{
+  int verbose=GLOBAL_verbose; int error_check = (strcmp(GLOBAL_TEST_TYP2,"error")==0);
+  int iteration_max = GLOBAL_TEST_niter;
+  int nbins = GLOBAL_NBINS,*A_n_rows=NULL,A_n_cols = GLOBAL_TEST_A_n_cols,*Z_n_rows=NULL,Y_n_cols = GLOBAL_TEST_Y_n_cols,T_n_cols = GLOBAL_TEST_T_n_cols;
+  struct bcc_ajdk *D;struct bcc_single **E_; struct bcc_double **F_;
+  bcc_init(GLOBAL_TEST_TYP2,GLOBAL_TEST_mrand,&D,&E_,&F_,GLOBAL_QR_strategy,GLOBAL_QC_strategy); bcc_init_QX(D);
+  M_handle_printf(E_[0]->M_An,verbose," %% E_[0]->M_An[0]: "); M_handle_printf(E_[0]->M_At,verbose," %% E_[0]->M_At[0]: ");
+  M_handle_printf(E_[1]->M_An,verbose," %% E_[1]->M_An[1]: "); M_handle_printf(E_[1]->M_At,verbose," %% E_[1]->M_At[1]: ");
+  M_handle_printf(E_[0]->M_Zn,verbose," %% E_[0]->M_Zn[0]: "); M_handle_printf(E_[0]->M_Zt,verbose," %% E_[0]->M_Zt[0]: ");
+  M_handle_printf(E_[1]->M_Zn,verbose," %% E_[1]->M_Zn[1]: "); M_handle_printf(E_[1]->M_Zt,verbose," %% E_[1]->M_Zt[1]: ");
+  M_handle_printf(E_[0]->M_Wn,verbose," %% E_[0]->M_Wn[0]: "); M_handle_printf(E_[0]->M_Wt,verbose," %% E_[0]->M_Wt[0]: ");
+  M_handle_printf(E_[1]->M_Wn,verbose," %% E_[1]->M_Wn[1]: "); M_handle_printf(E_[1]->M_Wt,verbose," %% E_[1]->M_Wt[1]: ");
+  M_handle_printf(E_[0]->M_Yn,verbose," %% E_[0]->M_Yn[0]: "); M_handle_printf(E_[0]->M_Yt,verbose," %% E_[0]->M_Yt[0]: ");
+  M_handle_printf(E_[1]->M_Yn,verbose," %% E_[1]->M_Yn[1]: "); M_handle_printf(E_[1]->M_Yt,verbose," %% E_[1]->M_Yt[1]: ");
+  M_handle_printf(E_[0]->M_Tn,verbose," %% E_[0]->M_Tn[0]: "); M_handle_printf(E_[0]->M_Tt,verbose," %% E_[0]->M_Tt[0]: ");
+  M_handle_printf(E_[1]->M_Tn,verbose," %% E_[1]->M_Tn[1]: "); M_handle_printf(E_[1]->M_Tt,verbose," %% E_[1]->M_Tt[1]: ");
+  M_handle_printf(E_[0]->M_Sn,verbose," %% E_[0]->M_Sn[0]: "); M_handle_printf(E_[0]->M_St,verbose," %% E_[0]->M_St[0]: ");
+  M_handle_printf(E_[1]->M_Sn,verbose," %% E_[1]->M_Sn[1]: "); M_handle_printf(E_[1]->M_St,verbose," %% E_[1]->M_St[1]: ");
+  raprintf(D->A_p,"double",1,psize(D->A_ncols)," %% D->A_p: "); raprintf(D->A_ajdk,"double",psize(D->A_ncols),AJDK_TOT," %% D->A_ajdk: ");
+  raprintf(D->Y_p,"double",1,psize(D->Y_ncols)," %% D->Y_p: "); raprintf(D->Y_ajdk,"double",psize(D->Y_ncols),AJDK_TOT," %% D->Y_ajdk: ");
+  wkspace_printf();
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_An_ajdk(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_a;
+  if (verbose){ printf(" %% [entering bcc_An_ajdk]\n");}
+  if (verbose){ printf(" %% calculating E_[nb]->lf_An_ajdk, E_[nb]->lf_Zn_ajdk, E_[nb]->lf_Yn_ajdk, E_[nb]->lf_Wn_ajdk.\n");}
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+  GLOBAL_nf_cur=0; GLOBAL_nf_opn=0; 
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    if (E->A_rbother && D->A_cbother){ 
+      GLOBAL_pthread_tic();
+      binary_An_ajdk_v(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_An,D->A_ajdk,&(E->lf_An_ajdk));
+      GLOBAL_pthread_toc(); /* if bother */}
+    if (E->Z_rbother && D->A_cbother){ 
+      GLOBAL_pthread_tic();
+      binary_An_ajdk_v(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_Zn,D->A_ajdk,&(E->lf_Zn_ajdk));
+      GLOBAL_pthread_toc(); /* if bother */}
+    if (E->A_rbother && D->Y_cbother){ 
+      GLOBAL_pthread_tic();
+      binary_An_ajdk_v(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_Yn,D->Y_ajdk,&(E->lf_Yn_ajdk));
+      GLOBAL_pthread_toc(); /* if bother */}
+    if (E->Z_rbother && D->Y_cbother){ 
+      GLOBAL_pthread_tic();
+      binary_An_ajdk_v(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_Wn,D->Y_ajdk,&(E->lf_Wn_ajdk));
+      GLOBAL_pthread_toc(); /* if bother */}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  GLOBAL_pthread_tuc(); 
+  GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% An_ajdk_v: ");
+  GLOBAL_ops_toc(-1,0,verbose," %% total time: ");  
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  if (verbose>2){ 
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+      printf(" %% nb %d\n",nb);
+      lfprintf(E->lf_An_ajdk," %% lf_An_ajdk->lf: ");
+      lfprintf(E->lf_Zn_ajdk," %% lf_Zn_ajdk->lf: ");
+      lfprintf(E->lf_Yn_ajdk," %% lf_Yn_ajdk->lf: ");
+      lfprintf(E->lf_Wn_ajdk," %% lf_Wn_ajdk->lf: ");
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    /* if (verbose>2){ } */}
+  if (verbose){ printf(" %% [finished bcc_An_ajdk]\n");}
+}
+
+void bcc_vn_ajdk(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_a;
+  if (strstr(D->QR_strategy,"YnWt") || strstr(D->QC_strategy,"YnWt")){
+    if (verbose){ printf(" %% [entering bcc_vn_ajdk]\n");}
+    if (verbose){ printf(" %% calculating E_[nb]->lf_jn_ajdk, E_[nb]->lf_vn_ajdk.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0; 
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+      if (E->A_rbother && D->A_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_An_ajdk_v(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_jn,D->A_ajdk,&(E->lf_jn_ajdk));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->Z_rbother && D->A_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_An_ajdk_v(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_vn,D->A_ajdk,&(E->lf_vn_ajdk));
+	GLOBAL_pthread_toc(); /* if bother */}
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_pthread_tuc(); 
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% An_ajdk_v: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");  
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){ 
+      for (nb=0;nb<nbins;nb++){ E = E_[nb];
+	printf(" %% nb %d\n",nb);
+	bprintf(E->A_bmr_j_rtn,D->bitj,1,E->A_nrows," %% A_bmr_j_rtn: ");
+	bprintf(E->M_jn->mr_j ,D->bitj,1,E->A_nrows," %% M_jn->mr_j : ");
+	bprintf(D->A_bmc_j_rmv,D->bitj,1,D->A_ncols," %% A_bmr_j_rtn: ");
+	bprintf(E->M_jn->mc_j ,D->bitj,1,D->A_ncols," %% M_jn->mc_j : ");
+	lfprintf(E->lf_jn_ajdk," %% lf_jn_ajdk->lf: ");
+	bprintf(E->M_vn->mc_j ,D->bitj,1,D->A_ncols," %% M_vn->mc_j : ");
+	lfprintf(E->lf_vn_ajdk," %% lf_vn_ajdk->lf: ");
+	/* for (nb=0;nb<nbins;nb++){ } */}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_vn_ajdk]\n");}
+    /* if strategy */}
+}
+
+void bcc_lf_ZtSn(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_a;
+  if (1 || strstr(D->QR_strategy,"ZtSWn") || strstr(D->QC_strategy,"ZtSWn")){ /* always recalculate for use in doublestudy and getscores */
+    if (verbose){ printf(" %% [entering bcc_lf_ZtSn]\n");}
+    if (verbose){ printf(" %% calculating E_[nb]->lf_AtTn, E_[nb]->lf_ZtSn, E_[nb]->lf_YtTn, E_[nb]->lf_WtSn.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+      if (E->A_rbother && D->A_cbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_At,E->M_Tt,NULL,NULL,NULL,&(E->lf_AtTn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->Z_rbother && D->A_cbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_Zt,E->M_St,NULL,NULL,NULL,&(E->lf_ZtSn));
+	GLOBAL_pthread_toc(); /* if bother */} 
+      if (E->A_rbother && D->Y_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_Yt,E->M_Tt,NULL,NULL,NULL,&(E->lf_YtTn));
+	GLOBAL_pthread_toc(); /* if bother */} 
+      if (E->Z_rbother && D->Y_cbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_Wt,E->M_St,NULL,NULL,NULL,&(E->lf_WtSn));
+	GLOBAL_pthread_toc(); /* if bother */} 
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% ZtSn_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb=0;nb<nbins;nb++){ E = E_[nb];
+	printf(" %% nb %d\n",nb);
+	bprintf(E->M_An->mc_j,D->bitj,1,D->A_ncols," %% A_bmc_j: ");
+	lfprintf(E->lf_AtTn," %% lf_AtTn: ");
+	lfprintf(E->lf_ZtSn," %% lf_ZtSn: ");
+	bprintf(E->M_Yn->mc_j,D->bitj,1,D->A_ncols," %% Y_bmc_j: ");
+	lfprintf(E->lf_YtTn," %% lf_YtTn: ");
+	lfprintf(E->lf_WtSn," %% lf_WtSn: ");
+	/* for (nb=0;nb<nbins;nb++){ } */}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lf_ZtSn]\n");}
+    /* if strategy */}
+}
+
+void bcc_lf_utrn(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_a;
+  if (strstr(D->QR_strategy,"ZtSWn") || strstr(D->QC_strategy,"ZtSWn")){
+    if (verbose){ printf(" %% [entering bcc_lf_utrn]\n");}
+    if (verbose){ printf(" %% calculating E_[nb]->lf_ktrn, E_[nb]->lf_utrn.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+      if (E->A_rbother && D->A_cbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_kt,E->M_rt,NULL,NULL,NULL,&(E->lf_ktrn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->A_rbother && D->Y_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_ut,E->M_rt,NULL,NULL,NULL,&(E->lf_utrn));
+	GLOBAL_pthread_toc(); /* if bother */} 
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% ZtSn_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb=0;nb<nbins;nb++){ E = E_[nb];
+	printf(" %% nb %d\n",nb);
+	bprintf(D->A_bmc_j_rmv,D->bitj,1,D->A_ncols," %% A_bmr_j_rtn: ");
+	bprintf(E->M_kt->mr_j ,D->bitj,1,D->A_ncols," %% M_kt->mr_j : ");
+	bprintf(E->A_bmr_j_rtn,D->bitj,1,E->A_nrows," %% A_bmr_j_rtn: ");
+	bprintf(E->M_kt->mc_j ,D->bitj,1,E->A_nrows," %% M_kt->mc_j : ");
+	lfprintf(E->lf_ktrn," %% lf_ktrn: ");
+	bprintf(E->M_ut->mc_j ,D->bitj,1,E->A_nrows," %% M_ut->mc_j : ");
+	lfprintf(E->lf_utrn," %% lf_utrn: ");
+	/* for (nb=0;nb<nbins;nb++){ } */}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lf_utrn]\n");}
+    /* if strategy */}
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_lf_ZtSWn(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  int n_spacing_A = SPACING_b;
+  if (strstr(D->QR_strategy,"ZtSWn") || strstr(D->QC_strategy,"ZtSWn")){
+    if (verbose){ printf(" %% [entering bcc_lf_ZtSWn]\n");}
+    if (verbose){ printf(" %% calculating E_[nb]->lf_AtTAn, E_[nb]->lf_AtTYn, E_[nb]->lf_ZtSZn, E_[nb]->lf_ZtSWn.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+      if (E->Z_rbother && D->A_cbother && D->Y_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AtTYn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_Zt,E->M_St,E->M_Wt,D->A_ajdk,D->Y_ajdk,E->lf_ZtSn,E->lf_WtSn,&(E->lf_ZtSWn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->Z_rbother && D->A_cbother && D->A_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AtTYn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_Zt,E->M_St,E->M_Zt,D->A_ajdk,D->A_ajdk,E->lf_ZtSn,E->lf_ZtSn,&(E->lf_ZtSZn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->A_rbother && D->A_cbother && D->Y_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AtTYn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_At,E->M_Tt,E->M_Yt,D->A_ajdk,D->Y_ajdk,E->lf_AtTn,E->lf_YtTn,&(E->lf_AtTYn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->A_rbother && D->A_cbother && D->A_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AtTYn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_At,E->M_Tt,E->M_At,D->A_ajdk,D->A_ajdk,E->lf_AtTn,E->lf_AtTn,&(E->lf_AtTAn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% ZtSWn_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){
+      for (nb=0;nb<nbins;nb++){ E = E_[nb];
+	printf(" %% nb %d\n",nb);
+	bprintf(E->M_An->mc_j,D->bitj,1,D->A_ncols," %% bmc_A_j: ");
+	bprintf(E->M_Yn->mc_j,D->bitj,1,D->Y_ncols," %% bmc_Y_j: ");
+	bprintf(E->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% bmc_T_j: ");
+	if (E->Z_rbother && D->A_cbother && D->Y_cbother){ lfprintf(E->lf_ZtSWn," %% lf_ZtSWn: "); /* if bother */} else{ printf(" %% no lf_ZtSWn\n");}
+	if (E->Z_rbother && D->A_cbother && D->A_cbother){ lfprintf(E->lf_ZtSZn," %% lf_ZtSWn: "); /* if bother */} else{ printf(" %% no lf_ZtSZn\n");}
+	if (E->A_rbother && D->A_cbother && D->Y_cbother){ lfprintf(E->lf_AtTYn," %% lf_AtTYn: "); /* if bother */} else{ printf(" %% no lf_AtTYn\n");}
+	if (E->A_rbother && D->A_cbother && D->A_cbother){ lfprintf(E->lf_AtTAn," %% lf_AtTAn: "); /* if bother */} else{ printf(" %% no lf_AtTAn\n");}
+	/* for (nb=0;nb<nbins;nb++){ } */}
+    /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lf_ZtSWn]\n");}
+    /* if strategy */}
+}
+
+void bcc_lf_ktrun(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  int n_spacing_A = SPACING_b;
+  if (strstr(D->QR_strategy,"ZtSWn") || strstr(D->QC_strategy,"ZtSWn")){
+    if (verbose){ printf(" %% [entering bcc_lf_ktrun]\n");}
+    if (verbose){ printf(" %% calculating E_[nb]->lf_ktrkn, E_[nb]->lf_ktrun.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+     if (E->A_rbother && D->A_cbother && D->Y_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AtTYn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_kt,E->M_rt,E->M_ut,D->A_ajdk,D->Y_ajdk,E->lf_ktrn,E->lf_utrn,&(E->lf_ktrun));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->A_rbother && D->A_cbother && D->A_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AtTYn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_kt,E->M_rt,E->M_kt,D->A_ajdk,D->A_ajdk,E->lf_ktrn,E->lf_ktrn,&(E->lf_ktrkn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% ZtSWn_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){
+      for (nb=0;nb<nbins;nb++){ E = E_[nb];
+	printf(" %% nb %d\n",nb);
+	bprintf(D->A_bmc_j_rtn,D->bitj,1,D->A_ncols," %% A_bmc_j_rtn: ");
+	bprintf(E->M_Yn->mc_j ,D->bitj,1,D->Y_ncols," %% bmc_Y_j    : ");
+	bprintf(E->M_Tn->mc_j ,D->bitj,1,D->T_ncols," %% bmc_T_j    : ");
+	if (E->A_rbother && D->A_cbother && D->Y_cbother){ lfprintf(E->lf_ktrun," %% lf_ktrun: "); /* if bother */} else{ printf(" %% no lf_ktrun\n");}
+	if (E->A_rbother && D->A_cbother && D->A_cbother){ lfprintf(E->lf_ktrkn," %% lf_ktrkn: "); /* if bother */} else{ printf(" %% no lf_ktrkn\n");}
+	/* for (nb=0;nb<nbins;nb++){ } */}
+    /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lf_ktrun]\n");}
+    /* if strategy */}
+}
+
+void bcc_lrup_lf_ZtSWn(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  if (strstr(D->QR_strategy,"ZtSWn") || strstr(D->QC_strategy,"ZtSWn")){
+    if (verbose){ printf(" %% [entering bcc_lrup_lf_ZtSWn]\n");}
+    if (verbose){ printf(" %% updating E_[nb]->lf_AtTAn, E_[nb]->lf_AtTYn.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+     if (E->A_rbother && D->A_cbother && D->Y_cbother){ dra_subtequals(E->lf_AtTYn->lf,E->lf_AtTYn->length,E->lf_ktrun->lf); /* if bother */}
+     if (E->A_rbother && D->A_cbother && D->A_cbother){ dra_subtequals(E->lf_AtTAn->lf,E->lf_AtTAn->length,E->lf_ktrkn->lf); /* if bother */}
+     /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){
+      for (nb=0;nb<nbins;nb++){ E = E_[nb];
+	printf(" %% nb %d\n",nb);
+	bprintf(E->M_An->mc_j,D->bitj,1,D->A_ncols," %% bmc_A_j: ");
+	bprintf(E->M_Yn->mc_j,D->bitj,1,D->Y_ncols," %% bmc_Y_j: ");
+	bprintf(E->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% bmc_T_j: ");
+	if (E->A_rbother && D->A_cbother && D->Y_cbother){ lfprintf(E->lf_AtTYn," %% lf_AtTYn: "); /* if bother */} else{ printf(" %% no lf_AtTYn\n");}
+	if (E->A_rbother && D->A_cbother && D->A_cbother){ lfprintf(E->lf_AtTAn," %% lf_AtTAn: "); /* if bother */} else{ printf(" %% no lf_AtTAn\n");}
+	/* for (nb=0;nb<nbins;nb++){ } */}
+    /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lrup_lf_ZtSWn]\n");}
+    /* if strategy */}
+}
+
+void bcc_M_ZtSWn_excerpt(int trm_flag,struct M_handle *M_St,struct M_handle *M_in1,struct M_handle *M_in2,struct L_handle *L_in,struct M_handle **M_out_)
+{
+  int ns_j=0,ns_b=0,ns_a=0;
+  if (trm_flag==0){
+    for (ns_j=0;ns_j<M_St->rpop_j;ns_j++){
+      ns_a = M_St->m_a_[ns_j]; ns_b = M_St->m_b_[ns_j];
+      GLOBAL_pthread_tic(); 
+      binary_xcalc(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),M_in1->mr_j,M_in1->mr_b,M_in2->mr_j,M_in2->mr_b,L_in,L3_lf_get(L_in,L_in->lf,0,0,0,0,0,0,ns_j,ns_b,ns_a),&(M_in1->nrows),&(M_in2->nrows),&(M_out_[ns_j]),&(GLOBAL_B_MLT),(addressable_0));
+      GLOBAL_pthread_toc(); 
+      /* for (ns_j=0;ns_j<M_St->rpop_j;ns_j++){ } */}
+    /* if trm==0 */}
+  if (trm_flag==1){
+    for (ns_j=0;ns_j<M_St->rpop_j;ns_j++){
+      ns_a = M_St->m_a_[ns_j]; ns_b = M_St->m_b_[ns_j];
+      GLOBAL_pthread_tic();
+      binary_xcalc(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),M_in2->mr_j,M_in2->mr_b,M_in1->mr_j,M_in1->mr_b,L_in,L3_lf_get(L_in,L_in->lf,0,0,0,0,0,0,ns_j,ns_b,ns_a),&(M_in2->nrows),&(M_in1->nrows),&(M_out_[ns_j]),&(GLOBAL_B_MLT),(addressable_1));
+      GLOBAL_pthread_toc(); 
+      /* for (ns_j=0;ns_j<M_St->rpop_j;ns_j++){ } */}
+    /* trm==1 */}
+}
+
+void bcc_M_ZtSWn(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0,ns_j=0,ns_b=0,ns_a=0; struct bcc_single *E=NULL;
+  struct M_handle *M_Xt=NULL,*M_in1=NULL,*M_in2=NULL,**M_out_=NULL;
+  struct L_handle *L_in=NULL;
+  int trm_flag=0;
+  if (strstr(D->QR_strategy,"ZtSWn")){
+    if (verbose){ printf(" %% [entering bcc_M_ZtSWn]\n");}
+    if (verbose){ printf(" %% calculating E_[nb]->M_AtTAn, E_[nb]->M_AtTYn, E_[nb]->M_ZtSZn, E_[nb]->M_ZtSWn.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+      /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+      if (E->Z_rbother && D->A_cbother && D->Y_cbother){ 
+	M_Xt = E->M_St; M_in1= E->M_Zt; M_in2 = E->M_Wt; M_out_ = E->M_ZtSWn_; L_in = E->lf_ZtSWn; trm_flag = E->M_ZtSWn_trm; if (verbose>0){ printf(" %% bcc_M_ZtSWn: trm_flag %d\n",trm_flag);}
+	bcc_M_ZtSWn_excerpt(trm_flag,M_Xt,M_in1,M_in2,L_in,M_out_);
+	/* if bother */}
+      /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+      if (E->Z_rbother && D->A_cbother && D->A_cbother){ 
+	M_Xt = E->M_St; M_in1= E->M_Zt; M_in2 = E->M_Zt; M_out_ = E->M_ZtSZn_; L_in = E->lf_ZtSZn; trm_flag = E->M_ZtSZn_trm; if (verbose>0){ printf(" %% bcc_M_ZtSZn: trm_flag %d\n",trm_flag);}
+	bcc_M_ZtSWn_excerpt(trm_flag,M_Xt,M_in1,M_in2,L_in,M_out_);
+	/* if bother */}
+      /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+      if (E->A_rbother && D->A_cbother && D->Y_cbother){ 
+	M_Xt = E->M_Tt; M_in1= E->M_At; M_in2 = E->M_Yt; M_out_ = E->M_AtTYn_; L_in = E->lf_AtTYn; trm_flag = E->M_AtTYn_trm; if (verbose>0){ printf(" %% bcc_M_AtTYn: trm_flag %d\n",trm_flag);}
+	bcc_M_ZtSWn_excerpt(trm_flag,M_Xt,M_in1,M_in2,L_in,M_out_);
+	/* if bother */}
+      /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+      if (E->A_rbother && D->A_cbother && D->A_cbother){ 
+	M_Xt = E->M_Tt; M_in1= E->M_At; M_in2 = E->M_At; M_out_ = E->M_AtTAn_; L_in = E->lf_AtTAn; trm_flag = E->M_AtTAn_trm; if (verbose>0){ printf(" %% bcc_M_AtTAn: trm_flag %d\n",trm_flag);}
+	bcc_M_ZtSWn_excerpt(trm_flag,M_Xt,M_in1,M_in2,L_in,M_out_);
+	/* if bother */}
+      /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% xcalc ZtSWn: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose){ printf(" %% [finished bcc_M_ZtSWn]\n");}
+    /* if strategy */}
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_lf_YnWt(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_b;
+  if (strstr(D->QR_strategy,"YnWt") || strstr(D->QC_strategy,"YnWt")){
+    if (verbose){ printf(" %% [entering bcc_lf_YnWt]\n");}
+    if (verbose){ printf(" %% calculating F_[nbx]->lf_YnWt, F_[nbx]->lf_YnYt, F_[nbx]->lf_AnZt, F_[nbx]->lf_AnAt.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	if (D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_Yn,E_nb2->M_Wn,D->Y_ajdk,E_nb1->lf_Yn_ajdk,E_nb2->lf_Wn_ajdk,&(F->lf_YnWt));
+	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_Yn,E_nb2->M_Yn,D->Y_ajdk,E_nb1->lf_Yn_ajdk,E_nb2->lf_Yn_ajdk,&(F->lf_YnYt));
+	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->M_Zn,D->A_ajdk,E_nb1->lf_An_ajdk,E_nb2->lf_Zn_ajdk,&(F->lf_AnZt));
+	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->M_An,D->A_ajdk,E_nb1->lf_An_ajdk,E_nb2->lf_An_ajdk,&(F->lf_AnAt));
+	  GLOBAL_pthread_toc(); /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% YnWt_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	  printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	  bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	  bprintf(E_nb2->M_Zn->mr_j,D->bitj,1,E_nb2->Z_nrows," %% Z2_bmr_j: ");
+	  lfprintf(F->lf_YnWt," %% lf_YnWt: ");
+	  lfprintf(F->lf_AnZt," %% lf_AnZt: ");
+	  bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	  bprintf(E_nb2->M_An->mr_j,D->bitj,1,E_nb2->A_nrows," %% A2_bmr_j: ");
+	  lfprintf(F->lf_YnYt," %% lf_YnYt: ");
+	  lfprintf(F->lf_AnAt," %% lf_AnAt: ");
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lf_YnWt]\n");}
+    /* if strategy */}
+}
+
+void bcc_lf_jnvt(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_b;
+  if (strstr(D->QR_strategy,"YnWt") || strstr(D->QC_strategy,"YnWt")){
+    if (verbose){ printf(" %% [entering bcc_lf_jnvt]\n");}
+    if (verbose){ printf(" %% calculating F_[nbx]->lf_jnvt, F_[nbx]->lf_jnjt.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_jn,E_nb2->M_vn,D->A_ajdk,E_nb1->lf_jn_ajdk,E_nb2->lf_vn_ajdk,&(F->lf_jnvt));
+	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_jn,E_nb2->M_jn,D->A_ajdk,E_nb1->lf_jn_ajdk,E_nb2->lf_jn_ajdk,&(F->lf_jnjt));
+	  GLOBAL_pthread_toc(); /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% YnWt_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	  printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	  bprintf(E_nb1->A_bmr_j_rtn,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j_rtn: ");
+	  bprintf(E_nb2->M_Zn->mr_j ,D->bitj,1,E_nb2->Z_nrows," %% Z2_bmr_j    : ");
+	  lfprintf(F->lf_jnvt," %% lf_jnvt: ");
+	  bprintf(E_nb1->A_bmr_j_rtn,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j_rtn: ");
+	  bprintf(E_nb2->A_bmr_j_rtn,D->bitj,1,E_nb2->A_nrows," %% A2_bmr_j_rtn: ");
+	  lfprintf(F->lf_jnjt," %% lf_jnjt: ");
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lf_jnvt]\n");}
+    /* if strategy */}
+}
+
+void bcc_lrup_lf_YnWt(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  if (strstr(D->QR_strategy,"YnWt") || strstr(D->QC_strategy,"YnWt")){
+    if (verbose){ printf(" %% [entering bcc_lrup_lf_YnWt]\n");}
+    if (verbose){ printf(" %% updating F_[nbx]->lf_AnZt, F_[nbx]->lf_AnAt.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ dra_subtequals(F->lf_AnZt->lf,F->lf_AnZt->length,F->lf_jnvt->lf); /* if bother */}
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ dra_subtequals(F->lf_AnAt->lf,F->lf_AnAt->length,F->lf_jnjt->lf); /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	  printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	  bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	  bprintf(E_nb2->M_Zn->mr_j,D->bitj,1,E_nb2->Z_nrows," %% Z2_bmr_j: ");
+	  lfprintf(F->lf_AnZt," %% lf_AnZt: ");
+	  bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	  bprintf(E_nb2->M_An->mr_j,D->bitj,1,E_nb2->A_nrows," %% A2_bmr_j: ");
+	  lfprintf(F->lf_AnAt," %% lf_AnAt: ");
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lrup_lf_YnWt]\n");}
+    /* if strategy */}
+}
+
+void bcc_M_YnWt_excerpt(int trm_flag,struct M_handle *M_in1,struct M_handle *M_in2,struct L_handle *L_in,struct M_handle **M_out_p)
+{
+  if (trm_flag==0){
+    GLOBAL_pthread_tic(); 
+    binary_xcalc(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),M_in1->mr_j,M_in1->mr_b,M_in2->mr_j,M_in2->mr_b,L_in,L_in->lf,&(M_in1->nrows),&(M_in2->nrows),&(*M_out_p),&(GLOBAL_B_MLT),(addressable_0));
+    GLOBAL_pthread_toc(); 
+    /* if trm==0 */}
+  if (trm_flag==1){
+    GLOBAL_pthread_tic();
+    binary_xcalc(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),M_in2->mr_j,M_in2->mr_b,M_in1->mr_j,M_in1->mr_b,L_in,L_in->lf,&(M_in2->nrows),&(M_in1->nrows),&(*M_out_p),&(GLOBAL_B_MLT),(addressable_1));
+    GLOBAL_pthread_toc(); 
+    /* trm==1 */}
+}
+
+void bcc_M_YnWt(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_b;
+  struct M_handle *M_in1=NULL,*M_in2=NULL,**M_out_p=NULL;
+  struct L_handle *L_in=NULL;
+  int trm_flag=0;
+  if (strstr(D->QC_strategy,"YnWt")){
+    if (verbose){ printf(" %% [entering bcc_M_YnWt]\n");}
+    if (verbose){ printf(" %% calculating F_[nbx]->M_YnWt, F_[nbx]->M_YnYt, F_[nbx]->M_AnZt, F_[nbx]->M_AnAt.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	if (D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  M_in1 = E_nb1->M_Yn; M_in2 = E_nb2->M_Wn; L_in = F->lf_YnWt; M_out_p = &(F->M_YnWt); trm_flag = F->M_YnWt_trm; if (verbose>0){ printf(" %% bcc_M_YnWt: trm_flag %d\n",trm_flag);}
+	  bcc_M_YnWt_excerpt(trm_flag,M_in1,M_in2,L_in,M_out_p);
+	  /* if bother */}
+	if (D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  M_in1 = E_nb1->M_Yn; M_in2 = E_nb2->M_Yn; L_in = F->lf_YnYt; M_out_p = &(F->M_YnYt); trm_flag = F->M_YnYt_trm; if (verbose>0){ printf(" %% bcc_M_YnYt: trm_flag %d\n",trm_flag);}
+	  bcc_M_YnWt_excerpt(trm_flag,M_in1,M_in2,L_in,M_out_p);
+	  /* if bother */}
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  M_in1 = E_nb1->M_An; M_in2 = E_nb2->M_Zn; L_in = F->lf_AnZt; M_out_p = &(F->M_AnZt); trm_flag = F->M_AnZt_trm; if (verbose>0){ printf(" %% bcc_M_AnZt: trm_flag %d\n",trm_flag);}
+	  bcc_M_YnWt_excerpt(trm_flag,M_in1,M_in2,L_in,M_out_p);
+	  /* if bother */}
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  M_in1 = E_nb1->M_An; M_in2 = E_nb2->M_An; L_in = F->lf_AnAt; M_out_p = &(F->M_AnAt); trm_flag = F->M_AnAt_trm; if (verbose>0){ printf(" %% bcc_M_AnAt: trm_flag %d\n",trm_flag);}
+	  bcc_M_YnWt_excerpt(trm_flag,M_in1,M_in2,L_in,M_out_p);
+	  /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% xcalc YnWt: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose){ printf(" %% [finished bcc_M_YnWt]\n");}
+    /* if strategy */}
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_lf_AnZt_S_WnYt(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  int n_spacing_A = SPACING_a;
+  if (strstr(D->QR_strategy,"YnWt")){
+    if (verbose){ printf(" %% [entering bcc_lf_AnZt_S_WnYt]\n");}
+    if (verbose){ printf(" %% calculating F_[nbx]->lf_AnZt_S_WnYt, etc.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+  	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_S_WnYt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->M_St,E_nb2->M_Zn,F->lf_AnZt,F->lf_YnWt,&(F->lf_AnZt_S_WnYt));
+  	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+  	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_S_WnYt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->M_St,E_nb2->M_Zn,F->lf_AnZt,F->lf_AnZt,&(F->lf_AnZt_S_ZnAt));
+  	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+  	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_S_WnYt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->M_Tt,E_nb2->M_An,F->lf_AnAt,F->lf_YnYt,&(F->lf_AnAt_T_YnYt));
+  	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+  	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_S_WnYt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->M_Tt,E_nb2->M_An,F->lf_AnAt,F->lf_AnAt,&(F->lf_AnAt_T_AnAt));
+  	  GLOBAL_pthread_toc(); /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% AnZt_S_WnYt_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	  printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	  bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	  bprintf(E_nb2->M_Sn->mc_j,D->bitj,1,D->T_ncols," %% S2_bmc_j: ");
+	  lfprintf(F->lf_AnZt_S_WnYt," %% lf_AnZt_S_WnYt: ");
+	  lfprintf(F->lf_AnZt_S_ZnAt," %% lf_AnZt_S_ZnAt: ");
+	  bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	  bprintf(E_nb2->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% T2_bmc_j: ");
+	  lfprintf(F->lf_AnAt_T_YnYt," %% lf_AnAt_T_YnYt: ");
+	  lfprintf(F->lf_AnAt_T_AnAt," %% lf_AnAt_T_AnAt: ");
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lf_AnZt_S_WnYt]\n");}
+    /* if strategy */}
+}
+
+void bcc_lf_An_ZtSWn_Yt_excerpt(int trm_flag,int n_spacing_A,struct M_handle *M_An,struct M_handle *M_St,struct M_handle **M_ZtSWn_,struct M_handle *M_Zt,struct M_handle *M_Wt,struct M_handle *M_Yn,double *A_ajdk,double *Y_ajdk,struct L_handle **L_out_p)
+{
+  struct M_handle **M_WtSZn_ = M_ZtSWn_;
+  if (trm_flag==0){
+    GLOBAL_pthread_tic();
+    binary_An_ZtSWn_Yt_ww__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,M_An,M_St,M_ZtSWn_,M_Wt,M_Yn,A_ajdk,Y_ajdk,&(*L_out_p));
+    GLOBAL_pthread_toc(); /* if trm==0 */}
+  if (trm_flag==1){
+    GLOBAL_pthread_tic();
+    binary_An_ZtSWn_Yt_ww__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,M_Yn,M_St,M_WtSZn_,M_Zt,M_An,Y_ajdk,A_ajdk,&(*L_out_p));
+    GLOBAL_pthread_toc(); /* if trm==1 */}
+}
+
+void bcc_lf_An_ZtSWn_Yt(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  int n_spacing_A = SPACING_a;
+  if (strstr(D->QR_strategy,"ZtSWn")){
+    if (verbose){ printf(" %% [entering bcc_lf_An_ZtSWn_Yt]\n");}
+    if (verbose){ printf(" %% calculating F_[nbx]->lf_An_ZtSWn_Yt, etc.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  bcc_lf_An_ZtSWn_Yt_excerpt(E_nb2->M_ZtSWn_trm,n_spacing_A,E_nb1->M_An,E_nb2->M_St,E_nb2->M_ZtSWn_,E_nb2->M_Zt,E_nb2->M_Wt,E_nb1->M_Yn,D->A_ajdk,D->Y_ajdk,&(F->lf_An_ZtSWn_Yt)); /* if bother */}
+	if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  bcc_lf_An_ZtSWn_Yt_excerpt(E_nb2->M_ZtSZn_trm,n_spacing_A,E_nb1->M_An,E_nb2->M_St,E_nb2->M_ZtSZn_,E_nb2->M_Zt,E_nb2->M_Zt,E_nb1->M_An,D->A_ajdk,D->A_ajdk,&(F->lf_An_ZtSZn_At)); /* if bother */}
+	if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  bcc_lf_An_ZtSWn_Yt_excerpt(E_nb2->M_ZtSWn_trm,n_spacing_A,E_nb1->M_An,E_nb2->M_Tt,E_nb2->M_AtTYn_,E_nb2->M_At,E_nb2->M_Yt,E_nb1->M_Yn,D->A_ajdk,D->Y_ajdk,&(F->lf_An_AtTYn_Yt)); /* if bother */}
+	if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  bcc_lf_An_ZtSWn_Yt_excerpt(E_nb2->M_ZtSZn_trm,n_spacing_A,E_nb1->M_An,E_nb2->M_Tt,E_nb2->M_AtTAn_,E_nb2->M_At,E_nb2->M_At,E_nb1->M_An,D->A_ajdk,D->A_ajdk,&(F->lf_An_AtTAn_At)); /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% An_ZtSWn_Yt_ww: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	  printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	  bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	  bprintf(E_nb2->M_Sn->mc_j,D->bitj,1,D->T_ncols," %% S2_bmc_j: ");
+	  lfprintf(F->lf_An_ZtSWn_Yt," %% lf_An_ZtSWn_Yt: ");
+	  lfprintf(F->lf_An_ZtSZn_At," %% lf_An_ZtSZn_At: ");
+	  bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	  bprintf(E_nb2->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% T2_bmc_j: ");
+	  lfprintf(F->lf_An_AtTYn_Yt," %% lf_An_AtTYn_Yt: ");
+	  lfprintf(F->lf_An_AtTAn_At," %% lf_An_AtTAn_At: ");
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lf_An_ZtSWn_Yt]\n");}
+    /* if strategy */}
+}
+
+void bcc_lf_AnZtSWnYt(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  int n_spacing_A = SPACING_a;
+  if (verbose){ printf(" %% [entering bcc_lf_AnZtSWnYt]\n");}
+  if (verbose){ printf(" %% calculating F_[nbx]->lf_AnZtSWnYt, etc.\n");}
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+  GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+      if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AnZtSWnYt_uu__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->M_Zt,E_nb2->M_St,E_nb2->M_Wt,E_nb1->M_Yn,D->A_ajdk,D->Y_ajdk,&(F->lf_AnZtSWnYt));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AnZtSWnYt_uu__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->M_Zt,E_nb2->M_St,E_nb2->M_Zt,E_nb1->M_An,D->A_ajdk,D->A_ajdk,&(F->lf_AnZtSZnAt));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AnZtSWnYt_uu__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->M_At,E_nb2->M_Tt,E_nb2->M_Yt,E_nb1->M_Yn,D->A_ajdk,D->Y_ajdk,&(F->lf_AnAtTYnYt));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AnZtSWnYt_uu__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->M_At,E_nb2->M_Tt,E_nb2->M_At,E_nb1->M_An,D->A_ajdk,D->A_ajdk,&(F->lf_AnAtTAnAt));
+	GLOBAL_pthread_toc(); /* if bother */}
+      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+  GLOBAL_pthread_tuc();
+  GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% AnZtSWnYt_uu: ");
+  GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  if (verbose>2){  
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	bprintf(E_nb2->M_Sn->mc_j,D->bitj,1,D->T_ncols," %% S2_bmc_j: ");
+	lfprintf(F->lf_AnZtSWnYt," %% lf_AnZtSWnYt: ");
+	lfprintf(F->lf_AnZtSZnAt," %% lf_AnZtSZnAt: ");
+	bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	bprintf(E_nb2->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% T2_bmc_j: ");
+	lfprintf(F->lf_AnAtTYnYt," %% lf_AnAtTYnYt: ");
+	lfprintf(F->lf_AnAtTAnAt," %% lf_AnAtTAnAt: ");
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    /* if (verbose>2){ } */}
+  if (verbose){ printf(" %% [finished bcc_lf_AnZtSWnYt]\n");}
+}
+
+void bcc_AnZtSWnYt_error(int verbose,struct bcc_ajdk *D)
+{
+  int nbins=D->nbins; struct bcc_single **E_=D->E_; struct bcc_double **F_=D->F_;
+  int nbx=0,nb1=0,nb2=0,length=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+      length = E_nb1->A_nrows * D->T_ncols;
+      printf(" %% nb1 %d nb2 %d length %d*%d=%d\n",nb1,nb2,E_nb1->A_nrows,D->T_ncols,length);
+      if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	if (strstr(D->QR_strategy,"ZtSWn") && strstr(D->QR_strategy,"YnWt")){ printf(" %% lf_An_ZtSWn_Yt - lf_AnZt_S_WnYt %0.16f\n",dra_diff(F->lf_An_ZtSWn_Yt->lf,F->lf_AnZt_S_WnYt->lf,length,1));}
+	if (strstr(D->QR_strategy,"ZtSWn")){ printf(" %% lf_An_ZtSWn_Yt - lf_AnZtSWnYt %0.16f\n",dra_diff(F->lf_An_ZtSWn_Yt->lf,F->lf_AnZtSWnYt->lf,length,1));}
+	if (strstr(D->QR_strategy,"YnWt")){ printf(" %% lf_AnZt_S_WnYt - lf_AnZtSWnYt %0.16f\n",dra_diff(F->lf_AnZt_S_WnYt->lf,F->lf_AnZtSWnYt->lf,length,1));}
+	/* if bother */}
+      if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	if (strstr(D->QR_strategy,"ZtSWn") && strstr(D->QR_strategy,"YnWt")){ printf(" %% lf_An_ZtSZn_At - lf_AnZt_S_ZnAt %0.16f\n",dra_diff(F->lf_An_ZtSZn_At->lf,F->lf_AnZt_S_ZnAt->lf,length,1));}
+	if (strstr(D->QR_strategy,"ZtSWn")){ printf(" %% lf_An_ZtSZn_At - lf_AnZtSZnAt %0.16f\n",dra_diff(F->lf_An_ZtSZn_At->lf,F->lf_AnZtSZnAt->lf,length,1));}
+	if (strstr(D->QR_strategy,"YnWt")){ printf(" %% lf_AnZt_S_ZnAt - lf_AnZtSZnAt %0.16f\n",dra_diff(F->lf_AnZt_S_ZnAt->lf,F->lf_AnZtSZnAt->lf,length,1));}
+	/* if bother */}
+      if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	if (strstr(D->QR_strategy,"ZtSWn") && strstr(D->QR_strategy,"YnWt")){ printf(" %% lf_An_AtTYn_Yt - lf_AnAt_T_YnYt %0.16f\n",dra_diff(F->lf_An_AtTYn_Yt->lf,F->lf_AnAt_T_YnYt->lf,length,1));}
+	if (strstr(D->QR_strategy,"ZtSWn")){ printf(" %% lf_An_AtTYn_Yt - lf_AnAtTYnYt %0.16f\n",dra_diff(F->lf_An_AtTYn_Yt->lf,F->lf_AnAtTYnYt->lf,length,1));}
+	if (strstr(D->QR_strategy,"YnWt")){ printf(" %% lf_AnAt_T_YnYt - lf_AnAtTYnYt %0.16f\n",dra_diff(F->lf_AnAt_T_YnYt->lf,F->lf_AnAtTYnYt->lf,length,1));}
+	/* if bother */}
+      if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	if (strstr(D->QR_strategy,"ZtSWn") && strstr(D->QR_strategy,"YnWt")){ printf(" %% lf_An_AtTAn_At - lf_AnAt_T_AnAt %0.16f\n",dra_diff(F->lf_An_AtTAn_At->lf,F->lf_AnAt_T_AnAt->lf,length,1));}
+	if (strstr(D->QR_strategy,"ZtSWn")){ printf(" %% lf_An_AtTAn_At - lf_AnAtTAnAt %0.16f\n",dra_diff(F->lf_An_AtTAn_At->lf,F->lf_AnAtTAnAt->lf,length,1));}
+	if (strstr(D->QR_strategy,"YnWt")){ printf(" %% lf_AnAt_T_AnAt - lf_AnAtTAnAt %0.16f\n",dra_diff(F->lf_AnAt_T_AnAt->lf,F->lf_AnAtTAnAt->lf,length,1));}
+	/* if bother */}
+      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+}
+
+void bcc_AnZtSWnYt_test()
+{
+  int verbose=GLOBAL_verbose; int error_check = (strcmp(GLOBAL_TEST_TYP2,"error")==0);
+  struct bcc_ajdk *D;struct bcc_single **E_; struct bcc_double **F_;
+  bcc_init(GLOBAL_TEST_TYP2,GLOBAL_TEST_mrand,&D,&E_,&F_,GLOBAL_QR_strategy,GLOBAL_QC_strategy); bcc_init_QX(D);
+  bcc_An_ajdk(D);
+  bcc_lf_ZtSn(D);
+  bcc_lf_ZtSWn(D);
+  bcc_M_ZtSWn(D);
+  bcc_lf_YnWt(D);
+  /* bcc_M_YnWt(D); */
+  bcc_lf_AnZt_S_WnYt(D);
+  bcc_lf_An_ZtSWn_Yt(D);
+  /* bcc_lf_AnZtSWnYt(D); */
+  if (error_check){ bcc_AnZtSWnYt_error(verbose,D);}
+  wkspace_printf();
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_lf_AtTYn____WtSZn(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  int n_spacing_A = SPACING_a;
+  if (strstr(D->QC_strategy,"ZtSWn")){
+    if (verbose){ printf(" %% [entering bcc_lf_AtTYn____WtSZn]\n");}
+    if (verbose){ printf(" %% calculating F_[nbx]->lf_AtTYn____WtSZn, etc.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+  	  GLOBAL_pthread_tic(); 
+	  binary_AtTYn____WtSZn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_Yt,E_nb2->M_Wt,E_nb2->M_St,E_nb2->M_Zt,D->Y_ajdk,E_nb1->lf_AtTYn,E_nb2->lf_ZtSWn,&(F->lf_AtTYn____WtSZn));
+  	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+  	  GLOBAL_pthread_tic(); 
+	  binary_AtTYn____WtSZn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_At,E_nb2->M_Zt,E_nb2->M_St,E_nb2->M_Zt,D->A_ajdk,E_nb1->lf_AtTAn,E_nb2->lf_ZtSZn,&(F->lf_AtTAn____ZtSZn));
+  	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+  	  GLOBAL_pthread_tic(); 
+	  binary_AtTYn____WtSZn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_Yt,E_nb2->M_Yt,E_nb2->M_Tt,E_nb2->M_At,D->Y_ajdk,E_nb1->lf_AtTYn,E_nb2->lf_AtTYn,&(F->lf_AtTYn____YtTAn));
+  	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+  	  GLOBAL_pthread_tic(); 
+	  binary_AtTYn____WtSZn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_At,E_nb2->M_At,E_nb2->M_Tt,E_nb2->M_At,D->A_ajdk,E_nb1->lf_AtTAn,E_nb2->lf_AtTAn,&(F->lf_AtTAn____AtTAn));
+  	  GLOBAL_pthread_toc(); /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% AtTYn____WtSZn_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	  printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	  bprintf(E_nb1->M_An->mc_j,D->bitj,1,D->A_ncols," %% A1_bmc_j: ");
+	  bprintf(E_nb2->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% T2_bmc_j: ");
+	  lfprintf(F->lf_AtTYn____WtSZn," %% lf_AtTYn____WtSZn: ");
+	  lfprintf(F->lf_AtTAn____ZtSZn," %% lf_AtTAn____ZtSZn: ");
+	  bprintf(E_nb1->M_An->mc_j,D->bitj,1,D->A_ncols," %% A1_bmc_j: ");
+	  bprintf(E_nb2->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% T2_bmc_j: ");
+	  lfprintf(F->lf_AtTYn____YtTAn," %% lf_AtTYn____YtTAn: ");
+	  lfprintf(F->lf_AtTAn____AtTAn," %% lf_AtTAn____AtTAn: ");
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lf_AtTYn____WtSZn]\n");}
+    /* if strategy */}
+}
+
+void bcc_lf_At_T_YnWt_S_Zn_excerpt(int trm_flag,int n_spacing_A,struct M_handle *M_At,struct M_handle *M_Tt,struct M_handle *M_Yn,struct M_handle *M_Wn,struct M_handle *M_St,struct M_handle *M_Zt,double *A_ajdk,struct M_handle *M_YnWt,struct L_handle **L_out_p)
+{
+  struct M_handle *M_WnYt = M_YnWt;
+  if (trm_flag==0){
+    GLOBAL_pthread_tic();
+    binary_At_T_YnWt_S_Zn_ww__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,M_At,M_Tt,M_Yn,M_Wn,M_St,M_Zt,A_ajdk,M_YnWt,&(*L_out_p));
+    GLOBAL_pthread_toc(); /* if trm==0 */}
+  if (trm_flag==1){
+    GLOBAL_pthread_tic();
+    binary_At_T_YnWt_S_Zn_ww__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,M_Zt,M_St,M_Wn,M_Yn,M_Tt,M_At,A_ajdk,M_WnYt,&(*L_out_p));
+    GLOBAL_pthread_toc(); /* if trm==1 */}
+}
+
+void bcc_lf_At_T_YnWt_S_Zn(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  int n_spacing_A = SPACING_a;
+  if (strstr(D->QC_strategy,"YnWt")){
+    if (verbose){ printf(" %% [entering bcc_lf_At_T_YnWt_S_Zn]\n");}
+    if (verbose){ printf(" %% calculating F_[nbx]->lf_At_T_YnWt_S_Zn, etc.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  bcc_lf_At_T_YnWt_S_Zn_excerpt(F->M_YnWt_trm,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_Yn,E_nb2->M_Wn,E_nb2->M_St,E_nb2->M_Zt,D->A_ajdk,F->M_YnWt,&(F->lf_At_T_YnWt_S_Zn)); /* if bother */}
+	if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  bcc_lf_At_T_YnWt_S_Zn_excerpt(F->M_AnZt_trm,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_An,E_nb2->M_Zn,E_nb2->M_St,E_nb2->M_Zt,D->A_ajdk,F->M_AnZt,&(F->lf_At_T_AnZt_S_Zn)); /* if bother */}
+	if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  bcc_lf_At_T_YnWt_S_Zn_excerpt(F->M_YnYt_trm,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_Yn,E_nb2->M_Yn,E_nb2->M_Tt,E_nb2->M_At,D->A_ajdk,F->M_YnYt,&(F->lf_At_T_YnYt_T_An)); /* if bother */}
+	if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  bcc_lf_At_T_YnWt_S_Zn_excerpt(F->M_AnAt_trm,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_An,E_nb2->M_An,E_nb2->M_Tt,E_nb2->M_At,D->A_ajdk,F->M_AnAt,&(F->lf_At_T_AnAt_T_An)); /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% At_T_YnWt_S_Zn_ww: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	  printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	  bprintf(E_nb1->M_An->mc_j,D->bitj,1,D->A_ncols," %% A1_bmc_j: ");
+	  bprintf(E_nb2->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% T2_bmc_j: ");
+	  lfprintf(F->lf_At_T_YnWt_S_Zn," %% lf_At_T_YnWt_S_Zn: ");
+	  lfprintf(F->lf_At_T_AnZt_S_Zn," %% lf_At_T_AnZt_S_Zn: ");
+	  bprintf(E_nb1->M_An->mc_j,D->bitj,1,D->A_ncols," %% A1_bmc_j: ");
+	  bprintf(E_nb2->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% T2_bmc_j: ");
+	  lfprintf(F->lf_At_T_YnYt_T_An," %% lf_At_T_YnYt_T_An: ");
+	  lfprintf(F->lf_At_T_AnAt_T_An," %% lf_At_T_AnAt_T_An: ");
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lf_At_T_YnWt_S_Zn]\n");}
+    /* if strategy */}
+}
+
+void bcc_lf_AtTYnWtSZn(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  int n_spacing_A = SPACING_a;
+  if (verbose){ printf(" %% [entering bcc_lf_AtTYnWtSZn]\n");}
+  if (verbose){ printf(" %% calculating F_[nbx]->lf_AtTYnWtSZn, etc.\n");}
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+  GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+      if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AtTYnWtSZn_uu__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_Yn,E_nb2->M_Wn,E_nb2->M_St,E_nb2->M_Zt,D->A_ajdk,D->Y_ajdk,&(F->lf_AtTYnWtSZn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AtTYnWtSZn_uu__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_An,E_nb2->M_Zn,E_nb2->M_St,E_nb2->M_Zt,D->A_ajdk,D->A_ajdk,&(F->lf_AtTAnZtSZn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AtTYnWtSZn_uu__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_Yn,E_nb2->M_Yn,E_nb2->M_Tt,E_nb2->M_At,D->A_ajdk,D->Y_ajdk,&(F->lf_AtTYnYtTAn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AtTYnWtSZn_uu__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb1->M_An,E_nb2->M_An,E_nb2->M_Tt,E_nb2->M_At,D->A_ajdk,D->A_ajdk,&(F->lf_AtTAnAtTAn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+  GLOBAL_pthread_tuc();
+  GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% AtTYnWtSZn_uu: ");
+  GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  if (verbose>2){  
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	bprintf(E_nb1->M_An->mc_j,D->bitj,1,D->A_ncols," %% A1_bmc_j: ");
+	bprintf(E_nb2->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% T2_bmc_j: ");
+	lfprintf(F->lf_AtTYnWtSZn," %% lf_AtTYnWtSZn: ");
+	lfprintf(F->lf_AtTAnZtSZn," %% lf_AtTAnZtSZn: ");
+	bprintf(E_nb1->M_An->mc_j,D->bitj,1,D->A_ncols," %% A1_bmc_j: ");
+	bprintf(E_nb2->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% T2_bmc_j: ");
+	lfprintf(F->lf_AtTYnYtTAn," %% lf_AtTYnYtTAn: ");
+	lfprintf(F->lf_AtTAnAtTAn," %% lf_AtTAnAtTAn: ");
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    /* if (verbose>2){ } */}
+  if (verbose){ printf(" %% [finished bcc_lf_AtTYnWtSZn]\n");}
+}
+
+void bcc_AtTYnWtSZn_error(int verbose,struct bcc_ajdk *D)
+{
+  int nbins=D->nbins; struct bcc_single **E_=D->E_; struct bcc_double **F_=D->F_;
+  int nbx=0,nb1=0,nb2=0,length=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+      length = D->A_ncols * D->T_ncols;
+      printf(" %% nb1 %d nb2 %d length %d*%d=%d\n",nb1,nb2,D->A_ncols,D->T_ncols,length);
+      if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	if (strstr(D->QC_strategy,"YnWt") && strstr(D->QC_strategy,"ZtSWn")){ printf(" %% lf_At_T_YnWt_S_Zn - lf_AtTYn____WtSZn %0.16f\n",dra_diff(F->lf_At_T_YnWt_S_Zn->lf,F->lf_AtTYn____WtSZn->lf,length,1));}
+	if (strstr(D->QC_strategy,"YnWt")){ printf(" %% lf_At_T_YnWt_S_Zn - lf_AtTYnWtSZn %0.16f\n",dra_diff(F->lf_At_T_YnWt_S_Zn->lf,F->lf_AtTYnWtSZn->lf,length,1));}
+	if (strstr(D->QC_strategy,"ZtSWn")){ printf(" %% lf_AtTYn____WtSZn - lf_AtTYnWtSZn %0.16f\n",dra_diff(F->lf_AtTYn____WtSZn->lf,F->lf_AtTYnWtSZn->lf,length,1));}
+	/* if bother */}
+      if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	if (strstr(D->QC_strategy,"YnWt") && strstr(D->QC_strategy,"ZtSWn")){ printf(" %% lf_At_T_AnZt_S_Zn - lf_AtTAn____ZtSZn %0.16f\n",dra_diff(F->lf_At_T_AnZt_S_Zn->lf,F->lf_AtTAn____ZtSZn->lf,length,1));}
+	if (strstr(D->QC_strategy,"YnWt")){ printf(" %% lf_At_T_AnZt_S_Zn - lf_AtTAnZtSZn %0.16f\n",dra_diff(F->lf_At_T_AnZt_S_Zn->lf,F->lf_AtTAnZtSZn->lf,length,1));}
+	if (strstr(D->QC_strategy,"ZtSWn")){ printf(" %% lf_AtTAn____ZtSZn - lf_AtTAnZtSZn %0.16f\n",dra_diff(F->lf_AtTAn____ZtSZn->lf,F->lf_AtTAnZtSZn->lf,length,1));}
+	/* if bother */}
+      if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	if (strstr(D->QC_strategy,"YnWt") && strstr(D->QC_strategy,"ZtSWn")){ printf(" %% lf_At_T_YnYt_T_An - lf_AtTYn____YtTAn %0.16f\n",dra_diff(F->lf_At_T_YnYt_T_An->lf,F->lf_AtTYn____YtTAn->lf,length,1));}
+	if (strstr(D->QC_strategy,"YnWt")){ printf(" %% lf_At_T_YnYt_T_An - lf_AtTYnYtTAn %0.16f\n",dra_diff(F->lf_At_T_YnYt_T_An->lf,F->lf_AtTYnYtTAn->lf,length,1));}
+	if (strstr(D->QC_strategy,"ZtSWn")){ printf(" %% lf_AtTYn____YtTAn - lf_AtTYnYtTAn %0.16f\n",dra_diff(F->lf_AtTYn____YtTAn->lf,F->lf_AtTYnYtTAn->lf,length,1));}
+	/* if bother */}
+      if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	if (strstr(D->QC_strategy,"YnWt") && strstr(D->QC_strategy,"ZtSWn")){ printf(" %% lf_At_T_AnAt_T_An - lf_AtTAn____AtTAn %0.16f\n",dra_diff(F->lf_At_T_AnAt_T_An->lf,F->lf_AtTAn____AtTAn->lf,length,1));}
+	if (strstr(D->QC_strategy,"YnWt")){ printf(" %% lf_At_T_AnAt_T_An - lf_AtTAnAtTAn %0.16f\n",dra_diff(F->lf_At_T_AnAt_T_An->lf,F->lf_AtTAnAtTAn->lf,length,1));}
+	if (strstr(D->QC_strategy,"ZtSWn")){ printf(" %% lf_AtTAn____AtTAn - lf_AtTAnAtTAn %0.16f\n",dra_diff(F->lf_AtTAn____AtTAn->lf,F->lf_AtTAnAtTAn->lf,length,1));}
+	/* if bother */}
+      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}} 
+}
+
+void bcc_AtTYnWtSZn_test()
+{
+  int verbose=GLOBAL_verbose; int error_check = (strcmp(GLOBAL_TEST_TYP2,"error")==0);
+  struct bcc_ajdk *D;struct bcc_single **E_; struct bcc_double **F_;
+  bcc_init(GLOBAL_TEST_TYP2,GLOBAL_TEST_mrand,&D,&E_,&F_,GLOBAL_QR_strategy,GLOBAL_QC_strategy); bcc_init_QX(D);
+  bcc_An_ajdk(D);
+  bcc_lf_ZtSn(D);
+  bcc_lf_ZtSWn(D);
+  /* bcc_M_ZtSWn(D); */
+  bcc_lf_YnWt(D);
+  bcc_M_YnWt(D);
+  bcc_lf_AtTYn____WtSZn(D);
+  bcc_lf_At_T_YnWt_S_Zn(D);
+  /* bcc_lf_AtTYnWtSZn(D); */
+  if (error_check){ bcc_AtTYnWtSZn_error(verbose,D);}
+  wkspace_printf();
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_test_mxcut(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
+  int nb=0,nr=0,nc=0,nccut=0,nrcut=0;
+  double mrnd = GLOBAL_gamma;
+  if (verbose){ printf(" %% [entering bcc_test_mxcut]\n");}
+  for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j[nc]=D->A_umc_j[nc]*(rand01>mrnd);}
+  if (verbose>2){ raprintf(D->A_umc_j,"char",1,D->A_ncols," %% D->A_umc_j: ");}
+  fill_uchar_zero(D->A_bmc_j,bsize(D->A_ncols));
+  for (nc=0;nc<D->A_ncols;nc++){ bdup__on(D->A_bmc_j,D->A_umc_j,nc);}
+  nccut = D->A_cpop_j - popcount_uchar_array(D->A_bmc_j,D->A_mc_length);
+  if (verbose>0){ printf(" %% %d columns cut\n",nccut);}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_j: "); if (verbose>2){ bprintf(D->A_bmc_j,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  for (nc=0;nc<D->Y_ncols;nc++){ D->Y_umc_j[nc]=D->Y_umc_j[nc]*(1 || rand01>mrnd);} /* do not remove any columns */
+  if (verbose>2){ raprintf(D->Y_umc_j,"char",1,D->Y_ncols," %% D->Y_umc_j: ");}
+  fill_uchar_zero(D->Y_bmc_j,bsize(D->Y_ncols));
+  for (nc=0;nc<D->Y_ncols;nc++){ bdup__on(D->Y_bmc_j,D->Y_umc_j,nc);}
+  sprintf(D->tmpYnchar," %%%% D->Y_bmc_j: "); if (verbose>2){ bprintf(D->Y_bmc_j,D->bitj,1,D->Y_ncols,D->tmpYnchar);}
+  for (nc=0;nc<D->T_ncols;nc++){ D->T_umc_j[nc]=D->T_umc_j[nc]*(1 || nc==0 || rand01>mrnd);} /* do not remove any columns ; otherwise ensure that the first column of T,S is retained */
+  if (verbose>2){ raprintf(D->T_umc_j,"char",1,D->T_ncols," %% D->T_umc_j: ");}
+  fill_uchar_zero(D->T_bmc_j,bsize(D->T_ncols));
+  for (nc=0;nc<D->T_ncols;nc++){ bdup__on(D->T_bmc_j,D->T_umc_j,nc);}
+  sprintf(D->tmpTnchar," %%%% D->T_bmc_j: "); if (verbose>2){ bprintf(D->T_bmc_j,D->bitj,1,D->T_ncols,D->tmpTnchar);}      
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j[nr]=E->A_umr_j[nr]*(rand01>mrnd);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_umr_j_[%.2d]: ",nb); if (verbose>2){ raprintf(E->A_umr_j,"char",1,E->A_nrows,D->tmpAnchar);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    fill_uchar_zero(E->A_bmr_j,bsize(E->A_nrows));
+    for (nr=0;nr<E->A_nrows;nr++){ bdup__on(E->A_bmr_j,E->A_umr_j,nr);}
+    nrcut = E->A_rpop_j - popcount_uchar_array(E->A_bmr_j,E->A_mr_length);
+    if (verbose>0){ printf(" %% %d rows cut\n",nrcut);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_bmr_j_[%.2d]: ",nb); if (verbose>2){ bprintf(E->A_bmr_j,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    for (nr=0;nr<E->Z_nrows;nr++){ E->Z_umr_j[nr]=E->Z_umr_j[nr]*(1 || rand01>mrnd);} /* do not remove any rows */
+    sprintf(D->tmpZnchar," %%%% E_[nb]->Z_umr_j_[%.2d]: ",nb); if (verbose>2){ raprintf(E->Z_umr_j,"char",1,E->Z_nrows,D->tmpZnchar);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    fill_uchar_zero(E->Z_bmr_j,bsize(E->Z_nrows));
+    for (nr=0;nr<E->Z_nrows;nr++){ bdup__on(E->Z_bmr_j,E->Z_umr_j,nr);}
+    sprintf(D->tmpZnchar," %%%% E_[nb]->Z_bmr_j_[%.2d]: ",nb); if (verbose>2){ bprintf(E->Z_bmr_j,D->bitj,1,E->Z_nrows,D->tmpZnchar);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){ printf(" %% [finished bcc_test_mxcut]\n");}
+}
+
+void bcc_lrup_mxcut(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
+  int nb=0,nr=0,nc=0,nrcut=0,nccut=0;
+  double mrnd = GLOBAL_gamma;
+  if (verbose){ printf(" %% [entering bcc_lrup_mxcut]\n");}
+  for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j[nc] = bget__on(D->A_bmc_j,nc);}
+  nccut=0; for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j_rtn[nc]=D->A_umc_j[nc]*(rand01>mrnd); D->A_umc_j_rmv[nc]=D->A_umc_j[nc]-D->A_umc_j_rtn[nc]; nccut += D->A_umc_j_rmv[nc];}
+  if (verbose>2){ raprintf(D->A_umc_j    ,"char",1,D->A_ncols," %% D->A_umc_j    : ");}
+  if (verbose>2){ raprintf(D->A_umc_j_rmv,"char",1,D->A_ncols," %% D->A_umc_j_rmv: ");}
+  if (verbose>2){ raprintf(D->A_umc_j_rtn,"char",1,D->A_ncols," %% D->A_umc_j_rtn: ");}
+  if (verbose>0){ printf(" %% cutting %d columns\n",nccut);}
+  fill_uchar_zero(D->A_bmc_j,bsize(D->A_ncols)); for (nc=0;nc<D->A_ncols;nc++){ bdup__on(D->A_bmc_j,D->A_umc_j,nc);}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_j    : "); if (verbose>2){ bprintf(D->A_bmc_j    ,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  fill_uchar_zero(D->A_bmc_j_rmv,bsize(D->A_ncols)); for (nc=0;nc<D->A_ncols;nc++){ bdup__on(D->A_bmc_j_rmv,D->A_umc_j_rmv,nc);}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_j_rmv: "); if (verbose>2){ bprintf(D->A_bmc_j_rmv,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  fill_uchar_zero(D->A_bmc_j_rtn,bsize(D->A_ncols)); for (nc=0;nc<D->A_ncols;nc++){ bdup__on(D->A_bmc_j_rtn,D->A_umc_j_rtn,nc);}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_j_rtn: "); if (verbose>2){ bprintf(D->A_bmc_j_rtn,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j[nr] = bget__on(E->A_bmr_j,nr);}
+    nrcut=0; for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j_rtn[nr] = E->A_umr_j[nr]*(rand01>mrnd); E->A_umr_j_rmv[nr] = E->A_umr_j[nr]-E->A_umr_j_rtn[nr]; nrcut += E->A_umr_j_rmv[nr];}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_umr_j_[%.2d]    : ",nb); if (verbose>2){ raprintf(E->A_umr_j    ,"char",1,E->A_nrows,D->tmpAnchar);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_umr_j_rmv_[%.2d]: ",nb); if (verbose>2){ raprintf(E->A_umr_j_rmv,"char",1,E->A_nrows,D->tmpAnchar);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_umr_j_rtn_[%.2d]: ",nb); if (verbose>2){ raprintf(E->A_umr_j_rtn,"char",1,E->A_nrows,D->tmpAnchar);}
+    if (verbose>0){ printf(" %% cutting %d rows\n",nrcut);}
+    fill_uchar_zero(E->A_bmr_j    ,bsize(E->A_nrows)); for (nr=0;nr<E->A_nrows;nr++){ bdup__on(E->A_bmr_j    ,E->A_umr_j,nr);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_bmr_j_    [%.2d]: ",nb); if (verbose>2){ bprintf(E->A_bmr_j    ,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+    fill_uchar_zero(E->A_bmr_j_rmv,bsize(E->A_nrows)); for (nr=0;nr<E->A_nrows;nr++){ bdup__on(E->A_bmr_j_rmv,E->A_umr_j_rmv,nr);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_bmr_j_rmv_[%.2d]: ",nb); if (verbose>2){ bprintf(E->A_bmr_j_rmv,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+    fill_uchar_zero(E->A_bmr_j_rtn,bsize(E->A_nrows)); for (nr=0;nr<E->A_nrows;nr++){ bdup__on(E->A_bmr_j_rtn,E->A_umr_j_rtn,nr);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_bmr_j_rtn_[%.2d]: ",nb); if (verbose>2){ bprintf(E->A_bmr_j_rtn,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){ printf(" %% [finished bcc_lrup_mxcut]\n");}
+}
+
+void bcc_lrup_mxset(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
+  int nb=0;
+  if (verbose){ printf(" %% [entering bcc_jvkur_mxset]\n");}
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    M_mxset(E->M_an,E->A_bmr_j_rtn,D->A_bmc_j_rtn); M_mxset(E->M_at,D->A_bmc_j_rtn,E->A_bmr_j_rtn);
+    M_mxset(E->M_jn,E->A_bmr_j_rtn,D->A_bmc_j_rmv); M_mxset(E->M_jt,D->A_bmc_j_rmv,E->A_bmr_j_rtn);
+    M_mxset(E->M_kn,E->A_bmr_j_rmv,D->A_bmc_j_rtn); M_mxset(E->M_kt,D->A_bmc_j_rtn,E->A_bmr_j_rmv);
+    M_mxset(E->M_hn,E->A_bmr_j_rmv,D->A_bmc_j_rmv); M_mxset(E->M_ht,D->A_bmc_j_rmv,E->A_bmr_j_rmv);
+    M_mxset(E->M_yn,E->A_bmr_j_rtn,D->Y_bmc_j    ); M_mxset(E->M_yt,D->Y_bmc_j    ,E->A_bmr_j_rtn);
+    M_mxset(E->M_un,E->A_bmr_j_rmv,D->Y_bmc_j    ); M_mxset(E->M_ut,D->Y_bmc_j    ,E->A_bmr_j_rmv);
+    M_mxset(E->M_zn,E->Z_bmr_j    ,D->A_bmc_j_rtn); M_mxset(E->M_zt,D->A_bmc_j_rtn,E->Z_bmr_j    );
+    M_mxset(E->M_vn,E->Z_bmr_j    ,D->A_bmc_j_rmv); M_mxset(E->M_vt,D->A_bmc_j_rmv,E->Z_bmr_j    );
+    M_mxset(E->M_tt,D->T_bmc_j    ,E->A_bmr_j_rtn);
+    M_mxset(E->M_rt,D->T_bmc_j    ,E->A_bmr_j_rmv);
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){ printf(" %% [finished bcc_jvkur_mxset]\n");}
+}
+
+void bcc_lrup_mxdup(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
+  int nb=0;
+  ura_dup(D->A_bmc_j,D->A_mc_length,D->A_bmc_j_rtn); ura_dup(D->A_umc_j,D->A_ncols,D->A_umc_j_rtn);
+  for (nb=0;nb<nbins;nb++){ E = E_[nb]; ura_dup(E->A_bmr_j,E->A_mr_length,E->A_bmr_j_rtn); ura_dup(E->A_umr_j,E->A_nrows,E->A_umr_j_rtn); /* for (nb=0;nb<nbins;nb++){ } */}
+}
+
+void bcc_lrup_test()
+{
+  int verbose=GLOBAL_verbose; int error_check = (strcmp(GLOBAL_TEST_TYP2,"error")==0); int iteration_max = GLOBAL_TEST_niter;
+  struct bcc_ajdk *D;struct bcc_single **E_; struct bcc_double **F_;
+  int nl=0;
+  bcc_init(GLOBAL_TEST_TYP2,GLOBAL_TEST_mrand,&D,&E_,&F_,GLOBAL_QR_strategy,GLOBAL_QC_strategy); bcc_init_QX(D);
+  bcc_An_ajdk(D);
+  bcc_lf_ZtSn(D);
+  bcc_lf_ZtSWn(D);
+  bcc_lf_YnWt(D);
+  bcc_M_ZtSWn(D);
+  bcc_M_YnWt(D);
+  bcc_lf_AtTYn____WtSZn(D);
+  bcc_lf_At_T_YnWt_S_Zn(D);
+  bcc_lf_AtTYnWtSZn(D);
+  bcc_lf_AnZt_S_WnYt(D);
+  bcc_lf_An_ZtSWn_Yt(D);
+  bcc_lf_AnZtSWnYt(D);
+  if (error_check){ bcc_AtTYnWtSZn_error(verbose,D);}
+  if (error_check){ bcc_AnZtSWnYt_error(verbose,D);}
+  for (nl=0;nl<iteration_max;nl++){
+    if (verbose>0){ printf(" %% iteration %d/%d\n",nl,iteration_max);}
+    bcc_lrup_mxcut(D);
+    bcc_lrup_mxset(D);
+    bcc_vn_ajdk(D);
+    bcc_lf_utrn(D);
+    bcc_lf_ktrun(D);
+    bcc_lf_jnvt(D);
+    bcc_lrup_lf_ZtSWn(D);
+    bcc_lrup_lf_YnWt(D);
+    bcc_lrup_mxdup(D);
+    bcc_M_mxset(D);
+    bcc_M_ZtSWn(D);
+    bcc_M_YnWt(D);
+    bcc_lf_AtTYn____WtSZn(D);
+    bcc_lf_At_T_YnWt_S_Zn(D);
+    bcc_lf_AtTYnWtSZn(D);
+    bcc_lf_AnZt_S_WnYt(D);
+    bcc_lf_An_ZtSWn_Yt(D);
+    bcc_lf_AnZtSWnYt(D);
+    if (error_check){ bcc_AtTYnWtSZn_error(verbose,D);}
+    if (error_check){ bcc_AnZtSWnYt_error(verbose,D);}
+    /* for (nl=0;nl<iteration_max;nl++){ } */}  
+  wkspace_printf();
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_QX_test()
+{
+  /* int verbose=GLOBAL_verbose; int error_check = (strcmp(GLOBAL_TEST_TYP2,"error")==0); int iteration_max = GLOBAL_TEST_niter; */
+  /* struct bcc_ajdk *D;struct bcc_single **E_; struct bcc_double **F_; */
+  /* int nl=0; */
+  /* bcc_init(GLOBAL_TEST_TYP2,GLOBAL_TEST_mrand,&D,&E_,&F_,GLOBAL_QR_strategy,GLOBAL_QC_strategy); bcc_init_QX(D); */
+  /* bcc_An_ajdk(D); */
+  /* bcc_lf_ZtSn(D); */
+  /* bcc_lf_ZtSWn(D); */
+  /* bcc_lf_YnWt(D); */
+  /* bcc_M_ZtSWn(D); */
+  /* bcc_M_YnWt(D); */
+  /* bcc_lf_AtTYn____WtSZn(D); */
+  /* bcc_lf_At_T_YnWt_S_Zn(D); */
+  /* bcc_lf_AtTYnWtSZn(D); */
+  /* bcc_lf_AnZt_S_WnYt(D); */
+  /* bcc_lf_An_ZtSWn_Yt(D); */
+  /* bcc_lf_AnZtSWnYt(D); */
+  /* bcc_singlestudy(D); */
+  /* bcc_doublestudy(D); */
+  /* bcc_flattenloop(D); */
+  /* if (error_check){ bcc_AtTYnWtSZn_error(verbose,1,D);} */
+  /* if (error_check){ bcc_AnZtSWnYt_error(verbose,1,D);} */
+  /* for (nl=0;nl<iteration_max;nl++){ */
+  /*   if (verbose>0){ printf(" %% iteration %d/%d\n",nl,iteration_max);} */
+  /*   bcc_lrup_mxcut(D); */
+  /*   bcc_lrup_mxset(D); */
+  /*   bcc_vn_ajdk(D); */
+  /*   bcc_lf_utrn(D); */
+  /*   bcc_lf_ktrun(D); */
+  /*   bcc_lf_jnvt(D); */
+  /*   bcc_lrup_lf_ZtSWn(D); */
+  /*   bcc_lrup_lf_YnWt(D); */
+  /*   bcc_lrup_mxdup(D); */
+  /*   bcc_M_mxset(D); */
+  /*   bcc_lf_ZtSn(D); */
+  /*   bcc_M_ZtSWn(D); */
+  /*   bcc_M_YnWt(D); */
+  /*   bcc_lf_AtTYn____WtSZn(D); */
+  /*   bcc_lf_At_T_YnWt_S_Zn(D); */
+  /*   bcc_lf_AtTYnWtSZn(D); */
+  /*   bcc_lf_AnZt_S_WnYt(D); */
+  /*   bcc_lf_An_ZtSWn_Yt(D); */
+  /*   bcc_lf_AnZtSWnYt(D); */
+  /*   bcc_singlestudy(D); */
+  /*   bcc_doublestudy(D); */
+  /*   bcc_flattenloop(D); */
+  /*   if (error_check){ bcc_AtTYnWtSZn_error(verbose,1,D);} */
+  /*   if (error_check){ bcc_AnZtSWnYt_error(verbose,1,D);} */
+  /*   /\* for (nl=0;nl<iteration_max;nl++){ } *\/}   */
+  /* wkspace_printf(); */
+}

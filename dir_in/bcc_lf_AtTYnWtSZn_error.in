@@ -1,0 +1,17 @@
+GLOBAL_verbose= 1;
+GLOBAL_thread_count= 8;
+GLOBAL_omp_type= 0;
+GLOBAL_TEST_TYPE= bcc_lf_AtTYnWtSZn;
+GLOBAL_TEST_TYP2= error;
+GLOBAL_QR_strategy= "YnWt ZtSWn";
+GLOBAL_QC_strategy= "YnWt ZtSWn";
+GLOBAL_NBINS= 2;
+GLOBAL_B_MLT= 44;
+GLOBAL_TEST_sparse= 1;
+GLOBAL_TEST_mrand= 0.05;
+GLOBAL_TEST_A_n_rows= 18;
+GLOBAL_TEST_A_n_cols= 2120;
+GLOBAL_TEST_Z_n_rows= 15;
+GLOBAL_TEST_Y_n_cols= 2100;
+GLOBAL_TEST_T_n_cols= 3;
+END= 0;

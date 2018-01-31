@@ -1,0 +1,397 @@
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_lrup_QR_YnWt_stage_0(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_a;
+  if (strstr(D->QR_strategy,"YnWt")){
+    if (verbose){ printf(" %% [entering bcc_lrup_QR_YnWt_stage_0]\n");}
+    if (verbose){ printf(" %% calculating E_[nb]->lf_jn_ajdk, E_[nb]->lf_vn_ajdk.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0; 
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+      if (E->A_rbother && D->A_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_An_ajdk_v(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_jn,D->A_ajdk,&(E->lf_jn_ajdk));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->Z_rbother && D->A_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_An_ajdk_v(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_vn,D->A_ajdk,&(E->lf_vn_ajdk));
+	GLOBAL_pthread_toc(); /* if bother */}
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_pthread_tuc(); 
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% An_ajdk_v: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");  
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){ 
+      for (nb=0;nb<nbins;nb++){ E = E_[nb];
+	printf(" %% nb %d\n",nb);
+	bprintf(E->A_bmr_j_rtn,D->bitj,1,E->A_nrows," %% A_bmr_j_rtn: ");
+	bprintf(E->M_jn->mr_j ,D->bitj,1,E->A_nrows," %% M_jn->mr_j : ");
+	bprintf(D->A_bmc_j_rmv,D->bitj,1,D->A_ncols," %% A_bmr_j_rtn: ");
+	bprintf(E->M_jn->mc_j ,D->bitj,1,D->A_ncols," %% M_jn->mc_j : ");
+	lfprintf(E->lf_jn_ajdk," %% lf_jn_ajdk->lf: ");
+	bprintf(E->M_vn->mc_j ,D->bitj,1,D->A_ncols," %% M_vn->mc_j : ");
+	lfprintf(E->lf_vn_ajdk," %% lf_vn_ajdk->lf: ");
+	/* for (nb=0;nb<nbins;nb++){ } */}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lrup_QR_YnWt_stage_0]\n");}
+    /* if strategy */}
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_lrup_QC_ZtSWn_stage_0(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_a;
+  if (strstr(D->QC_strategy,"ZtSWn")){
+    if (verbose){ printf(" %% [entering bcc_lrup_QC_ZtSWn_stage_0]\n");}
+    if (verbose){ printf(" %% calculating E_[nb]->lf_ktrn, E_[nb]->lf_utrn.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+      if (E->A_rbother && D->A_cbother){ 
+	GLOBAL_pthread_tic(); 
+	binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_kt,E->M_rt,NULL,NULL,NULL,&(E->lf_ktrn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->A_rbother && D->Y_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_ut,E->M_rt,NULL,NULL,NULL,&(E->lf_utrn));
+	GLOBAL_pthread_toc(); /* if bother */} 
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% ZtSn_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb=0;nb<nbins;nb++){ E = E_[nb];
+	printf(" %% nb %d\n",nb);
+	bprintf(D->A_bmc_j_rmv,D->bitj,1,D->A_ncols," %% A_bmr_j_rtn: ");
+	bprintf(E->M_kt->mr_j ,D->bitj,1,D->A_ncols," %% M_kt->mr_j : ");
+	bprintf(E->A_bmr_j_rtn,D->bitj,1,E->A_nrows," %% A_bmr_j_rtn: ");
+	bprintf(E->M_kt->mc_j ,D->bitj,1,E->A_nrows," %% M_kt->mc_j : ");
+	lfprintf(E->lf_ktrn," %% lf_ktrn: ");
+	bprintf(E->M_ut->mc_j ,D->bitj,1,E->A_nrows," %% M_ut->mc_j : ");
+	lfprintf(E->lf_utrn," %% lf_utrn: ");
+	/* for (nb=0;nb<nbins;nb++){ } */}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lrup_QC_ZtSWn_stage_0]\n");}
+    /* if strategy */}
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_lrup_QC_ZtSWn_stage_1(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  int n_spacing_A = SPACING_b;
+  if (strstr(D->QC_strategy,"ZtSWn")){
+    if (verbose){ printf(" %% [entering bcc_lrup_QC_ZtSWn_stage_1]\n");}
+    if (verbose){ printf(" %% calculating E_[nb]->lf_ktrkn, E_[nb]->lf_ktrun.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+     if (E->A_rbother && D->A_cbother && D->Y_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AtTYn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_kt,E->M_rt,E->M_ut,D->A_ajdk,D->Y_ajdk,E->lf_ktrn,E->lf_utrn,&(E->lf_ktrun));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->A_rbother && D->A_cbother && D->A_cbother){ 
+	GLOBAL_pthread_tic();
+	binary_AtTYn_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_kt,E->M_rt,E->M_kt,D->A_ajdk,D->A_ajdk,E->lf_ktrn,E->lf_ktrn,&(E->lf_ktrkn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% ZtSWn_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){
+      for (nb=0;nb<nbins;nb++){ E = E_[nb];
+	printf(" %% nb %d\n",nb);
+	bprintf(D->A_bmc_j_rtn,D->bitj,1,D->A_ncols," %% A_bmc_j_rtn: ");
+	bprintf(E->M_Yn->mc_j ,D->bitj,1,D->Y_ncols," %% bmc_Y_j    : ");
+	bprintf(E->M_Tn->mc_j ,D->bitj,1,D->T_ncols," %% bmc_T_j    : ");
+	if (E->A_rbother && D->A_cbother && D->Y_cbother){ lfprintf(E->lf_ktrun," %% lf_ktrun: "); /* if bother */} else{ printf(" %% no lf_ktrun\n");}
+	if (E->A_rbother && D->A_cbother && D->A_cbother){ lfprintf(E->lf_ktrkn," %% lf_ktrkn: "); /* if bother */} else{ printf(" %% no lf_ktrkn\n");}
+	/* for (nb=0;nb<nbins;nb++){ } */}
+    /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lrup_QC_ZtSWn_stage_1]\n");}
+    /* if strategy */}
+}
+
+void bcc_lrup_QC_ZtSWn_stage_2(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_;
+  int nb=0; struct bcc_single *E=NULL;
+  if (strstr(D->QC_strategy,"ZtSWn")){
+    if (verbose){ printf(" %% [entering bcc_lrup_QC_ZtSWn_stage_2]\n");}
+    if (verbose){ printf(" %% updating E_[nb]->lf_AtTAn, E_[nb]->lf_AtTYn.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+     if (E->A_rbother && D->A_cbother && D->Y_cbother){ dra_subtequals(E->lf_AtTYn->lf,E->lf_AtTYn->length,E->lf_ktrun->lf); /* if bother */}
+     if (E->A_rbother && D->A_cbother && D->A_cbother){ dra_subtequals(E->lf_AtTAn->lf,E->lf_AtTAn->length,E->lf_ktrkn->lf); /* if bother */}
+     /* for (nb=0;nb<nbins;nb++){ } */}
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){
+      for (nb=0;nb<nbins;nb++){ E = E_[nb];
+	printf(" %% nb %d\n",nb);
+	bprintf(E->M_An->mc_j,D->bitj,1,D->A_ncols," %% bmc_A_j: ");
+	bprintf(E->M_Yn->mc_j,D->bitj,1,D->Y_ncols," %% bmc_Y_j: ");
+	bprintf(E->M_Tn->mc_j,D->bitj,1,D->T_ncols," %% bmc_T_j: ");
+	if (E->A_rbother && D->A_cbother && D->Y_cbother){ lfprintf(E->lf_AtTYn," %% lf_AtTYn: "); /* if bother */} else{ printf(" %% no lf_AtTYn\n");}
+	if (E->A_rbother && D->A_cbother && D->A_cbother){ lfprintf(E->lf_AtTAn," %% lf_AtTAn: "); /* if bother */} else{ printf(" %% no lf_AtTAn\n");}
+	/* for (nb=0;nb<nbins;nb++){ } */}
+    /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lrup_QC_ZtSWn_stage_2]\n");}
+    /* if strategy */}
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_lrup_QR_YnWt_stage_1(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_b;
+  if (strstr(D->QR_strategy,"YnWt")){
+    if (verbose){ printf(" %% [entering bcc_lrup_QR_YnWt_stage_1]\n");}
+    if (verbose){ printf(" %% calculating F_[nbx]->lf_jnvt, F_[nbx]->lf_jnjt.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_jn,E_nb2->M_vn,D->A_ajdk,E_nb1->lf_jn_ajdk,E_nb2->lf_vn_ajdk,&(F->lf_jnvt));
+	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  binary_AnZt_vv__run(&(GLOBAL_ira[GLOBAL_nf_cur]),GLOBAL_vpra[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_jn,E_nb2->M_jn,D->A_ajdk,E_nb1->lf_jn_ajdk,E_nb2->lf_jn_ajdk,&(F->lf_jnjt));
+	  GLOBAL_pthread_toc(); /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% YnWt_vv: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	  printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	  bprintf(E_nb1->A_bmr_j_rtn,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j_rtn: ");
+	  bprintf(E_nb2->M_Zn->mr_j ,D->bitj,1,E_nb2->Z_nrows," %% Z2_bmr_j    : ");
+	  lfprintf(F->lf_jnvt," %% lf_jnvt: ");
+	  bprintf(E_nb1->A_bmr_j_rtn,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j_rtn: ");
+	  bprintf(E_nb2->A_bmr_j_rtn,D->bitj,1,E_nb2->A_nrows," %% A2_bmr_j_rtn: ");
+	  lfprintf(F->lf_jnjt," %% lf_jnjt: ");
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lrup_QR_YnWt_stage_1]\n");}
+    /* if strategy */}
+}
+
+void bcc_lrup_QR_YnWt_stage_2(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
+  if (strstr(D->QR_strategy,"YnWt")){
+    if (verbose){ printf(" %% [entering bcc_lrup_QR_YnWt_stage_2]\n");}
+    if (verbose){ printf(" %% updating F_[nbx]->lf_AnZt, F_[nbx]->lf_AnAt.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ dra_subtequals(F->lf_AnZt->lf,F->lf_AnZt->length,F->lf_jnvt->lf); /* if bother */}
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ dra_subtequals(F->lf_AnAt->lf,F->lf_AnAt->length,F->lf_jnjt->lf); /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	  printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	  bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	  bprintf(E_nb2->M_Zn->mr_j,D->bitj,1,E_nb2->Z_nrows," %% Z2_bmr_j: ");
+	  lfprintf(F->lf_AnZt," %% lf_AnZt: ");
+	  bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j: ");
+	  bprintf(E_nb2->M_An->mr_j,D->bitj,1,E_nb2->A_nrows," %% A2_bmr_j: ");
+	  lfprintf(F->lf_AnAt," %% lf_AnAt: ");
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lrup_QR_YnWt_stage_2]\n");}
+    /* if strategy */}
+}
+
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+void bcc_test_mxcut(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
+  int nb=0,nr=0,nc=0,nccut=0,nrcut=0;
+  double mrnd = GLOBAL_gamma;
+  if (verbose){ printf(" %% [entering bcc_test_mxcut]\n");}
+  for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j[nc]=D->A_umc_j[nc]*(rand01>mrnd);}
+  if (verbose>2){ raprintf(D->A_umc_j,"char",1,D->A_ncols," %% D->A_umc_j: ");}
+  fill_uchar_zero(D->A_bmc_j,bsize(D->A_ncols));
+  for (nc=0;nc<D->A_ncols;nc++){ bdup__on(D->A_bmc_j,D->A_umc_j,nc);}
+  nccut = D->A_cpop_j - popcount_uchar_array(D->A_bmc_j,D->A_mc_length);
+  if (verbose>0){ printf(" %% %d columns cut\n",nccut);}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_j: "); if (verbose>2){ bprintf(D->A_bmc_j,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  for (nc=0;nc<D->Y_ncols;nc++){ D->Y_umc_j[nc]=D->Y_umc_j[nc]*(1 || rand01>mrnd);} /* do not remove any columns */
+  if (verbose>2){ raprintf(D->Y_umc_j,"char",1,D->Y_ncols," %% D->Y_umc_j: ");}
+  fill_uchar_zero(D->Y_bmc_j,bsize(D->Y_ncols));
+  for (nc=0;nc<D->Y_ncols;nc++){ bdup__on(D->Y_bmc_j,D->Y_umc_j,nc);}
+  sprintf(D->tmpYnchar," %%%% D->Y_bmc_j: "); if (verbose>2){ bprintf(D->Y_bmc_j,D->bitj,1,D->Y_ncols,D->tmpYnchar);}
+  for (nc=0;nc<D->T_ncols;nc++){ D->T_umc_j[nc]=D->T_umc_j[nc]*(1 || nc==0 || rand01>mrnd);} /* do not remove any columns ; otherwise ensure that the first column of T,S is retained */
+  if (verbose>2){ raprintf(D->T_umc_j,"char",1,D->T_ncols," %% D->T_umc_j: ");}
+  fill_uchar_zero(D->T_bmc_j,bsize(D->T_ncols));
+  for (nc=0;nc<D->T_ncols;nc++){ bdup__on(D->T_bmc_j,D->T_umc_j,nc);}
+  sprintf(D->tmpTnchar," %%%% D->T_bmc_j: "); if (verbose>2){ bprintf(D->T_bmc_j,D->bitj,1,D->T_ncols,D->tmpTnchar);}      
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j[nr]=E->A_umr_j[nr]*(rand01>mrnd);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_umr_j_[%.2d]: ",nb); if (verbose>2){ raprintf(E->A_umr_j,"char",1,E->A_nrows,D->tmpAnchar);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    fill_uchar_zero(E->A_bmr_j,bsize(E->A_nrows));
+    for (nr=0;nr<E->A_nrows;nr++){ bdup__on(E->A_bmr_j,E->A_umr_j,nr);}
+    nrcut = E->A_rpop_j - popcount_uchar_array(E->A_bmr_j,E->A_mr_length);
+    if (verbose>0){ printf(" %% %d rows cut\n",nrcut);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_bmr_j_[%.2d]: ",nb); if (verbose>2){ bprintf(E->A_bmr_j,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    for (nr=0;nr<E->Z_nrows;nr++){ E->Z_umr_j[nr]=E->Z_umr_j[nr]*(1 || rand01>mrnd);} /* do not remove any rows */
+    sprintf(D->tmpZnchar," %%%% E_[nb]->Z_umr_j_[%.2d]: ",nb); if (verbose>2){ raprintf(E->Z_umr_j,"char",1,E->Z_nrows,D->tmpZnchar);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    fill_uchar_zero(E->Z_bmr_j,bsize(E->Z_nrows));
+    for (nr=0;nr<E->Z_nrows;nr++){ bdup__on(E->Z_bmr_j,E->Z_umr_j,nr);}
+    sprintf(D->tmpZnchar," %%%% E_[nb]->Z_bmr_j_[%.2d]: ",nb); if (verbose>2){ bprintf(E->Z_bmr_j,D->bitj,1,E->Z_nrows,D->tmpZnchar);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){ printf(" %% [finished bcc_test_mxcut]\n");}
+}
+
+void bcc_lrup_mxcut(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
+  int nb=0,nr=0,nc=0,nrcut=0,nccut=0;
+  double mrnd = GLOBAL_gamma;
+  if (verbose){ printf(" %% [entering bcc_lrup_mxcut]\n");}
+  for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j[nc] = bget__on(D->A_bmc_j,nc);}
+  nccut=0; for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j_rtn[nc]=D->A_umc_j[nc]*(rand01>mrnd); D->A_umc_j_rmv[nc]=D->A_umc_j[nc]-D->A_umc_j_rtn[nc]; nccut += D->A_umc_j_rmv[nc];}
+  if (verbose>2){ raprintf(D->A_umc_j    ,"char",1,D->A_ncols," %% D->A_umc_j    : ");}
+  if (verbose>2){ raprintf(D->A_umc_j_rmv,"char",1,D->A_ncols," %% D->A_umc_j_rmv: ");}
+  if (verbose>2){ raprintf(D->A_umc_j_rtn,"char",1,D->A_ncols," %% D->A_umc_j_rtn: ");}
+  if (verbose>0){ printf(" %% cutting %d columns\n",nccut);}
+  fill_uchar_zero(D->A_bmc_j,bsize(D->A_ncols)); for (nc=0;nc<D->A_ncols;nc++){ bdup__on(D->A_bmc_j,D->A_umc_j,nc);}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_j    : "); if (verbose>2){ bprintf(D->A_bmc_j    ,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  fill_uchar_zero(D->A_bmc_j_rmv,bsize(D->A_ncols)); for (nc=0;nc<D->A_ncols;nc++){ bdup__on(D->A_bmc_j_rmv,D->A_umc_j_rmv,nc);}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_j_rmv: "); if (verbose>2){ bprintf(D->A_bmc_j_rmv,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  fill_uchar_zero(D->A_bmc_j_rtn,bsize(D->A_ncols)); for (nc=0;nc<D->A_ncols;nc++){ bdup__on(D->A_bmc_j_rtn,D->A_umc_j_rtn,nc);}
+  sprintf(D->tmpAnchar," %%%% D->A_bmc_j_rtn: "); if (verbose>2){ bprintf(D->A_bmc_j_rtn,D->bitj,1,D->A_ncols,D->tmpAnchar);}
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j[nr] = bget__on(E->A_bmr_j,nr);}
+    nrcut=0; for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j_rtn[nr] = E->A_umr_j[nr]*(rand01>mrnd); E->A_umr_j_rmv[nr] = E->A_umr_j[nr]-E->A_umr_j_rtn[nr]; nrcut += E->A_umr_j_rmv[nr];}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_umr_j_[%.2d]    : ",nb); if (verbose>2){ raprintf(E->A_umr_j    ,"char",1,E->A_nrows,D->tmpAnchar);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_umr_j_rmv_[%.2d]: ",nb); if (verbose>2){ raprintf(E->A_umr_j_rmv,"char",1,E->A_nrows,D->tmpAnchar);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_umr_j_rtn_[%.2d]: ",nb); if (verbose>2){ raprintf(E->A_umr_j_rtn,"char",1,E->A_nrows,D->tmpAnchar);}
+    if (verbose>0){ printf(" %% cutting %d rows\n",nrcut);}
+    fill_uchar_zero(E->A_bmr_j    ,bsize(E->A_nrows)); for (nr=0;nr<E->A_nrows;nr++){ bdup__on(E->A_bmr_j    ,E->A_umr_j,nr);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_bmr_j_    [%.2d]: ",nb); if (verbose>2){ bprintf(E->A_bmr_j    ,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+    fill_uchar_zero(E->A_bmr_j_rmv,bsize(E->A_nrows)); for (nr=0;nr<E->A_nrows;nr++){ bdup__on(E->A_bmr_j_rmv,E->A_umr_j_rmv,nr);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_bmr_j_rmv_[%.2d]: ",nb); if (verbose>2){ bprintf(E->A_bmr_j_rmv,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+    fill_uchar_zero(E->A_bmr_j_rtn,bsize(E->A_nrows)); for (nr=0;nr<E->A_nrows;nr++){ bdup__on(E->A_bmr_j_rtn,E->A_umr_j_rtn,nr);}
+    sprintf(D->tmpAnchar," %%%% E_[nb]->A_bmr_j_rtn_[%.2d]: ",nb); if (verbose>2){ bprintf(E->A_bmr_j_rtn,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){ printf(" %% [finished bcc_lrup_mxcut]\n");}
+}
+
+void bcc_lrup_mxset(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
+  int nb=0;
+  if (verbose){ printf(" %% [entering bcc_jvkur_mxset]\n");}
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    M_mxset(E->M_an,E->A_bmr_j_rtn,D->A_bmc_j_rtn); M_mxset(E->M_at,D->A_bmc_j_rtn,E->A_bmr_j_rtn);
+    M_mxset(E->M_jn,E->A_bmr_j_rtn,D->A_bmc_j_rmv); M_mxset(E->M_jt,D->A_bmc_j_rmv,E->A_bmr_j_rtn);
+    M_mxset(E->M_kn,E->A_bmr_j_rmv,D->A_bmc_j_rtn); M_mxset(E->M_kt,D->A_bmc_j_rtn,E->A_bmr_j_rmv);
+    M_mxset(E->M_hn,E->A_bmr_j_rmv,D->A_bmc_j_rmv); M_mxset(E->M_ht,D->A_bmc_j_rmv,E->A_bmr_j_rmv);
+    M_mxset(E->M_yn,E->A_bmr_j_rtn,D->Y_bmc_j    ); M_mxset(E->M_yt,D->Y_bmc_j    ,E->A_bmr_j_rtn);
+    M_mxset(E->M_un,E->A_bmr_j_rmv,D->Y_bmc_j    ); M_mxset(E->M_ut,D->Y_bmc_j    ,E->A_bmr_j_rmv);
+    M_mxset(E->M_zn,E->Z_bmr_j    ,D->A_bmc_j_rtn); M_mxset(E->M_zt,D->A_bmc_j_rtn,E->Z_bmr_j    );
+    M_mxset(E->M_vn,E->Z_bmr_j    ,D->A_bmc_j_rmv); M_mxset(E->M_vt,D->A_bmc_j_rmv,E->Z_bmr_j    );
+    M_mxset(E->M_tt,D->T_bmc_j    ,E->A_bmr_j_rtn);
+    M_mxset(E->M_rt,D->T_bmc_j    ,E->A_bmr_j_rmv);
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){ printf(" %% [finished bcc_jvkur_mxset]\n");}
+}
+
+void bcc_lrup_mxdup(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
+  int nb=0;
+  ura_dup(D->A_bmc_j,D->A_mc_length,D->A_bmc_j_rtn); ura_dup(D->A_umc_j,D->A_ncols,D->A_umc_j_rtn);
+  for (nb=0;nb<nbins;nb++){ E = E_[nb]; ura_dup(E->A_bmr_j,E->A_mr_length,E->A_bmr_j_rtn); ura_dup(E->A_umr_j,E->A_nrows,E->A_umr_j_rtn); /* for (nb=0;nb<nbins;nb++){ } */}
+}
+
+void bcc_lrup_test()
+{
+  int verbose=GLOBAL_verbose; int error_check = (strcmp(GLOBAL_TEST_TYP2,"error")==0); int iteration_max = GLOBAL_TEST_niter;
+  struct bcc_ajdk *D;struct bcc_single **E_; struct bcc_double **F_;
+  int nl=0;
+  bcc_init(GLOBAL_TEST_TYP2,GLOBAL_TEST_mrand,&D,&E_,&F_,GLOBAL_QR_strategy,GLOBAL_QC_strategy); bcc_init_QX(D);
+  bcc_An_ajdk(D);
+  bcc_lf_ZtSn(D);
+  bcc_lf_ZtSWn(D);
+  bcc_lf_YnWt(D);
+  bcc_M_ZtSWn(D);
+  bcc_M_YnWt(D);
+  bcc_lf_AtTYn____WtSZn(D);
+  bcc_lf_At_T_YnWt_S_Zn(D);
+  bcc_lf_AtTYnWtSZn(D);
+  bcc_lf_AnZt_S_WnYt(D);
+  bcc_lf_An_ZtSWn_Yt(D);
+  bcc_lf_AnZtSWnYt(D);
+  if (error_check){ bcc_AtTYnWtSZn_error(verbose,D);}
+  if (error_check){ bcc_AnZtSWnYt_error(verbose,D);}
+  for (nl=0;nl<iteration_max;nl++){
+    if (verbose>0){ printf(" %% iteration %d/%d\n",nl,iteration_max);}
+    bcc_lrup_mxcut(D);
+    bcc_lrup_mxset(D);
+    bcc_lrup_QR_YnWt_stage_0(D);
+    bcc_lrup_QR_YnWt_stage_1(D);
+    bcc_lrup_QR_YnWt_stage_2(D);
+    bcc_lrup_QC_ZtSWn_stage_0(D);
+    bcc_lrup_QC_ZtSWn_stage_1(D);
+    bcc_lrup_QC_ZtSWn_stage_2(D);
+    bcc_lrup_mxdup(D);
+    bcc_M_mxset(D);
+    bcc_M_ZtSWn(D);
+    bcc_M_YnWt(D);
+    bcc_lf_AtTYn____WtSZn(D);
+    bcc_lf_At_T_YnWt_S_Zn(D);
+    bcc_lf_AtTYnWtSZn(D);
+    bcc_lf_AnZt_S_WnYt(D);
+    bcc_lf_An_ZtSWn_Yt(D);
+    bcc_lf_AnZtSWnYt(D);
+    if (error_check){ bcc_AtTYnWtSZn_error(verbose,D);}
+    if (error_check){ bcc_AnZtSWnYt_error(verbose,D);}
+    /* for (nl=0;nl<iteration_max;nl++){ } */}  
+  wkspace_printf();
+}

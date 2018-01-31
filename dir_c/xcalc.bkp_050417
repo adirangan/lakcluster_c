@@ -1,0 +1,353 @@
+void xcalc_setmaxmin(double *YnWt,int rpop_j,int rpop_b,int Yn_nrows,int cpop_j,int cpop_b,int Wn_nrows,int spacing_YnWt,unsigned char *mr_b,unsigned char *mr_j,unsigned char *mc_b,unsigned char *mc_j,int trm_flag,double *max_data_p,double *min_data_p)
+{
+  int verbose=0;
+  int nc_a=0,nc_b=0,nc_j=0,nr_a=0,nr_b=0,nr_j=0,tab_row=0,row_stride=0,tab_col=0,col_stride=0,tab_Z=0,m_set=0;
+  double min_data=0,max_data=0,sum1_data=0,sum2_data=0,avg_data=0,var_data=0,std_data=0;
+  if (verbose){ printf(" %% [entering xcalc_setmaxmin]\n");}
+  switch (spacing_YnWt){ case SPACING_j: row_stride=rpop_j; break; case SPACING_b: row_stride=rpop_b; break; case SPACING_a: row_stride=Yn_nrows; break; default: break; /* switch (spacing_YnWt){ } */}
+  switch (spacing_YnWt){ case SPACING_j: col_stride=cpop_j; break; case SPACING_b: col_stride=cpop_b; break; case SPACING_a: col_stride=Wn_nrows; break; default: break; /* switch (spacing_YnWt){ } */}
+  m_set=0; nc_a=0;nc_b=0;nc_j=0;
+  while (nc_a<Wn_nrows){
+    if (mc_b==NULL || bget__on(mc_b,nc_a)){
+      if (mc_j==NULL || bget__on(mc_j,nc_a)){
+	switch (spacing_YnWt){ case SPACING_j: tab_col=nc_j; break; case SPACING_b: tab_col=nc_b; break; case SPACING_a: tab_col=nc_a; break; default: break; /* switch (spacing_YnWt){ } */}
+	nr_a=0;nr_b=0;nr_j=0;
+	while (nr_a<Yn_nrows){
+	  if (mr_b==NULL || bget__on(mr_b,nr_a)){
+	    if (mr_j==NULL || bget__on(mr_j,nr_a)){
+	      switch (spacing_YnWt){ case SPACING_j: tab_row=nr_j; break; case SPACING_b: tab_row=nr_b; break; case SPACING_a: tab_row=nr_a; break; default: break; /* switch (spacing_YnWt){ } */}
+	      tab_Z = trm_flag ? tab_col + tab_row*col_stride : tab_row + tab_col*row_stride ;
+	      if (!m_set){ min_data = YnWt[tab_Z]; max_data = YnWt[tab_Z]; m_set=1;} else /* if m_set */{ min_data = minimum(YnWt[tab_Z],min_data); max_data = maximum(YnWt[tab_Z],max_data);}
+	      sum1_data += YnWt[tab_Z]; sum2_data += YnWt[tab_Z]*YnWt[tab_Z];
+	      nr_j++; /* if (mr_j==NULL || bget__on(mr_j,nr_a)){ } */}
+	    nr_b++; /* if (mr_b==NULL || bget__on(mr_b,nr_a)){ } */}
+	  nr_a++; /* while (nr_a<Yn_nrows){ } */}
+	nc_j++; /* if (mc_j==NULL || bget__on(mc_j,nc_a)){ } */}
+      nc_b++; /* if (mc_b==NULL || bget__on(mc_b,nc_a)){ } */}
+    nc_a++; /* while (nc_a<Wn_nrows){ } */}
+  if (min_data>=max_data){ max_data = min_data+1;}
+  avg_data = sum1_data / maximum(1,rpop_j*cpop_j) ; var_data = sum2_data / maximum(1,rpop_j*cpop_j) - avg_data*avg_data ; std_data = sqrt(maximum(0,var_data)) ;
+  if (verbose){ printf(" %% min %f max %f; sum1 %f avg %f sum2 %f var %f std %f\n",min_data,max_data,sum1_data,avg_data,sum2_data,var_data,std_data);}
+  if (min_data_p!=NULL){ *min_data_p = min_data;} if (max_data_p!=NULL){ *max_data_p = max_data;}
+  if (verbose){ printf(" %% [finished xcalc_setmaxmin]\n");}  
+}
+
+void *get_xcalc(void *vp)
+{
+  /* This function is designed for use with TYPE_pZ and TYPE_0Z computation, with simple parallelization. ;
+     This can allow an extra bit to be used as a buffer for future additive updates (not implemented now);
+     Given double array *YnWt, we create bit array bZ, with first column 1's.
+     For example given *YnWt = 
+     [ -5 ,  1 ] ;
+     [  3 ,  0 ] ;
+     [  2 , -1 ] ;
+     [  8 , -2 ] ;
+     we note min=-5 and max = 8, for a total of 13 in range.
+     with a minbuffer of 0.25, we would set min = -5 - 0.25*13 = -9;
+     and then subtract to obtain
+     [  4 , 10 ] ;
+     [ 12 ,  9 ] ;
+     [ 11 ,  8 ] ;
+     [ 17 ,  7 ] ;
+     and then multiply by mlt = D_MLT/(max-min) (e.g., mlt = 128), to obtain
+     [  4*mlt , 10*mlt ] ;
+     [ 12*mlt ,  9*mlt ] ;
+     [ 11*mlt ,  8*mlt ] ;
+     [ 17*mlt ,  7*mlt ] ;
+     at this point ceil(log2(max+1)) = 12
+     so we need at least 12 columns per row
+     since:
+     4*mlt   = 001000000000
+     12*mlt  = 011000000000
+     11*mlt  = 010110000000
+     17*mlt  = 100010000000
+     10*mlt  = 010100000000
+     9*mlt   = 010010000000
+     8*mlt   = 010000000000
+     7*mlt   = 001110000000
+     the final bZ is something like:
+     [ 1 001000000000 010100000000 ]
+     [ 1 011000000000 010010000000 ]
+     [ 1 010110000000 010000000000 ]
+     [ 1 100010000000 001110000000 ]
+     [ 0 000000000000 000000000000 ]
+     [ 0 000000000000 000000000000 ]
+     [ 0 000000000000 000000000000 ]
+     [ 0 000000000000 000000000000 ]
+     With this compressed notation, we can multiply bZ by a vector "A" of length 4 producing: ;
+     A*bZ = [ xx y_{11} y_{10} ... y_{0} z_{11} z_{10} ... z_{0} ],
+     with A*YnWt = B, where
+     B = [ min*mlt*xx + 2^11*y_{11} + 2^10*y_{10} + ... + 2^0*y_{0} , min*mlt*xx + 2^11*z_{11} + 2^10*z_{10} + ... 2^0*z_{0} ] / mlt . ;
+     The number of bits of precision retained will be roughly log2(D_MLT). ;
+     Note that we pad bZ to account for POPLENGTH (i.e., for direct use as M_X->wX). ;
+  */
+  int verbose=0;
+  int ip=0;
+  void **vpra=(void **)vp;
+  int tidx = *(int *)(vpra[ip++]);
+  unsigned char *mr_b = (unsigned char *)(vpra[ip++]); /* original M_Yn->mr_b used to construct YnWt */
+  unsigned char *mr_j = (unsigned char *)(vpra[ip++]); /* original M_Yn->mr_j used to construct YnWt */
+  unsigned char *mc_b = (unsigned char *)(vpra[ip++]); /* original M_Wn->mr_b used to construct YnWt */
+  unsigned char *mc_j = (unsigned char *)(vpra[ip++]); /* original M_Wn->mr_j used to construct YnWt */
+  double *YnWt = (double *)(vpra[ip++]);
+  int Yn_nrows = *(int *)(vpra[ip++]); /* original M_Yn->nrows used to construct YnWt */
+  int Wn_nrows = *(int *)(vpra[ip++]); /* original M_Wn->nrows used to construct YnWt */
+  struct M_handle **M_X_p = (struct M_handle **)(vpra[ip++]);
+  int b_mlt = *(int *)(vpra[ip++]); /* number of bits to store */
+  int trm_flag = *(int *)(vpra[ip++]); /* 0 --> YnWt, 1 --> WnYt (must switch masks and rows at input) */
+  int spacing_YnWt = *(int *)(vpra[ip++]); /* spacing used to store YnWt (assumed same for Y and W) */
+  int rpop_b = 0,cpop_b=0; int rpop_j = 0,cpop_j=0;
+  struct M_handle *M_X = NULL;
+  int length = Yn_nrows*Wn_nrows;
+  int ncols=0;
+  int nrows=0,brows=0,ncols_per=0;
+  double min_data=0,max_data=0,min=0,max=0,mlt=0;
+  int nb=0,nr_a=0,nc_a=0,nr_m8=0,nr_m7=0,nr_d8=0,tab_nb=0,tab_Yn=0,tab_Wn=0,tab_YnWt=0,tab_YnWt_stride=0,nr_j=0,nc_j=0,nr_b=0,nc_b=0;
+  unsigned long long int cz=0,cz_tmp=0;
+  /* unsigned char *wkspace_mark=NULL; */
+  unsigned char **bZ_p=NULL;
+  if (verbose){ printf(" %% \n");}
+  if (verbose){ printf(" %% [entering get_xcalc] tidx %d trm_flag %d\n",tidx,trm_flag);}
+  xcalc_setmaxmin(YnWt,rpop_j,rpop_b,Yn_nrows,cpop_j,cpop_b,Wn_nrows,spacing_YnWt,mr_b,mr_j,mc_b,mc_j,trm_flag,&max_data,&min_data);
+  min = min_data - 0.0625*(max_data - min_data); max = max_data + 0.0625*(max_data - min_data); mlt = (double)(GLOBAL_D_MLT)/(max - min); 
+  if (verbose){ printf(" %% min_data %0.2f max_data %0.2f min %0.2f max %0.2f\n",min_data,max_data,min,max);}
+  if (mr_j==NULL || mr_b==NULL || mc_j==NULL || mc_b==NULL){ printf(" %% Warning! null mask in get_xcalc\n");}
+  rpop_j = popcount_uchar_array(mr_j,bsize(Yn_nrows)); cpop_j = popcount_uchar_array(mc_j,bsize(Wn_nrows));
+  rpop_b = popcount_uchar_array(mr_b,bsize(Yn_nrows)); cpop_b = popcount_uchar_array(mc_b,bsize(Wn_nrows));
+  if (*M_X_p==NULL){ if (GLOBAL_thread_count>1){ printf(" %% Warning! *M_X_p undefined in get_xcalc; must pre-allocate to avoid thread conflict!\n");} bZ_p = (unsigned char **)wkspace_alloc(1*sizeof(unsigned char *)); *bZ_p = NULL;}
+  else if (*M_X_p!=NULL){ M_X = *M_X_p; bZ_p = &(M_X->Ara);}
+  if (length>0 && YnWt!=NULL){
+    ncols_per = b_mlt + 1; ncols = ncols_per*cpop_j; if (ncols_per>63){ printf(" %% Warning! overflow in get_xcalc!\n");} if (verbose){ printf(" %% ncols_per %d, ncols %d\n",ncols_per,ncols);}
+    nrows = Yn_nrows; brows = bsize(nrows);
+    if (*bZ_p==NULL){ if (GLOBAL_thread_count>1){ printf(" %% Warning! *bZ_p undefined in get_xcalc; must pre-allocate to avoid thread conflict!\n");} *bZ_p = wkspace_all0c(ncols*brows);} 
+    if (verbose){ printf(" %% nrows %d, brows %d\n",nrows,brows);}
+    switch (spacing_YnWt){
+    case SPACING_j: tab_YnWt_stride = (trm_flag ? cpop_j : rpop_j); break;
+    case SPACING_b: tab_YnWt_stride = (trm_flag ? cpop_b : rpop_b); break;
+    case SPACING_a: tab_YnWt_stride = (trm_flag ? Wn_nrows : Yn_nrows); break;
+    default: break; /* switch (spacing_YnWt){ } */}
+    nr_m8=0;nr_m7=7;nr_d8=0; for (nr_a=0;nr_a<Yn_nrows;nr_a++){ if (bget__on(mr_j,nr_a)){ (*bZ_p)[nr_d8 + 0*brows] |= (1 << (nr_m7));} nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;}}
+    nc_j=0; nc_b=0; tab_YnWt=0;
+    for (nc_a=0;nc_a<Wn_nrows;nc_a++){
+      if (bget__on(mc_b,nc_a)){
+	if (bget__on(mc_j,nc_a)){
+	  switch (spacing_YnWt){ 
+	  case SPACING_j: tab_Wn = nc_j; break;
+	  case SPACING_b: tab_Wn = nc_b; break;
+	  case SPACING_a: tab_Wn = nc_a; break;
+	  default: break; /* switch (spacing_YnWt){ } */}
+	  nr_m8=0;nr_m7=7;nr_d8=0;nr_j=0;nr_b=0;
+	  for (nr_a=0;nr_a<Yn_nrows;nr_a++){
+	    if (bget__on(mr_b,nr_a)){
+	      if (bget__on(mr_j,nr_a)){
+		switch (spacing_YnWt){ 
+		case SPACING_j: tab_Yn = nc_j; break;
+		case SPACING_b: tab_Yn = nc_b; break;
+		case SPACING_a: tab_Yn = nc_a; break;
+		default: break; /* switch (spacing_YnWt){ } */}
+		tab_YnWt = (trm_flag ? tab_Wn + tab_Yn*tab_YnWt_stride : tab_Yn + tab_Wn*tab_YnWt_stride);
+		cz = (unsigned long long int)(mlt*(double)(YnWt[tab_YnWt]-min)); cz = crop(cz,0+1,GLOBAL_D_MLT-1);
+		nb=0; tab_nb = nr_d8 + (ncols_per*nc_j + ncols_per-1-nb)*brows; cz_tmp = cz;
+		for (nb=0;nb<ncols_per-1;nb++){ (*bZ_p)[tab_nb] |= ((unsigned char)(cz_tmp & 1) << (nr_m7)); cz_tmp >>= 1; tab_nb -= brows;}
+		nr_j++; /* if (bget__on(mr_j,nr_a)){ } */}
+	      nr_b++; /* if (bget__on(mr_b,nr_a)){ } */}    
+	    nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;}
+	    /* for (nr_a=0;nr_a<Yn_nrows;nr_a++){ } */}
+	  nc_j++; /* if (bget__on(mc_j,nc_a)){ } */}
+	nc_b++; /* if (bget__on(mc_b,nc_a)){ } */}
+      /* for (nc_a=0;nc_a<Wn_nrows;nc_a++){ } */}
+    /* if (length>0 && YnWt!=NULL){ } */}
+  if (verbose>2 && (*bZ_p)!=NULL){ bprintf((*bZ_p),BITJ,ncols,brows*BIT8," %% b: ");}
+  if (*M_X_p==NULL){ if (GLOBAL_thread_count>1){ printf(" %% Warning! *M_X_p undefined in get_xcalc; must pre-allocate to avoid thread conflict!\n");} M_X = binary_A_v_gen(BITJ,cpop_j,nrows,NULL,(*bZ_p),NULL,-1,NULL,-1); *M_X_p = M_X;}
+  else if (*M_X_p!=NULL){
+    M_X->nrows = cpop_j; M_X->ncols = nrows; 
+    M_X->nrows_extend = (BITJ - (M_X->nrows % BITJ)) % BITJ; M_X->mr_length = bsize(M_X->nrows);
+    M_X->ncols_extend = (BITJ - (M_X->ncols % BITJ)) % BITJ; M_X->mc_length = bsize(M_X->ncols);
+    for (nc_j=0;nc_j<cpop_j;nc_j++){ bset__on(M_X->mr_b,nc_j); bset__on(M_X->mr_j,nc_j);} M_X->rpop_b = cpop_j; M_X->rpop_j = cpop_j;
+    for (nr_a=0;nr_a<M_X->mc_length;nr_a++){ M_X->mc_b[nr_a] = mr_b[nr_a]; M_X->mc_j[nr_a] = mr_j[nr_a];} M_X->cpop_b = rpop_b; M_X->cpop_j = rpop_j;
+    M_X->wX = (*bZ_p);
+    /* else if (M_X_p!=NULL){ } */}
+  M_X->ncols_per_z = ncols_per; M_X->max_d = max; M_X->min_d = min; M_X->mlt_d = mlt; if (!isfinite(M_X->mlt_d) || M_X->mlt_d<=0){ M_X->mlt_d=1;}
+  M_mxget(M_X);  
+  if (verbose>2){ M_handle_printf(M_X,verbose," %% M_X: ");}
+  if (verbose){ printf(" %% [finished get_xcalc] tidx %d trm_flag %d\n",tidx,trm_flag);}
+  return NULL;
+}
+
+void binary_xcalc(int *tidx,void **vpra,pthread_t *thread_in,unsigned char *mr_b,unsigned char *mr_j,unsigned char *mc_b,unsigned char *mc_j,int spacing_YnWt,double *YnWt,int *Yn_nrows_p,int *Wn_nrows_p,struct M_handle **M_X_p,int *b_mlt_p,int trm_flag)
+{
+  /* calls get_xcalc;
+     variable space in **vpra (should be at least size 12)
+   */
+  int verbose=1;
+  /* unsigned char *wkspace_mark=NULL; */
+  int ip=0;
+  if (verbose){ printf(" %% [entering binary_xcalc] tidx %d trm_flag %d\n",*tidx,trm_flag);}
+  ip=0; vpra[ip++] = tidx; vpra[ip++] = mr_b; vpra[ip++] = mr_j; vpra[ip++] = mc_b; vpra[ip++] = mc_j; vpra[ip++] = YnWt; vpra[ip++] = Yn_nrows_p; vpra[ip++] = Wn_nrows_p; vpra[ip++] = M_X_p; vpra[ip++] = b_mlt_p;
+  switch (trm_flag){ case 0: vpra[ip++] = &addressable_0; break; case 1: vpra[ip++] = &addressable_1; break; default: break; /* switch (trm_flag){ } */}
+  switch (spacing_YnWt){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (spacing_YnWt){ } */}
+  if (*tidx>0){ if (pthread_create(thread_in,NULL,&get_xcalc,vpra)){ printf("Warning! cannot create thread %d in binary_xcalc\n",*tidx);}}
+  else /* if (*tidx<=0) */{ get_xcalc(vpra);} /* must join threads later */;
+  if (verbose>2){ M_handle_printf(*M_X_p,verbose," %% M_X: ");}
+  if (verbose){ printf(" %% [finished binary_xcalc] tidx %d trm_flag %d\n",*tidx,trm_flag);}
+}
+
+
+void *get_xcalc_At_T_YnWt_test(void *vp)
+{
+  int verbose=0;
+  int ip=0;
+  void **vpra=(void **)vp;
+  int tidx = *(int *)(vpra[ip++]);
+  double *A_ajdk = (double *)(vpra[ip++]);
+  struct M_handle *M_At = (struct M_handle *)(vpra[ip++]);
+  struct M_handle *M_Tt = (struct M_handle *)(vpra[ip++]);
+  double *YnWt = (double *)(vpra[ip++]);
+  struct M_handle *M_YnWt = (struct M_handle *)(vpra[ip++]);
+  struct M_handle *M_Wn = (struct M_handle *)(vpra[ip++]);
+  double *output_At_T_YnWt_uu = (double *)(vpra[ip++]);
+  double *output_At_T_YnWt_ww = (double *)(vpra[ip++]);
+  int output_spacing_a = *(int *)(vpra[ip++]);
+  int output_spacing_t = *(int *)(vpra[ip++]);
+  int output_spacing_w = *(int *)(vpra[ip++]);
+  int output_spacing_YnWt = *(int *)(vpra[ip++]); /* spacing used to store YnWt (assumed same for Y and W) */
+  int ncols_A_p = psize(M_At->nrows)/* rup(M_At->nrows + M_At->nrows_extend,POPLENGTH)/POPLENGTH */;
+  double *D_An = (double *)&(A_ajdk[0 + AJDK_0_1*ncols_A_p]);
+  double *a_An = (double *)&(A_ajdk[0 + AJDK_1_0*ncols_A_p]);
+  int ns_j=0,ns_a=0,ns_b=0,tab_t=0,tab_t_stride=0,na_j=0,na_a=0,na_b=0,tab_a=0,tab_a_stride=0,mw_j=0,mw_a=0,mw_b=0,tab_w=0,tab_w_stride=0,tab_wx=0,my_j=0,my_a=0,my_b=0,tab_y=0,tab_YnWt_stride=0,tab_yx=0;
+  double output_tmp=0;
+  int vA=0,vS=0;
+  unsigned char *Tt_tag=NULL,*At_tag=NULL;
+  __m128i *wAt_tag=NULL,*wTt_tag=NULL,*wYnWt_tag=NULL,*mcay_tag=NULL,*mcay_end=NULL;
+  long long int lltmp=0,n2=0;
+  double output_At_T_YnWt_base=0,output_At_T_YnWt_tmp=0;
+  int tab_x=0,mr=0,mx=0;
+  char tmpchar[FNAMESIZE];
+  if (verbose){ printf(" %% [entering get_xcalc_At_T_YnWt_test] tidx %d\n",tidx);}
+  if (verbose){ printf(" %% Calculating output_At_T_YnWt_uu\n");}
+  switch (output_spacing_t){ case SPACING_j: tab_t_stride = M_Tt->rpop_j; break; case SPACING_b: tab_t_stride = M_Tt->rpop_b; break; case SPACING_a: tab_t_stride = M_Tt->nrows; break; default: break; /* switch (output_spacing_t){ } */}
+  switch (output_spacing_a){ case SPACING_j: tab_a_stride = M_At->rpop_j; break; case SPACING_b: tab_a_stride = M_At->rpop_b; break; case SPACING_a: tab_a_stride = M_At->nrows; break; default: break; /* switch (output_spacing_a){ } */}
+  switch (output_spacing_w){ case SPACING_j: tab_w_stride = M_Wn->rpop_j; break; case SPACING_b: tab_w_stride = M_Wn->rpop_b; break; case SPACING_a: tab_w_stride = M_Wn->nrows; break; default: break; /* switch (output_spacing_w){ } */}
+  switch (output_spacing_YnWt){ case SPACING_j: tab_YnWt_stride = M_At->cpop_j; break; case SPACING_b: tab_YnWt_stride = M_At->cpop_b; break; case SPACING_a: tab_YnWt_stride = M_At->ncols; break; default: break; /* switch (output_spacing_w){ } */}
+  ns_j=0;
+  while (ns_j<M_Tt->rpop_j){
+    ns_a = M_Tt->m_a_[ns_j]; ns_b = M_Tt->m_b_[ns_j];
+    switch (output_spacing_t){ case SPACING_j: tab_t=ns_j; break; case SPACING_b: tab_t=ns_b; break; case SPACING_a: tab_t=ns_a; break; default: break; /* switch (output_spacing_t){ } */}
+    Tt_tag = (unsigned char *)(&(M_Tt->wX[ns_b*M_Tt->mc_length]));
+    na_j=0;
+    while (na_j<M_At->rpop_j){
+      na_a = M_At->m_a_[na_j]; na_b = M_At->m_b_[na_j];
+      switch (output_spacing_a){ case SPACING_j: tab_a=na_j; break; case SPACING_b: tab_a=na_b; break; case SPACING_a: tab_a=na_a; break; default: break; /* switch (output_spacing_a){ } */}
+      At_tag = (unsigned char *)(&(M_At->wX[na_b*M_At->mc_length]));
+      output_At_T_YnWt_uu[tab_a + tab_w*tab_a_stride]=0;
+      mw_j=0;
+      while (mw_j<M_Wn->rpop_j){
+	mw_a = M_Wn->m_a_[mw_j]; mw_b = M_Wn->m_b_[mw_j];
+	switch (output_spacing_w){ case SPACING_j: tab_w=mw_j; break; case SPACING_b: tab_w=mw_b; break; case SPACING_a: tab_w=mw_a; break; default: break; /* switch (output_spacing_YnWt){ } */}
+	switch (output_spacing_YnWt){ case SPACING_j: tab_wx=mw_j; break; case SPACING_b: tab_wx=mw_b; break; case SPACING_a: tab_wx=mw_a; break; default: break; /* switch (output_spacing_YnWt){ } */}
+	output_tmp=0;
+	my_j=0;
+	while (my_j<M_At->cpop_j){
+	  my_a = M_At->n_a_[my_j]; my_b = M_At->n_b_[my_j];
+	  switch (output_spacing_YnWt){ case SPACING_j: tab_yx=my_j; break; case SPACING_b: tab_yx=my_b; break; case SPACING_a: tab_yx=my_a; break; default: break; /* switch (output_spacing_YnWt){ } */}
+	  vA = bget____(At_tag,my_a); vS = bget____(Tt_tag,my_a);
+	  //output_tmp += (vA - a_An[na_a/POPLENGTH])*vS*YnWt[tab_yx + tab_wx*tab_YnWt_stride];
+	  output_tmp += vA*vS*YnWt[tab_yx + tab_wx*tab_YnWt_stride];
+	  my_j++; /* while (my_j<M_At->cpop_j){ } */}
+	output_At_T_YnWt_uu[tab_a + tab_w*tab_a_stride + tab_t*tab_a_stride*tab_w_stride] = output_tmp;
+	mw_j++; /* while (mw_j<M_Wn->rpop_j){ } */}
+      na_j++; /* while (na_j<M_At->rpop_j){ } */}
+    ns_j++; /* while (ns_j<M_Tt->rpop_j){ } */}
+  if (verbose){ printf(" %% Calculating output_At_T_YnWt_ww\n");}
+  switch (output_spacing_t){ case SPACING_j: tab_t_stride = M_Tt->rpop_j; break; case SPACING_b: tab_t_stride = M_Tt->rpop_b; break; case SPACING_a: tab_t_stride = M_Tt->nrows; break; default: break; /* switch (output_spacing_t){ } */}
+  switch (output_spacing_a){ case SPACING_j: tab_a_stride = M_At->rpop_j; break; case SPACING_b: tab_a_stride = M_At->rpop_b; break; case SPACING_a: tab_a_stride = M_At->nrows; break; default: break; /* switch (output_spacing_a){ } */}
+  switch (output_spacing_w){ case SPACING_j: tab_w_stride = M_Wn->rpop_j; break; case SPACING_b: tab_w_stride = M_Wn->rpop_b; break; case SPACING_a: tab_w_stride = M_Wn->nrows; break; default: break; /* switch (output_spacing_w){ } */}
+  ns_j=0;
+  while (ns_j<M_Tt->rpop_j){
+    ns_a = M_Tt->m_a_[ns_j]; ns_b = M_Tt->m_b_[ns_j];
+    switch (output_spacing_t){ case SPACING_j: tab_t=ns_j; break; case SPACING_b: tab_t=ns_b; break; case SPACING_a: tab_t=ns_a; break; default: break; /* switch (output_spacing_t){ } */}
+    na_j=0;
+    while (na_j<M_At->rpop_j){
+      na_a = M_At->m_a_[na_j]; na_b = M_At->m_b_[na_j];
+      switch (output_spacing_a){ case SPACING_j: tab_a=na_j; break; case SPACING_b: tab_a=na_b; break; case SPACING_a: tab_a=na_a; break; default: break; /* switch (output_spacing_a){ } */}
+      wAt_tag = (__m128i*)((unsigned long *)(&(M_At->wX[na_b*M_At->mc_length])));
+      wTt_tag = (__m128i*)((unsigned long *)(&(M_Tt->wX[ns_b*M_Tt->mc_length])));
+      wYnWt_tag = (__m128i*)((unsigned long *)(&(M_YnWt->wX[0/* start */*M_YnWt->mc_length])));
+      mcay_tag = (__m128i*)((unsigned long *)(&(M_At->mc_j[0]))); 
+      mcay_end = (__m128i*)((unsigned long *)(&(M_At->mc_j[M_At->mc_length])));
+      lltmp = popcount_pmpm0_1mask_multiword_adv_end(&wAt_tag,&wTt_tag,&wYnWt_tag,&mcay_tag,&mcay_end);
+      output_At_T_YnWt_base = lltmp*M_YnWt->min_d*M_YnWt->mlt_d;
+      mw_j=0;
+      while (my_j<M_Wn->rpop_j){
+	mw_a = M_Wn->m_a_[mw_j]; mw_b = M_Wn->m_b_[mw_j];
+	switch (output_spacing_w){ case SPACING_j: tab_w=mw_j; break; case SPACING_b: tab_w=mw_b; break; case SPACING_a: tab_w=mw_a; break; default: break; /* switch (output_spacing_w){ } */}
+	tab_x = tab_a + tab_w*tab_a_stride + tab_t*tab_a_stride*tab_w_stride;
+	output_At_T_YnWt_tmp = 0;
+	mr=M_YnWt->ncols_per_z*mw_j/* spacing_j */; n2=1;
+	for (mx=M_YnWt->ncols_per_z-1;mx>0;mx--){
+	  wAt_tag = (__m128i*)((unsigned long *)(&(M_At->wX[na_b*M_At->mc_length])));
+	  wTt_tag = (__m128i*)((unsigned long *)(&(M_Tt->wX[ns_b*M_Tt->mc_length])));
+	  wYnWt_tag = (__m128i*)((unsigned long *)(&(M_YnWt->wX[(mr+mx)*M_YnWt->mc_length])));
+	  mcay_tag = (__m128i*)((unsigned long *)(&(M_At->mc_j[0]))); mcay_end = (__m128i*)((unsigned long *)(&(M_At->mc_j[M_At->mc_length])));
+	  lltmp = popcount_pmpm0_1mask_multiword_adv_end(&wAt_tag,&wTt_tag,&wYnWt_tag,&mcay_tag,&mcay_end);
+	  output_At_T_YnWt_tmp += n2*lltmp;
+	  n2*=2;
+	  /* for (mx=M_YnWt->ncols_per_z-1;mx>0;mx--){ } */}
+	output_At_T_YnWt_ww[tab_x] = (double)(output_At_T_YnWt_base + output_At_T_YnWt_tmp)/M_YnWt->mlt_d;
+	mw_j++; /* while (mw_j<M_Wn->rpop_j){ } */}
+      na_j++; /* while (na_j<M_At->rpop_j){ } */}
+    ns_j++; /* while (ns_j<M_Tt->rpop_j){ } */}
+  if (verbose){
+    ns_j=0;
+    while (ns_j<M_Tt->rpop_j){
+      ns_a = M_Tt->m_a_[ns_j]; ns_b = M_Tt->m_b_[ns_j];
+      switch (output_spacing_t){ case SPACING_j: tab_t=ns_j; break; case SPACING_b: tab_t=ns_b; break; case SPACING_a: tab_t=ns_a; break; default: break; /* switch (output_spacing_t){ } */}
+      if (verbose>1){
+	sprintf(tmpchar," %% output_At_T_YnWt_uu[%d]: ",tab_t);
+	raprintf(&(output_At_T_YnWt_uu[tab_t*tab_a_stride*tab_w_stride]),"double",tab_a_stride,tab_w_stride,tmpchar);
+	sprintf(tmpchar," %% output_At_T_YnWt_ww[%d]: ",tab_t);
+	raprintf(&(output_At_T_YnWt_ww[tab_t*tab_a_stride*tab_w_stride]),"double",tab_a_stride,tab_w_stride,tmpchar);
+	/* if (verbose>1){ } */}
+      printf(" %% Difference: %0.16f\n",dra_diff(&(output_At_T_YnWt_uu[tab_t*tab_a_stride*tab_w_stride]),&(output_At_T_YnWt_ww[tab_t*tab_a_stride*tab_w_stride]),tab_a_stride*tab_w_stride,1));
+      ns_j++; /* while (ns_j<M_Tt->rpop_j){ } */}
+    /* if (verbose){ } */}
+  if (verbose){ printf(" %% [finished get_xcalc_At_T_YnWt_test] tidx %d\n",tidx);}
+  return NULL;
+}
+
+void binary_xcalc_At_T_YnWt_test(int *tidx,void **vpra,pthread_t *thread_in,int spacing_a,int spacing_t,int spacing_w,int spacing_YnWt,double *A_ajdk,struct M_handle *M_At,struct M_handle *M_Tt,double *YnWt,struct M_handle *M_YnWt,struct M_handle *M_Wn,double **output_At_T_YnWt_uu_p,double **output_At_T_YnWt_ww_p)
+{
+  /* calls get_xcalc_At_T_YnWt_test;
+     variable space in **vpra (should be at least size 13)
+   */
+  int verbose=1;
+  int length_a=0,length_t=0,length_w=0,length=0,ip=0;
+  if (verbose){ printf(" %% [entering binary_xcalc_At_T_YnWt_test] tidx %d\n",*tidx);}
+  if (verbose){ M_handle_printf(M_At,verbose," %% M_At: ");}
+  if (verbose){ M_handle_printf(M_Tt,verbose," %% M_Tt: ");}
+  if (verbose){ M_handle_printf(M_Wn,verbose," %% M_Wn: ");}
+  switch (spacing_a){ case SPACING_j: length_a = M_At->rpop_j; break; case SPACING_b: length_a = M_At->rpop_b; break; case SPACING_a: length_a = M_At->nrows; break; default: break; /* switch (spacing_a){ } */}
+  switch (spacing_t){ case SPACING_j: length_t = M_Tt->rpop_j; break; case SPACING_b: length_t = M_Tt->rpop_b; break; case SPACING_a: length_t = M_Tt->nrows; break; default: break; /* switch (spacing_t){ } */}
+  switch (spacing_w){ case SPACING_j: length_w = M_Wn->rpop_j; break; case SPACING_b: length_w = M_Wn->rpop_b; break; case SPACING_a: length_w = M_Wn->nrows; break; default: break; /* switch (spacing_w){ } */}
+  length = length_a*length_t*length_w; if (verbose){ printf(" %% length %d*%d*%d=%d\n",length_a,length_t,length_w,length);}
+  if (verbose>2){ bprintf(M_At->mr_b,M_At->bitj,1,M_At->nrows," %% M_At->mr_b: ");}
+  if (verbose>2){ bprintf(M_At->mr_j,M_At->bitj,1,M_At->nrows," %% M_At->mr_j: ");}
+  if (verbose>2){ bprintf(M_At->mc_b,M_At->bitj,1,M_At->ncols," %% M_At->mc_b: ");}
+  if (verbose>2){ bprintf(M_At->mc_j,M_At->bitj,1,M_At->ncols," %% M_At->mc_j: ");}
+  if (verbose>2){ bprintf(M_Wn->mr_b,M_Wn->bitj,1,M_Wn->nrows," %% M_Wn->mr_b: ");}
+  if (verbose>2){ bprintf(M_Wn->mr_j,M_Wn->bitj,1,M_Wn->nrows," %% M_Wn->mr_j: ");}
+  if (verbose>2){ bprintf(M_Wn->mc_b,M_Wn->bitj,1,M_Wn->ncols," %% M_Wn->mc_b: ");}
+  if (verbose>2){ bprintf(M_Wn->mc_j,M_Wn->bitj,1,M_Wn->ncols," %% M_Wn->mc_j: ");}
+  if (*output_At_T_YnWt_uu_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_At_T_YnWt_uu_p = (double *)wkspace_all0c(length*sizeof(double));}
+  memset((*output_At_T_YnWt_uu_p),0,length*sizeof(double));
+  if (*output_At_T_YnWt_ww_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_At_T_YnWt_ww_p = (double *)wkspace_all0c(length*sizeof(double));}
+  memset((*output_At_T_YnWt_ww_p),0,length*sizeof(double));
+  ip=0; vpra[ip++] = tidx; vpra[ip++] = A_ajdk; vpra[ip++] = M_At; vpra[ip++] = M_Tt; vpra[ip++] = YnWt; vpra[ip++] = M_YnWt; vpra[ip++] = M_Wn; vpra[ip++] = *output_At_T_YnWt_uu_p; vpra[ip++] = *output_At_T_YnWt_ww_p;
+  switch (spacing_a){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (spacing_a){ } */}
+  switch (spacing_t){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (spacing_t){ } */}
+  switch (spacing_w){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (spacing_w){ } */}
+  switch (spacing_YnWt){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (spacing_YnWt){ } */}
+  if (*tidx>0){ if (pthread_create(thread_in,NULL,&get_xcalc_At_T_YnWt_test,vpra)){ printf("Warning! cannot create thread %d in binary_xcalc_At_T_YnWt_test\n",*tidx);}}
+  else /* if (*tidx<=0) */{ get_xcalc_At_T_YnWt_test(vpra);} /* must join threads later */;
+  if (verbose){ printf(" %% [finished binary_xcalc_At_T_YnWt_test] tidx %d\n",*tidx);}
+}

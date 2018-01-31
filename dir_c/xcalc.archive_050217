@@ -1,0 +1,337 @@
+void xcalc_setmaxmin(double *Zx,int rpop_j,int rpop_b,int nrows_Z,int cpop_j,int cpop_b,int ncols_Z,int spacing_Zx,unsigned char *mr_b,unsigned char *mr_j,unsigned char *mc_b,unsigned char *mc_j,int trm_flag,double *max_data_p,double *min_data_p)
+{
+  int verbose=0;
+  int nc_a=0,nc_b=0,nc_j=0,nr_a=0,nr_b=0,nr_j=0,tab_row=0,row_stride=0,tab_col=0,col_stride=0,tab_Z=0,m_set=0;
+  double min_data=0,max_data=0,sum1_data=0,sum2_data=0,avg_data=0,var_data=0,std_data=0;
+  if (verbose){ printf(" %% [entering xcalc_setmaxmin]\n");}
+  switch (spacing_Zx){ case SPACING_j: row_stride=rpop_j; break; case SPACING_b: row_stride=rpop_b; break; case SPACING_a: row_stride=nrows_Z; break; default: break; /* switch (spacing_Zx){ } */}
+  switch (spacing_Zx){ case SPACING_j: col_stride=cpop_j; break; case SPACING_b: col_stride=cpop_b; break; case SPACING_a: col_stride=ncols_Z; break; default: break; /* switch (spacing_Zx){ } */}
+  m_set=0; nc_a=0;nc_b=0;nc_j=0;
+  while (nc_a<ncols_Z){
+    if (mc_b==NULL || bget__on(mc_b,nc_a)){
+      if (mc_j==NULL || bget__on(mc_j,nc_a)){
+	switch (spacing_Zx){ case SPACING_j: tab_col=nc_j; break; case SPACING_b: tab_col=nc_b; break; case SPACING_a: tab_col=nc_a; break; default: break; /* switch (spacing_Zx){ } */}
+	nr_a=0;nr_b=0;nr_j=0;
+	while (nr_a<nrows_Z){
+	  if (mr_b==NULL || bget__on(mr_b,nr_a)){
+	    if (mr_j==NULL || bget__on(mr_j,nr_a)){
+	      switch (spacing_Zx){ case SPACING_j: tab_row=nr_j; break; case SPACING_b: tab_row=nr_b; break; case SPACING_a: tab_row=nr_a; break; default: break; /* switch (spacing_Zx){ } */}
+	      tab_Z = trm_flag ? tab_col + tab_row*col_stride : tab_row + tab_col*row_stride ;
+	      if (!m_set){ min_data = Zx[tab_Z]; max_data = Zx[tab_Z]; m_set=1;} else /* if m_set */{ min_data = minimum(Zx[tab_Z],min_data); max_data = maximum(Zx[tab_Z],max_data);}
+	      sum1_data += Zx[tab_Z]; sum2_data += Zx[tab_Z]*Zx[tab_Z];
+	      nr_j++; /* if (mr_j==NULL || bget__on(mr_j,nr_a)){ } */}
+	    nr_b++; /* if (mr_b==NULL || bget__on(mr_b,nr_a)){ } */}
+	  nr_a++; /* while (nr_a<nrows_Z){ } */}
+	nc_j++; /* if (mc_j==NULL || bget__on(mc_j,nc_a)){ } */}
+      nc_b++; /* if (mc_b==NULL || bget__on(mc_b,nc_a)){ } */}
+    nc_a++; /* while (nc_a<ncols_Z){ } */}
+  if (min_data>=max_data){ max_data = min_data+1;}
+  avg_data = sum1_data / maximum(1,rpop_j*cpop_j) ; var_data = sum2_data / maximum(1,rpop_j*cpop_j) - avg_data*avg_data ; std_data = sqrt(maximum(0,var_data)) ;
+  if (verbose){ printf(" %% min %f max %f; sum1 %f avg %f sum2 %f var %f std %f\n",min_data,max_data,sum1_data,avg_data,sum2_data,var_data,std_data);}
+  if (min_data_p!=NULL){ *min_data_p = min_data;} if (max_data_p!=NULL){ *max_data_p = max_data;}
+  if (verbose){ printf(" %% [finished xcalc_setmaxmin]\n");}  
+}
+
+void *get_xcalc(void *vp)
+{
+  /* This function is designed for use with TYPE_pZ and TYPE_0Z computation, with simple parallelization. ;
+     This can allow an extra bit to be used as a buffer for future additive updates (not implemented now);
+     Given double array *Zx, we create bit array bZ, with first column 1's.
+     For example given *Zx = 
+     { -5 3 2 8 , 1 0 -1 -2 } 
+     we note min=-5 and max = 8, for a total of 13 in range.
+     with a minbuffer of 0.25, we would set min = -5 - 0.25*13 = -9;
+     and then subtract to obtain
+     { 4 12 11 17 , 10 9 8 7 }
+     and then multiply by mlt = D_MLT/(max-min) (e.g., mlt = 128), to obtain
+     { 4*mlt 12*mlt 11*mlt 17*mlt , 10*mlt 9*mlt 8*mlt 7*mlt }
+     at this point ceil(log2(max+1)) = 12
+     so we need at least 12 columns per row
+     since:
+     4*mlt   = 001000000000
+     12*mlt  = 011000000000
+     11*mlt  = 010110000000
+     17*mlt  = 100010000000
+     10*mlt  = 010100000000
+     9*mlt   = 010010000000
+     8*mlt   = 010000000000
+     7*mlt   = 001110000000
+     the final bZ is something like:
+     [ 1 001000000000 010100000000 ]
+     [ 1 011000000000 010010000000 ]
+     [ 1 010110000000 010000000000 ]
+     [ 1 100010000000 001110000000 ]
+     [ 0 000000000000 000000000000 ]
+     [ 0 000000000000 000000000000 ]
+     [ 0 000000000000 000000000000 ]
+     [ 0 000000000000 000000000000 ]
+     With this compressed notation, A*bZ = [ xx y11 y10 ... y0 z11 z10 ... z0 ],
+     with A*Zx = y, where
+     y = [ min*mlt*xx + 2^11*y11 + 2^10*y10 + ... + 2^0*y0 , min*mlt*xx + 2^11*z11 + 2^10*z10 + ... 2^0*z0 ] / mlt . ;
+     The number of bits of precision retained will be roughly log2(D_MLT) - bitbuffer. ;
+     Note that we pad bZ to account for POPLENGTH (i.e., for direct use as M_X->wX). ;
+  */
+  int verbose=0;
+  int ver_flag=2; /* fastest */
+  int ip=0;
+  void **vpra=(void **)vp;
+  int tidx = *(int *)(vpra[ip++]);
+  int bitj = *(int *)(vpra[ip++]);
+  unsigned char *mr_b = (unsigned char *)(vpra[ip++]);
+  unsigned char *mr_j = (unsigned char *)(vpra[ip++]);
+  unsigned char *mc_b = (unsigned char *)(vpra[ip++]);
+  unsigned char *mc_j = (unsigned char *)(vpra[ip++]);
+  double *Zx = (double *)(vpra[ip++]);
+  int nrows_Z = *(int *)(vpra[ip++]);
+  int ncols_Z = *(int *)(vpra[ip++]);
+  struct M_handle **M_X_p = (struct M_handle **)(vpra[ip++]);
+  int b_mlt = *(int *)(vpra[ip++]);
+  int trm_flag = *(int *)(vpra[ip++]);
+  int spacing_Zx = *(int *)(vpra[ip++]);
+  int rpop_b = 0,cpop_b=0; int rpop_j = 0,cpop_j=0;
+  struct M_handle *M_X = NULL;
+  int length = nrows_Z*ncols_Z;
+  int ncols=0,ncols_extend=0;
+  int nrows=0,nrows_extend=0,brows=0,ncols_per=0;
+  double min_data=0,max_data=0,min=0,max=0,mlt=0;
+  int mx_j=0,mx_chunk=0,nb=0,nr_a=0,nc_a=0,nr_m8=0,nr_m7=0,nr_d8=0,tab_nb=0,tab_Z=0,tab_Z_stride=0,nr_j=0,nc_j=0,nr_b=0,nc_b=0,nc_a_[ncols_Z],nc_b_[ncols_Z],Z_cpop_j=0;
+  unsigned long long int cz=0,cz_tmp=0;
+  /* unsigned char *wkspace_mark=NULL; */
+  unsigned char **bZ_p=NULL;
+  if (verbose){ printf(" %% \n");}
+  if (verbose){ printf(" %% [entering get_xcalc] tidx %d, trm_flag %d\n",tidx,trm_flag);}
+  if (spacing_Zx==SPACING_j){ 
+    if (mr_j==NULL || mc_j==NULL){ printf(" %% Warning! mc_j and mr_j must be defined to use SPACING_j within get_xcalc\n");}
+    rpop_j = popcount_uchar_array(mr_j,bsize(nrows_Z)); cpop_j = popcount_uchar_array(mc_j,bsize(ncols_Z));
+    if (*M_X_p==NULL){ if (GLOBAL_thread_count>1){ printf(" %% Warning! *M_X_p undefined in get_xcalc; must pre-allocate to avoid thread conflict!\n");} bZ_p = (unsigned char **)wkspace_alloc(1*sizeof(unsigned char *)); *bZ_p = NULL;}
+    else if (*M_X_p!=NULL){ M_X = *M_X_p; bZ_p = &(M_X->Ara);}
+    if (length>0 && Zx!=NULL){
+      xcalc_setmaxmin(Zx,rpop_j,rpop_b,nrows_Z,cpop_j,cpop_b,ncols_Z,spacing_Zx,mr_b,mr_j,mc_b,mc_j,trm_flag,&max_data,&min_data);
+      min = min_data - 0.0625*(max_data - min_data); max = max_data + 0.0625*(max_data - min_data);
+      if (verbose){ printf(" %% min %f max %f --> min %f max %f\n",min_data,max_data,min,max);}
+      mlt = (double)(GLOBAL_D_MLT)/(max - min); if (verbose){ printf(" %% min_data %0.2f max_data %0.2f min %0.2f max %0.2f\n",min_data,max_data,min,max);}
+      if (verbose>1){
+	nc_j=0; for (nc_a=0;nc_a<ncols_Z;nc_a++){ if (bget__on(mc_j,nc_a)){
+	    printf("nc_a %d(%d): ",nc_a,nc_j);
+	    nr_j=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){ 
+	      if (bget__on(mr_j,nr_a)){ cz = trm_flag ? (unsigned long long int)(mlt*(double)(Zx[nc_j + nr_j*cpop_j]-min)) : (unsigned long long int)(mlt*(double)(Zx[nr_j + nc_j*rpop_j]-min)) ;} else{ cz=0;} cz = crop(cz,0+1,GLOBAL_D_MLT-1);
+	      printf(" %lld",cz);
+	      nr_j += bget__on(mr_j,nr_a); /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	    printf("\n");
+	    /* if (bget__on(mc_j,nc_a)){ } */}
+	  nc_j += bget__on(mc_j,nc_a); /* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+	/* if (verbose>1){ } */}
+      ncols_per = b_mlt + 1; ncols = ncols_per*ncols_Z; if (ncols_per>62){ printf(" %% Warning! overflow in get_xcalc!\n");} if (verbose){ printf(" %% ncols_per %d, ncols %d\n",ncols_per,ncols);}
+      nrows = nrows_Z; nrows_extend = (bitj - (nrows % bitj)) % bitj; brows = bsize(nrows);
+      if (*bZ_p==NULL){ if (GLOBAL_thread_count>1){ printf(" %% Warning! *bZ_p undefined in get_xcalc; must pre-allocate to avoid thread conflict!\n");} *bZ_p = wkspace_alloc(ncols*brows);} fill_uchar_zero(*bZ_p,ncols*brows);
+      if (verbose){ printf(" %% nrows %d+%d, brows %d\n",nrows,nrows_extend,brows);}
+      nr_m8=0;nr_m7=7;nr_d8=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){ (*bZ_p)[nr_d8 + 0*brows] |= (1 << (nr_m7)); nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;}}
+      nc_j=0; for (nc_a=0;nc_a<ncols_Z;nc_a++){
+	if (bget__on(mc_j,nc_a)){
+	  nr_m8=0;nr_m7=7;nr_d8=0;nr_j=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){ 
+	    if (bget__on(mr_j,nr_a)){ cz = trm_flag ? (unsigned long long int)(mlt*(double)(Zx[nc_j + nr_j*cpop_j]-min)) : (unsigned long long int)(mlt*(double)(Zx[nr_j + nc_j*rpop_j]-min)) ;} else{ cz=0;} cz = crop(cz,0+1,GLOBAL_D_MLT-1);
+	    nb=0; tab_nb = nr_d8 + (ncols_per*nc_a + ncols_per-1-nb)*brows; cz_tmp = cz;
+	    for (nb=0;nb<ncols_per-1;nb++){ (*bZ_p)[tab_nb] |= ((unsigned char)(cz_tmp & 1) << (nr_m7)); cz_tmp >>= 1; tab_nb -= brows;}
+	    nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;} nr_j += bget__on(mr_j,nr_a); /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	  /* if (bget__on(mc_j,nc_a)){ } */}
+	nc_j += bget__on(mc_j,nc_a); /* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+      /* if (length>0 && Zx!=NULL){ } */}
+    /* if (spacing_Zx==SPACING_j){ } */}
+  if (spacing_Zx==SPACING_b){ 
+    if (mr_j==NULL || mc_j==NULL){ printf(" %% Warning! mc_j and mr_j must be defined to use SPACING_b within get_xcalc\n");}
+    if (mr_b==NULL || mc_b==NULL){ printf(" %% Warning! mc_b and mr_b must be defined to use SPACING_b within get_xcalc\n");}
+    rpop_b = popcount_uchar_array(mr_b,bsize(nrows_Z)); rpop_j = popcount_uchar_array(mr_j,bsize(nrows_Z));
+    cpop_b = popcount_uchar_array(mc_b,bsize(ncols_Z)); cpop_j = popcount_uchar_array(mc_j,bsize(ncols_Z));
+    if (*M_X_p==NULL){ if (GLOBAL_thread_count>1){ printf(" %% Warning! *M_X_p undefined in get_xcalc; must pre-allocate to avoid thread conflict!\n");} bZ_p = (unsigned char **)wkspace_alloc(1*sizeof(unsigned char *)); *bZ_p = NULL;}
+    else if (*M_X_p!=NULL){ M_X = *M_X_p; bZ_p = &(M_X->Ara);}
+    if (length>0 && Zx!=NULL){
+      if (verbose>1){
+	nc_j=0; nc_b=0; for (nc_a=0;nc_a<ncols_Z;nc_a++){ if (bget__on(mc_b,nc_a)){ if (bget__on(mc_j,nc_a)){
+	      printf("nc_a %d(%d,%d): ",nc_a,nc_b,nc_j);
+	      nr_j=0; nr_b=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){ 
+		if (bget__on(mr_b,nr_a)){ if (bget__on(mr_j,nr_a)){ cz = trm_flag ? (unsigned long long int)(mlt*(double)(Zx[nc_b + nr_b*cpop_b]-min)) : (unsigned long long int)(mlt*(double)(Zx[nr_b + nc_b*rpop_b]-min)) ;}} else{ cz=0;} cz = crop(cz,0+1,GLOBAL_D_MLT-1);
+		printf(" %lld",cz);
+		nr_b += bget__on(mr_b,nr_a); nr_j += bget__on(mr_j,nr_a); /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	      printf("\n");
+	      /* if (bget__on(mc_j,nc_a)){ } */} /* if (bget__on(mc_b,nc_a)){ } */}
+	  nc_b += bget__on(mc_b,nc_a); nc_j += bget__on(mc_j,nc_a); /* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+	/* if (verbose>1){ } */}
+      xcalc_setmaxmin(Zx,rpop_j,rpop_b,nrows_Z,cpop_j,cpop_b,ncols_Z,spacing_Zx,mr_b,mr_j,mc_b,mc_j,trm_flag,&max_data,&min_data);
+      min = min_data - 0.0625*(max_data - min_data); max = max_data + 0.0625*(max_data - min_data);
+      if (verbose){ printf(" %% min %f max %f --> min %f max %f\n",min_data,max_data,min,max);}
+      mlt = (double)(GLOBAL_D_MLT)/(max - min); if (verbose){ printf(" %% min_data %0.2f max_data %0.2f min %0.2f max %0.2f\n",min_data,max_data,min,max);}
+      ncols_per = b_mlt + 1; ncols = ncols_per*ncols_Z; if (ncols_per>62){ printf(" %% Warning! overflow in get_xcalc!\n");} if (verbose){ printf(" %% ncols_per %d, ncols %d\n",ncols_per,ncols);}
+      nrows = nrows_Z; nrows_extend = (bitj - (nrows % bitj)) % bitj; brows = bsize(nrows);
+      if (*bZ_p==NULL){ if (GLOBAL_thread_count>1){ printf(" %% Warning! *bZ_p undefined in get_xcalc; must pre-allocate to avoid thread conflict!\n");} *bZ_p = wkspace_alloc(ncols*brows);} fill_uchar_zero(*bZ_p,ncols*brows);
+      if (verbose){ printf(" %% nrows %d+%d, brows %d\n",nrows,nrows_extend,brows);}
+      nr_m8=0;nr_m7=7;nr_d8=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){ (*bZ_p)[nr_d8 + 0*brows] |= (1 << (nr_m7)); nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;}}
+      nc_j=0; nc_b=0; for (nc_a=0;nc_a<ncols_Z;nc_a++){
+	if (bget__on(mc_b,nc_a)){ if (bget__on(mc_j,nc_a)){
+	    nr_m8=0;nr_m7=7;nr_d8=0;nr_j=0;nr_b=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){ 
+	      if (bget__on(mr_b,nr_a)){ if (bget__on(mr_j,nr_a)){ cz = trm_flag ? (unsigned long long int)(mlt*(double)(Zx[nc_b + nr_b*cpop_b]-min)) : (unsigned long long int)(mlt*(double)(Zx[nr_b + nc_b*rpop_b]-min)) ;}} else{ cz=0;} cz = crop(cz,0+1,GLOBAL_D_MLT-1);
+	      nb=0; tab_nb = nr_d8 + (ncols_per*nc_a + ncols_per-1-nb)*brows; cz_tmp = cz;
+	      for (nb=0;nb<ncols_per-1;nb++){ (*bZ_p)[tab_nb] |= ((unsigned char)(cz_tmp & 1) << (nr_m7)); cz_tmp >>= 1; tab_nb -= brows;}
+	      nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;} nr_b += bget__on(mr_b,nr_a); nr_j += bget__on(mr_j,nr_a); /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	    nc_j += 1; /* if (bget__on(mc_j,nc_a)){ } */} nc_b += 1; /* if (bget__on(mc_b,nc_a)){ } */}
+	/* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+      /* if (length>0 && Zx!=NULL){ } */}
+    /* if (spacing_Zx==SPACING_b){ } */}
+  if (spacing_Zx==SPACING_a){ 
+    if (verbose>2 && Zx!=NULL){ if (trm_flag){ raprintf(Zx,"double",ncols_Z,nrows_Z," %% Zt: ");} else{ raprintf(Zx,"double",nrows_Z,ncols_Z," %% Zn: ");}}
+    if (*M_X_p==NULL){ if (GLOBAL_thread_count>1){ printf(" %% Warning! *M_X_p undefined in get_xcalc; must pre-allocate to avoid thread conflict!\n");} bZ_p = (unsigned char **)wkspace_alloc(1*sizeof(unsigned char *)); *bZ_p = NULL;}
+    else if (*M_X_p!=NULL){ M_X = *M_X_p; bZ_p = &(M_X->Ara);}
+    if (length>0 && Zx!=NULL){
+      rpop_j = popcount_uchar_array(mr_j,bsize(nrows));
+      xcalc_setmaxmin(Zx,rpop_j,rpop_b,nrows_Z,cpop_j,cpop_b,ncols_Z,spacing_Zx,mr_b,mr_j,mc_b,mc_j,trm_flag,&max_data,&min_data);
+      min = min_data - 0.0625*(max_data - min_data); max = max_data + 0.0625*(max_data - min_data);
+      if (verbose){ printf(" %% min %f max %f --> min %f max %f\n",min_data,max_data,min,max);}
+      mlt = (double)(GLOBAL_D_MLT)/(max - min);
+      if (verbose){ printf(" %% min_data %0.2f max_data %0.2f min %0.2f max %0.2f\n",min_data,max_data,min,max);}
+      ncols_per = b_mlt + 1; ncols = ncols_per*ncols_Z; if (ncols_per>62){ printf(" %% Warning! overflow in get_xcalc!\n");} if (verbose){ printf(" %% ncols_per %d, ncols %d\n",ncols_per,ncols);}
+      nrows = nrows_Z; nrows_extend = (bitj - (nrows % bitj)) % bitj; brows = bsize(nrows);
+      if (*bZ_p==NULL){ if (GLOBAL_thread_count>1){ printf(" %% Warning! *bZ_p undefined in get_xcalc; must pre-allocate to avoid thread conflict!\n");} *bZ_p = wkspace_alloc(ncols*brows);} fill_uchar_zero(*bZ_p,ncols*brows);
+      if (verbose){ printf(" %% nrows %d+%d, brows %d\n",nrows,nrows_extend,brows);}
+      /* here we assume that M_X->Ara has been allocated using *bZ_p = wkspace_alloc(ncols*brows);*/ fill_uchar_zero(*bZ_p,ncols*brows);
+      if (verbose>2 && Zx!=NULL){
+	if (trm_flag==addressable_0){ for (nr_a=0;nr_a<nrows_Z;nr_a++){ printf(" %% Zx_n: "); for (nc_a=0;nc_a<ncols_Z;nc_a++){ printf(" %d",(int)((double)(Zx[nr_a+nc_a*nrows_Z] - min)*mlt));} printf("\n");} /* if (trm_flag){ } */}
+	if (trm_flag==addressable_1){ for (nc_a=0;nc_a<ncols_Z;nc_a++){ printf(" %% Zx_t: "); for (nr_a=0;nr_a<nrows_Z;nr_a++){ printf(" %d",(int)((double)(Zx[nc_a+nr_a*ncols_Z] - min)*mlt));} printf("\n");} /* if (trm_flag){ } */}
+	/* if (verbose>2 && Zx!=NULL){ } */}
+      switch (ver_flag){
+      case -1: /* row ( col ( bin ) ) */ /* original with comments */
+	for (nr_a=0;nr_a<nrows_Z;nr_a++){
+	  (*bZ_p)[nr_a/BIT8 + 0*brows] |= (1 << (7 - (nr_a%BIT8)));
+	  for (nc_a=0;nc_a<ncols_Z;nc_a++){
+	    if (mc_j==NULL || bget__on(mc_j,nc_a)){
+	      cz = trm_flag ? (unsigned long long int)(mlt*(double)(Zx[nc_a + nr_a*ncols_Z]-min)) : (unsigned long long int)(mlt*(double)(Zx[nr_a + nc_a*nrows_Z]-min)) ; cz = crop(cz,0+1,GLOBAL_D_MLT-1);
+	      if (verbose>3){ printf(" %% (%d,%d) %lld: ",nr_a,nc_a,cz);}
+	      tab_nb = nr_d8 + (ncols_per*nc_a + ncols_per-1-0)*brows; cz_tmp = cz;
+	      for (nb=0;nb<ncols_per-1;nb++){ if (verbose>3){ printf(" nb %d [%lld]",nb,(long long int)((cz >> nb) & 1));} (*bZ_p)[nr_d8 + (ncols_per*nc_a + ncols_per-1-nb)*brows] |= ((unsigned char)((cz >> nb) & 1) << (7 - (nr_a%BIT8)));}
+	      if (verbose>3){ printf("\n");}
+	      /* if (mc_j==NULL || bget__on(mc_j,nc_a)){ } */}
+	    /* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+	  /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	break;
+      case 0: /* row ( col ( bin )) */
+	nr_m8=0;nr_m7=7;nr_d8=0;
+	for (nr_a=0;nr_a<nrows_Z;nr_a++){
+	  (*bZ_p)[nr_d8 + 0*brows] |= (1 << (nr_m7));
+	  for (nc_a=0;nc_a<ncols_Z;nc_a++){
+	    if (mc_j==NULL || bget__on(mc_j,nc_a)){
+	      cz = trm_flag ? (unsigned long long int)(mlt*(double)(Zx[nc_a + nr_a*ncols_Z]-min)) : (unsigned long long int)(mlt*(double)(Zx[nr_a + nc_a*nrows_Z]-min)) ; cz = crop(cz,0+1,GLOBAL_D_MLT-1);
+	      nb=0; tab_nb = nr_d8 + (ncols_per*nc_a + ncols_per-1-0)*brows; cz_tmp = cz;
+	      for (nb=0;nb<ncols_per-1;nb++){ (*bZ_p)[tab_nb] |= ((unsigned char)(cz_tmp & 1) << (nr_m7)); cz_tmp >>= 1; tab_nb -= brows;}
+	      /* if (mc_j==NULL || bget__on(mc_j,nc_a)){ } */}
+	    /* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+	  nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;}
+	  /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	break;
+      case 1: /* row ( bin ( col )) */
+	nr_m8=0;nr_m7=7;nr_d8=0;
+	for (nr_a=0;nr_a<nrows_Z;nr_a++){
+	  (*bZ_p)[nr_d8 + 0*brows] |= (1 << (nr_m7));
+	  for (nb=0;nb<ncols_per-1;nb++){
+	    nc_a=0; tab_nb = nr_d8 + (ncols_per*nc_a + ncols_per-1-nb)*brows; tab_Z_stride = trm_flag ? 1 : nrows_Z; nc_a=0; tab_Z = trm_flag ? nc_a + nr_a*ncols_Z : nr_a + nc_a*nrows_Z;
+	    for (nc_a=0;nc_a<ncols_Z;nc_a++){ if (mc_j==NULL || bget__on(mc_j,nc_a)){
+		cz = (unsigned long long int)(mlt*(double)(Zx[tab_Z]-min)); cz = crop(cz,0+1,GLOBAL_D_MLT-1); cz_tmp = cz; 
+		(*bZ_p)[tab_nb] |= ((unsigned char)(cz_tmp & 1) << (nr_m7)); 
+		tab_nb += ncols_per*brows;
+		/* if (mc_j==NULL || bget__on(mc_j,nc_a)){ } */}
+	      /* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+	    /* for (nb=0;nb<ncols_per-1;nb++){ } */}
+	  nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;}
+	  /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	break;
+      case 2: /* col ( row ( bin )) */ /* fastest so far */
+	nr_m8=0;nr_m7=7;nr_d8=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){ (*bZ_p)[nr_d8 + 0*brows] |= (1 << (nr_m7)); nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;}}
+	for (nc_a=0;nc_a<ncols_Z;nc_a++){
+	  if (mc_j==NULL || bget__on(mc_j,nc_a)){
+	    nr_m8=0;nr_m7=7;nr_d8=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){
+	      cz = trm_flag ? (unsigned long long int)(mlt*(double)(Zx[nc_a + nr_a*ncols_Z]-min)) : (unsigned long long int)(mlt*(double)(Zx[nr_a + nc_a*nrows_Z]-min)) ; cz = crop(cz,0+1,GLOBAL_D_MLT-1); 
+	      nb=0; tab_nb = nr_d8 + (ncols_per*nc_a + ncols_per-1-nb)*brows; cz_tmp = cz;
+	      for (nb=0;nb<ncols_per-1;nb++){ (*bZ_p)[tab_nb] |= ((unsigned char)(cz_tmp & 1) << (nr_m7)); cz_tmp >>= 1; tab_nb -= brows;}
+	      nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;} /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	    /* if (mc_j==NULL || bget__on(mc_j,nc_a)){ } */}
+	  /* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+	break;
+      case 3: /* col ( bin ( row )) */
+	nr_m8=0;nr_m7=7;nr_d8=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){ (*bZ_p)[nr_d8 + 0*brows] |= (1 << (nr_m7)); nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;}}
+	for (nc_a=0;nc_a<ncols_Z;nc_a++){ if (mc_j==NULL || bget__on(mc_j,nc_a)){
+	    for (nb=0;nb<ncols_per-1;nb++){ 
+	      nr_m8=0;nr_m7=7;nr_d8=0; tab_nb = nr_d8 + (ncols_per*nc_a + ncols_per-1-nb)*brows; tab_Z_stride = trm_flag ? ncols_Z : 1; nr_a=0; tab_Z = trm_flag ? nc_a + nr_a*ncols_Z : nr_a + nc_a*nrows_Z;	    
+	      for (nr_a=0;nr_a<nrows_Z;nr_a++){
+		cz = (unsigned long long int)(mlt*(double)(Zx[tab_Z]-min)); cz = crop(cz,0+1,GLOBAL_D_MLT-1); cz_tmp = cz >> nb;
+		(*bZ_p)[tab_nb] |= ((unsigned char)(cz_tmp & 1) << (nr_m7)); 
+		nr_m8++; nr_m7--; tab_Z += tab_Z_stride; if (nr_m8>=BIT8){ nr_d8++; tab_nb++; nr_m8=0; nr_m7=7; } /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	      tab_nb -= brows; /* for (nb=0;nb<ncols_per-1;nb++){ } */}
+	    /* if (mc_j==NULL || bget__on(mc_j,nc_a)){ } */}/* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+	break;
+      case 4: /* bin ( col ( row )) */
+	nr_m8=0;nr_m7=7;nr_d8=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){ (*bZ_p)[nr_d8 + 0*brows] |= (1 << (nr_m7)); nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;}}
+	for (nb=0;nb<ncols_per-1;nb++){ 
+	  for (nc_a=0;nc_a<ncols_Z;nc_a++){ if (mc_j==NULL || bget__on(mc_j,nc_a)){
+	      nr_m8=0;nr_m7=7;nr_d8=0; tab_nb = nr_d8 + (ncols_per*nc_a + ncols_per-1-nb)*brows; tab_Z_stride = trm_flag ? ncols_Z : 1; nr_a=0; tab_Z = trm_flag ? nc_a + nr_a*ncols_Z : nr_a + nc_a*nrows_Z;	    
+	      for (nr_a=0;nr_a<nrows_Z;nr_a++){
+		cz = (unsigned long long int)(mlt*(double)(Zx[tab_Z]-min)); cz = crop(cz,0+1,GLOBAL_D_MLT-1); cz_tmp = cz >> nb;
+		(*bZ_p)[tab_nb] |= ((unsigned char)(cz_tmp & 1) << (nr_m7)); 
+		nr_m8++; nr_m7--; tab_Z += tab_Z_stride; if (nr_m8>=BIT8){ nr_d8++; tab_nb++; nr_m8=0; nr_m7=7; } /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	      /* if (mc_j==NULL || bget__on(mc_j,nc_a)){ } */}/* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+	  tab_nb -= brows; /* for (nb=0;nb<ncols_per-1;nb++){ } */}
+	break;
+      case 5: /* bin ( row ( col )) */
+	nr_m8=0;nr_m7=7;nr_d8=0; for (nr_a=0;nr_a<nrows_Z;nr_a++){ (*bZ_p)[nr_d8 + 0*brows] |= (1 << (nr_m7)); nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7;}}
+	for (nb=0;nb<ncols_per-1;nb++){ 
+	  nr_m8=0;nr_m7=7;nr_d8=0; tab_Z_stride = trm_flag ? 1 : nrows_Z; nr_a=0; nc_a=0; tab_Z = trm_flag ? nc_a + nr_a*ncols_Z : nr_a + nc_a*nrows_Z;	    
+	  for (nr_a=0;nr_a<nrows_Z;nr_a++){
+	    nc_a=0; tab_nb = nr_d8 + (ncols_per*nc_a + ncols_per-1-nb)*brows;
+	    for (nc_a=0;nc_a<ncols_Z;nc_a++){ if (mc_j==NULL || bget__on(mc_j,nc_a)){
+		cz = (unsigned long long int)(mlt*(double)(Zx[tab_Z]-min)); cz = crop(cz,0+1,GLOBAL_D_MLT-1); cz_tmp = cz >> nb;
+		(*bZ_p)[tab_nb] |= ((unsigned char)(cz_tmp & 1) << (nr_m7)); 
+		/* if (mc_j==NULL || bget__on(mc_j,nc_a)){ } */} tab_Z += tab_Z_stride; tab_nb += ncols_per*brows; /* for (nc_a=0;nc_a<ncols_Z;nc_a++){ } */}
+	    nr_m8++; nr_m7--; if (nr_m8>=BIT8){ nr_d8++; nr_m8=0; nr_m7=7; } /* for (nr_a=0;nr_a<nrows_Z;nr_a++){ } */}
+	  tab_nb -= brows; /* for (nb=0;nb<ncols_per-1;nb++){ } */}
+	break;
+      default: break; /* switch (ver_flag){ } */}
+      /* if (length>0 && Zx!=NULL){ } */}
+    /* if (spacing_Zx==SPACING_a){ } */}
+  if (verbose>2 && (*bZ_p)!=NULL){ bprintf((*bZ_p),bitj,ncols,brows*BIT8," %% b: ");}
+  ncols_extend = (bitj - (ncols % bitj)) % bitj;
+  if (*M_X_p==NULL){ if (GLOBAL_thread_count>1){ printf(" %% Warning! *M_X_p undefined in get_xcalc; must pre-allocate to avoid thread conflict!\n");} M_X = binary_A_v_gen(bitj,ncols,nrows,NULL,(*bZ_p),mc_j,ncols,mr_j,rpop_j); *M_X_p = M_X;}
+  else if (*M_X_p!=NULL){
+    M_X->nrows = ncols; M_X->ncols = nrows; 
+    M_X->nrows_extend = (M_X->bitj - (M_X->nrows % M_X->bitj)) % M_X->bitj; M_X->mr_length = bsize(M_X->nrows);
+    M_X->ncols_extend = (M_X->bitj - (M_X->ncols % M_X->bitj)) % M_X->bitj; M_X->mc_length = bsize(M_X->ncols);
+    if (mc_j){ for (nr_a=0;nr_a<M_X->mr_length;nr_a++){ M_X->mr_b[nr_a] = mc_j[nr_a];}} else{ for (nr_a=0;nr_a<ncols;nr_a++){ bset__on(M_X->mr_b,nr_a);}} M_X->rpop_b = ncols; 
+    for (nc_a=0;nc_a<M_X->mc_length;nc_a++){ M_X->mc_b[nc_a] = mr_j[nc_a];} M_X->cpop_b = rpop_j;
+    if (mc_j){ for (nr_a=0;nr_a<M_X->mr_length;nr_a++){ M_X->mr_j[nr_a] = mc_j[nr_a];}} else{ for (nr_a=0;nr_a<ncols;nr_a++){ bset__on(M_X->mr_j,nr_a);}} M_X->rpop_j = ncols; 
+    for (nc_a=0;nc_a<M_X->mc_length;nc_a++){ M_X->mc_j[nc_a] = mr_j[nc_a];} M_X->cpop_j = rpop_j;
+    M_X->wX = (*bZ_p);
+    /* else if (M_X_p!=NULL){ } */}
+  M_X->ncols_per_z = ncols_per; M_X->max_d = max; M_X->min_d = min; M_X->mlt_d = mlt; if (!isfinite(M_X->mlt_d) || M_X->mlt_d<=0){ M_X->mlt_d=1;}
+  M_mxget(M_X);  
+  if (verbose>2){ M_handle_printf(M_X,verbose," %% M_X: ");}
+  if (verbose){ printf(" %% [finished get_xcalc] tidx %d trm_flag %d\n",tidx,trm_flag);}
+  return NULL;
+}
+
+void binary_xcalc(int *tidx,void **vpra,pthread_t *thread_in,int *bitj_p,unsigned char *mr_b,unsigned char *mr_j,unsigned char *mc_b,unsigned char *mc_j,int spacing_Zx,double *Zx,int *nrows_Z_p,int *ncols_Z_p,struct M_handle **M_X_p,int *b_mlt_p,int trm_flag)
+{
+  /* This function uses the M_handles M_A and M_Zn to run a series of parallel calls to get_AnZt_vv__run ; 
+     No reloading of data is performed ; we assume all data is preloaded ;
+     calculation performed in thread *thread_in ; thread number *tidx ;
+     variable space in **vpra (should be at least size 13)
+     the type of multiplication is determined by trm_flag: ;
+     trm_flag==TYPE_pm: get_AX_pm ;
+     trm_flag==TYPE_00: get_AX_00 ;
+   */
+  int verbose=0;
+  /* unsigned char *wkspace_mark=NULL; */
+  int ip=0;
+  if (verbose){ printf(" %% [entering binary_xcalc] tidx %d trm_flag %d\n",*tidx,trm_flag);}
+  ip=0; vpra[ip++] = tidx; vpra[ip++] = bitj_p; vpra[ip++] = mr_b; vpra[ip++] = mr_j; vpra[ip++] = mc_b; vpra[ip++] = mc_j; vpra[ip++] = Zx; vpra[ip++] = nrows_Z_p; vpra[ip++] = ncols_Z_p; vpra[ip++] = M_X_p; vpra[ip++] = b_mlt_p;
+  switch (trm_flag){ case 0: vpra[ip++] = &addressable_0; break; case 1: vpra[ip++] = &addressable_1; break; default: break; /* switch (trm_flag){ } */}
+  switch (spacing_Zx){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (spacing_Zx){ } */}
+  if (*tidx>0){ if (pthread_create(thread_in,NULL,&get_xcalc,vpra)){ printf("Warning! cannot create thread %d in binary_xcalc\n",*tidx);}}
+  else /* if (*tidx<=0) */{ get_xcalc(vpra);} /* must join threads later */;
+  if (verbose>2){ M_handle_printf(*M_X_p,verbose," %% M_X: ");}
+  if (verbose){ printf(" %% [finished binary_xcalc] tidx %d trm_flag %d\n",*tidx,trm_flag);}
+}
