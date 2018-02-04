@@ -1359,23 +1359,6 @@ void bcc_init_QX(struct bcc_ajdk *D)
     /*  for (nb1=0;nb1<nbins;nb1++){ } */}
 }
 
-void M_mxset(struct M_handle *M_An,unsigned char *mr_j,unsigned char *mc_j)
-{
-  /* This function updates masks mr_j and mc_j for M_An based on the input masks mr_j, mc_j; */
-  int verbose=0;
-  int nr=0,nc=0;
-  if (verbose){ printf(" %% [entering M_mxset] \n");}
-  if (verbose){ M_handle_printf(M_An,verbose," %% M_An: ");}
-  if (mr_j!=NULL){ 
-    for (nr=0;nr<M_An->mr_length;nr++){ M_An->mr_j[nr] = mr_j[nr] & M_An->mr_b[nr];} M_An->rpop_j = popcount_uchar_array(M_An->mr_j,M_An->mr_length);
-    /* if (mr_j!=NULL){ } */}
-  if (mc_j!=NULL){
-    for (nc=0;nc<M_An->mc_length;nc++){ M_An->mc_j[nc] = mc_j[nc] & M_An->mc_b[nc];} M_An->cpop_j = popcount_uchar_array(M_An->mc_j,M_An->mc_length);
-    /* if (mc_j!=NULL){ } */}
-  M_mxget(M_An); 
-  if (verbose){ printf(" %% [finished M_mxset] \n");}
-}
-
 void bcc_M_mxset(struct bcc_ajdk *D)
 {
   int verbose=GLOBAL_verbose;

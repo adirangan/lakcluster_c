@@ -1,3 +1,42 @@
+void dcc_ajdk_copy(struct dcc_ajdk *D,struct dcc_ajdk *D_in)
+{
+  /* copy from D_in; assuming D has been preallocated. */
+  int verbose=0;
+  int nc=0;
+  int bitj_tmp=0,nrows_tmp=0,ncols_tmp=0;
+  if (verbose){ printf(" %% [entering dcc_ajdk_copy]\n");}
+  D->A_ncols=D_in->A_ncols;D->T_ncols=D_in->T_ncols;
+  /* copying A_bmc_b */
+  D->A_cbother = (D->A_ncols>0);
+  D->A_ncols_extend = (D->bitj - (D->A_ncols % D->bitj)) % D->bitj; 
+  D->A_mc_length = bsize(D->A_ncols)/* rup(D->A_ncols+D->A_ncols_extend,POPLENGTH)/BIT8 */;
+  if (verbose>1){ printf(" %%%% A_ncols %d, A_ncols_extend %d A_mc_length %d\n",D->A_ncols,D->A_ncols_extend,D->A_mc_length);}
+  memcpy(D->A_bmc_b,D_in->A_bmc_b,D->A_mc_length);
+  memcpy(D->A_bmc_j,D_in->A_bmc_j,D->A_mc_length);
+  memcpy(D->A_bmc_j_rmv,D_in->A_bmc_j_rmv,D->A_mc_length);
+  memcpy(D->A_bmc_j_rtn,D_in->A_bmc_j_rtn,D->A_mc_length);
+  D->A_cpop_b= popcount_uchar_array(D->A_bmc_b,D->A_mc_length); D->A_cpop_j = popcount_uchar_array(D->A_bmc_j,D->A_mc_length); if (verbose>1){ printf(" %%%% D->A_cpop_b %d D->A_cpop_j %d\n",D->A_cpop_b,D->A_cpop_j);}
+  memcpy(D->A_umc_b,D_in->A_umc_b,D->A_ncols*sizeof(unsigned char));
+  memcpy(D->A_umc_j,D_in->A_umc_j,D->A_ncols*sizeof(unsigned char));
+  memcpy(D->A_umc_j_rmv,D_in->A_umc_j_rmv,D->A_ncols*sizeof(unsigned char));
+  memcpy(D->A_umc_j_rtn,D_in->A_umc_j_rtn,D->A_ncols*sizeof(unsigned char));
+  /* loading T_bmc_b */
+  D->T_ncols_extend = (D->bitj - (D->T_ncols % D->bitj)) % D->bitj; 
+  D->T_mc_length = bsize(D->T_ncols)/* rup(D->T_ncols+D->T_ncols_extend,POPLENGTH)/BIT8 */;
+  if (verbose>1){ printf(" %%%% T_ncols %d, T_ncols_extend %d T_mc_length %d\n",D->T_ncols,D->T_ncols_extend,D->T_mc_length);}
+  memcpy(D->T_bmc_b,D_in->T_bmc_b,D->T_mc_length);
+  memcpy(D->T_bmc_j,D_in->T_bmc_j,D->T_mc_length);
+  D->T_cpop_b= popcount_uchar_array(D->T_bmc_b,D->T_mc_length); D->T_cpop_j = popcount_uchar_array(D->T_bmc_j,D->T_mc_length); if (verbose>1){ printf(" %%%% D->T_cpop_b %d D->T_cpop_j %d\n",D->T_cpop_b,D->T_cpop_j);}
+  memcpy(D->T_umc_b,D_in->T_umc_b,D->T_ncols*sizeof(unsigned char));
+  memcpy(D->T_umc_j,D_in->T_umc_j,D->T_ncols*sizeof(unsigned char));
+  D->Irem=D_in->Irem;
+  D->Ireq=D_in->Ireq;
+  D->out_iteration=D_in->out_iteration;
+  D->out_xdrop_ij=D_in->out_xdrop_ij;
+  D->out_trace_length=D_in->out_trace_length;
+  if (verbose){ printf(" %% [finished dcc_ajdk_copy] D->A_ncols=%d \n",D->A_ncols,D->T_ncols);}
+}
+
 void dcc_ajdk_load(struct dcc_ajdk *D)
 {
   /* load from file */
@@ -90,6 +129,74 @@ void dcc_ajdk_init(double mrnd,struct dcc_ajdk *D)
   D->QR_sra=NULL; D->QR_lmr_a=NULL; D->QR_lmr_b=NULL; D->QR_lmr_j=NULL; D->QR_lnb=NULL; D->QR_imr_a=NULL; D->QR_imr_b=NULL; D->QR_imr_j=NULL;
   D->Irem=0;D->Ireq=0; D->out_iteration=0; D->out_xdrop_ij=0; D->out_trace=NULL; D->out_xdrop_a=NULL; D->out_xdrop_b=NULL; D->out_trace_length = 0;
   if (verbose){ printf(" %% [finished dcc_ajdk_init] D->A_ncols=%d D->T_ncols=%d \n",D->A_ncols,D->T_ncols);}
+}
+
+void dcc_single_copy_M_An(struct dcc_single *E,struct dcc_single *E_in)
+{
+  /* copy from file */
+  int verbose=0;
+  struct dcc_ajdk *D=E->D,*D_in=E_in->D;
+  int nb_given = E->nb;
+  int nr=0,nb=0,nc=0;
+  int bitj_tmp=0,nrows_tmp=0,ncols_tmp=0,nrows_tmp_extend,brows_tmp;
+  unsigned char *bXra_tmp=NULL;
+  if (verbose){ printf(" %% [entering dcc_single_copy_M_An]\n");}
+  /* copying A_bmr_b etc */
+  nb = nb_given;
+  /* copying A */
+  D->bitj = D_in->bitj; D->A_ncols = D_in->A_ncols; E->A_nrows = E_in->A_nrows;
+  E->A_rbother = (E->A_nrows>0);
+  E->A_nrows_extend = (D->bitj - (E->A_nrows % D->bitj)) % D->bitj;
+  E->A_mr_length = bsize(E->A_nrows)/* rup(E->A_nrows+E->A_nrows_extend,POPLENGTH)/BIT8 */;
+  memcpy(E->A_bmr_b,E_in->A_bmr_b,E->A_mr_length);
+  memcpy(E->A_bmr_j,E_in->A_bmr_j,E->A_mr_length);
+  memcpy(E->A_bmr_j_rmv,E_in->A_bmr_j_rmv,E->A_mr_length);
+  memcpy(E->A_bmr_j_rtn,E_in->A_bmr_j_rtn,E->A_mr_length);
+  E->A_rpop_b = popcount_uchar_array(E->A_bmr_b,E->A_mr_length);
+  E->A_rpop_j = popcount_uchar_array(E->A_bmr_j,E->A_mr_length);
+  if (verbose>1){ printf(" %% A_nrows_extend_[%d] %d\n",nb,E->A_nrows_extend);}
+  if (verbose>1){ printf(" %% A_mr_length_[%d] %d\n",nb,E->A_mr_length);}
+  sprintf(D->tmpAnchar," %%%% E->A_bmr_b_[%.2d]:",nb); if (verbose>1){ bprintf(E->A_bmr_b,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+  sprintf(D->tmpAnchar," %%%% E->A_bmr_j_[%.2d]:",nb); if (verbose>1){ bprintf(E->A_bmr_j,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+  if (verbose>1){ printf(" %% A_nrows_[%d]  = %d\n",nb,E->A_nrows);}
+  if (verbose>1){ printf(" %% A_rpop_b_[%d] = %d\n",nb,E->A_rpop_b);}
+  if (verbose>1){ printf(" %% A_rpop_j_[%d] = %d\n",nb,E->A_rpop_j);}
+  memcpy(E->A_umr_b,E_in->A_umr_b,E->A_nrows*sizeof(unsigned char));
+  memcpy(E->A_umr_j,E_in->A_umr_j,E->A_nrows*sizeof(unsigned char));
+  memcpy(E->A_umr_j_rmv,E_in->A_umr_j_rmv,E->A_nrows*sizeof(unsigned char));
+  memcpy(E->A_umr_j_rtn,E_in->A_umr_j_rtn,E->A_nrows*sizeof(unsigned char));
+  if (verbose>1){ printf(" %% copying M_An_[%d]\n",nb);}
+  M_handle_copy(E->M_An,E_in->M_An);
+  M_handle_copy(E->M_At,E_in->M_At);
+  /* copying Z */
+  E->Z_nrows = E_in->Z_nrows;
+  E->Z_rbother = (E->Z_nrows>0);
+  E->Z_nrows_extend = (D->bitj - (E->Z_nrows % D->bitj)) % D->bitj;
+  E->Z_mr_length = bsize(E->Z_nrows)/* rup(E->Z_nrows+E->Z_nrows_extend,POPLENGTH)/BIT8 */;
+  memcpy(E->Z_bmr_b,E_in->Z_bmr_b,E->Z_mr_length);
+  memcpy(E->Z_bmr_j,E_in->Z_bmr_j,E->Z_mr_length);
+  E->Z_rpop_b = popcount_uchar_array(E->Z_bmr_b,E->Z_mr_length);
+  E->Z_rpop_j = popcount_uchar_array(E->Z_bmr_j,E->Z_mr_length);
+  if (verbose>1){ printf(" %% Z_nrows_extend_[%d] %d\n",nb,E->Z_nrows_extend);}
+  if (verbose>1){ printf(" %% Z_mr_length_[%d] %d\n",nb,E->Z_mr_length);}
+  sprintf(D->tmpZnchar," %%%% E->Z_bmr_b_[%.2d]:",nb); if (verbose>1){ bprintf(E->Z_bmr_b,D->bitj,1,E->Z_nrows,D->tmpZnchar);}
+  sprintf(D->tmpZnchar," %%%% E->Z_bmr_j_[%.2d]:",nb); if (verbose>1){ bprintf(E->Z_bmr_j,D->bitj,1,E->Z_nrows,D->tmpZnchar);}
+  if (verbose>1){ printf(" %% Z_nrows_[%d]  = %d\n",nb,E->Z_nrows);}
+  if (verbose>1){ printf(" %% Z_rpop_b_[%d] = %d\n",nb,E->Z_rpop_b);}
+  if (verbose>1){ printf(" %% Z_rpop_j_[%d] = %d\n",nb,E->Z_rpop_j);}
+  memcpy(E->Z_umr_b,E_in->Z_umr_b,E->Z_nrows*sizeof(unsigned char));
+  memcpy(E->Z_umr_j,E_in->Z_umr_j,E->Z_nrows*sizeof(unsigned char));
+  if (verbose>1){ printf(" %% copying M_Zn_[%d]\n",nb);}
+  M_handle_copy(E->M_Zn,E_in->M_Zn);
+  M_handle_copy(E->M_Zt,E_in->M_Zt);
+  /* copying T */
+  D->T_ncols = D_in->T_ncols;
+  M_handle_copy(E->M_Tn,E_in->M_Tn);
+  M_handle_copy(E->M_Tt,E_in->M_Tt);
+  /* copying S */
+  M_handle_copy(E->M_Sn,E_in->M_Sn);
+  M_handle_copy(E->M_St,E_in->M_St);
+  if (verbose){ printf(" %% [finished dcc_single_copy_M_An]\n");}
 }
 
 void dcc_single_load_M_An(struct dcc_single *E)
@@ -268,6 +375,31 @@ void dcc_single_init_M_An(char *error_vs_speed,double mrnd,struct dcc_single *E)
   if (verbose){ printf(" %% [finished dcc_single_init_M_An]\n");}
 }
 
+void dcc_single_copy_lf(struct dcc_single *E,struct dcc_single *E_in)
+{
+  int verbose=0; /* double gamma = GLOBAL_gamma; */
+  struct dcc_ajdk *D = E->D;
+  int ns_b=0,n1a=0,n1b=0,n2a=0,n2b=0;
+  char prefix[FNAMESIZE];
+  int M_flag=0;
+  int cdrop=0,ckeep=0;
+  long long int mm=0;
+  L_handle_copy(E->lf_At_rsum,E_in->lf_At_rsum);
+  L_handle_copy(E->lf_Zt_rsum,E_in->lf_Zt_rsum);
+  L_handle_copy(E->lf_AtTn,E_in->lf_AtTn);
+  L_handle_copy(E->lf_ZtSn,E_in->lf_ZtSn);
+  L_handle_copy(E->lf_An_ajdk,E_in->lf_An_ajdk);
+  L_handle_copy(E->lf_Zn_ajdk,E_in->lf_Zn_ajdk);
+  L_handle_copy(E->lf_a0d1,E_in->lf_a0d1);
+  L_handle_copy(E->lf_a2d1,E_in->lf_a2d1);
+  L_handle_copy(E->lf_a1d1_ZtSn,E_in->lf_a1d1_ZtSn);
+  L_handle_copy(E->lf_a1d1_AtTn,E_in->lf_a1d1_AtTn);
+  L_handle_copy(E->lf_et_Sn,E_in->lf_et_Sn);
+  L_handle_copy(E->lf_et_Tn,E_in->lf_et_Tn);
+  L_handle_copy(E->lf_a0d1_ZtSn,E_in->lf_a0d1_ZtSn); M_handle_copy(E->M_a0d1_ZtSn,E_in->M_a0d1_ZtSn);
+  L_handle_copy(E->lf_a0d1_AtTn,E_in->lf_a0d1_AtTn); M_handle_copy(E->M_a0d1_AtTn,E_in->M_a0d1_AtTn);
+}
+
 void dcc_single_init_lf_excerpt(char *prefix,int n1a,int n1b,int n2a,int n2b,struct L_handle **L_p,int M_flag,struct M_handle **M_p)
 {
   int verbose=0;
@@ -317,17 +449,34 @@ void dcc_single_init_lf(struct dcc_single *E)
   dcc_single_init_lf_excerpt(prefix,n1a,n1b,n2a,n2b,&(E->lf_a0d1_AtTn),M_flag,&(E->M_a0d1_AtTn));
 }
 
-void dcc_double_init_lf_excerpt(char *prefix,int n1a,int n1b,int n2a,int n2b,struct L_handle **L_p,int M_flag,int *trm_flag_p,struct M_handle **M_p)
+void dcc_double_copy_lf(struct dcc_double *F,struct dcc_double *F_in)
 {
   int verbose=0;
-  int length=0;
-  length  = n1b*n2b; *L_p = L_handle_make(length); if (!(*L_p)){ printf(" %% Warning! not enough memory in dcc_double_init_lf\n");}
-  if (M_flag){
-    if (0){}
-    else if (n2b<=n1b){ *trm_flag_p = 0; *M_p = M_handle_w_make(BITJ,GLOBAL_B_MLT,n1a,n2b);}
-    else if (n1b<=n2b){ *trm_flag_p = 1; *M_p = M_handle_w_make(BITJ,GLOBAL_B_MLT,n2a,n1b);}
-    /* if (M_flag){ } */}
-  if (verbose){ printf(" %% %s n1a %d n1b %d n2a %d n2b %d --> length %d trm_flag %d \n",prefix,n1a,n1b,n2a,n2b,length,*trm_flag_p);}
+  struct dcc_ajdk *D=F->D;
+  int n1a=0,n2a=0,n1b,n2b=0;
+  int M_flag=0,rdrop=0,rdrop2=0;
+  char prefix[FNAMESIZE];
+  GLOBAL_tic(0);
+  if (verbose>1){ printf(" %% dcc_double_copy_lf: %d,%d\n",F->nb1,F->nb2);}
+  L_handle_copy(F->lf_An_a0d1_ZtSn,F_in->lf_An_a0d1_ZtSn);
+  L_handle_copy(F->lf_An_a0d1_AtTn,F_in->lf_An_a0d1_AtTn);
+  L_handle_copy(F->lf_TAnZtS_ww,F_in->lf_TAnZtS_ww);
+  L_handle_copy(F->lf_TAnAtT_ww,F_in->lf_TAnAtT_ww);
+  L_handle_copy(F->lf_TAnZtS_uu,F_in->lf_TAnZtS_uu);
+  L_handle_copy(F->lf_TAnAtT_uu,F_in->lf_TAnAtT_uu);
+  L_handle_copy(F->lf_D_AtTn_ZtSn_vv,F_in->lf_D_AtTn_ZtSn_vv);
+  L_handle_copy(F->lf_D_AtTn_AtTn_vv,F_in->lf_D_AtTn_AtTn_vv);
+  L_handle_copy(F->lf_D_AtTn_ZtSn_uu,F_in->lf_D_AtTn_ZtSn_uu);
+  L_handle_copy(F->lf_D_AtTn_AtTn_uu,F_in->lf_D_AtTn_AtTn_uu);
+  L_handle_copy(F->QR_TAnZtS,F_in->QR_TAnZtS);
+  L_handle_copy(F->QR_TAnAtT,F_in->QR_TAnAtT);
+  L_handle_copy(F->QC_TAnZtS,F_in->QC_TAnZtS);
+  L_handle_copy(F->QC_TAnAtT,F_in->QC_TAnAtT);
+  L_handle_copy(F->QR_TAnZtS_uu,F_in->QR_TAnZtS_uu);
+  L_handle_copy(F->QR_TAnAtT_uu,F_in->QR_TAnAtT_uu);
+  L_handle_copy(F->QC_TAnZtS_uu,F_in->QC_TAnZtS_uu);
+  L_handle_copy(F->QC_TAnAtT_uu,F_in->QC_TAnAtT_uu);
+  GLOBAL_toc(0,verbose," %% copying data_structures: ");
 }
 
 void dcc_double_init_lf(struct dcc_double *F)
@@ -363,6 +512,28 @@ void dcc_double_init_lf(struct dcc_double *F)
   F->length = D->A_ncols*D->T_ncols; F->QC_TAnZtS_uu = L_handle_make(F->length);
   F->length = D->A_ncols*D->T_ncols; F->QC_TAnAtT_uu = L_handle_make(F->length); if (!F->QC_TAnAtT_uu){ printf(" %% Warning! not enough memory in dcc_double_init_lf\n");}
   GLOBAL_toc(0,verbose," %% initializing data_structures: ");
+}
+
+void dcc_copy_A_p(struct dcc_ajdk *D,struct dcc_ajdk *D_in)
+{
+  /* copies A_p for each column from D_in */
+  int verbose=0; char tempchar[FNAMESIZE];
+  int nbins = D->nbins; struct dcc_single **E_ = D->E_; struct dcc_single **E_in_ = D_in->E_;
+  int nb=0,nc=0,nc_p=0,nc_start=0,nc_final=0;
+  int A_pcols=0,A_ncols=0,A_rpop_b_total=0,Z_rpop_b_total=0;
+  double tmp_sum=0,tmp_num=0;
+  if (verbose){ printf(" %% [entering dcc_copy_A_p]\n"); wkspace_printf();}
+  if (verbose){ printf(" %% \n");}
+  D->A_pcols = psize(D->A_ncols)/* rup(D->A_ncols+D->A_ncols_extend,POPLENGTH)/POPLENGTH */;
+  if (verbose){ printf(" %% nbins %d; A_ncols %d A_pcols %d\n",nbins,D->A_ncols,D->A_pcols);}
+  memcpy(D->AZ_rsum,D_in->AZ_rsum,D->A_ncols*sizeof(double)); 
+  memcpy(D->A_p,D_in->A_p,D->A_pcols*sizeof(double)); 
+  memcpy(D->A_ajdk,D_in->A_ajdk,AJDK_TOT*D->A_pcols*sizeof(double)); 
+  for (nb=0;nb<nbins;nb++){
+    L_handle_copy(E_[nb]->lf_At_rsum,E_in_[nb]->lf_At_rsum);
+    L_handle_copy(E_[nb]->lf_Zt_rsum,E_in_[nb]->lf_Zt_rsum);
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  if (verbose){ printf(" %% [finished dcc_copy_A_p]\n");  wkspace_printf();}
 }
 
 void dcc_X_nrows_total(struct dcc_ajdk *D)
@@ -466,6 +637,36 @@ void dcc_init_A_p(double mrnd,struct dcc_ajdk *D)
   if (verbose){ printf(" %% [finished dcc_init_A_p]\n");}
 }
 
+void dcc_copy_QX(struct dcc_ajdk *D,struct dcc_ajdk *D_in)
+{
+  int nbins = D->nbins; struct dcc_single **E_ = D->E_; struct dcc_single **E_in_ = D_in->E_;
+  int nb1=0; struct dcc_single *E=NULL;
+  D->out_iteration=0; D->out_trace_length = 6; memcpy(D->out_trace,D_in->out_trace,(D->A_ncols+D->A_nrows_total)*D->out_trace_length*sizeof(double));
+  memcpy(D->out_xdrop_a,D_in->out_xdrop_a,(D->A_ncols+D->A_nrows_total)*2*sizeof(int));
+  memcpy(D->out_xdrop_b,D_in->out_xdrop_b,(D->A_ncols+D->A_nrows_total)*2*sizeof(int));
+  memcpy(D->QC_TAnZtS_nrm,D_in->QC_TAnZtS_nrm,D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double));
+  memcpy(D->QC_TAnAtT_nrm,D_in->QC_TAnAtT_nrm,D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double));
+  memcpy(D->QC_sra,D_in->QC_sra,D->A_ncols*sizeof(double));
+  memcpy(D->QC_lmc_a,D_in->QC_lmc_a,D->A_ncols*sizeof(int));
+  memcpy(D->QC_lmc_b,D_in->QC_lmc_b,D->A_ncols*sizeof(int));
+  memcpy(D->QC_lmc_j,D_in->QC_lmc_j,D->A_ncols*sizeof(int));
+  memcpy(D->QR_sra,D_in->QR_sra,D->A_nrows_total*sizeof(double));
+  memcpy(D->QR_imr_a,D_in->QR_imr_a,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_imr_b,D_in->QR_imr_b,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_imr_j,D_in->QR_imr_j,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_lmr_a,D_in->QR_lmr_a,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_lmr_b,D_in->QR_lmr_b,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_lmr_j,D_in->QR_lmr_j,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_lnb,D_in->QR_lnb,D->A_nrows_total*sizeof(int));
+  for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];
+    memcpy(E->QR_imr_a,E_in_[nb1]->QR_imr_a,E->A_nrows*sizeof(int));
+    memcpy(E->QR_imr_b,E_in_[nb1]->QR_imr_b,E->A_nrows*sizeof(int));
+    memcpy(E->QR_imr_j,E_in_[nb1]->QR_imr_j,E->A_nrows*sizeof(int));
+    memcpy(E->QR_TAnZtS_nrm,E_in_[nb1]->QR_TAnZtS_nrm,E->A_nrows*D->T_ncols*nbins*sizeof(double));
+    memcpy(E->QR_TAnAtT_nrm,E_in_[nb1]->QR_TAnAtT_nrm,E->A_nrows*D->T_ncols*nbins*sizeof(double));
+    /*  for (nb1=0;nb1<nbins;nb1++){ } */}
+}
+
 void dcc_init_QX(struct dcc_ajdk *D)
 {
   int nbins = D->nbins; struct dcc_single **E_ = D->E_;
@@ -524,6 +725,48 @@ void dcc_M_mxset(struct dcc_ajdk *D)
     M_mxset(E_[nb]->M_Tn,E_[nb]->A_bmr_j,D->T_bmc_j); M_mxset(E_[nb]->M_Tt,D->T_bmc_j,E_[nb]->A_bmr_j);
     M_mxset(E_[nb]->M_Sn,E_[nb]->Z_bmr_j,D->T_bmc_j); M_mxset(E_[nb]->M_St,D->T_bmc_j,E_[nb]->Z_bmr_j);
     /* for (nb=0;nb<nbins;nb++){ } */}
+}
+
+void dcc_copy(struct dcc_ajdk *D,struct dcc_ajdk *D_in)
+{
+  int verbose=0;
+  struct dcc_single **E_ = D->E_; struct dcc_single **E_in_ = D_in->E_;
+  struct dcc_double **F_ = D->F_; struct dcc_double **F_in_ = D_in->F_;
+  int nbins = GLOBAL_NBINS, nbx=0,nb1=0,nb2=0;
+  if (verbose){ printf(" %% [entering dcc_copy] \n");}
+  GLOBAL_tic(0);
+  if (verbose){ printf(" %% calling dcc_ajdk_copy: \n");}
+  dcc_ajdk_copy(D,D_in);
+  if (verbose){ printf(" %% finished dcc_ajdk_copy: "); wkspace_printf();}
+  for (nb1=0;nb1<nbins;nb1++){ 
+    if (verbose){ printf(" %% calling dcc_single_copy_M_An for nb1 %d: \n",nb1);} 
+    dcc_single_copy_M_An(E_[nb1],E_in_[nb1]);
+    if (verbose){ printf(" %% finished dcc_single_copy_M_An for nb1 %d: ",nb1); wkspace_printf();}
+    /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  if (verbose){ printf(" %% calling dcc_X_nrows_total: \n");}
+  dcc_X_nrows_total(D);
+  if (verbose){ printf(" %% finished dcc_X_nrows_total: "); wkspace_printf();}
+  for (nb1=0;nb1<nbins;nb1++){ 
+    if (verbose){ printf(" %% calling dcc_single_copy_lf for nb1 %d: \n",nb1);}
+    dcc_single_copy_lf(E_[nb1],E_in_[nb1]);
+    if (verbose){ printf(" %% finished dcc_single_copy_lf for nb1 %d: ",nb1); wkspace_printf();}
+    /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; 
+      if (verbose){ printf(" %% calling dcc_double_copy_lf for nb1 %d nb2 %d nbx %d: \n",nb1,nb2,nbx);}
+      dcc_double_copy_lf(F_[nbx],F_in_[nbx]); 
+      if (verbose){ printf(" %% finished dcc_double_copy_lf for nb1 %d nb2 %d nbx %d: ",nb1,nb2,nbx); wkspace_printf();}
+      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+  GLOBAL_toc(0,verbose," %% generating data matrices: ");
+  if (verbose){ printf(" %% calling dcc_copy_A_p: \n");}
+  dcc_copy_A_p(D,D_in);
+  if (verbose){ printf(" %% finished dcc_copy_A_p: "); wkspace_printf();}
+  if (verbose){ printf(" %% calling dcc_copy_QX\n");}
+  dcc_copy_QX(D,D_in);
+  if (verbose){ printf(" %% finished dcc_copy_QX: "); wkspace_printf();}
+  if (verbose){ printf(" %% calling dcc_M_mxset\n");}
+  dcc_M_mxset(D);
+  if (verbose){ printf(" %% finished dcc_M_mxset: "); wkspace_printf();}
+  if (verbose){ printf(" %% [finished dcc_copy] "); wkspace_printf();}
 }
 
 void dcc_load(struct dcc_ajdk **D_p,struct dcc_single ***E_p,struct dcc_double ***F_p)

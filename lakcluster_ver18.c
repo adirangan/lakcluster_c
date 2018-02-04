@@ -399,8 +399,10 @@ long long int wkspace_used=0;
 
 /* scorebox functions */
 #include "./dir_c/bcc_scorebox.c"
+#include "./dir_c/dcc_scorebox.c"
 #include "./dir_c/S_init.c"
 #include "./dir_c/lakcluster_scorebox.c"
+#include "./dir_c/dexcluster_scorebox.c"
 
 /* ---------------------------------------------------------------- */
 
@@ -526,6 +528,7 @@ int main(int argc, char** argv) {
   if (strcmp(GLOBAL_TEST_TYPE,"dcc_sumscores")==0){ dcc_sumscores_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"dcc_time_sumscores")==0){ dcc_time_sumscores_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"dexcluster_driver")==0){ dexcluster_driver();}
+  if (strcmp(GLOBAL_TEST_TYPE,"dexcluster_scorebox")==0){ dexcluster_scorebox();}
   free(wkspace_ua); exit(RET_SUCCESS);
   return 0;
 }
