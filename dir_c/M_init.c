@@ -41,7 +41,7 @@ unsigned long long int M_wkspace_copy(struct M_handle *M,struct M_handle *M_in)
   length = M->wt_length; memcpy(M->wt,M_in->wt,length); length_total += length; stp++;
   if (verbose){ printf(" %% stp %d length %lld <-- %lld\n",stp,length,length_total);}
   M->length_total = length_total;
-  if (verbose){ printf(" %% [finished M_wkspace_copy] M->mc_length %d M->length_total \n",(int)M->mc_length,length_total); wkspace_printf();}
+  if (verbose){ printf(" %% [finished M_wkspace_copy] M->mc_length %d M->length_total %d \n",(int)M->mc_length,length_total); wkspace_printf();}
   return M->length_total;
 }
 

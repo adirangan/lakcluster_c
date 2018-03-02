@@ -34,7 +34,7 @@ void dcc_ajdk_copy(struct dcc_ajdk *D,struct dcc_ajdk *D_in)
   D->out_iteration=D_in->out_iteration;
   D->out_xdrop_ij=D_in->out_xdrop_ij;
   D->out_trace_length=D_in->out_trace_length;
-  if (verbose){ printf(" %% [finished dcc_ajdk_copy] D->A_ncols=%d \n",D->A_ncols,D->T_ncols);}
+  if (verbose){ printf(" %% [finished dcc_ajdk_copy] D->A_ncols=%d D->T_ncols=%d \n",D->A_ncols,D->T_ncols);}
 }
 
 void dcc_ajdk_load(struct dcc_ajdk *D)
