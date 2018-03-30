@@ -27,6 +27,7 @@ void updateglobals(char *vname)
   else if (strcmp(vname,"GLOBAL_B_MLT")==0){ scanf("%d",&GLOBAL_B_MLT); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_B_MLT);} GLOBAL_D_MLT = (long long int)pow(2.0,(double)GLOBAL_B_MLT);}
   else if (strcmp(vname,"GLOBAL_gamma_type")==0){ scanf("%d",&GLOBAL_gamma_type); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_gamma_type);}}
   else if (strcmp(vname,"GLOBAL_gamma")==0){ scanf("%lf",&GLOBAL_gamma); if (verbose>0){ printf("%s read to be %f\n",vname,GLOBAL_gamma);}}
+  else if (strcmp(vname,"GLOBAL_kappa_squared")==0){ scanf("%lf",&GLOBAL_kappa_squared); if (verbose>0){ printf("%s read to be %f\n",vname,GLOBAL_kappa_squared);}}
   else if (strcmp(vname,"GLOBAL_Ireq")==0){ scanf("%d",&GLOBAL_Ireq); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_Ireq);}}
   else if (strcmp(vname,"GLOBAL_NBINS")==0){ 
     scanf("%d",&GLOBAL_NBINS); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_NBINS);} 

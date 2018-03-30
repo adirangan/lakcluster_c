@@ -1,5 +1,5 @@
 GLOBAL_verbose= 1;
-GLOBAL_thread_count= 8;
+GLOBAL_thread_count= 1;
 GLOBAL_omp_type= 1;
 GLOBAL_TEST_TYPE= At_T_YnWt_S_Zn_ww;
 GLOBAL_TEST_TYP2= speed;

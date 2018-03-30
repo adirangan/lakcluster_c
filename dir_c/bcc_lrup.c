@@ -708,16 +708,28 @@ void bcc_lrup_QR_YnWt_stage_1(struct bcc_ajdk *D)
     for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2; F_trn = F_[nb2+nb1*nbins];
 	if (D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
 	  GLOBAL_pthread_tic(); 
+	  if (verbose>1){
+	    printf(" %% M_jn (%d,%d,%d)-x-(%d,%d,%d)\n",E_nb1->M_jn->rpop_j,E_nb1->M_jn->rpop_b,E_nb1->M_jn->nrows,E_nb1->M_jn->cpop_j,E_nb1->M_jn->cpop_b,E_nb1->M_jn->ncols);
+	    printf(" %% M_vn (%d,%d,%d)-x-(%d,%d,%d)\n",E_nb2->M_vn->rpop_j,E_nb2->M_vn->rpop_b,E_nb2->M_vn->nrows,E_nb2->M_vn->cpop_j,E_nb2->M_vn->cpop_b,E_nb2->M_vn->ncols);
+	    /* if (verbose>1){ } */}
 	  wrap_AnZt_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_jn,E_nb2->M_vn,D->A_ajdk,E_nb1->lf_jn_ajdk,E_nb2->lf_vn_ajdk,&(F->lf_jnvt));
 	  GLOBAL_pthread_toc(); /* if bother */}
 	if (D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
 	  if (nb1==nb2){
 	    GLOBAL_pthread_tic(); 
+	    if (verbose>1){
+	      printf(" %% M_jn (%d,%d,%d)-x-(%d,%d,%d)\n",E_nb1->M_jn->rpop_j,E_nb1->M_jn->rpop_b,E_nb1->M_jn->nrows,E_nb1->M_jn->cpop_j,E_nb1->M_jn->cpop_b,E_nb1->M_jn->ncols);
+	      printf(" %% M_jn (%d,%d,%d)-x-(%d,%d,%d)\n",E_nb2->M_jn->rpop_j,E_nb2->M_jn->rpop_b,E_nb2->M_jn->nrows,E_nb2->M_jn->cpop_j,E_nb2->M_jn->cpop_b,E_nb2->M_jn->ncols);
+	      /* if (verbose>1){ } */}
 	    wrap_AnAt_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_jn,E_nb2->M_jn,D->A_ajdk,E_nb1->lf_jn_ajdk,E_nb2->lf_jn_ajdk,&(F->lf_jnjt));
 	    GLOBAL_pthread_toc();
 	    /* if (nb1==nb2){ } */}
 	  if (nb1<nb2){
 	    GLOBAL_pthread_tic(); 
+	    if (verbose>1){
+	      printf(" %% M_jn (%d,%d,%d)-x-(%d,%d,%d)\n",E_nb1->M_jn->rpop_j,E_nb1->M_jn->rpop_b,E_nb1->M_jn->nrows,E_nb1->M_jn->cpop_j,E_nb1->M_jn->cpop_b,E_nb1->M_jn->ncols);
+	      printf(" %% M_jn (%d,%d,%d)-x-(%d,%d,%d)\n",E_nb2->M_jn->rpop_j,E_nb2->M_jn->rpop_b,E_nb2->M_jn->nrows,E_nb2->M_jn->cpop_j,E_nb2->M_jn->cpop_b,E_nb2->M_jn->ncols);
+	      /* if (verbose>1){ } */}
 	    wrap_AnZt_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E_nb1->M_jn,E_nb2->M_jn,D->A_ajdk,E_nb1->lf_jn_ajdk,E_nb2->lf_jn_ajdk,&(F->lf_jnjt));
 	    GLOBAL_pthread_toc();
 	    /* if (nb1<nb2){ } */}

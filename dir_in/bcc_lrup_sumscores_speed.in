@@ -7,7 +7,6 @@ GLOBAL_QR_strategy= "YnWt";
 GLOBAL_QC_strategy= "YnWt store one";
 GLOBAL_NBINS= 1;
 GLOBAL_gamma= 0.001;
-GLOBAL_gamma= 0.002;
 GLOBAL_B_MLT= 32;
 GLOBAL_TEST_sparse= 1;
 GLOBAL_TEST_mrand= 0.00;

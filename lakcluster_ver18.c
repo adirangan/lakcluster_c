@@ -26,8 +26,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
-
 #include <emmintrin.h>
+#include <cblas.h>
 
 #define PI 3.141592653589793
 #define CACHELINE 64 // assumed number of bytes per cache line, for alignment
@@ -137,8 +137,9 @@ long GLOBAL_l_msec[GLOBAL_NTICKS],GLOBAL_l_ssec[GLOBAL_NTICKS],GLOBAL_l_usec[GLO
 double GLOBAL_elct[GLOBAL_NTICKS],GLOBAL_elrt[GLOBAL_NTICKS];
 
 /* These are the kappa-values used for continuous-covariate correction; note that the former are the square of the latter. */
-double GLOBAL_mds_loop_scale_factor_[6] = {1.00 , 0.34 , 0.19 , 0.13 , 0.10 , 0.09};
-double GLOBAL_mds_half_scale_factor_[6] = {1.0000 , 0.5747 , 0.4338 , 0.3613 , 0.3154 , 0.3000 } ; 
+double GLOBAL_kappa_squared_loop_scale_factor_[6] = {1.00 , 0.34 , 0.19 , 0.13 , 0.10 , 0.09};
+double GLOBAL_kappa_squared_half_scale_factor_[6] = {1.0000 , 0.5747 , 0.4338 , 0.3613 , 0.3154 , 0.3000 } ; 
+double GLOBAL_kappa_squared = 0.0;
 
 char GLOBAL_CWD[FNAMESIZE];
 char GLOBAL_DIR_BASE[FNAMESIZE]="\0";
@@ -361,12 +362,14 @@ long long int wkspace_used=0;
 #include "./dir_c/updateglobals.c"
 #include "./dir_c/L_init.c"
 #include "./dir_c/M_init.c"
-#include "./dir_c/rastats.c"
+#include "./dir_c/ra_stats.c"
 #include "./dir_c/Quicksort.c"
 #include "./dir_c/PNMfile.c"
 #include "./dir_c/An_ajdk_v.c"
 #include "./dir_c/An_v.c"
+#include "./dir_c/M_Ax_to_L2.c"
 #include "./dir_c/AnZt_vv.c"
+#include "./dir_c/AnZt_mm.c"
 #include "./dir_c/AnAt_vv.c"
 #include "./dir_c/AtTYn_vv.c"
 #include "./dir_c/AtTAn_vv.c"
@@ -495,9 +498,11 @@ int main(int argc, char** argv) {
   read_input(); if (GLOBAL_verbose>1){ printf("sysconf(_SC_NPROCESSORS_ONLN) = %d\n",(int)sysconf(_SC_NPROCESSORS_ONLN));}
   set_globals();
   if (strcmp(GLOBAL_TEST_TYPE,"wrap_M_setup_test")==0){ wrap_M_setup_test_test();}
+  if (strcmp(GLOBAL_TEST_TYPE,"M_Ax_to_L2")==0){ wrap_M_Ax_to_L2_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"An_ajdk_v")==0){ wrap_An_ajdk_v_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"An_v")==0){ wrap_An_v_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"AnZt_vv")==0){ wrap_AnZt_vv_test();}
+  if (strcmp(GLOBAL_TEST_TYPE,"AnZt_mm")==0){ wrap_AnZt_mm_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"AnAt_vv")==0){ wrap_AnAt_vv_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"AtTYn_vv")==0){ wrap_AtTYn_vv_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"AtTAn_vv")==0){ wrap_AtTAn_vv_test();}

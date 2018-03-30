@@ -24,6 +24,6 @@ end;%if (length(intersect(A_n_rind_{1+nb1},1:size(M_n_{1+nb1},1)))<length(A_n_ri
 if (length(intersect(Z_n_rind_{1+nb1},1:size(M_n_{1+nb1},1)))<length(Z_n_rind_{1+nb1}));
 disp(sprintf(' %% Warning! Z_n_rind_ indices out of bounds for for 1+nb1=%d in lakcluster_uADZSZDA_check_0.m',1+nb1));
 end;%if (length(intersect(Z_n_rind_{1+nb1},1:size(M_n_{1+nb1},1)))<length(Z_n_rind_{1+nb1}));
-A_n_rows_(1+nb1) = size(M_n_{1+nb1},2);
-Z_n_rows_(1+nb1) = size(M_n_{1+nb1},2);
+A_n_rows_(1+nb1) = size(M_n_{1+nb1},1);
+Z_n_rows_(1+nb1) = size(M_n_{1+nb1},1);
 end;%for nb1=0:nbins-1;

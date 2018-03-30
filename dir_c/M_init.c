@@ -417,3 +417,4 @@ struct M_handle * M_handle_w_make(int bitj,int b_mlt,int nrows_bZ,int ncols_bZ_t
   M = M_handle_v_make(BITJ,ncols_bZ,nrows_bZ,NULL,(*bZ_p),NULL,NULL);
   return M;
 }
+

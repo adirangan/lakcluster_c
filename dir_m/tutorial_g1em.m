@@ -29,7 +29,8 @@ end;%if nargin<1;
 
 if nargin<2; m=1; end;
 esm = eps*sqrt(m);
-w_ra = linspace(0,1,128); w_ra = 2*pi*(w_ra(1:end-1) + 1/256);
+N_w = 128;
+w_ra = linspace(0,1,N_w); w_ra = 2*pi*(w_ra(1:end-1) + 1/(2*N_w));
 dw = mean(diff(w_ra));
 pp_ra = zeros(length(w_ra),1);
 for nw=1:length(w_ra);
@@ -37,6 +38,7 @@ w = w_ra(nw);
 pval_r = @(r) 1/pi * max( atan2( - (esm./r) .* sqrt(1 + (esm./r).^2) , 0.5 * sin(2*w) ) , atan2( (esm./r) .* sqrt(1 + (esm./r).^2) , - 0.5 * sin(2*w) ) );
 ival_r = @(r) 1/2/pi * (1 - 2*pval_r(r) + 2*pval_r(r).^2) .* r .* exp(-r.^2 / 2);
 pp_ra(nw) = integral(ival_r,0.00001,10);
+%pp_ra(nw) = integral(ival_r,0.00000001,10);
 end;%for nw=1:length(w_ra);
 pp = dw*sum(pp_ra);
 

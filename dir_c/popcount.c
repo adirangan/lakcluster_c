@@ -79,16 +79,15 @@ static inline long long int popcount_and(__m128i** mem1p, __m128i** mem2p, __m12
   long long int d=0;
   do{
     maskp_tmp = &((*maskp)[MULTIPLEX_2DIST / 128]);  
-    if (verbose){ printf(" %% do start *mem1p %p *mem2p %p *maskp %p maskp_tmp %p *maskp_end %p\n",(*mem1p),(*mem2p),(*maskp),maskp_tmp,(*maskp_end));}
-    acc.vi = _mm_setzero_si128();
+    /* if (verbose){ printf(" %% do start *mem1p %p *mem2p %p *maskp %p maskp_tmp %p *maskp_end %p\n",(*mem1p),(*mem2p),(*maskp),maskp_tmp,(*maskp_end));} */
     acc.vi = _mm_setzero_si128();
     do {
       count1 = _mm_and_si128(_mm_and_si128(*((*mem1p)++), *((*mem2p)++)), *((*maskp)++));
-      if (verbose){ printf(" %% %% *maskp %p\n",(*maskp));}
+      /* if (verbose){ printf(" %% %% *maskp %p\n",(*maskp));} */
       count2 = _mm_and_si128(_mm_and_si128(*((*mem1p)++), *((*mem2p)++)), *((*maskp)++));
-      if (verbose){ printf(" %% %% *maskp %p\n",(*maskp));}
+      /* if (verbose){ printf(" %% %% *maskp %p\n",(*maskp));} */
       half1 = _mm_and_si128(_mm_and_si128(*((*mem1p)++), *((*mem2p)++)), *((*maskp)++));
-      if (verbose){ printf(" %% %% *maskp %p\n",(*maskp));}
+      /* if (verbose){ printf(" %% %% *maskp %p\n",(*maskp));} */
       half2 = _mm_and_si128(_mm_srli_epi64(half1, 1), m1);
       half1 = _mm_and_si128(half1, m1);
       // Two bits can represent values from 0-3, so make each pair in count1 and
@@ -103,7 +102,7 @@ static inline long long int popcount_and(__m128i** mem1p, __m128i** mem2p, __m12
       count1 = _mm_add_epi64(count1, _mm_add_epi64(_mm_and_si128(count2, m2), _mm_and_si128(_mm_srli_epi64(count2, 2), m2)));
       // Accumulator stores sixteen 0-255 counts in parallel.
       acc.vi = _mm_add_epi64(acc.vi, _mm_add_epi64(_mm_and_si128(count1, m4), _mm_and_si128(_mm_srli_epi64(count1, 4), m4)));
-      if (verbose){ printf(" %% %% *maskp %p\n",(*maskp));}
+      /* if (verbose){ printf(" %% %% *maskp %p\n",(*maskp));} */
     } while ((*maskp) < (maskp_tmp));
 #if MULTIPLEX_DIST > 960
     acc.vi = _mm_add_epi64(_mm_and_si128(acc.vi, m8), _mm_and_si128(_mm_srli_epi64(acc.vi, 8), m8));
@@ -115,7 +114,7 @@ static inline long long int popcount_and(__m128i** mem1p, __m128i** mem2p, __m12
     acc.vi = _mm_and_si128(_mm_add_epi64(acc.vi, _mm_srli_epi64(acc.vi, 16)), m16);
     acc.vi = _mm_add_epi64(acc.vi, _mm_srli_epi64(acc.vi, 32));
     d += (unsigned int)(acc.u8[0] + acc.u8[1]);
-    if (verbose){ printf(" %% do final *mem1p %p *mem2p %p *maskp %p maskp_tmp %p *maskp_end %p\n",(*mem1p),(*mem2p),(*maskp),maskp_tmp,(*maskp_end));}
+    /* if (verbose){ printf(" %% do final *mem1p %p *mem2p %p *maskp %p maskp_tmp %p *maskp_end %p\n",(*mem1p),(*mem2p),(*maskp),maskp_tmp,(*maskp_end));} */
   } while ((*maskp) < (*maskp_end));
   return d;
 }

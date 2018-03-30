@@ -84,7 +84,7 @@ void *get_AtTYn_vv(void *vp)
       mctx_tag = (__m128i *)(&(M_Tt->mc_j[0]));
       mctx_end = (__m128i *)(&(M_Tt->mc_j[M_Tt->mc_length]));
       hhay = -M_Tt->cpop_j + 2*popcount(&wTt_tag,&mctx_tag,&mctx_end); 
-      GLOBAL_ops_count_one(tidx,1,M_Tt->mc_length*BIT8);
+      GLOBAL_ops_count_one(tidx,1,(unsigned long long int)M_Tt->mc_length*BIT8);
       ny_block=0;
       while (ny_block<rup(M_Yt->rpop_j,yper)/yper){
       	na_j=0;
@@ -109,7 +109,7 @@ void *get_AtTYn_vv(void *vp)
 	    ny_j++; /* while (ny_j<M_Yt->rpop_j){ } */}
 	  na_j++; /* while (na_j<M_At->rpop_j){ } */}
 	ny_block++; /* while (ny_block<rup(M_Yt->rpop_j,yper)/yper){ } */}
-      GLOBAL_ops_count_one(tidx,M_Yt->rpop_j*M_At->rpop_j*3,M_Yt->rpop_j*M_At->rpop_j*M_At->mc_length*BIT8);
+      GLOBAL_ops_count_one(tidx,(unsigned long long int)M_Yt->rpop_j*(unsigned long long int)M_At->rpop_j*3,(unsigned long long int)M_Yt->rpop_j*(unsigned long long int)M_At->rpop_j*(unsigned long long int)M_At->mc_length*BIT8);
       nt_j++; /* while (nt_j<M_Tt->rpop_j){ } */}
     /* if (GLOBAL_omp_type==GLOBAL_omp_off){ } */}
   if (GLOBAL_omp_type==GLOBAL_omp__on){
@@ -127,7 +127,7 @@ void *get_AtTYn_vv(void *vp)
 	mctx_tag = (__m128i *)(&(M_Tt->mc_j[0]));
 	mctx_end = (__m128i *)(&(M_Tt->mc_j[M_Tt->mc_length]));
 	hhay = -M_Tt->cpop_j + 2*popcount(&wTt_tag,&mctx_tag,&mctx_end); 
-	GLOBAL_ops_count_one(tidx,1,M_Tt->mc_length*BIT8);
+	GLOBAL_ops_count_one(tidx,1,(unsigned long long int)M_Tt->mc_length*BIT8);
 	na_j=0;
 	while (na_j<M_At->rpop_j){
 	  na_a = na_a_[na_j]; na_b = na_b_[na_j];
@@ -151,7 +151,7 @@ void *get_AtTYn_vv(void *vp)
 	  na_j++; /* while (na_j<M_At->rpop_j){ } */}
 	/* for (mx_j=0;mx_j<M_Tt->rpop_j*ny_block_max;mx_j++){ } */}
       /* end omp parallel */}
-    GLOBAL_ops_count_one(tidx,M_Tt->rpop_j*M_Yt->rpop_j*M_At->rpop_j*3,M_Tt->rpop_j*M_Yt->rpop_j*M_At->rpop_j*M_At->mc_length*BIT8);
+    GLOBAL_ops_count_one(tidx,(unsigned long long int)M_Tt->rpop_j*(unsigned long long int)M_Yt->rpop_j*(unsigned long long int)M_At->rpop_j*3,(unsigned long long int)M_Tt->rpop_j*(unsigned long long int)M_Yt->rpop_j*(unsigned long long int)M_At->rpop_j*(unsigned long long int)M_At->mc_length*BIT8);
     /* if (GLOBAL_omp_type==GLOBAL_omp__on){ } */}
   else if (GLOBAL_omp_type==GLOBAL_omp_unused){
     for (nt_j=0;nt_j<M_Tt->rpop_j;nt_j++){
@@ -162,7 +162,7 @@ void *get_AtTYn_vv(void *vp)
       mctx_end = (__m128i *)(&(M_Tt->mc_j[M_Tt->mc_length]));
       hhay_[nt_j] = -M_Tt->cpop_j + 2*popcount(&wTt_tag,&mctx_tag,&mctx_end); 
       /* for (nt_j=0;nt_j<M_Tt->rpop_j;nt_j++){ } */}
-    GLOBAL_ops_count_one(tidx,M_Tt->rpop_j,M_Tt->rpop_j*M_Tt->mc_length*BIT8);
+    GLOBAL_ops_count_one(tidx,(unsigned long long int)M_Tt->rpop_j,(unsigned long long int)M_Tt->rpop_j*(unsigned long long int)M_Tt->mc_length*BIT8);
     mx_chunk=1920;
 #pragma omp parallel shared(mx_chunk) private(mx_j,nt_j,nt_a,nt_b,na_j,na_a,na_b,ny_j,ny_a,ny_b,tab_t,tab_y,tab_a,tab_x,hhaY,hhAy,hhAY,wAt_tag,wTt_tag,wYt_tag,mcay_tag,mcay_end)
     { /* begin omp parallel */
@@ -190,7 +190,7 @@ void *get_AtTYn_vv(void *vp)
 	output_AtTYn->lf[tab_x] = /* D_An[na_a/POPLENGTH]* */(hhAY - hhAy*a_Yn[ny_a/POPLENGTH] - a_An[na_a/POPLENGTH]*hhaY + a_An[na_a/POPLENGTH]*hhay_[nt_j]*a_Yn[ny_a/POPLENGTH])/* *D_Yn[ny_a/POPLENGTH] */;
 	/* for (mx_j=0;mx_j<M_Tt->rpop_j*M_Yt->rpop_j*M_At->rpop_j;mx_j++){ } */}
       /* end omp parallel */}
-    GLOBAL_ops_count_one(tidx,M_Tt->rpop_j*M_Yt->rpop_j*M_At->rpop_j*3,M_Tt->rpop_j*M_Yt->rpop_j*M_At->rpop_j*M_At->mc_length*BIT8);
+    GLOBAL_ops_count_one(tidx,(unsigned long long int)M_Tt->rpop_j*(unsigned long long int)M_Yt->rpop_j*(unsigned long long int)M_At->rpop_j*3,(unsigned long long int)M_Tt->rpop_j*(unsigned long long int)M_Yt->rpop_j*(unsigned long long int)M_At->rpop_j*(unsigned long long int)M_At->mc_length*BIT8);
     /* else if (GLOBAL_omp_type==GLOBAL_omp_unused){ } */}
  skip_AtTYn_vv:
   if (verbose>1){ printf(" %% [finished get_AtTYn_vv] tidx %d\n",tidx);}

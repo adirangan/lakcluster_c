@@ -90,9 +90,9 @@ void *get_AnZt_vv__run(void *vp)
 	  if (lf_An_ajdk && lf_Zn_ajdk){ output_tmp -= lf_An_ajdk->lf[tab_An_ajdk + AJDK_1_1*lf_An_ajdk->row_stride] + lf_Zn_ajdk->lf[tab_Zn_ajdk + AJDK_1_1*lf_Zn_ajdk->row_stride] - dtmp_a2d1;}
 	  output_AnZt->lf[tab_r + tab_c*tab_r_stride] = output_tmp;
 	  mz_j++; /* while (mz_j<M_Zn->rpop_j){ } */}
-	ma_j++;}
+	ma_j++; /* while (ma_j<M_An->rpop_j){ } */}
       mz_block++; /* while (mz_block<mz_block_max){ } */}
-    GLOBAL_ops_count_one(tidx,M_An->rpop_j*M_Zn->rpop_j,M_An->rpop_j*M_Zn->rpop_j*M_An->mc_length*BIT8);
+    GLOBAL_ops_count_one(tidx,(unsigned long long int)M_An->rpop_j*(unsigned long long int)M_Zn->rpop_j,(unsigned long long int)M_An->rpop_j*(unsigned long long int)M_Zn->rpop_j*(unsigned long long int)M_An->mc_length*BIT8);
     /* if (GLOBAL_omp_type==GLOBAL_omp_off){ } */}
   else if (GLOBAL_omp_type==GLOBAL_omp__on){
 #pragma omp parallel private(mz_block,ma_j,ma_a,ma_b,mz_j,mz_a,mz_b,tab_An_ajdk,tab_Zn_ajdk,tab_r,tab_c,wA_tag,wZ_tag,mc_tag,mc_end,dinp,dtmp,output_tmp)
@@ -130,10 +130,10 @@ void *get_AnZt_vv__run(void *vp)
 	    if (lf_An_ajdk && lf_Zn_ajdk){ output_tmp -= lf_An_ajdk->lf[tab_An_ajdk + AJDK_1_1*lf_An_ajdk->row_stride] + lf_Zn_ajdk->lf[tab_Zn_ajdk + AJDK_1_1*lf_Zn_ajdk->row_stride] - dtmp_a2d1;}
 	    output_AnZt->lf[tab_r + tab_c*tab_r_stride] = output_tmp;
 	    mz_j++; /* while (mz_j<M_Zn->rpop_j){ } */}
-	  ma_j++;}
+	  ma_j++; /* while (ma_j<M_An->rpop_j){ } */}
 	/* for (mz_block=0;mz_block<mz_block_max;mz_block++){ } */}
       /* end omp parallel */}
-    GLOBAL_ops_count_one(tidx,M_An->rpop_j*M_Zn->rpop_j,M_An->rpop_j*M_Zn->rpop_j*M_An->mc_length*BIT8);
+    GLOBAL_ops_count_one(tidx,(unsigned long long int)M_An->rpop_j*(unsigned long long int)M_Zn->rpop_j,(unsigned long long int)M_An->rpop_j*(unsigned long long int)M_Zn->rpop_j*(unsigned long long int)M_An->mc_length*BIT8);
     /* else if (GLOBAL_omp_type==GLOBAL_omp__on){ } */}
   else if (GLOBAL_omp_type==GLOBAL_omp_unused){
     mx_chunk=1920;
@@ -171,7 +171,7 @@ void *get_AnZt_vv__run(void *vp)
 	output_AnZt->lf[tab_r + tab_c*tab_r_stride] = output_tmp;
 	/* for (mx_j=0;mx_j<M_An->rpop_j*M_Zn->rpop_j;mx_j++){ } */}
       /* end omp parallel */}
-    GLOBAL_ops_count_one(tidx,M_An->rpop_j*M_Zn->rpop_j,M_An->rpop_j*M_Zn->rpop_j*M_An->mc_length*BIT8);
+    GLOBAL_ops_count_one(tidx,(unsigned long long int)M_An->rpop_j*(unsigned long long int)M_Zn->rpop_j,(unsigned long long int)M_An->rpop_j*(unsigned long long int)M_Zn->rpop_j*(unsigned long long int)M_An->mc_length*BIT8);
     /* else if (GLOBAL_omp_type==GLOBAL_omp__on){ } */}
  skip_AnZt_vv:
   if (verbose>1){ printf(" %% [finished get_AnZt_vv__run] tidx %d \n",tidx);}
@@ -291,9 +291,9 @@ void *get_AnZt_uu__run(void *vp)
       /* 	/\* for (nc_a=0;nc_a<M_An->ncols;nc_a++){ } *\/} */
       output_tmp = dtmp;
       output_AnZt->lf[tab_r + tab_c*tab_r_stride] = output_tmp;
-      mz_j++;	/* while (mz_j<M_Zn->rpop_j){ } */}
-    ma_j++;}
-  GLOBAL_ops_count_one(tidx,M_An->rpop_j*M_Zn->rpop_j*M_An->cpop_j*2,0);
+      mz_j++; /* while (mz_j<M_Zn->rpop_j){ } */}
+    ma_j++; /* while (ma_j<M_An->rpop_j){ } */}
+  GLOBAL_ops_count_one(tidx,(unsigned long long int)M_An->rpop_j*(unsigned long long int)M_Zn->rpop_j*(unsigned long long int)M_An->cpop_j*2,0);
   if (verbose>1){ raprintf(output_AnZt->lf,"double",tab_r_stride,tab_c_stride," %% output_AnZt->lf: ");}
   if (verbose>1){ printf(" %% [finished get_AnZt_uu__run] tidx %d \n",tidx);}  
   return NULL;
