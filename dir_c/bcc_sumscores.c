@@ -628,9 +628,9 @@ void bcc_sumscores_test()
     bcc_sumscores_mxA(D);
     bcc_sumscores_dmp(D);
     if (verbose>1){ printf(" %% use low-rank-update to calculate new loop-subscores after removing rows and columns with low scores.\n");}
-    bcc_lrup_QR_YnWt_stage_0(D);
-    bcc_lrup_QR_YnWt_stage_1(D);
-    bcc_lrup_QR_YnWt_stage_2(D);
+    if (strstr(D->QR_strategy,"condense")){ bcc_lrup_QR_YnWt_stage_2(D); /* if strategy */}
+    else{ /* use AnZt_vv */ bcc_lrup_QR_YnWt_stage_0(D); bcc_lrup_QR_YnWt_stage_1(D); /* if strategy */}
+    bcc_lrup_QR_YnWt_stage_3(D);
     bcc_lrup_QC_ZtSWn_stage_0(D);
     bcc_lrup_QC_ZtSWn_stage_1(D);
     bcc_lrup_QC_ZtSWn_stage_2(D);
@@ -716,9 +716,14 @@ void bcc_lrup_sumscores_test()
     GLOBAL_tic(4); bcc_sumscores_mxA(D); GLOBAL_toc(4,1+verbose," %% sumscores_mxA: ");
     GLOBAL_tic(4); bcc_sumscores_dmp(D); GLOBAL_toc(4,1+verbose," %% sumscores_dmp: ");
     if (verbose>1){ printf(" %% use low-rank-update to calculate new loop-subscores after removing rows and columns with low scores.\n");}
-    GLOBAL_tic(4); bcc_lrup_QR_YnWt_stage_0(D); GLOBAL_toc(4,1+verbose," %% lrup_QR_YnWt_stage_0: ");
-    GLOBAL_tic(4); bcc_lrup_QR_YnWt_stage_1(D); GLOBAL_toc(4,1+verbose," %% lrup_QR_YnWt_stage_1: ");
-    GLOBAL_tic(4); bcc_lrup_QR_YnWt_stage_2(D); GLOBAL_toc(4,1+verbose," %% lrup_QR_YnWt_stage_2: ");
+    if (strstr(D->QR_strategy,"condense")){ 
+      GLOBAL_tic(4); bcc_lrup_QR_YnWt_stage_2(D); GLOBAL_toc(4,1+verbose," %% lrup_QR_YnWt_stage_2: ");
+      /* if strategy */}
+    else{ /* use AnZt_vv */ 
+      GLOBAL_tic(4); bcc_lrup_QR_YnWt_stage_0(D); GLOBAL_toc(4,1+verbose," %% lrup_QR_YnWt_stage_0: ");
+      GLOBAL_tic(4); bcc_lrup_QR_YnWt_stage_1(D); GLOBAL_toc(4,1+verbose," %% lrup_QR_YnWt_stage_1: ");
+      /* if strategy */}
+    GLOBAL_tic(4); bcc_lrup_QR_YnWt_stage_3(D); GLOBAL_toc(4,1+verbose," %% lrup_QR_YnWt_stage_3: ");
     GLOBAL_tic(4); bcc_lrup_QC_ZtSWn_stage_0(D); GLOBAL_toc(4,1+verbose," %% lrup_QC_ZtSWn_stage_0: ");
     GLOBAL_tic(4); bcc_lrup_QC_ZtSWn_stage_1(D); GLOBAL_toc(4,1+verbose," %% lrup_QC_ZtSWn_stage_1: ");
     GLOBAL_tic(4); bcc_lrup_QC_ZtSWn_stage_2(D); GLOBAL_toc(4,1+verbose," %% lrup_QC_ZtSWn_stage_2: ");

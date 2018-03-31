@@ -55,9 +55,9 @@ void lakcluster_driver()
     bcc_sumscores_mxA(D);
     bcc_sumscores_dmp(D);
     if (verbose>1){ printf(" %% use low-rank-update to calculate new loop-subscores after removing rows and columns with low scores.\n");}
-    bcc_lrup_QR_YnWt_stage_0(D);
-    bcc_lrup_QR_YnWt_stage_1(D);
-    bcc_lrup_QR_YnWt_stage_2(D);
+    if (strstr(D->QR_strategy,"condense")){ bcc_lrup_QR_YnWt_stage_2(D); /* if strategy */}
+    else{ /* use AnZt_vv */ bcc_lrup_QR_YnWt_stage_0(D); bcc_lrup_QR_YnWt_stage_1(D); /* if strategy */}
+    bcc_lrup_QR_YnWt_stage_3(D);
     bcc_lrup_QC_ZtSWn_stage_0(D);
     bcc_lrup_QC_ZtSWn_stage_1(D);
     bcc_lrup_QC_ZtSWn_stage_2(D);

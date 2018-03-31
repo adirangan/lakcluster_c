@@ -362,7 +362,7 @@ void bcc_lrup_QC_YnWt_stage_b1(struct bcc_ajdk *D)
   int nbins = D->nbins; struct bcc_single **E_ = D->E_;
   int nb=0; struct bcc_single *E=NULL;
   int n_spacing_A = SPACING_j;
-  if (strstr(D->QC_strategy,"YnWt")){ 
+  if (strstr(D->QC_strategy,"YnWt") && !strstr(D->QC_strategy,"store one")){ 
     if (verbose){ printf(" %% [entering bcc_lrup_QC_YnWt_stage_b1]\n");}
     if (verbose){ printf(" %% calculating E_[nb]->lf_ztsvn, E_[nb]->lf_attjn, E_[nb]->lf_ktrhn.\n");}
     /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -408,7 +408,7 @@ void bcc_lrup_QC_YnWt_stage_b2(struct bcc_ajdk *D)
   int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
   int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL,*F_trn=NULL;
   int n_spacing_A = SPACING_a;
-  if (strstr(D->QC_strategy,"YnWt")){ 
+  if (strstr(D->QC_strategy,"YnWt") && !strstr(D->QC_strategy,"store one")){ 
     if (verbose){ printf(" %% [entering bcc_lrup_QC_YnWt_stage_b2]\n");}
     if (verbose){ printf(" %% calculating F_[nbx]->lf_attjn____vtszn, F_[nbx]->lf_attjn____jttan, F_[nbx]->lf_attjn____htrkn, F_[nbx]->lf_ktrhn____jttan, F_[nbx]->lf_ktrhn____htrkn.\n");}
     /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -656,7 +656,7 @@ void bcc_lrup_QR_YnWt_stage_0(struct bcc_ajdk *D)
   int nb=0; struct bcc_single *E=NULL;
   int n_type = TYPE_pm;
   int n_spacing_A = SPACING_a;
-  if (strstr(D->QR_strategy,"YnWt")){
+  if (strstr(D->QR_strategy,"YnWt") && !strstr(D->QR_strategy,"condense")){
     if (verbose){ printf(" %% [entering bcc_lrup_QR_YnWt_stage_0]\n");}
     if (verbose){ printf(" %% calculating E_[nb]->lf_jn_ajdk, E_[nb]->lf_vn_ajdk.\n");}
     /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -699,9 +699,9 @@ void bcc_lrup_QR_YnWt_stage_1(struct bcc_ajdk *D)
   int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL,*F_trn=NULL;
   int n_type = TYPE_pm;
   int n_spacing_A = SPACING_b;
-  if (strstr(D->QR_strategy,"YnWt")){
+  if (strstr(D->QR_strategy,"YnWt") && !strstr(D->QR_strategy,"condense")){
     if (verbose){ printf(" %% [entering bcc_lrup_QR_YnWt_stage_1]\n");}
-    if (verbose){ printf(" %% calculating F_[nbx]->lf_jnvt, F_[nbx]->lf_jnjt.\n");}
+    if (verbose){ printf(" %% calculating F_[nbx]->lf_jnvt, F_[nbx]->lf_jnjt using AnZt_vv.\n");}
     /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
     GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
     GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
@@ -766,9 +766,101 @@ void bcc_lrup_QR_YnWt_stage_2(struct bcc_ajdk *D)
 {
   int verbose=GLOBAL_verbose;
   int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
+  int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL,*F_trn=NULL;
+  int n_type = TYPE_pm;
+  int n_spacing_A = SPACING_b; int n_spacing_B = SPACING_j;
+  if (strstr(D->QR_strategy,"YnWt") && strstr(D->QR_strategy,"condense")){
+    if (verbose){ printf(" %% [entering bcc_lrup_QR_YnWt_stage_2]\n");}
+    if (verbose){ printf(" %% calculating F_[nbx]->lf_jnvt, F_[nbx]->lf_jnjt using M_At_to_L2 and AnZt_mm.\n");}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb1=0;nb1<nbins;nb1++){ E_nb1 = E_[nb1];
+	if (D->A_cbother && E_nb1->A_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  wrap_M_At_to_L2_run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_B,n_spacing_A,E_nb1->M_jt,D->A_ajdk,&(E_nb1->lf_jn));
+	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && E_nb1->Z_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  wrap_M_At_to_L2_run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_B,n_spacing_A,E_nb1->M_vt,D->A_ajdk,&(E_nb1->lf_vn));
+	  GLOBAL_pthread_toc();
+	  /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ } */}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% M_At_to_L2: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    if (verbose>2){
+      for (nb1=0;nb1<nbins;nb1++){ E_nb1 = E_[nb1];
+	printf(" %% E_[%d]->M_jn (%d,%d,%d)-x-(%d,%d,%d)\n",nb1,E_nb1->M_jn->rpop_j,E_nb1->M_jn->rpop_b,E_nb1->M_jn->nrows,E_nb1->M_jn->cpop_j,E_nb1->M_jn->cpop_b,E_nb1->M_jn->ncols);
+	printf(" %% E_[%d]->lf_jn (%d,%d) <-- (%s,%s)\n",nb1,E_nb1->lf_jn->row_stride,E_nb1->lf_jn->col_stride,SPACING_name[E_nb1->lf_jn->spacing_row],SPACING_name[E_nb1->lf_jn->spacing_col]);
+	printf(" %% E_[%d]->M_vn (%d,%d,%d)-x-(%d,%d,%d)\n",nb1,E_nb1->M_vn->rpop_j,E_nb1->M_vn->rpop_b,E_nb1->M_vn->nrows,E_nb1->M_vn->cpop_j,E_nb1->M_vn->cpop_b,E_nb1->M_vn->ncols);
+	printf(" %% E_[%d]->lf_vn (%d,%d) <-- (%s,%s)\n",nb1,E_nb1->lf_vn->row_stride,E_nb1->lf_vn->col_stride,SPACING_name[E_nb1->lf_vn->spacing_row],SPACING_name[E_nb1->lf_vn->spacing_col]);
+	/* for (nb1=0;nb1<nbins;nb1++){ } */}
+      /* if (verbose>2){ } */}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+    GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2; F_trn = F_[nb2+nb1*nbins];
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	  GLOBAL_pthread_tic(); 
+	  if (verbose>1){
+	    printf(" %% M_jn (%d,%d,%d)-x-(%d,%d,%d)\n",E_nb1->M_jn->rpop_j,E_nb1->M_jn->rpop_b,E_nb1->M_jn->nrows,E_nb1->M_jn->cpop_j,E_nb1->M_jn->cpop_b,E_nb1->M_jn->ncols);
+	    printf(" %% M_vn (%d,%d,%d)-x-(%d,%d,%d)\n",E_nb2->M_vn->rpop_j,E_nb2->M_vn->rpop_b,E_nb2->M_vn->nrows,E_nb2->M_vn->cpop_j,E_nb2->M_vn->cpop_b,E_nb2->M_vn->ncols);
+	    /* if (verbose>1){ } */}
+	  wrap_AnZt_mm__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),E_nb1->lf_jn,E_nb2->lf_vn,&(F->lf_jnvt));
+	  GLOBAL_pthread_toc(); /* if bother */}
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  if (nb1<=nb2){
+	    GLOBAL_pthread_tic(); 
+	    if (verbose>1){
+	      printf(" %% M_jn (%d,%d,%d)-x-(%d,%d,%d)\n",E_nb1->M_jn->rpop_j,E_nb1->M_jn->rpop_b,E_nb1->M_jn->nrows,E_nb1->M_jn->cpop_j,E_nb1->M_jn->cpop_b,E_nb1->M_jn->ncols);
+	      printf(" %% M_jn (%d,%d,%d)-x-(%d,%d,%d)\n",E_nb2->M_jn->rpop_j,E_nb2->M_jn->rpop_b,E_nb2->M_jn->nrows,E_nb2->M_jn->cpop_j,E_nb2->M_jn->cpop_b,E_nb2->M_jn->ncols);
+	      /* if (verbose>1){ } */}
+	    wrap_AnZt_mm__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),E_nb1->lf_jn,E_nb2->lf_jn,&(F->lf_jnjt));
+	    GLOBAL_pthread_toc();
+	    /* if (nb1<=nb2){ } */}
+	  /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    GLOBAL_pthread_tuc();
+    GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% AnZt_mm: ");
+    GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    if (verbose>2){
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx];
+	  printf(" %% F_[%d,%d]->lf_jnjt (%d,%d) <-- (%s,%s)\n",nb1,nb2,F->lf_jnjt->row_stride,F->lf_jnjt->col_stride,SPACING_name[F->lf_jnjt->spacing_row],SPACING_name[F->lf_jnjt->spacing_col]);
+	  printf(" %% F_[%d,%d]->lf_jnvt (%d,%d) <-- (%s,%s)\n",nb1,nb2,F->lf_jnvt->row_stride,F->lf_jnvt->col_stride,SPACING_name[F->lf_jnvt->spacing_row],SPACING_name[F->lf_jnvt->spacing_col]);
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2; F_trn = F_[nb2+nb1*nbins];
+	if (D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	  if (nb1>nb2){
+	    L2_transpose(F->lf_jnjt,F_trn->lf_jnjt);
+	    /* if (nb1>nb2){ } */}
+	  /* if bother */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    if (verbose>2){  
+      for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
+	  printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
+	  bprintf(E_nb1->A_bmr_j_rtn,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j_rtn: ");
+	  bprintf(E_nb2->M_Zn->mr_j ,D->bitj,1,E_nb2->Z_nrows," %% Z2_bmr_j    : ");
+	  lfprintf(F->lf_jnvt," %% lf_jnvt: ");
+	  bprintf(E_nb1->A_bmr_j_rtn,D->bitj,1,E_nb1->A_nrows," %% A1_bmr_j_rtn: ");
+	  bprintf(E_nb2->A_bmr_j_rtn,D->bitj,1,E_nb2->A_nrows," %% A2_bmr_j_rtn: ");
+	  lfprintf(F->lf_jnjt," %% lf_jnjt: ");
+	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+      /* if (verbose>2){ } */}
+    if (verbose){ printf(" %% [finished bcc_lrup_QR_YnWt_stage_2]\n");}
+    /* if strategy */}
+}
+
+void bcc_lrup_QR_YnWt_stage_3(struct bcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
   int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
   if (strstr(D->QR_strategy,"YnWt")){
-    if (verbose){ printf(" %% [entering bcc_lrup_QR_YnWt_stage_2]\n");}
+    if (verbose){ printf(" %% [entering bcc_lrup_QR_YnWt_stage_3]\n");}
     if (verbose){ printf(" %% updating F_[nbx]->lf_AnZt, F_[nbx]->lf_AnAt.\n");}
     /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
     GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
@@ -789,7 +881,7 @@ void bcc_lrup_QR_YnWt_stage_2(struct bcc_ajdk *D)
 	  lfprintf(F->lf_AnAt," %% lf_AnAt: ");
 	  /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
       /* if (verbose>2){ } */}
-    if (verbose){ printf(" %% [finished bcc_lrup_QR_YnWt_stage_2]\n");}
+    if (verbose){ printf(" %% [finished bcc_lrup_QR_YnWt_stage_3]\n");}
     /* if strategy */}
 }
 
@@ -1048,9 +1140,9 @@ void bcc_lrup_test()
     if (verbose>0){ printf(" %% iteration %d/%d\n",nl,iteration_max);}
     bcc_lrup_mxcut(D);
     bcc_lrup_mxset(D);
-    bcc_lrup_QR_YnWt_stage_0(D);
-    bcc_lrup_QR_YnWt_stage_1(D);
-    bcc_lrup_QR_YnWt_stage_2(D);
+    if (strstr(D->QR_strategy,"condense")){ bcc_lrup_QR_YnWt_stage_2(D); /* if strategy */}
+    else{ /* use AnZt_vv */ bcc_lrup_QR_YnWt_stage_0(D); bcc_lrup_QR_YnWt_stage_1(D); /* if strategy */}
+    bcc_lrup_QR_YnWt_stage_3(D);
     bcc_lrup_QC_ZtSWn_stage_0(D);
     bcc_lrup_QC_ZtSWn_stage_1(D);
     bcc_lrup_QC_ZtSWn_stage_2(D);
@@ -1059,8 +1151,8 @@ void bcc_lrup_test()
     bcc_lrup_QC_YnWt_stage_a2(D);
     bcc_lrup_QC_YnWt_stage_a3(D);
     bcc_lrup_QC_YnWt_stage_b0(D);
-    bcc_lrup_QC_YnWt_stage_b1(D);
-    bcc_lrup_QC_YnWt_stage_b2(D);
+    if (strstr(D->QC_strategy,"store one")){ bcc_lrup_QC_YnWt_stage_b3(D); /* if strategy */}
+    else{ /* store all */ bcc_lrup_QC_YnWt_stage_b1(D); bcc_lrup_QC_YnWt_stage_b2(D); /* if strategy */}
     bcc_lrup_mxdup(D);
     bcc_M_mxset(D);
     bcc_M_ZtSWn(D);
@@ -1108,9 +1200,9 @@ void bcc_lrup_flattenloop_test()
     if (verbose>0){ printf(" %% iteration %d/%d\n",nl,iteration_max);}
     bcc_lrup_mxcut(D);
     bcc_lrup_mxset(D);
-    bcc_lrup_QR_YnWt_stage_0(D);
-    bcc_lrup_QR_YnWt_stage_1(D);
-    bcc_lrup_QR_YnWt_stage_2(D);
+    if (strstr(D->QR_strategy,"condense")){ bcc_lrup_QR_YnWt_stage_2(D); /* if strategy */}
+    else{ /* use AnZt_vv */ bcc_lrup_QR_YnWt_stage_0(D); bcc_lrup_QR_YnWt_stage_1(D); /* if strategy */}
+    bcc_lrup_QR_YnWt_stage_3(D);
     bcc_lrup_QC_ZtSWn_stage_0(D);
     bcc_lrup_QC_ZtSWn_stage_1(D);
     bcc_lrup_QC_ZtSWn_stage_2(D);
@@ -1119,8 +1211,8 @@ void bcc_lrup_flattenloop_test()
     bcc_lrup_QC_YnWt_stage_a2(D);
     bcc_lrup_QC_YnWt_stage_a3(D);
     bcc_lrup_QC_YnWt_stage_b0(D);
-    bcc_lrup_QC_YnWt_stage_b1(D);
-    bcc_lrup_QC_YnWt_stage_b2(D);
+    if (strstr(D->QC_strategy,"store one")){ bcc_lrup_QC_YnWt_stage_b3(D); /* if strategy */}
+    else{ /* store all */ bcc_lrup_QC_YnWt_stage_b1(D); bcc_lrup_QC_YnWt_stage_b2(D); /* if strategy */}
     bcc_lrup_mxdup(D);
     bcc_M_mxset(D);
     bcc_M_ZtSWn(D);

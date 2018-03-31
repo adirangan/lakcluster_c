@@ -50,9 +50,9 @@ void lakcluster_scorebox_excerpt_2(int verbose,struct bcc_ajdk *D,struct S_handl
 {
   if (verbose>1){ printf(" %% use low-rank-update to recalculate loop-subscores after removing some rows and/or columns.\n");}
   GLOBAL_tic(1);
-  bcc_lrup_QR_YnWt_stage_0(D);
-  bcc_lrup_QR_YnWt_stage_1(D);
-  bcc_lrup_QR_YnWt_stage_2(D);
+  if (strstr(D->QR_strategy,"condense")){ bcc_lrup_QR_YnWt_stage_2(D); /* if strategy */}
+  else{ /* use AnZt_vv */ bcc_lrup_QR_YnWt_stage_0(D); bcc_lrup_QR_YnWt_stage_1(D); /* if strategy */}
+  bcc_lrup_QR_YnWt_stage_3(D);
   bcc_lrup_QC_ZtSWn_stage_0(D);
   bcc_lrup_QC_ZtSWn_stage_1(D);
   bcc_lrup_QC_ZtSWn_stage_2(D);

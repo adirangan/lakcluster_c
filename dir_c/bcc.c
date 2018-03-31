@@ -385,7 +385,7 @@ void bcc_single_load_M_An(struct bcc_single *E)
   /* initializing a,j,y,t,k,h,u,r,z,v */
   E->M_an = NULL; E->M_at = NULL; E->M_jn = NULL; E->M_jt = NULL; E->M_yn = NULL; E->M_yt; E->M_tt;
   E->M_kn = NULL; E->M_kt = NULL; E->M_hn = NULL; E->M_ht = NULL; E->M_un = NULL; E->M_ut; E->M_rt;
-  E->M_zn = NULL; E->M_zt = NULL; E->M_vn = NULL; E->M_vt = NULL;
+  E->M_zn = NULL; E->M_zt = NULL; E->M_vn = NULL; E->M_vt = NULL; 
   E->M_an = M_handle_v_make(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
   E->M_jn = M_handle_v_make(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
   E->M_kn = M_handle_v_make(D->bitj,E->A_nrows,D->A_ncols,NULL,E->M_An->wX,E->M_An->mr_b,E->M_An->mc_b);
@@ -404,6 +404,7 @@ void bcc_single_load_M_An(struct bcc_single *E)
   E->M_vt = M_handle_v_make(D->bitj,D->A_ncols,E->Z_nrows,NULL,E->M_Zt->wX,E->M_Zt->mr_b,E->M_Zt->mc_b);
   E->M_tt = M_handle_v_make(D->bitj,D->T_ncols,E->A_nrows,NULL,E->M_Tt->wX,E->M_Tt->mr_b,E->M_Tt->mc_b);
   E->M_rt = M_handle_v_make(D->bitj,D->T_ncols,E->A_nrows,NULL,E->M_Tt->wX,E->M_Tt->mr_b,E->M_Tt->mc_b);
+  E->lf_jn = NULL; E->lf_vn = NULL;
   if (verbose){ printf(" %% [finished bcc_single_load_M_An]\n");}
 }
 
@@ -504,6 +505,7 @@ void bcc_single_init_M_An(char *error_vs_speed,double mrnd,struct bcc_single *E)
   E->M_vt = M_handle_v_make(D->bitj,D->A_ncols,E->Z_nrows,NULL,E->M_Zt->wX,E->M_Zt->mr_b,E->M_Zt->mc_b);
   E->M_tt = M_handle_v_make(D->bitj,D->T_ncols,E->A_nrows,NULL,E->M_Tt->wX,E->M_Tt->mr_b,E->M_Tt->mc_b);
   E->M_rt = M_handle_v_make(D->bitj,D->T_ncols,E->A_nrows,NULL,E->M_Tt->wX,E->M_Tt->mr_b,E->M_Tt->mc_b);
+  E->lf_jn = NULL; E->lf_vn = NULL;
   if (verbose){ printf(" %% [finished bcc_single_init_M_An]\n");}
 }
 
@@ -584,6 +586,12 @@ void bcc_single_copy_lf(struct bcc_single *E,struct bcc_single *E_in)
     L_handle_copy(E->lf_htrn,E_in->lf_htrn);
     L_handle_copy(E->lf_ztsn,E_in->lf_ztsn);
     L_handle_copy(E->lf_vtsn,E_in->lf_vtsn);
+    /* if strategy */}
+  if (strstr(D->QC_strategy,"YnWt")){
+    if (strstr(D->QC_strategy,"condense")){
+      L_handle_copy(E->lf_jn,E_in->lf_jn);
+      L_handle_copy(E->lf_vn,E_in->lf_vn);
+      /* if strategy */}
     /* if strategy */}
   if (strstr(D->QC_strategy,"YnWt")){
     if (strstr(D->QC_strategy,"store one")){
@@ -730,18 +738,34 @@ void bcc_single_init_lf(struct bcc_single *E)
     E->length = D->A_ncols*D->T_ncols; E->lf_ztsn = L_handle_make(E->length); if (!E->lf_ztsn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
     E->length = D->A_ncols*D->T_ncols; E->lf_vtsn = L_handle_make(E->length); if (!E->lf_vtsn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
     /* if strategy */}
+  E->lf_jn=NULL; E->lf_vn=NULL;
+  if (strstr(D->QC_strategy,"YnWt")){
+    if (strstr(D->QC_strategy,"condense")){
+      E->length = E->A_rbother*E->A_nrows*cdrop; 
+      mm = 8*(double)E->length;
+      if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d --> %d; memory required %0.2fG\n",E->A_nrows,cdrop,E->length,8*(double)E->length/1e9);}
+      E->lf_jn = L_handle_make(E->length); if (!E->lf_jn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      E->length = E->Z_rbother*E->Z_nrows*cdrop; 
+      mm = 8*(double)E->length;
+      if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d --> %d; memory required %0.2fG\n",E->Z_nrows,cdrop,E->length,8*(double)E->length/1e9);}
+      E->lf_vn = L_handle_make(E->length); if (!E->lf_vn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      /* if strategy */}
+    /* if strategy */}
   E->lf_ztsvn=NULL; E->lf_attjn=NULL; E->lf_ktrhn=NULL;
   if (strstr(D->QC_strategy,"YnWt")){
     if (strstr(D->QC_strategy,"store one")){
-      E->length = E->Z_rbother*ckeep*cdrop; E->lf_ztsvn = L_handle_make(E->length); if (!E->lf_ztsvn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      E->length = E->Z_rbother*ckeep*cdrop; 
       mm = 8*(double)E->length;
       if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d --> %d; memory required %0.2fG\n",ckeep,cdrop,E->length,8*(double)E->length/1e9);}
-      E->length = E->A_rbother*ckeep*cdrop; E->lf_attjn = L_handle_make(E->length); if (!E->lf_attjn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      E->lf_ztsvn = L_handle_make(E->length); if (!E->lf_ztsvn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      E->length = E->A_rbother*ckeep*cdrop; 
       mm = 8*(double)E->length;
       if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d --> %d; memory required %0.2fG\n",ckeep,cdrop,E->length,8*(double)E->length/1e9);}
-      E->length = E->A_rbother*ckeep*cdrop; E->lf_ktrhn = L_handle_make(E->length); if (!E->lf_ktrhn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      E->lf_attjn = L_handle_make(E->length); if (!E->lf_attjn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      E->length = E->A_rbother*ckeep*cdrop; 
       mm = 8*(double)E->length;
       if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d --> %d; memory required %0.2fG\n",ckeep,cdrop,E->length,8*(double)E->length/1e9);}
+      E->lf_ktrhn = L_handle_make(E->length); if (!E->lf_ktrhn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
       /* if strategy */}
     else /* store all */{
       E->length = E->Z_rbother*ckeep*cdrop*D->T_ncols; E->lf_ztsvn = L_handle_make(E->length); if (!E->lf_ztsvn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}

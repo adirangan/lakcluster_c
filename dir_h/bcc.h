@@ -74,6 +74,7 @@ struct bcc_single /* for use in passing inputs */
   struct M_handle *M_zn; struct M_handle *M_zt; struct M_handle *M_vn; struct M_handle *M_vt;
   /* QR YnWt lrup */
   struct L_handle *lf_jn_ajdk;struct L_handle *lf_vn_ajdk;
+  struct L_handle *lf_jn;struct L_handle *lf_vn;
   /* QC ZtSWn lrup */
   struct L_handle *lf_ktrn;struct L_handle *lf_utrn;
   struct L_handle *lf_ktrun;struct L_handle *lf_ktrkn;
