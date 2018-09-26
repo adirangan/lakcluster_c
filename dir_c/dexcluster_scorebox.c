@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 
 void dexcluster_scorebox_excerpt_0(int verbose,struct dcc_ajdk *D,struct S_handle *S)
 {
@@ -8,9 +12,9 @@ void dexcluster_scorebox_excerpt_0(int verbose,struct dcc_ajdk *D,struct S_handl
   S->A_rpop_j_total[tab] = D->A_rpop_j_total;
   S->A_cpop_j[tab] = D->A_cpop_j;
   S->Irem[tab] = D->Irem;
-  ra_stats(D->QR_sra,"double",D->A_rpop_j_total,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
+  ra_stats(D->QR_svalue,"double",D->A_rpop_j_total,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
   S->QR_avg[tab] = tmp_mean; 
-  ra_stats(D->QC_sra,"double",D->A_cpop_j,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
+  ra_stats(D->QC_svalue,"double",D->A_cpop_j,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
   S->QC_avg[tab] = tmp_mean; 
 }
 
@@ -32,8 +36,8 @@ void dexcluster_scorebox_excerpt_1(int verbose,struct dcc_ajdk *D,struct S_handl
   dcc_sumscores_ifT(D);
   dcc_sumscores_srt(D);
   dcc_sumscores_cmb(D);
-  if (verbose>1){ printf(" %% calculating QX_sra.\n");}
-  dcc_scorebox_sra(D);
+  if (verbose>1){ printf(" %% calculating QX_svalue.\n");}
+  dcc_scorebox_svalue(D);
   dexcluster_scorebox_excerpt_0(verbose,D,S);
   S_handle_printf(verbose,S," %% scorebox: ");
 }
@@ -55,8 +59,8 @@ void dexcluster_scorebox_excerpt_2(int verbose,struct dcc_ajdk *D,struct S_handl
   dcc_sumscores_ifT(D);
   dcc_sumscores_srt(D);
   dcc_sumscores_cmb(D);
-  if (verbose>1){ printf(" %% calculating QX_sra.\n");}
-  dcc_scorebox_sra(D);
+  if (verbose>1){ printf(" %% calculating QX_svalue.\n");}
+  dcc_scorebox_svalue(D);
   dexcluster_scorebox_excerpt_0(verbose,D,S);
 }
 
@@ -83,7 +87,7 @@ void dexcluster_scorebox_rc()
     S->nr=0;
     if (S->nc==0){
       if (verbose>1){ printf(" %% initial drop: S->rdrop[%d] %d S->cdrop[%d] %d\n",S->nr,S->rdrop[S->nr],S->nc,S->cdrop[S->nc]);}
-      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       dcc_scorebox_mxA(D_ori,S->rdrop[S->nr],S->cdrop[S->nc]);
       if (verbose>1){ printf(" %% calling dcc_lrup_mxdup\n");} dcc_lrup_mxdup(D_ori);
       if (verbose>1){ printf(" %% calling dcc_M_mxset\n");} dcc_M_mxset(D_ori);
@@ -91,14 +95,14 @@ void dexcluster_scorebox_rc()
       /* if (S->nc==0){ } */}
     if (S->nc>0){
       if (verbose>1){ printf(" %% cdrop: S->cdrop[%d] %d\n",S->nc,S->cdrop[S->nc]);}
-      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       dcc_scorebox_mxA(D_ori,0,S->cdrop[S->nc]);
       dexcluster_scorebox_excerpt_2(verbose,D_ori,S);
       /* if (S->nc>0){ } */}
     if (verbose>1){ printf(" %% copying D_ori to D_sub.\n");} dcc_copy(D_sub,D_ori);    
     for (S->nr=1;S->nr<S->row_num;S->nr++){
       if (verbose>1){ printf(" %% S->nc %d; rdrop: S->rdrop[%d] %d\n",S->nc,S->nr,S->rdrop[S->nr]);}
-      dcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      dcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       dcc_scorebox_mxA(D_sub,S->rdrop[S->nr],0);
       dexcluster_scorebox_excerpt_2(verbose,D_sub,S);
       /* for (S->nr=1;S->nr<S->row_num;S->nr++){ } */}
@@ -133,7 +137,7 @@ void dexcluster_scorebox_cr()
     S->nc=0;
     if (S->nr==0){
       if (verbose>1){ printf(" %% initial drop: S->rdrop[%d] %d S->cdrop[%d] %d\n",S->nr,S->rdrop[S->nr],S->nc,S->cdrop[S->nc]);}
-      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       dcc_scorebox_mxA(D_ori,S->rdrop[S->nr],S->cdrop[S->nc]);
       if (verbose>1){ printf(" %% calling dcc_lrup_mxdup\n");} dcc_lrup_mxdup(D_ori);
       if (verbose>1){ printf(" %% calling dcc_M_mxset\n");} dcc_M_mxset(D_ori);
@@ -141,14 +145,14 @@ void dexcluster_scorebox_cr()
       /* if (S->nr==0){ } */}
     if (S->nr>0){
       if (verbose>1){ printf(" %% rdrop: S->rdrop[%d] %d\n",S->nr,S->rdrop[S->nr]);}
-      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       dcc_scorebox_mxA(D_ori,S->rdrop[S->nr],0);
       dexcluster_scorebox_excerpt_2(verbose,D_ori,S);
       /* if (S->nr>0){ } */}
     if (verbose>1){ printf(" %% copying D_ori to D_sub.\n");} dcc_copy(D_sub,D_ori);
     for (S->nc=1;S->nc<S->col_num;S->nc++){
       if (verbose>1){ printf(" %% S->nr %d; cdrop: S->cdrop[%d] %d\n",S->nr,S->nc,S->cdrop[S->nc]);}
-      dcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      dcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       dcc_scorebox_mxA(D_sub,0,S->cdrop[S->nc]);
       dexcluster_scorebox_excerpt_2(verbose,D_sub,S);
       /* for (S->nc=0;S->nc<S->col_num;S->nc++){ } */}
@@ -183,7 +187,7 @@ void dexcluster_scorebox_xx()
     S->nc=0;
     if (S->nr==0){
       if (verbose>1){ printf(" %% initial drop: S->rdrop[%d] %d S->cdrop[%d] %d\n",S->nr,S->rdrop[S->nr],S->nc,S->cdrop[S->nc]);}
-      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       dcc_scorebox_mxA(D_ori,S->rdrop[S->nr],S->cdrop[S->nc]);
       if (verbose>1){ printf(" %% calling dcc_lrup_mxdup\n");} dcc_lrup_mxdup(D_ori);
       if (verbose>1){ printf(" %% calling dcc_M_mxset\n");} dcc_M_mxset(D_ori);
@@ -191,7 +195,7 @@ void dexcluster_scorebox_xx()
       /* if (S->nr==0){ } */}
     if (S->nr>0){
       if (verbose>1){ printf(" %% rdrop: S->rdrop[%d] %d\n",S->nr,S->rdrop[S->nr]);}
-      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      dcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       dcc_scorebox_mxA(D_ori,S->rdrop[S->nr],0);
       if (verbose>1){ printf(" %% calling dcc_lrup_mxdup\n");} dcc_lrup_mxdup(D_ori);
       if (verbose>1){ printf(" %% calling dcc_M_mxset\n");} dcc_M_mxset(D_ori);
@@ -200,7 +204,7 @@ void dexcluster_scorebox_xx()
     if (verbose>1){ printf(" %% copying D_ori to D_sub.\n");} dcc_copy(D_sub,D_ori);
     for (S->nc=1;S->nc<S->col_num;S->nc++){
       if (verbose>1){ printf(" %% S->nr %d; cdrop: S->cdrop[%d] %d\n",S->nr,S->nc,S->cdrop[S->nc]);}
-      dcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      dcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       dcc_scorebox_mxA(D_sub,0,S->cdrop[S->nc]);
       if (verbose>1){ printf(" %% calling dcc_lrup_mxdup\n");} dcc_lrup_mxdup(D_sub);
       if (verbose>1){ printf(" %% calling dcc_M_mxset\n");} dcc_M_mxset(D_sub);

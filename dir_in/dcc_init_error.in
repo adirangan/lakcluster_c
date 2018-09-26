@@ -10,6 +10,7 @@ GLOBAL_TEST_mrand= 0.15;
 GLOBAL_TEST_A_n_rows= 18;
 GLOBAL_TEST_A_n_cols= 2130;
 GLOBAL_TEST_Z_n_rows= 10;
+GLOBAL_TEST_Y_n_cols= 2220;
 GLOBAL_TEST_T_n_cols= 3;
 GLOBAL_TEST_niter= 1;
 END= 0;

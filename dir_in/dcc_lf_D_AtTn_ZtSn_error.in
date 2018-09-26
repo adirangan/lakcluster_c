@@ -9,6 +9,6 @@ GLOBAL_TEST_sparse= 1;
 GLOBAL_TEST_A_n_rows= 43;
 GLOBAL_TEST_A_n_cols= 5307;
 GLOBAL_TEST_Z_n_rows= 63;
-GLOBAL_TEST_Y_n_cols= 0;
+GLOBAL_TEST_Y_n_cols= 3038;
 GLOBAL_TEST_T_n_cols= 4;
 END= 0;

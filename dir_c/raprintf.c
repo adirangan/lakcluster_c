@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void raprintf(void *vra,char *type,int rows,int cols,char *prefix)
 {
   /* prints out arrays of varying types */

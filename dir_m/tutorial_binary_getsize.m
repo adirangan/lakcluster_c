@@ -24,6 +24,7 @@ disp(sprintf(' reading from this file sizes %dx%d.',nr,nc));
 return;
 end;%if nargin<1;
 
+fcheck(filename_to_read);
 fid = fopen(filename_to_read,'r');
 j = fread(fid,1,'int');
 nrows = fread(fid,1,'int');

@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void *get_singlestudy_uu(void *vp)
 {
   /* This function takes in a variety of inputs and calculates a variety of single-study terms */
@@ -830,7 +834,7 @@ void bcc_singlestudy_ww(struct bcc_ajdk *D)
 
 void *get_doublestudy_uu(void *vp)
 {
-  /* This function takes in a variety of inputs and calculates a variety of double-study terns */
+  /* This function takes in a variety of inputs and calculates a variety of double-study terms */
   int verbose=0;
   int ip=0;
   void **vpra=(void **)vp;
@@ -1427,7 +1431,9 @@ void bcc_QC_AtTYnWtSZn_uu(struct bcc_ajdk *D)
 void *get_flattenloop(void *vp)
 {
   /* This function corrects the row- and col-scores, removing flattened-loops.
-     Along the way we also convert from SPACING_a to SPACING_b along the T_ncols dimension. */
+     Along the way we also convert from SPACING_a to SPACING_b along the T_ncols dimension.
+     Warning! Later on we expect D->T_bmc_b to include only contiguous bits.
+     This ensures that D->T_bmc_j will serve as a mask for QR_AnAtTAnAt etc. after switching to SPACING_b. */
   int verbose=0;
   int ip=0,nc=0;
   void **vpra=(void **)vp;

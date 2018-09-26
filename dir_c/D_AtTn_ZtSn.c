@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void *get_D_AtTn_ZtSn_vv(void *vp)
 {
   /* This function takes in M_At, M_St, M_Zt, lf_AtTn, lf_ZtSn, and calculates output[nk+ns*nrows_An] = (AtTn)(nk,ns).*D(nk).*(ZtSn)(nk,ns) ;
@@ -116,7 +120,7 @@ int wrap_D_AtTn_ZtSn_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
    */
   int verbose=0;
   /* unsigned char *wkspace_mark=NULL; */
-  int length_a=0,length_s=0,length=0,ip=0;
+  unsigned long long int length_a=0,length_s=0,length=0,ip=0;
   if (verbose){ printf(" %% [entering wrap_D_AtTn_ZtSn_vv__run] tidx %d\n",*tidx);}
   if (verbose){ M_handle_printf(M_At,verbose," %% M_At: ");}
   if (verbose){ M_handle_printf(M_Tt,verbose," %% M_Tt: ");}
@@ -124,8 +128,8 @@ int wrap_D_AtTn_ZtSn_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
   if (verbose){ M_handle_printf(M_St,verbose," %% M_St: ");}
   switch (output_spacing_a){ case SPACING_j: length_a = M_At->rpop_j; break; case SPACING_b: length_a = M_At->rpop_b; break; case SPACING_a: length_a = M_At->nrows; break; default: break; /* switch (output_spacing_a){ } */}
   switch (output_spacing_s){ case SPACING_j: length_s = M_St->rpop_j; break; case SPACING_b: length_s = M_St->rpop_b; break; case SPACING_a: length_s = M_St->nrows; break; default: break; /* switch (output_spacing_a){ } */}
-  length = length_a*length_s; if (verbose){ printf(" %% length %d*%d=%d\n",length_a,length_s,length);}
-  if (*output_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_p = L_handle_make(length);}
+  length = length_a*length_s; if (verbose){ printf(" %% length %llu*%llu=%llu\n",length_a,length_s,length);}
+  if (*output_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_p = L_handle_make(length);}
   if (verbose>2){ bprintf(M_At->mr_b,M_At->bitj,1,M_At->nrows," %% M_At->mr_b: "); bprintf(M_At->mr_j,M_At->bitj,1,M_At->nrows," %% M_At->mr_j: ");}
   if (verbose>2){ bprintf(M_At->mc_b,M_At->bitj,1,M_At->ncols," %% M_At->mc_b: "); bprintf(M_At->mc_j,M_At->bitj,1,M_At->ncols," %% M_At->mc_j: ");}
   if (verbose>2){ bprintf(M_Tt->mr_b,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_b: "); bprintf(M_Tt->mr_j,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_j: ");}
@@ -134,7 +138,7 @@ int wrap_D_AtTn_ZtSn_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
   if (verbose>2){ bprintf(M_Zt->mc_b,M_Zt->bitj,1,M_Zt->ncols," %% M_Zt->mc_b: "); bprintf(M_Zt->mc_j,M_Zt->bitj,1,M_Zt->ncols," %% M_Zt->mc_j: ");}
   if (verbose>2){ bprintf(M_St->mr_b,M_St->bitj,1,M_St->nrows," %% M_St->mr_b: "); bprintf(M_St->mr_j,M_St->bitj,1,M_St->nrows," %% M_St->mr_j: ");}
   if (verbose>2){ bprintf(M_St->mc_b,M_St->bitj,1,M_St->ncols," %% M_St->mc_b: "); bprintf(M_St->mc_j,M_St->bitj,1,M_St->ncols," %% M_St->mc_j: ");}
-  length = length_a*length_s; if ((*output_p)->length<length){ printf(" %% Warning! length %d<%d in wrap_D_AtTn_ZtSn_vv__run\n",(*output_p)->length,length);} memset((*output_p)->lf,0,length*sizeof(double));
+  length = length_a*length_s; if ((*output_p)->length<length){ printf(" %% Warning! length %llu<%llu in wrap_D_AtTn_ZtSn_vv__run\n",(*output_p)->length,length);} memset((*output_p)->lf,0,length*sizeof(double));
   ip=0; vpra[ip++] = tidx; vpra[ip++] = M_At; vpra[ip++] = M_Tt; vpra[ip++] = M_Zt; vpra[ip++] = M_St; vpra[ip++] = A_ajdk; vpra[ip++] = lf_AtTn; vpra[ip++] = lf_ZtSn; vpra[ip++] = *output_p; 
   switch (output_spacing_a){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_a){ } */}
   switch (output_spacing_s){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_s){ } */}
@@ -273,7 +277,7 @@ int wrap_D_AtTn_AtTn_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
    */
   int verbose=0;
   /* unsigned char *wkspace_mark=NULL; */
-  int length_a=0,length_s=0,length=0,ip=0;
+  unsigned long long int length_a=0,length_s=0,length=0,ip=0;
   if (verbose){ printf(" %% [entering wrap_D_AtTn_AtTn_vv__run] tidx %d\n",*tidx);}
   if (verbose){ M_handle_printf(M_At,verbose," %% M_At: ");}
   if (verbose){ M_handle_printf(M_Tt,verbose," %% M_Tt: ");}
@@ -281,8 +285,8 @@ int wrap_D_AtTn_AtTn_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
   if (verbose){ M_handle_printf(M_St,verbose," %% M_St: ");}
   switch (output_spacing_a){ case SPACING_j: length_a = M_At->rpop_j; break; case SPACING_b: length_a = M_At->rpop_b; break; case SPACING_a: length_a = M_At->nrows; break; default: break; /* switch (output_spacing_a){ } */}
   switch (output_spacing_s){ case SPACING_j: length_s = M_St->rpop_j; break; case SPACING_b: length_s = M_St->rpop_b; break; case SPACING_a: length_s = M_St->nrows; break; default: break; /* switch (output_spacing_a){ } */}
-  length = length_a*length_s; if (verbose){ printf(" %% length %d*%d=%d\n",length_a,length_s,length);}
-  if (*output_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_p = L_handle_make(length);}
+  length = length_a*length_s; if (verbose){ printf(" %% length %llu*%llu=%llu\n",length_a,length_s,length);}
+  if (*output_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_p = L_handle_make(length);}
   if (verbose>2){ bprintf(M_At->mr_b,M_At->bitj,1,M_At->nrows," %% M_At->mr_b: "); bprintf(M_At->mr_j,M_At->bitj,1,M_At->nrows," %% M_At->mr_j: ");}
   if (verbose>2){ bprintf(M_At->mc_b,M_At->bitj,1,M_At->ncols," %% M_At->mc_b: "); bprintf(M_At->mc_j,M_At->bitj,1,M_At->ncols," %% M_At->mc_j: ");}
   if (verbose>2){ bprintf(M_Tt->mr_b,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_b: "); bprintf(M_Tt->mr_j,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_j: ");}
@@ -291,7 +295,7 @@ int wrap_D_AtTn_AtTn_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
   if (verbose>2){ bprintf(M_Zt->mc_b,M_Zt->bitj,1,M_Zt->ncols," %% M_Zt->mc_b: "); bprintf(M_Zt->mc_j,M_Zt->bitj,1,M_Zt->ncols," %% M_Zt->mc_j: ");}
   if (verbose>2){ bprintf(M_St->mr_b,M_St->bitj,1,M_St->nrows," %% M_St->mr_b: "); bprintf(M_St->mr_j,M_St->bitj,1,M_St->nrows," %% M_St->mr_j: ");}
   if (verbose>2){ bprintf(M_St->mc_b,M_St->bitj,1,M_St->ncols," %% M_St->mc_b: "); bprintf(M_St->mc_j,M_St->bitj,1,M_St->ncols," %% M_St->mc_j: ");}
-  length = length_a*length_s; if ((*output_p)->length<length){ printf(" %% Warning! length %d<%d in wrap_D_AtTn_AtTn_vv__run\n",(*output_p)->length,length);} memset((*output_p)->lf,0,length*sizeof(double));
+  length = length_a*length_s; if ((*output_p)->length<length){ printf(" %% Warning! length %llu<%llu in wrap_D_AtTn_AtTn_vv__run\n",(*output_p)->length,length);} memset((*output_p)->lf,0,length*sizeof(double));
   ip=0; vpra[ip++] = tidx; vpra[ip++] = M_At; vpra[ip++] = M_Tt; vpra[ip++] = M_Zt; vpra[ip++] = M_St; vpra[ip++] = A_ajdk; vpra[ip++] = lf_AtTn; vpra[ip++] = lf_ZtSn; vpra[ip++] = *output_p; 
   switch (output_spacing_a){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_a){ } */}
   switch (output_spacing_s){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_s){ } */}
@@ -389,7 +393,7 @@ int wrap_D_AtTn_ZtSn_uu__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
    */
   int verbose=0;
   /* unsigned char *wkspace_mark=NULL; */
-  int length_a=0,length_s=0,length=0,ip=0;
+  unsigned long long int length_a=0,length_s=0,length=0,ip=0;
   if (verbose){ printf(" %% [entering wrap_D_AtTn_ZtSn_uu__run] tidx %d\n",*tidx);}
   if (verbose>2){ M_handle_printf(M_At,verbose," %% M_At: ");}
   if (verbose>2){ M_handle_printf(M_Tt,verbose," %% M_Tt: ");}
@@ -397,8 +401,8 @@ int wrap_D_AtTn_ZtSn_uu__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
   if (verbose>2){ M_handle_printf(M_St,verbose," %% M_St: ");}
   switch (output_spacing_a){ case SPACING_j: length_a = M_At->rpop_j; break; case SPACING_b: length_a = M_At->rpop_b; break; case SPACING_a: length_a = M_At->nrows; break; default: break; /* switch (output_spacing_a){ } */}
   switch (output_spacing_s){ case SPACING_j: length_s = M_St->rpop_j; break; case SPACING_b: length_s = M_St->rpop_b; break; case SPACING_a: length_s = M_St->nrows; break; default: break; /* switch (output_spacing_a){ } */}
-  length = length_a*length_s; if (verbose){ printf(" %% length %d*%d=%d\n",length_a,length_s,length);}
-  if (*output_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_p = L_handle_make(length);}
+  length = length_a*length_s; if (verbose){ printf(" %% length %llu*%llu=%llu\n",length_a,length_s,length);}
+  if (*output_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_p = L_handle_make(length);}
   if (verbose>2){ bprintf(M_At->mr_b,M_At->bitj,1,M_At->nrows," %% M_At->mr_b: "); bprintf(M_At->mr_j,M_At->bitj,1,M_At->nrows," %% M_At->mr_j: ");}
   if (verbose>2){ bprintf(M_At->mc_b,M_At->bitj,1,M_At->ncols," %% M_At->mc_b: "); bprintf(M_At->mc_j,M_At->bitj,1,M_At->ncols," %% M_At->mc_j: ");}
   if (verbose>2){ bprintf(M_Tt->mr_b,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_b: "); bprintf(M_Tt->mr_j,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_j: ");}
@@ -407,7 +411,7 @@ int wrap_D_AtTn_ZtSn_uu__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
   if (verbose>2){ bprintf(M_Zt->mc_b,M_Zt->bitj,1,M_Zt->ncols," %% M_Zt->mc_b: "); bprintf(M_Zt->mc_j,M_Zt->bitj,1,M_Zt->ncols," %% M_Zt->mc_j: ");}
   if (verbose>2){ bprintf(M_St->mr_b,M_St->bitj,1,M_St->nrows," %% M_St->mr_b: "); bprintf(M_St->mr_j,M_St->bitj,1,M_St->nrows," %% M_St->mr_j: ");}
   if (verbose>2){ bprintf(M_St->mc_b,M_St->bitj,1,M_St->ncols," %% M_St->mc_b: "); bprintf(M_St->mc_j,M_St->bitj,1,M_St->ncols," %% M_St->mc_j: ");}
-  length = length_a*length_s; if ((*output_p)->length<length){ printf(" %% Warning! length %d<%d in wrap_D_AtTn_ZtSn_uu__run\n",(*output_p)->length,length);} memset((*output_p)->lf,0,length*sizeof(double));
+  length = length_a*length_s; if ((*output_p)->length<length){ printf(" %% Warning! length %llu<%llu in wrap_D_AtTn_ZtSn_uu__run\n",(*output_p)->length,length);} memset((*output_p)->lf,0,length*sizeof(double));
   ip=0; vpra[ip++] = tidx; vpra[ip++] = M_At; vpra[ip++] = M_Tt; vpra[ip++] = M_Zt; vpra[ip++] = M_St; vpra[ip++] = A_ajdk; vpra[ip++] = *output_p; 
   switch (output_spacing_a){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_a){ } */}
   switch (output_spacing_s){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_s){ } */}
@@ -503,7 +507,7 @@ int wrap_D_AtTn_AtTn_uu__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
    */
   int verbose=0;
   /* unsigned char *wkspace_mark=NULL; */
-  int length_a=0,length_s=0,length=0,ip=0;
+  unsigned long long int length_a=0,length_s=0,length=0,ip=0;
   if (verbose){ printf(" %% [entering wrap_D_AtTn_AtTn_uu__run] tidx %d\n",*tidx);}
   if (verbose>2){ M_handle_printf(M_At,verbose," %% M_At: ");}
   if (verbose>2){ M_handle_printf(M_Tt,verbose," %% M_Tt: ");}
@@ -511,8 +515,8 @@ int wrap_D_AtTn_AtTn_uu__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
   if (verbose>2){ M_handle_printf(M_St,verbose," %% M_St: ");}
   switch (output_spacing_a){ case SPACING_j: length_a = M_At->rpop_j; break; case SPACING_b: length_a = M_At->rpop_b; break; case SPACING_a: length_a = M_At->nrows; break; default: break; /* switch (output_spacing_a){ } */}
   switch (output_spacing_s){ case SPACING_j: length_s = M_St->rpop_j; break; case SPACING_b: length_s = M_St->rpop_b; break; case SPACING_a: length_s = M_St->nrows; break; default: break; /* switch (output_spacing_a){ } */}
-  length = length_a*length_s; if (verbose){ printf(" %% length %d*%d=%d\n",length_a,length_s,length);}
-  if (*output_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_p = L_handle_make(length);}
+  length = length_a*length_s; if (verbose){ printf(" %% length %llu*%llu=%llu\n",length_a,length_s,length);}
+  if (*output_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_p = L_handle_make(length);}
   if (verbose>2){ bprintf(M_At->mr_b,M_At->bitj,1,M_At->nrows," %% M_At->mr_b: "); bprintf(M_At->mr_j,M_At->bitj,1,M_At->nrows," %% M_At->mr_j: ");}
   if (verbose>2){ bprintf(M_At->mc_b,M_At->bitj,1,M_At->ncols," %% M_At->mc_b: "); bprintf(M_At->mc_j,M_At->bitj,1,M_At->ncols," %% M_At->mc_j: ");}
   if (verbose>2){ bprintf(M_Tt->mr_b,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_b: "); bprintf(M_Tt->mr_j,M_Tt->bitj,1,M_Tt->nrows," %% M_Tt->mr_j: ");}
@@ -521,7 +525,7 @@ int wrap_D_AtTn_AtTn_uu__run(int *tidx,void **vpra,pthread_t *thread_in,int outp
   if (verbose>2){ bprintf(M_Zt->mc_b,M_Zt->bitj,1,M_Zt->ncols," %% M_Zt->mc_b: "); bprintf(M_Zt->mc_j,M_Zt->bitj,1,M_Zt->ncols," %% M_Zt->mc_j: ");}
   if (verbose>2){ bprintf(M_St->mr_b,M_St->bitj,1,M_St->nrows," %% M_St->mr_b: "); bprintf(M_St->mr_j,M_St->bitj,1,M_St->nrows," %% M_St->mr_j: ");}
   if (verbose>2){ bprintf(M_St->mc_b,M_St->bitj,1,M_St->ncols," %% M_St->mc_b: "); bprintf(M_St->mc_j,M_St->bitj,1,M_St->ncols," %% M_St->mc_j: ");}
-  length = length_a*length_s; if ((*output_p)->length<length){ printf(" %% Warning! length %d<%d in wrap_D_AtTn_AtTn_uu__run\n",(*output_p)->length,length);} memset((*output_p)->lf,0,length*sizeof(double));
+  length = length_a*length_s; if ((*output_p)->length<length){ printf(" %% Warning! length %llu<%llu in wrap_D_AtTn_AtTn_uu__run\n",(*output_p)->length,length);} memset((*output_p)->lf,0,length*sizeof(double));
   ip=0; vpra[ip++] = tidx; vpra[ip++] = M_At; vpra[ip++] = M_Tt; vpra[ip++] = M_Zt; vpra[ip++] = M_St; vpra[ip++] = A_ajdk; vpra[ip++] = *output_p; 
   switch (output_spacing_a){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_a){ } */}
   switch (output_spacing_s){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_s){ } */}
@@ -559,23 +563,23 @@ void wrap_D_AtTn_ZtSn_vv_test()
   lf_ZtSn = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   lf_WtSn = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   for (nb=0;nb<nbins;nb++){
-    lf_AtTn[nb] = L_handle_make(M_An[nb]->ncols*M_Tn[nb]->ncols);
-    lf_YtTn[nb] = L_handle_make(M_Yn[nb]->ncols*M_Tn[nb]->ncols);
-    lf_ZtSn[nb] = L_handle_make(M_Zn[nb]->ncols*M_Sn[nb]->ncols);
-    lf_WtSn[nb] = L_handle_make(M_Wn[nb]->ncols*M_Sn[nb]->ncols);
+    lf_AtTn[nb] = L_handle_make((unsigned long long int)M_An[nb]->ncols*(unsigned long long int)M_Tn[nb]->ncols);
+    lf_YtTn[nb] = L_handle_make((unsigned long long int)M_Yn[nb]->ncols*(unsigned long long int)M_Tn[nb]->ncols);
+    lf_ZtSn[nb] = L_handle_make((unsigned long long int)M_Zn[nb]->ncols*(unsigned long long int)M_Sn[nb]->ncols);
+    lf_WtSn[nb] = L_handle_make((unsigned long long int)M_Wn[nb]->ncols*(unsigned long long int)M_Sn[nb]->ncols);
     /* for (nb=0;nb<nbins;nb++){ } */}
   lf_D_AtTn_ZtSn_vv = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_D_AtTn_ZtSn_vv = (int *)wkspace_all0c(sizeof(int)*nbins);
   lf_D_AtTn_AtTn_vv = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_D_AtTn_AtTn_vv = (int *)wkspace_all0c(sizeof(int)*nbins);
   for (nb=0;nb<nbins;nb++){ 
-    lf_D_AtTn_ZtSn_vv[nb] = L_handle_make(M_An[nb]->ncols*M_Tn[nb]->ncols);
-    lf_D_AtTn_AtTn_vv[nb] = L_handle_make(M_An[nb]->ncols*M_Tn[nb]->ncols);
+    lf_D_AtTn_ZtSn_vv[nb] = L_handle_make((unsigned long long int)M_An[nb]->ncols*(unsigned long long int)M_Tn[nb]->ncols);
+    lf_D_AtTn_AtTn_vv[nb] = L_handle_make((unsigned long long int)M_An[nb]->ncols*(unsigned long long int)M_Tn[nb]->ncols);
     /* for (nb=0;nb<nbins;nb++){ } */}
   if (error_check){ 
     lf_D_AtTn_ZtSn_uu = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_D_AtTn_ZtSn_uu = (int *)wkspace_all0c(sizeof(int)*nbins);
     lf_D_AtTn_AtTn_uu = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_D_AtTn_AtTn_uu = (int *)wkspace_all0c(sizeof(int)*nbins);
     for (nb=0;nb<nbins;nb++){ 
-      lf_D_AtTn_ZtSn_uu[nb] = L_handle_make(M_An[nb]->ncols*M_Tn[nb]->ncols);
-      lf_D_AtTn_AtTn_uu[nb] = L_handle_make(M_An[nb]->ncols*M_Tn[nb]->ncols);
+      lf_D_AtTn_ZtSn_uu[nb] = L_handle_make((unsigned long long int)M_An[nb]->ncols*(unsigned long long int)M_Tn[nb]->ncols);
+      lf_D_AtTn_AtTn_uu[nb] = L_handle_make((unsigned long long int)M_An[nb]->ncols*(unsigned long long int)M_Tn[nb]->ncols);
       /* for (nb=0;nb<nbins;nb++){ } */}
     /* if (error_check){ } */}
   for (n_type=1;n_type<=1;n_type++){ for (n_spacing_B=0;n_spacing_B<=2;n_spacing_B++){ for (n_spacing_A=0;n_spacing_A<=2;n_spacing_A++){

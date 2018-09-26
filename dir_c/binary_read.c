@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void binary_read(char *filename,int *bitj_p,int *nrows_p,int *ncols_p,unsigned char **A_p)
 {
   /* reads a binary array stored in *filename; stores ouput in **A_p, allocated as necessary */
@@ -50,10 +54,36 @@ void binary_read_getsize(char *filename,int *bitj_p,int *nrows_p,int *ncols_p)
   if (fp!=NULL){ fclose(fp);fp=NULL;}
 }
 
-void binary_write(int bitj,unsigned char *bra,int nrows,int ncols,char *filename)
+void binary_write(char *filename,int bitj,int nrows,int ncols,unsigned char *A)
 {
-  /* Writes a binary array *bra to filename, typically named ./filename.b16 ;
-     We assume bra[nr + nc*nrows] is the (nr,nc) entry of bra */
+  /* Writes a binary array *A to filename, typically named ./filename.b16 ; 
+     Assumes that &(A[nc*bsize(nrows)]) is the starting address of column nc. ;
+     This means that for a typical M_handle M_An, one should call:
+     binary_write(filename,bitj,M_An->ncols,M_An->rpop_b,M_An->wX);
+  */
+  int verbose=0;
+  FILE *fpout=NULL;
+  int nc=0,nrows_extend=0,wp_length;
+  if (verbose){ printf(" %% [entering binary_write] bitj %d nrows %d ncols %d filename %s\n",bitj,nrows,ncols,filename);}
+  if (verbose>1){ bprintf(A,bitj,nrows,ncols," %% A: ");}
+  if ((fpout=fopen(filename,"w"))==NULL){ printf(" Warning! cannot open %s in binary_write\n",filename);}
+  fwrite(&bitj,sizeof(/*uint8_t*/ int),1,fpout);fwrite(&nrows,sizeof(/* uint32_t */ int),1,fpout);fwrite(&ncols,sizeof(/* uint32_t */ int),1,fpout);
+  if (verbose){ printf(" %% wrote bitj %d nrows %d ncols %d\n",bitj,nrows,ncols);}
+  nrows_extend = (bitj - (nrows % bitj)) % bitj;
+  if (verbose){ printf(" %% nrows_extend %d\n",nrows_extend);}
+  wp_length = (nrows+nrows_extend)/BIT8;
+  if (verbose){ printf(" %% wp_length %d\n",wp_length);}
+  for (nc=0;nc<ncols;nc++){
+    fwrite(&(A[nc*bsize(nrows)]),sizeof(unsigned char),wp_length,fpout);
+    /* for (nc=0;nc<ncols;nc++){ } */}
+  if (fpout!=NULL){ fclose(fpout);fpout=NULL;}
+  if (verbose){ printf(" %% [finished binary_write] filename %s\n",filename);}
+}
+
+void uchar_write_as_binary(char *filename,int bitj,int nrows,int ncols,unsigned char *u_)
+{
+  /* Writes a binary array *u_ to filename, typically named ./filename.b16 ;
+     We assume u_[nr + nc*nrows] is the (nr,nc) entry of u_ */
   int verbose=0;
   FILE *fpout=NULL;
   /*uint8_t*/ int bitj_x=0;
@@ -65,9 +95,9 @@ void binary_write(int bitj,unsigned char *bra,int nrows,int ncols,char *filename
   unsigned char *wkspace_mark=NULL,*wp=NULL;
   unsigned char b1=0,b2=0;
   char bstr1[9],bstr2[9];
-  if (verbose){ printf(" %% [entering binary_write] bitj %d nrows %d ncols %d filename %s\n",bitj,nrows,ncols,filename);}
-  if (verbose){ raprintf(bra,"char",nrows,ncols," %% bra: ");}
-  if ((fpout=fopen(filename,"w"))==NULL){ printf(" Warning! cannot open %s in binary_write\n",filename);}
+  if (verbose){ printf(" %% [entering uchar_write_as_binary] bitj %d nrows %d ncols %d filename %s\n",bitj,nrows,ncols,filename);}
+  if (verbose){ raprintf(u_,"char",nrows,ncols," %% u_: ");}
+  if ((fpout=fopen(filename,"w"))==NULL){ printf(" Warning! cannot open %s in uchar_write_as_binary\n",filename);}
   bitj_x = (/*uint8_t*/ int)bitj; nrows_x = (/* uint32_t */ int)nrows; ncols_x = (/* uint32_t */ int)ncols;
   fwrite(&bitj_x,sizeof(/*uint8_t*/ int),1,fpout);fwrite(&nrows_x,sizeof(/* uint32_t */ int),1,fpout);fwrite(&ncols_x,sizeof(/* uint32_t */ int),1,fpout);
   if (verbose){ printf(" %% wrote bitj %d nrows %d ncols %d\n",bitj,nrows,ncols);}
@@ -75,7 +105,7 @@ void binary_write(int bitj,unsigned char *bra,int nrows,int ncols,char *filename
   ncols_extend = (bitj - (ncols % bitj)) % bitj;
   wp_length = sizeof(long)*ceil((double)(nrows+nrows_extend)/(double)sizeof(long)); wp_length = wp_length/BIT8;
   if (verbose){ printf(" %% nrows %d+%d --> wp_length %d/BIT8=%d\n",nrows,nrows_extend,(int)wp_length*BIT8,(int)wp_length);}
-  GLOBAL_wkspace_point = 0; wkspace_mark = wkspace_base; wp = wkspace_all0c(wp_length); if (!wp){ printf(" Warning! not enough memory in binary_write\n");}
+  GLOBAL_wkspace_point = 0; wkspace_mark = wkspace_base; wp = wkspace_all0c(wp_length); if (!wp){ printf(" Warning! not enough memory in uchar_write_as_binary\n");}
   nc=0;
   while (nc<ncols){
     fill_uchar_zero(wp,wp_length);
@@ -83,29 +113,29 @@ void binary_write(int bitj,unsigned char *bra,int nrows,int ncols,char *filename
     while (nr<nrows){ 
       if (verbose>1){ 
 	printf("nr %d nc %d: ",nr,nc);
-	b1 = (bra[nr + nc*nrows]>0) ? (1 << (7-(nr%BIT8))) : 0;getBinW(&b1,bstr1,8);
+	b1 = (u_[nr + nc*nrows]>0) ? (1 << (7-(nr%BIT8))) : 0;getBinW(&b1,bstr1,8);
 	printf("bitpattern %s set, ",bstr1);
 	b1 = wp[nr/BIT8];getBinW(&b1,bstr1,8);
-	b2 = (wp[nr/BIT8] | ((bra[nr + nc*nrows]>0) ? (1 << (7-(nr%BIT8))) : 0));getBinW(&b2,bstr2,8);
+	b2 = (wp[nr/BIT8] | ((u_[nr + nc*nrows]>0) ? (1 << (7-(nr%BIT8))) : 0));getBinW(&b2,bstr2,8);
 	printf("updating %s into %s.\n",bstr1,bstr2);
 	/* if (verbose){ } */}
-      wp[nr/BIT8] |= ((bra[nr + nc*nrows]>0) ? (1 << (7-(nr%BIT8))) : 0) ; nr++; /* while (nr<nrows){ } */}
+      wp[nr/BIT8] |= ((u_[nr + nc*nrows]>0) ? (1 << (7-(nr%BIT8))) : 0) ; nr++; /* while (nr<nrows){ } */}
     fwrite(wp,sizeof(unsigned char),(nrows + nrows_extend)/BIT8,fpout);
     nc ++;
     if (verbose){ printf("\r%d cols complete.", nc); fflush(stdout);}
     /* while (nc<ncols){ } */}
   if (verbose){ printf("\r finished writing %s\n",filename); fflush(stdout);}
   if (fpout!=NULL){ fclose(fpout);fpout=NULL;}
-  if (verbose){ printf(" %% [finished binary_write] filename %s\n",filename);}
+  if (verbose){ printf(" %% [finished uchar_write_as_binary] filename %s\n",filename);}
   wkspace_reset(wkspace_mark); GLOBAL_wkspace_point = 1;
 }
 
-void wrap_rand(int bitj,int nrows,int ncols,int type_set,char *filename)
+void wrap_rand(char *filename,int bitj,int nrows,int ncols,int type_set)
 {
-  /* Here we generate a random/arbitrary binary array *bra ;
-     We assume that bra[nr + nc*nrows] is the (nr,nc) entry of bra ;
+  /* Here we generate a random/arbitrary unsigned-char array *u_ ;
+     We assume that u_[nr + nc*nrows] is the (nr,nc) entry of u_ ;
      if type_set==0, then we don't actually fill this array at all. ;
-     otherwise, if type_set!-0, we fill the array randomly ; */
+     otherwise, if type_set!=0, we fill the array randomly ; */
   int verbose=0;
   FILE *fpout=NULL;
   /*uint8_t*/ int bitj_x=0;

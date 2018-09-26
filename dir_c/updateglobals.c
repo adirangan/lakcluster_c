@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void updateglobals(char *vname)
 {
   /* given a variable name, scan the appropriate format into the appropriate global variable */
@@ -77,6 +81,7 @@ void updateglobals(char *vname)
   else if (strcmp(vname,"GLOBAL_A_n_rind_")==0){ length=GLOBAL_NBINS; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_A_n_rind_[nv]); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_A_n_rind_[nv]); sprintf(GLOBAL_A_n_rind_[nv],"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_A_n_rind_[nv]);}}}
   /* else if (strcmp(vname,"GLOBAL_A_n_rind")==0){ scanf("%[^,;]",GLOBAL_A_n_rind); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_A_n_rind);}} */
   else if (strcmp(vname,"GLOBAL_A_n_cind")==0){ scanf("%[^,;]",GLOBAL_A_n_cind); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_A_n_cind); sprintf(GLOBAL_A_n_cind,"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_A_n_cind);}}
+  else if (strcmp(vname,"GLOBAL_A_p_name")==0){ scanf("%[^,;]",GLOBAL_A_p_name); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_A_p_name); sprintf(GLOBAL_A_p_name,"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_A_p_name);}}
   else if (strcmp(vname,"GLOBAL_Z_n_name_")==0){ length=GLOBAL_NBINS; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_Z_n_name_[nv]); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_Z_n_name_[nv]); sprintf(GLOBAL_Z_n_name_[nv],"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_Z_n_name_[nv]);}}}
   /* else if (strcmp(vname,"GLOBAL_Z_n_name")==0){ scanf("%[^,;]",GLOBAL_Z_n_name); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_Z_n_name);}} */
   else if (strcmp(vname,"GLOBAL_Z_t_name_")==0){ length=GLOBAL_NBINS; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_Z_t_name_[nv]); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_Z_t_name_[nv]); sprintf(GLOBAL_Z_t_name_[nv],"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_Z_t_name_[nv]);}}}
@@ -91,6 +96,7 @@ void updateglobals(char *vname)
   /* else if (strcmp(vname,"GLOBAL_Y_t_name")==0){ scanf("%[^,;]",GLOBAL_Y_t_name); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_Y_t_name);}} */
   else if (strcmp(vname,"GLOBAL_Y_n_cols")==0){ scanf("%d",&GLOBAL_Y_n_cols); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_Y_n_cols);}}
   else if (strcmp(vname,"GLOBAL_Y_n_cind")==0){ scanf("%[^,;]",GLOBAL_Y_n_cind); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_Y_n_cind); sprintf(GLOBAL_Y_n_cind,"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_Y_n_cind);}}
+  else if (strcmp(vname,"GLOBAL_Y_p_name")==0){ scanf("%[^,;]",GLOBAL_Y_p_name); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_Y_p_name); sprintf(GLOBAL_Y_p_name,"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_Y_p_name);}}
   else if (strcmp(vname,"GLOBAL_W_n_name_")==0){ length=GLOBAL_NBINS; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_W_n_name_[nv]); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_W_n_name_[nv]); sprintf(GLOBAL_W_n_name_[nv],"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_W_n_name_[nv]);}}}
   /* else if (strcmp(vname,"GLOBAL_W_n_name")==0){ scanf("%[^,;]",GLOBAL_W_n_name); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_W_n_name);}} */
   else if (strcmp(vname,"GLOBAL_W_t_name_")==0){ length=GLOBAL_NBINS; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_W_t_name_[nv]); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_W_t_name_[nv]); sprintf(GLOBAL_W_t_name_[nv],"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_W_t_name_[nv]);}}}
@@ -108,11 +114,33 @@ void updateglobals(char *vname)
   else if (strcmp(vname,"GLOBAL_DIR_XPRE")==0){ scanf("%[^,;]",GLOBAL_DIR_XPRE); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_DIR_XPRE);} /* else if (strcmp(vname,"GLOBAL_DIR_XPRE")==0){ } */}
   else if (strcmp(vname,"GLOBAL_DIR_BASE")==0){ scanf("%[^,;]",GLOBAL_DIR_BASE); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_DIR_BASE);} /* else if (strcmp(vname,"GLOBAL_DIR_BASE")==0){ } */}
   else if (strcmp(vname,"GLOBAL_out_name")==0){ scanf("%[^,;]",GLOBAL_out_name); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_out_name);} /* else if (strcmp(vname,"GLOBAL_out_name")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_scramble_num")==0){ 
+    scanf("%d",&GLOBAL_scramble_num); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_scramble_num);}
+    if (GLOBAL_scramble_num>0){ 
+      length=GLOBAL_scramble_num; 
+      GLOBAL_scramble_out_xdrop_ = (char **) wkspace_alloc(GLOBAL_scramble_num*sizeof(char *)); 
+      GLOBAL_scramble_rseed_ = (unsigned long int *) wkspace_alloc(GLOBAL_scramble_num*sizeof(unsigned long int)); 
+      for (nv=0;nv<length;nv++){ 
+	GLOBAL_scramble_out_xdrop_[nv] = (char *) wkspace_alloc(FNAMESIZE*sizeof(char)); GLOBAL_scramble_out_xdrop_[nv][0]='\0';
+	GLOBAL_scramble_rseed_[nv] = nv+1;
+	/* for (nv=0;nv<length;nv++){ } */}
+      /* if (GLOBAL_scramble_num>0){ } */}
+    /* else if (strcmp(vname,"GLOBAL_scramble_num")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_scramble_out_xdrop_")==0){ length=GLOBAL_scramble_num; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_scramble_out_xdrop_[nv]); if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_scramble_out_xdrop_[nv]);}}}
+  else if (strcmp(vname,"GLOBAL_scramble_rseed_")==0){ length=GLOBAL_scramble_num; for (nv=0;nv<length;nv++){ scanf("%d",&(GLOBAL_scramble_rseed_[nv])); if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %d\n",vname,nv,GLOBAL_scramble_rseed_[nv]);}}}
   else if (strcmp(vname,"GLOBAL_scorebox_out_xdrop")==0){ scanf("%[^,;]",GLOBAL_scorebox_out_xdrop); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_scorebox_out_xdrop);} /* else if (strcmp(vname,"GLOBAL_scorebox_out_xdrop")==0){ } */}
   else if (strcmp(vname,"GLOBAL_scorebox_row_max")==0){ scanf("%d",&GLOBAL_scorebox_row_max); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_scorebox_row_max);}}
   else if (strcmp(vname,"GLOBAL_scorebox_row_num")==0){ scanf("%d",&GLOBAL_scorebox_row_num); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_scorebox_row_num);}}
   else if (strcmp(vname,"GLOBAL_scorebox_col_max")==0){ scanf("%d",&GLOBAL_scorebox_col_max); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_scorebox_col_max);}}
   else if (strcmp(vname,"GLOBAL_scorebox_col_num")==0){ scanf("%d",&GLOBAL_scorebox_col_num); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_scorebox_col_num);}}
+  else if (strcmp(vname,"GLOBAL_pca_out_xdrop")==0){ scanf("%[^,;]",GLOBAL_pca_out_xdrop); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_pca_out_xdrop);} /* else if (strcmp(vname,"GLOBAL_pca_out_xdrop")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_pca_V_")==0){ scanf("%[^,;]",GLOBAL_pca_V_); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_pca_V_);} /* else if (strcmp(vname,"GLOBAL_pca_V_")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_pca_infix")==0){ scanf("%[^,;]",GLOBAL_pca_infix); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_pca_infix);} /* else if (strcmp(vname,"GLOBAL_pca_infix")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_pca_iteration_num")==0){ scanf("%d",&GLOBAL_pca_iteration_num); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_pca_iteration_num);}}
+  else if (strcmp(vname,"GLOBAL_pca_iteration_max")==0){ scanf("%d",&GLOBAL_pca_iteration_max); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_pca_iteration_max);}}
+  else if (strcmp(vname,"GLOBAL_pca_iteration_min")==0){ scanf("%d",&GLOBAL_pca_iteration_min); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_pca_iteration_min);}}
+  else if (strcmp(vname,"GLOBAL_pca_rank")==0){ scanf("%d",&GLOBAL_pca_rank); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_pca_rank);}}
+  else if (strcmp(vname,"GLOBAL_pca_tolerance")==0){ scanf("%lf",&GLOBAL_pca_tolerance); if (verbose>0){ printf("%s read to be %f\n",vname,GLOBAL_pca_tolerance);}}
   else if (strcmp(vname,"GLOBAL_DIR_NAME")==0){ scanf("%[^,;]",GLOBAL_DIR_NAME); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_DIR_NAME);} /* else if (strcmp(vname,"GLOBAL_DIR_NAME")==0){ } */}
   else if (strcmp(vname,"END")==0){ /* do nothing */ if (verbose>0){ printf("end of input reached\n");}}
 /*   else if (strcmp(vname,"yy")==0){ scanf("%zz",&yy); if (verbose>0){ printf("%s read to be %zz\n",vname,yy);}} */

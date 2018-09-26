@@ -27,8 +27,8 @@ struct bcc_ajdk /* for use in passing inputs */
   double *QC_AtTAnZtSZn_nrm;
   double *QC_AtTYnYtTAn_nrm;
   double *QC_AtTAnAtTAn_nrm;
-  double *QC_sra; int *QC_lmc_a; int *QC_lmc_b; int *QC_lmc_j;
-  double *QR_sra; int *QR_lmr_a; int *QR_lmr_b; int *QR_lmr_j; int *QR_lnb; int *QR_imr_a; int *QR_imr_b; int *QR_imr_j;
+  double *QC_svalue; int *QC_index_local_mc_a; int *QC_index_local_mc_b; int *QC_index_local_mc_j;
+  double *QR_svalue; int *QR_index_local_mr_a; int *QR_index_local_mr_b; int *QR_index_local_mr_j; int *QR_index_local_nb; int *QR_index_global_mr_a; int *QR_index_global_mr_b; int *QR_index_global_mr_j;
   int Irem;int Ireq;
   int out_iteration; int out_xdrop_ij; int out_trace_length;
   double *out_trace; int *out_xdrop_a; int *out_xdrop_b;
@@ -123,7 +123,7 @@ struct bcc_single /* for use in passing inputs */
   double *QR_AnAtTYnYt_nrm;
   double *QR_AnAtTAnAt_nrm;
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-  int *QR_imr_a; int *QR_imr_b; int *QR_imr_j;
+  int *QR_index_global_mr_a; int *QR_index_global_mr_b; int *QR_index_global_mr_j;
 };
 
 struct bcc_double /* for use in passing inputs */

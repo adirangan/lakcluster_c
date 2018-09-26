@@ -17,9 +17,9 @@ function output = tutorial_binary_uncompress(filename_to_read,row_ind,col_ind);
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if nargin<3;
+if nargin<1;
 disp(sprintf(' '));
-disp(' testing tutorial_binary_compress: ');
+disp(' testing tutorial_binary_uncompress: ');
 A = randn(3,12)>0;
 tutorial_binary_compress(16,A,'tutorial_binary_compress_test.b16');
 B = tutorial_binary_uncompress('tutorial_binary_compress_test.b16',[1,3],[2,4,6,8,10]);
@@ -30,18 +30,25 @@ disp(sprintf(' reading from this file a recovered array named B: '));
 disp(num2str(B>0));
 disp(sprintf('error |A-B| = %f',norm(A([1,3],[2,4,6,8,10])-(B>0))));
 return;
-end;%if nargin<3;
+end;%if nargin<1;
+
+if nargin<3;
+[~,nrows,ncols] = tutorial_binary_getsize(filename_to_read);
+output = tutorial_binary_uncompress(filename_to_read,1:nrows,1:ncols);
+return;
+end;% if nargin<3;
 
 verbose=0;
 BIT8=8;
 
+fcheck(filename_to_read);
 fid = fopen(filename_to_read,'r');
 bitj = fread(fid,1,'int');
 nrows = fread(fid,1,'int');
 ncols = fread(fid,1,'int');
 if nrows*ncols<=0;
 output = zeros(nrows,ncols);
- else;
+else;
 
 nrows_extend = mod(bitj - mod(nrows,bitj),bitj);
 mr_length = (nrows + nrows_extend)/BIT8;
@@ -53,7 +60,6 @@ while (nc<ncols & ncc<length(col_ind_s));
 while (nc<ncols & ncc<length(col_ind_s) & nc<col_ind_s(1+ncc)); if (verbose>1); disp(sprintf(' %% jumping column %d',nc)); end; fseek(fid,mr_length,'cof'); nc = nc+1; end;%while;
 if (nc<ncols & ncc<length(col_ind_s) & nc==col_ind_s(1+ncc)); if (verbose); disp(sprintf(' %% reading column %d(%d)',nc,ncc)); end; btmp = uint8(fread(fid,mr_length,'uint8')); b(1 + (ncc*mr_length : (ncc+1)*mr_length-1)) = btmp; nc = nc+1; ncc = ncc+1; end;%if;
 end;%while (nc<ncols);
-fclose(fid);
 
 br = cast(zeros(1,BIT8),'uint8'); br = 2.^(BIT8-1:-1:0);
 br2 = cast(zeros(1,BIT8),'uint8'); br2 = 2.^(BIT8:-1:1);
@@ -68,3 +74,5 @@ if (verbose); disp(sprintf('recovered %s of size %d,%d',filename_to_read,length(
 output = 2*(output)-1;
 
 end;%if nrows*ncols<=0;
+
+fclose(fid);

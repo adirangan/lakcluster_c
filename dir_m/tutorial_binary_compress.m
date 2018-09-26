@@ -30,6 +30,7 @@ disp(sprintf('error |A-B| = %f',norm(A([1,3],[2,4,6,8,10])-(B>0))));
 return;
 end;%if nargin<3;
 
+%fcheck(filename_to_save);
 fid = fopen(filename_to_save,'w');
 fwrite(fid,bitj,'int');
 [nrows,ncols] = size(input);

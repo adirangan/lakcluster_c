@@ -1,0 +1,16 @@
+GLOBAL_verbose= 1;
+GLOBAL_thread_count= 4;
+GLOBAL_omp_type= 1;
+GLOBAL_TEST_TYPE= At_T_Xn_ww;
+GLOBAL_TEST_TYP2= speed;
+GLOBAL_NBINS= 4;
+GLOBAL_TEST_sparse= 1;
+GLOBAL_TEST_mrand= 0.15;
+GLOBAL_B_MLT= 44;
+GLOBAL_TEST_A_n_rows= 135;
+GLOBAL_TEST_A_n_cols= 20930;
+GLOBAL_TEST_Z_n_rows= 134;
+GLOBAL_TEST_Y_n_cols= 21030;
+GLOBAL_TEST_T_n_cols= 4;
+GLOBAL_TEST_niter= 1;
+END= 0;

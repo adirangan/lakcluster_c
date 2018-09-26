@@ -1,3 +1,6 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
 
 void lakcluster_scorebox_excerpt_0(int verbose,struct bcc_ajdk *D,struct S_handle *S)
 {
@@ -8,9 +11,9 @@ void lakcluster_scorebox_excerpt_0(int verbose,struct bcc_ajdk *D,struct S_handl
   S->A_rpop_j_total[tab] = D->A_rpop_j_total;
   S->A_cpop_j[tab] = D->A_cpop_j;
   S->Irem[tab] = D->Irem;
-  ra_stats(D->QR_sra,"double",D->A_rpop_j_total,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
+  ra_stats(D->QR_svalue,"double",D->A_rpop_j_total,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
   S->QR_avg[tab] = tmp_mean; 
-  ra_stats(D->QC_sra,"double",D->A_cpop_j,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
+  ra_stats(D->QC_svalue,"double",D->A_cpop_j,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
   S->QC_avg[tab] = tmp_mean; 
 }
 
@@ -40,8 +43,8 @@ void lakcluster_scorebox_excerpt_1(int verbose,struct bcc_ajdk *D,struct S_handl
   bcc_sumscores_ifT(D);
   bcc_sumscores_srt(D);
   bcc_sumscores_cmb(D);
-  if (verbose>1){ printf(" %% calculating QX_sra.\n");}
-  bcc_scorebox_sra(D);
+  if (verbose>1){ printf(" %% calculating QX_svalue.\n");}
+  bcc_scorebox_svalue(D);
   lakcluster_scorebox_excerpt_0(verbose,D,S);
   S_handle_printf(verbose,S," %% scorebox: ");
 }
@@ -85,8 +88,8 @@ void lakcluster_scorebox_excerpt_2(int verbose,struct bcc_ajdk *D,struct S_handl
   bcc_sumscores_ifT(D);
   bcc_sumscores_srt(D);
   bcc_sumscores_cmb(D);
-  if (verbose>1){ printf(" %% calculating QX_sra.\n");}
-  bcc_scorebox_sra(D);
+  if (verbose>1){ printf(" %% calculating QX_svalue.\n");}
+  bcc_scorebox_svalue(D);
   lakcluster_scorebox_excerpt_0(verbose,D,S);
 }
 
@@ -113,7 +116,7 @@ void lakcluster_scorebox_rc()
     S->nr=0;
     if (S->nc==0){
       if (verbose>1){ printf(" %% initial drop: S->rdrop[%d] %d S->cdrop[%d] %d\n",S->nr,S->rdrop[S->nr],S->nc,S->cdrop[S->nc]);}
-      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       bcc_scorebox_mxA(D_ori,S->rdrop[S->nr],S->cdrop[S->nc]);
       if (verbose>1){ printf(" %% calling bcc_lrup_mxdup\n");} bcc_lrup_mxdup(D_ori);
       if (verbose>1){ printf(" %% calling bcc_M_mxset\n");} bcc_M_mxset(D_ori);
@@ -121,14 +124,14 @@ void lakcluster_scorebox_rc()
       /* if (S->nc==0){ } */}
     if (S->nc>0){
       if (verbose>1){ printf(" %% cdrop: S->cdrop[%d] %d\n",S->nc,S->cdrop[S->nc]);}
-      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       bcc_scorebox_mxA(D_ori,0,S->cdrop[S->nc]);
       lakcluster_scorebox_excerpt_2(verbose,D_ori,S);
       /* if (S->nc>0){ } */}
     if (verbose>1){ printf(" %% copying D_ori to D_sub.\n");} bcc_copy(D_sub,D_ori);    
     for (S->nr=1;S->nr<S->row_num;S->nr++){
       if (verbose>1){ printf(" %% S->nc %d; rdrop: S->rdrop[%d] %d\n",S->nc,S->nr,S->rdrop[S->nr]);}
-      bcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      bcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       bcc_scorebox_mxA(D_sub,S->rdrop[S->nr],0);
       lakcluster_scorebox_excerpt_2(verbose,D_sub,S);
       /* for (S->nr=1;S->nr<S->row_num;S->nr++){ } */}
@@ -163,7 +166,7 @@ void lakcluster_scorebox_cr()
     S->nc=0;
     if (S->nr==0){
       if (verbose>1){ printf(" %% initial drop: S->rdrop[%d] %d S->cdrop[%d] %d\n",S->nr,S->rdrop[S->nr],S->nc,S->cdrop[S->nc]);}
-      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       bcc_scorebox_mxA(D_ori,S->rdrop[S->nr],S->cdrop[S->nc]);
       if (verbose>1){ printf(" %% calling bcc_lrup_mxdup\n");} bcc_lrup_mxdup(D_ori);
       if (verbose>1){ printf(" %% calling bcc_M_mxset\n");} bcc_M_mxset(D_ori);
@@ -171,14 +174,14 @@ void lakcluster_scorebox_cr()
       /* if (S->nr==0){ } */}
     if (S->nr>0){
       if (verbose>1){ printf(" %% rdrop: S->rdrop[%d] %d\n",S->nr,S->rdrop[S->nr]);}
-      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       bcc_scorebox_mxA(D_ori,S->rdrop[S->nr],0);
       lakcluster_scorebox_excerpt_2(verbose,D_ori,S);
       /* if (S->nr>0){ } */}
     if (verbose>1){ printf(" %% copying D_ori to D_sub.\n");} bcc_copy(D_sub,D_ori);
     for (S->nc=1;S->nc<S->col_num;S->nc++){
       if (verbose>1){ printf(" %% S->nr %d; cdrop: S->cdrop[%d] %d\n",S->nr,S->nc,S->cdrop[S->nc]);}
-      bcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      bcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       bcc_scorebox_mxA(D_sub,0,S->cdrop[S->nc]);
       lakcluster_scorebox_excerpt_2(verbose,D_sub,S);
       /* for (S->nc=0;S->nc<S->col_num;S->nc++){ } */}
@@ -213,15 +216,30 @@ void lakcluster_scorebox_xx()
     S->nc=0;
     if (S->nr==0){
       if (verbose>1){ printf(" %% initial drop: S->rdrop[%d] %d S->cdrop[%d] %d\n",S->nr,S->rdrop[S->nr],S->nc,S->cdrop[S->nc]);}
-      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      if (verbose>2){ printf(" %% This step sets D->QC_index_local_mc_a to be the final D->A_cpop_j entries of S->mc_index_sort.\n");}
+      if (verbose>2){ printf(" %% This step also sets D->QR_index_local_nb and D->QR_index_local_mr_a to be the final D->A_rpop_j entries of mr_index_sort (i.e., mr_index_local_nb and mr_index_local_mr).\n");}
+      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
+      if (verbose>2){ printf(" %% This step does the following in order: \n");}
+      if (verbose>2){ printf(" %% copies D->A_bmc_j to D->A_umc_j ; \n");}
+      if (verbose>2){ printf(" %% define D->A_umc_j_rmv and D->A_umc_j_rtn ; removing first cdrop entries of D->QC_index_local_mc_a ; \n");}
+      if (verbose>2){ printf(" %% copies E->A_bmr_j to E->A_umr_j ; \n");}
+      if (verbose>2){ printf(" %% define E->A_umr_j_rmv and E->A_umr_j_rtn ; removing first rdrop entries of D->QR_index_local_mr_a ; using D->QR_index_local_nb to index nb ; \n");}
+      if (verbose>2){ printf(" %% call bcc_sumscores_mxB ; copying all instances of umc and umr to associated bmc and bmr respectively ; \n");}
+      if (verbose>2){ printf(" %% Note that bcc_sumscores_mxB also calls bcc_lrup_mxset, which copies all of the A_bmr_j_rtn etc (i.e., retained) and A_bmr_j_rmv etc (i.e., removed) bitmasks into the temporary variables used for lrup.\n");}
       bcc_scorebox_mxA(D_ori,S->rdrop[S->nr],S->cdrop[S->nc]);
-      if (verbose>1){ printf(" %% calling bcc_lrup_mxdup\n");} bcc_lrup_mxdup(D_ori);
-      if (verbose>1){ printf(" %% calling bcc_M_mxset\n");} bcc_M_mxset(D_ori);
+      if (verbose>1){ printf(" %% calling bcc_lrup_mxdup\n");} 
+      if (verbose>2){ printf(" %% This step copies D->A_bmc_j_rtn into D->A_bmc_j, and E_[nb]->A_bmr_j_rtn into E_[nb]->A_bmr_j.\n");} 
+      bcc_lrup_mxdup(D_ori);
+      if (verbose>1){ printf(" %% calling bcc_M_mxset\n");} 
+      if (verbose>2){ printf(" %% This step updates cpop_j and rpop_j, copies D->A_bmc_j into M_An->mc_j, and copies E_[nb]->A_bmr_j into M_An->mr_j.\n");}
+      bcc_M_mxset(D_ori);
+      if (verbose>1){ printf(" %% calling lakcluster_scorebox_excerpt_1\n");} 
+      if (verbose>2){ printf(" %% This step calculates the original scores (without using lrup)\n");}
       lakcluster_scorebox_excerpt_1(verbose,D_ori,S);
       /* if (S->nr==0){ } */}
     if (S->nr>0){
       if (verbose>1){ printf(" %% rdrop: S->rdrop[%d] %d\n",S->nr,S->rdrop[S->nr]);}
-      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      bcc_scorebox_srt(D_ori,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       bcc_scorebox_mxA(D_ori,S->rdrop[S->nr],0);
       if (verbose>1){ printf(" %% calling bcc_lrup_mxdup\n");} bcc_lrup_mxdup(D_ori);
       if (verbose>1){ printf(" %% calling bcc_M_mxset\n");} bcc_M_mxset(D_ori);
@@ -230,7 +248,7 @@ void lakcluster_scorebox_xx()
     if (verbose>1){ printf(" %% copying D_ori to D_sub.\n");} bcc_copy(D_sub,D_ori);
     for (S->nc=1;S->nc<S->col_num;S->nc++){
       if (verbose>1){ printf(" %% S->nr %d; cdrop: S->cdrop[%d] %d\n",S->nr,S->nc,S->cdrop[S->nc]);}
-      bcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_lnb,S->mr_lmr,S->out_xdrop_ncols,S->mc_srt);
+      bcc_scorebox_srt(D_sub,S->out_xdrop_nrows,S->mr_index_local_nb,S->mr_index_local_mr,S->out_xdrop_ncols,S->mc_index_sort);
       bcc_scorebox_mxA(D_sub,0,S->cdrop[S->nc]);
       if (verbose>1){ printf(" %% calling bcc_lrup_mxdup\n");} bcc_lrup_mxdup(D_sub);
       if (verbose>1){ printf(" %% calling bcc_M_mxset\n");} bcc_M_mxset(D_sub);

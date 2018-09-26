@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void *get_AnZt_vv__run(void *vp)
 {
   /* This function serves as a module which calculates the matrix-matrix product AnZt, where both An and Zt are treated as +1/-1 values ;
@@ -190,14 +194,14 @@ int wrap_AnZt_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int type_flag,i
    */
   int verbose=0;
   /* unsigned char *wkspace_mark=NULL; */
-  int length_r=0,length_c=0,length=0,ip=0;
+  unsigned long long int length_r=0,length_c=0,length=0,ip=0;
   if (verbose){ printf(" %% [entering wrap_AnZt_vv__run] tidx %d type_flag %d\n",*tidx,type_flag);}
   if (verbose){ M_handle_printf(M_An,verbose," %% M_An: ");}
   if (verbose){ M_handle_printf(M_Zn,verbose," %% M_Zn: ");}
   switch (output_spacing_r){ case SPACING_j: length_r = M_An->rpop_j; break; case SPACING_b: length_r = M_An->rpop_b; break; case SPACING_a: length_r = M_An->nrows; break; default: break; /* switch (output_spacing_r){ } */}
   switch (output_spacing_c){ case SPACING_j: length_c = M_Zn->rpop_j; break; case SPACING_b: length_c = M_Zn->rpop_b; break; case SPACING_a: length_c = M_Zn->nrows; break; default: break; /* switch (output_spacing_r){ } */}
-  length = length_r*length_c; if (verbose){ printf(" %% length %d*%d=%d\n",length_r,length_c,length);}
-  if (*output_AnZt_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_AnZt_p = L_handle_make(length);}
+  length = length_r*length_c; if (verbose){ printf(" %% length %llu*%llu=%llu\n",length_r,length_c,length);}
+  if (*output_AnZt_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_AnZt_p = L_handle_make(length);}
   if (verbose>2){ bprintf(M_An->mr_b,M_An->bitj,1,M_An->nrows," %% M_An->mr_b: ");}
   if (verbose>2){ bprintf(M_An->mr_j,M_An->bitj,1,M_An->nrows," %% M_An->mr_j: ");}
   if (verbose>2){ bprintf(M_An->mc_b,M_An->bitj,1,M_An->ncols," %% M_An->mc_b: ");}
@@ -206,7 +210,7 @@ int wrap_AnZt_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int type_flag,i
   if (verbose>2){ bprintf(M_Zn->mr_j,M_Zn->bitj,1,M_Zn->nrows," %% M_Zn->mr_j: ");}
   if (verbose>2){ bprintf(M_Zn->mc_b,M_Zn->bitj,1,M_Zn->ncols," %% M_Zn->mc_b: ");}
   if (verbose>2){ bprintf(M_Zn->mc_j,M_Zn->bitj,1,M_Zn->ncols," %% M_Zn->mc_j: ");}
-  length = length_r*length_c; if ((*output_AnZt_p)->length<length){ printf(" %% Warning! length %d<%d in wrap_AnZt_vv__run\n",(*output_AnZt_p)->length,length);} memset((*output_AnZt_p)->lf,0,length*sizeof(double));
+  length = length_r*length_c; if ((*output_AnZt_p)->length<length){ printf(" %% Warning! length %llu<%llu in wrap_AnZt_vv__run\n",(*output_AnZt_p)->length,length);} memset((*output_AnZt_p)->lf,0,length*sizeof(double));
   ip=0; vpra[ip++] = tidx; vpra[ip++] = M_An; vpra[ip++] = M_Zn; vpra[ip++] = A_ajdk; vpra[ip++] = lf_An_ajdk; vpra[ip++] = lf_Zn_ajdk; vpra[ip++] = *output_AnZt_p;
   switch (type_flag){ case TYPE_p0: vpra[ip++] = &addressable_type_p0; break; case TYPE_pm: vpra[ip++] = &addressable_type_pm; break; case TYPE_00: vpra[ip++] = &addressable_type_00; break; default: break; /* switch (type_flag){ } */}
   switch (output_spacing_r){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_r){ } */}
@@ -311,14 +315,14 @@ int wrap_AnZt_uu__run(int *tidx,void **vpra,pthread_t *thread_in,int type_flag,i
    */
   int verbose=0;
   /* unsigned char *wkspace_mark=NULL; */
-  int length_r=0,length_c=0,length=0,ip=0;
+  unsigned long long int length_r=0,length_c=0,length=0,ip=0;
   if (verbose){ printf(" %% [entering wrap_AnZt_uu__run] tidx %d type_flag %d\n",*tidx,type_flag);}
   if (verbose){ M_handle_printf(M_An,verbose," %% M_An: ");}
   if (verbose){ M_handle_printf(M_Zn,verbose," %% M_Zn: ");}
   switch (output_spacing_r){ case SPACING_j: length_r = M_An->rpop_j; break; case SPACING_b: length_r = M_An->rpop_b; break; case SPACING_a: length_r = M_An->nrows; break; default: break; /* switch (output_spacing_r){ } */}
   switch (output_spacing_c){ case SPACING_j: length_c = M_Zn->rpop_j; break; case SPACING_b: length_c = M_Zn->rpop_b; break; case SPACING_a: length_c = M_Zn->nrows; break; default: break; /* switch (output_spacing_r){ } */}
-  length = length_r*length_c; if (verbose){ printf(" %% length %d*%d=%d\n",length_r,length_c,length);}
-  if (*output_AnZt_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_AnZt_p = L_handle_make(length);}
+  length = length_r*length_c; if (verbose){ printf(" %% length %llu*%llu=%llu\n",length_r,length_c,length);}
+  if (*output_AnZt_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_AnZt_p = L_handle_make(length);}
   if (verbose>2){ bprintf(M_An->mr_b,M_An->bitj,1,M_An->nrows," %% M_An->mr_b: ");}
   if (verbose>2){ bprintf(M_An->mr_j,M_An->bitj,1,M_An->nrows," %% M_An->mr_j: ");}
   if (verbose>2){ bprintf(M_An->mc_b,M_An->bitj,1,M_An->ncols," %% M_An->mc_b: ");}
@@ -327,7 +331,7 @@ int wrap_AnZt_uu__run(int *tidx,void **vpra,pthread_t *thread_in,int type_flag,i
   if (verbose>2){ bprintf(M_Zn->mr_j,M_Zn->bitj,1,M_Zn->nrows," %% M_Zn->mr_j: ");}
   if (verbose>2){ bprintf(M_Zn->mc_b,M_Zn->bitj,1,M_Zn->ncols," %% M_Zn->mc_b: ");}
   if (verbose>2){ bprintf(M_Zn->mc_j,M_Zn->bitj,1,M_Zn->ncols," %% M_Zn->mc_j: ");}
-  length = length_r*length_c; if ((*output_AnZt_p)->length<length){ printf(" %% Warning! length %d<%d in wrap_AnZt__run\n",(*output_AnZt_p)->length,length);} memset((*output_AnZt_p)->lf,0,length*sizeof(double));
+  length = length_r*length_c; if ((*output_AnZt_p)->length<length){ printf(" %% Warning! length %llu<%llu in wrap_AnZt__run\n",(*output_AnZt_p)->length,length);} memset((*output_AnZt_p)->lf,0,length*sizeof(double));
   ip=0; vpra[ip++] = tidx; vpra[ip++] = M_An; vpra[ip++] = M_Zn; vpra[ip++] = A_ajdk; vpra[ip++] = *output_AnZt_p;
   switch (type_flag){ case TYPE_p0: vpra[ip++] = &addressable_type_p0; break; case TYPE_pm: vpra[ip++] = &addressable_type_pm; break; case TYPE_00: vpra[ip++] = &addressable_type_00; break; default: break; /* switch (type_flag){ } */}
   switch (output_spacing_r){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing_r){ } */}
@@ -389,15 +393,15 @@ void wrap_AnZt_vv_test()
   lf_AnZt_vv = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_AnZt_vv = (int *)wkspace_all0c(sizeof(int)*nbins);
   lf_YnWt_vv = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_YnWt_vv = (int *)wkspace_all0c(sizeof(int)*nbins);
   for (nb=0;nb<nbins;nb++){
-    lf_AnZt_vv[nb] = L_handle_make(M_An[nb]->nrows*M_Zn[nb]->nrows);
-    lf_YnWt_vv[nb] = L_handle_make(M_An[nb]->nrows*M_Zn[nb]->nrows);
+    lf_AnZt_vv[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_Zn[nb]->nrows);
+    lf_YnWt_vv[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_Zn[nb]->nrows);
     /* for (nb=0;nb<nbins;nb++){ } */}
   if (error_check){  
     lf_AnZt_uu = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_AnZt_uu = (int *)wkspace_all0c(sizeof(int)*nbins);
     lf_YnWt_uu = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_YnWt_uu = (int *)wkspace_all0c(sizeof(int)*nbins);
     for (nb=0;nb<nbins;nb++){
-      lf_AnZt_uu[nb] = L_handle_make(M_An[nb]->nrows*M_Zn[nb]->nrows);
-      lf_YnWt_uu[nb] = L_handle_make(M_An[nb]->nrows*M_Zn[nb]->nrows);
+      lf_AnZt_uu[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_Zn[nb]->nrows);
+      lf_YnWt_uu[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_Zn[nb]->nrows);
       /* for (nb=0;nb<nbins;nb++){ } */}
     /* if (error_check){ } */}
   for (n_type=1;n_type<=2;n_type++){ for (n_spacing_B=0;n_spacing_B<=2;n_spacing_B++){ for (n_spacing_A=0;n_spacing_A<=2;n_spacing_A++){
