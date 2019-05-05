@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void bcc_ajdk_copy(struct bcc_ajdk *D,struct bcc_ajdk *D_in)
 {
   /* copy from D_in; assuming D has been preallocated. */
@@ -104,8 +108,8 @@ void bcc_ajdk_load(struct bcc_ajdk *D)
   D->T_umc_b = (unsigned char *) wkspace_all0c(D->T_ncols*sizeof(unsigned char)); if (!D->T_umc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} for (nc=0;nc<D->T_ncols;nc++){ D->T_umc_b[nc] = bget__on(D->T_bmc_b,nc);}
   D->T_umc_j = (unsigned char *) wkspace_all0c(D->T_ncols*sizeof(unsigned char)); if (!D->T_umc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_load\n");} for (nc=0;nc<D->T_ncols;nc++){ D->T_umc_j[nc] = bget__on(D->T_bmc_j,nc);}
   D->QC_AtTYnWtSZn_nrm = NULL; D->QC_AtTAnZtSZn_nrm = NULL; D->QC_AtTYnYtTAn_nrm = NULL; D->QC_AtTAnAtTAn_nrm = NULL;
-  D->QC_sra=NULL; D->QC_lmc_a=NULL; D->QC_lmc_b=NULL; D->QC_lmc_j=NULL;
-  D->QR_sra=NULL; D->QR_lmr_a=NULL; D->QR_lmr_b=NULL; D->QR_lmr_j=NULL; D->QR_lnb=NULL; D->QR_imr_a=NULL; D->QR_imr_b=NULL; D->QR_imr_j=NULL;
+  D->QC_svalue=NULL; D->QC_index_local_mc_a=NULL; D->QC_index_local_mc_b=NULL; D->QC_index_local_mc_j=NULL;
+  D->QR_svalue=NULL; D->QR_index_local_mr_a=NULL; D->QR_index_local_mr_b=NULL; D->QR_index_local_mr_j=NULL; D->QR_index_local_nb=NULL; D->QR_index_global_mr_a=NULL; D->QR_index_global_mr_b=NULL; D->QR_index_global_mr_j=NULL;
   D->Irem=0;D->Ireq=0; D->out_iteration=0; D->out_xdrop_ij=0; D->out_trace=NULL; D->out_xdrop_a=NULL; D->out_xdrop_b=NULL; D->out_trace_length = 0;
   if (verbose){ printf(" %% [finished bcc_ajdk_load] D->A_ncols=%d D->Y_ncols=%d D->T_ncols=%d \n",D->A_ncols,D->Y_ncols,D->T_ncols);}
 }
@@ -163,8 +167,8 @@ void bcc_ajdk_init(double mrnd,struct bcc_ajdk *D)
   D->T_umc_b = (unsigned char *) wkspace_all0c(D->T_ncols*sizeof(unsigned char)); if (!D->T_umc_b){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} for (nc=0;nc<D->T_ncols;nc++){ D->T_umc_b[nc] = bget__on(D->T_bmc_b,nc);}
   D->T_umc_j = (unsigned char *) wkspace_all0c(D->T_ncols*sizeof(unsigned char)); if (!D->T_umc_j){ printf(" %% Warning! not enough memory in bcc_ajdk_init\n");} for (nc=0;nc<D->T_ncols;nc++){ D->T_umc_j[nc] = bget__on(D->T_bmc_j,nc);}
   D->QC_AtTYnWtSZn_nrm = NULL; D->QC_AtTAnZtSZn_nrm = NULL; D->QC_AtTYnYtTAn_nrm = NULL; D->QC_AtTAnAtTAn_nrm = NULL;
-  D->QC_sra=NULL; D->QC_lmc_a=NULL; D->QC_lmc_b=NULL; D->QC_lmc_j=NULL;
-  D->QR_sra=NULL; D->QR_lmr_a=NULL; D->QR_lmr_b=NULL; D->QR_lmr_j=NULL; D->QR_lnb=NULL; D->QR_imr_a=NULL; D->QR_imr_b=NULL; D->QR_imr_j=NULL;
+  D->QC_svalue=NULL; D->QC_index_local_mc_a=NULL; D->QC_index_local_mc_b=NULL; D->QC_index_local_mc_j=NULL;
+  D->QR_svalue=NULL; D->QR_index_local_mr_a=NULL; D->QR_index_local_mr_b=NULL; D->QR_index_local_mr_j=NULL; D->QR_index_local_nb=NULL; D->QR_index_global_mr_a=NULL; D->QR_index_global_mr_b=NULL; D->QR_index_global_mr_j=NULL;
   D->Irem=0;D->Ireq=0; D->out_iteration=0; D->out_xdrop_ij=0; D->out_trace=NULL; D->out_xdrop_a=NULL; D->out_xdrop_b=NULL; D->out_trace_length = 0;
   if (verbose){ printf(" %% [finished bcc_ajdk_init] D->A_ncols=%d D->Y_ncols=%d D->T_ncols=%d \n",D->A_ncols,D->Y_ncols,D->T_ncols);}
 }
@@ -381,7 +385,7 @@ void bcc_single_load_M_An(struct bcc_single *E)
     bXra_tmp = wkspace_all0c(ncols_tmp*brows_tmp); for (nr=0;nr<nrows_tmp;nr++){ bset__on(bXra_tmp,nr);}
     E->M_St = M_handle_v_make(D->bitj,D->T_ncols,E->Z_nrows,NULL,bXra_tmp,D->T_bmc_b,E->Z_bmr_b);}
   else{ E->M_St = M_handle_v_make(D->bitj,D->T_ncols,E->Z_nrows,GLOBAL_S_n_name_[nb],NULL,D->T_bmc_b,E->Z_bmr_b);} M_mxget(E->M_St);
-  E->QR_AnZtSWnYt_nrm = NULL; E->QR_AnZtSZnAt_nrm = NULL; E->QR_AnAtTYnYt_nrm = NULL; E->QR_AnAtTAnAt_nrm = NULL; E->QR_imr_a=NULL; E->QR_imr_b=NULL;
+  E->QR_AnZtSWnYt_nrm = NULL; E->QR_AnZtSZnAt_nrm = NULL; E->QR_AnAtTYnYt_nrm = NULL; E->QR_AnAtTAnAt_nrm = NULL; E->QR_index_global_mr_a=NULL; E->QR_index_global_mr_b=NULL;
   /* initializing a,j,y,t,k,h,u,r,z,v */
   E->M_an = NULL; E->M_at = NULL; E->M_jn = NULL; E->M_jt = NULL; E->M_yn = NULL; E->M_yt; E->M_tt;
   E->M_kn = NULL; E->M_kt = NULL; E->M_hn = NULL; E->M_ht = NULL; E->M_un = NULL; E->M_ut; E->M_rt;
@@ -482,7 +486,7 @@ void bcc_single_init_M_An(char *error_vs_speed,double mrnd,struct bcc_single *E)
   for (nx=0;nx<E->Z_nrows;nx++){ bt2 = &(bt[0*bsize(E->Z_nrows)]); bset__on(bt2,nx);}
   wrap_M_setup_test_excerpt_2(E->Z_nrows,D->T_ncols,bn,bt,E->Z_bmr_b,E->Z_bmr_j,D->T_bmc_b,D->T_bmc_j,&(E->M_Sn),&(E->M_St));
   /* initializing E->QR_AnZtSWnYt_nrm */
-  E->QR_AnZtSWnYt_nrm = NULL; E->QR_AnZtSZnAt_nrm = NULL; E->QR_AnAtTYnYt_nrm = NULL; E->QR_AnAtTAnAt_nrm = NULL; E->QR_imr_a=NULL; E->QR_imr_b=NULL;
+  E->QR_AnZtSWnYt_nrm = NULL; E->QR_AnZtSZnAt_nrm = NULL; E->QR_AnAtTYnYt_nrm = NULL; E->QR_AnAtTAnAt_nrm = NULL; E->QR_index_global_mr_a=NULL; E->QR_index_global_mr_b=NULL;
   /* initializing a,j,y,t,k,h,u,r,z,v */
   E->M_an = NULL; E->M_at = NULL; E->M_jn = NULL; E->M_jt = NULL; E->M_yn = NULL; E->M_yt; E->M_tt;
   E->M_kn = NULL; E->M_kt = NULL; E->M_hn = NULL; E->M_ht = NULL; E->M_un = NULL; E->M_ut; E->M_rt;
@@ -555,7 +559,9 @@ void bcc_single_copy_lf(struct bcc_single *E,struct bcc_single *E_in)
     else if (n1b<=n2b){ E->M_AtTAn_trm = 1; for (ns_b=0;ns_b<D->T_cpop_b;ns_b++){ M_handle_copy(E->M_AtTAn_[ns_b],E_in->M_AtTAn_[ns_b]);}}
     /* if strategy */}
   if (verbose>1){ printf(" %% copying E->lrup\n");}
-  get_xdrop(D->A_rpop_j_total,D->A_cpop_j,NULL,&cdrop); ckeep=D->A_cpop_j-cdrop;
+  get_xdrop(D->A_rpop_j_total,D->A_cpop_j,NULL,&cdrop); 
+  if (strstr(GLOBAL_TEST_TYPE,"scorebox") && GLOBAL_scorebox_col_num>1 && GLOBAL_scorebox_col_max>0){ cdrop = ceil((double)GLOBAL_scorebox_col_max/(double)(GLOBAL_scorebox_col_num-1));}
+  ckeep=D->A_cpop_j-cdrop;
   /* QR YnWt lrup */
   if (strstr(D->QR_strategy,"YnWt")){
     L_handle_copy(E->lf_jn_ajdk,E_in->lf_jn_ajdk);
@@ -587,8 +593,8 @@ void bcc_single_copy_lf(struct bcc_single *E,struct bcc_single *E_in)
     L_handle_copy(E->lf_ztsn,E_in->lf_ztsn);
     L_handle_copy(E->lf_vtsn,E_in->lf_vtsn);
     /* if strategy */}
-  if (strstr(D->QC_strategy,"YnWt")){
-    if (strstr(D->QC_strategy,"condense")){
+  if (strstr(D->QR_strategy,"YnWt")){
+    if (strstr(D->QR_strategy,"condense")){
       L_handle_copy(E->lf_jn,E_in->lf_jn);
       L_handle_copy(E->lf_vn,E_in->lf_vn);
       /* if strategy */}
@@ -637,10 +643,10 @@ void bcc_single_copy_lf(struct bcc_single *E,struct bcc_single *E_in)
 void bcc_single_init_lf_excerpt(char *prefix,int n1a,int n1b,int n2a,int n2b,struct L_handle **L_p,int M_flag,struct M_handle **M_p)
 {
   int verbose=0;
-  int length=0;
-  length  = n1b*n2b; *L_p = L_handle_make(length); if (!(*L_p)){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  unsigned long long int length=0;
+  length  = (unsigned long long int)n1b*(unsigned long long int)n2b; *L_p = L_handle_make(length); if (!(*L_p)){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
   if (M_flag){ *M_p = M_handle_w_make(BITJ,GLOBAL_B_MLT,n1a,n2b);}
-  if (verbose){ printf(" %% %s n1a %d n1b %d n2a %d n2b %d --> length %d \n",prefix,n1a,n1b,n2a,n2b,length);}
+  if (verbose){ printf(" %% %s n1a %d n1b %d n2a %d n2b %d --> length %llu \n",prefix,n1a,n1b,n2a,n2b,length);}
 }
 
 void bcc_single_init_lf(struct bcc_single *E)
@@ -652,6 +658,7 @@ void bcc_single_init_lf(struct bcc_single *E)
   int M_flag=0;
   int cdrop=0,ckeep=0;
   long long int mm=0;
+  if (verbose){ printf(" %% [entering bcc_single_init_lf]\n");}
   E->lf_At_rsum=NULL; E->lf_Zt_rsum=NULL; E->lf_Wt_rsum=NULL; E->lf_Yt_rsum=NULL;
   E->length = D->A_ncols; E->lf_At_rsum = L_handle_make(E->length); if (!E->lf_At_rsum){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
   E->length = D->A_ncols; E->lf_Zt_rsum = L_handle_make(E->length); if (!E->lf_Zt_rsum){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
@@ -659,23 +666,23 @@ void bcc_single_init_lf(struct bcc_single *E)
   E->length = D->Y_ncols; E->lf_Yt_rsum = L_handle_make(E->length); if (!E->lf_Yt_rsum){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
   if (verbose){ printf(" %% initializing E->lf_AtTn, E->lf_ZtSn, E->lf_YtTn, E->lf_WtSn.\n");}
   E->lf_AtTn = NULL; E->lf_ZtSn = NULL; E->lf_YtTn = NULL; E->lf_WtSn = NULL;
-  E->length = D->A_ncols*D->T_ncols; E->lf_AtTn = L_handle_make(E->length); if (!E->lf_AtTn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-  E->length = D->A_ncols*D->T_ncols; E->lf_ZtSn = L_handle_make(E->length); if (!E->lf_ZtSn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-  E->length = D->Y_ncols*D->T_ncols; E->lf_YtTn = L_handle_make(E->length); if (!E->lf_YtTn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-  E->length = D->Y_ncols*D->T_ncols; E->lf_WtSn = L_handle_make(E->length); if (!E->lf_WtSn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; E->lf_AtTn = L_handle_make(E->length); if (!E->lf_AtTn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; E->lf_ZtSn = L_handle_make(E->length); if (!E->lf_ZtSn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = (unsigned long long int)D->Y_ncols*(unsigned long long int)D->T_ncols; E->lf_YtTn = L_handle_make(E->length); if (!E->lf_YtTn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = (unsigned long long int)D->Y_ncols*(unsigned long long int)D->T_ncols; E->lf_WtSn = L_handle_make(E->length); if (!E->lf_WtSn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
   if (verbose>1){ printf(" %% initializing E->lf_An_ajdk, etc\n");}
   E->lf_An_ajdk = NULL; E->lf_Zn_ajdk = NULL; E->lf_Yn_ajdk = NULL; E->lf_Wn_ajdk = NULL;
-  E->length = E->A_nrows*AJDK_TOT; E->lf_An_ajdk = L_handle_make(E->length); if (!E->lf_An_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-  E->length = E->Z_nrows*AJDK_TOT; E->lf_Zn_ajdk = L_handle_make(E->length); if (!E->lf_Zn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-  E->length = E->A_nrows*AJDK_TOT; E->lf_Yn_ajdk = L_handle_make(E->length); if (!E->lf_Yn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-  E->length = E->Z_nrows*AJDK_TOT; E->lf_Wn_ajdk = L_handle_make(E->length); if (!E->lf_Wn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = (unsigned long long int)E->A_nrows*(unsigned long long int)AJDK_TOT; E->lf_An_ajdk = L_handle_make(E->length); if (!E->lf_An_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = (unsigned long long int)E->Z_nrows*(unsigned long long int)AJDK_TOT; E->lf_Zn_ajdk = L_handle_make(E->length); if (!E->lf_Zn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = (unsigned long long int)E->A_nrows*(unsigned long long int)AJDK_TOT; E->lf_Yn_ajdk = L_handle_make(E->length); if (!E->lf_Yn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = (unsigned long long int)E->Z_nrows*(unsigned long long int)AJDK_TOT; E->lf_Wn_ajdk = L_handle_make(E->length); if (!E->lf_Wn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
   if (verbose>1){ printf(" %% initializing E->lf_ZtSWn, etc\n");}
   E->lf_ZtSWn = NULL; E->lf_ZtSZn = NULL; E->lf_AtTYn = NULL; E->lf_AtTAn = NULL; 
   if (strstr(D->QR_strategy,"ZtSWn") || strstr(D->QC_strategy,"ZtSWn")){
-    E->length = E->Z_rbother*E->M_Zn->cpop_b*E->M_Wn->cpop_b*D->T_cpop_b; E->lf_ZtSWn = L_handle_make(E->length); if (!E->lf_ZtSWn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = E->Z_rbother*E->M_Zn->cpop_b*E->M_Zn->cpop_b*D->T_cpop_b; E->lf_ZtSZn = L_handle_make(E->length); if (!E->lf_ZtSZn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = E->A_rbother*E->M_An->cpop_b*E->M_Yn->cpop_b*D->T_cpop_b; E->lf_AtTYn = L_handle_make(E->length); if (!E->lf_AtTYn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = E->A_rbother*E->M_An->cpop_b*E->M_An->cpop_b*D->T_cpop_b; E->lf_AtTAn = L_handle_make(E->length); if (!E->lf_AtTAn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->Z_rbother*(unsigned long long int)E->M_Zn->cpop_b*(unsigned long long int)E->M_Wn->cpop_b*(unsigned long long int)D->T_cpop_b; E->lf_ZtSWn = L_handle_make(E->length); if (!E->lf_ZtSWn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->Z_rbother*(unsigned long long int)E->M_Zn->cpop_b*(unsigned long long int)E->M_Zn->cpop_b*(unsigned long long int)D->T_cpop_b; E->lf_ZtSZn = L_handle_make(E->length); if (!E->lf_ZtSZn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->A_rbother*(unsigned long long int)E->M_An->cpop_b*(unsigned long long int)E->M_Yn->cpop_b*(unsigned long long int)D->T_cpop_b; E->lf_AtTYn = L_handle_make(E->length); if (!E->lf_AtTYn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->A_rbother*(unsigned long long int)E->M_An->cpop_b*(unsigned long long int)E->M_An->cpop_b*(unsigned long long int)D->T_cpop_b; E->lf_AtTAn = L_handle_make(E->length); if (!E->lf_AtTAn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
     /* if strategy */}
   E->M_ZtSWn_ = NULL; E->M_ZtSZn_ = NULL; E->M_AtTYn_ = NULL; E->M_AtTAn_ = NULL;
   if (strstr(D->QR_strategy,"ZtSWn")){
@@ -701,82 +708,87 @@ void bcc_single_init_lf(struct bcc_single *E)
     else if (n1b<=n2b){ E->M_AtTAn_trm = 1; for (ns_b=0;ns_b<D->T_cpop_b;ns_b++){ E->M_AtTAn_[ns_b] = M_handle_w_make(BITJ,GLOBAL_B_MLT,n2a,n1b);}}
     /* if strategy */}
   if (verbose>1){ printf(" %% initializing E->lrup\n");}
-  get_xdrop(D->A_rpop_j_total,D->A_cpop_j,NULL,&cdrop); ckeep=D->A_cpop_j-cdrop;
+  get_xdrop(D->A_rpop_j_total,D->A_cpop_j,NULL,&cdrop); 
+  if (strstr(GLOBAL_TEST_TYPE,"scorebox") && GLOBAL_scorebox_col_num>1 && GLOBAL_scorebox_col_max>0){ cdrop = ceil((double)GLOBAL_scorebox_col_max/(double)(GLOBAL_scorebox_col_num-1));}
+  ckeep=D->A_cpop_j-cdrop;
   /* QR YnWt lrup */
   E->lf_jn_ajdk=NULL;E->lf_vn_ajdk=NULL;
   if (strstr(D->QR_strategy,"YnWt")){
-    E->length = E->A_nrows*AJDK_TOT; E->lf_jn_ajdk = L_handle_make(E->length); if (!E->lf_jn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = E->Z_nrows*AJDK_TOT; E->lf_vn_ajdk = L_handle_make(E->length); if (!E->lf_vn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->A_nrows*(unsigned long long int)AJDK_TOT; E->lf_jn_ajdk = L_handle_make(E->length); if (!E->lf_jn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->Z_nrows*(unsigned long long int)AJDK_TOT; E->lf_vn_ajdk = L_handle_make(E->length); if (!E->lf_vn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
     /* if strategy */}
   /* QC ZtSWn lrup */
   E->lf_ktrn=NULL;E->lf_utrn=NULL;
   if (strstr(D->QC_strategy,"ZtSWn")){
-    E->length = D->A_ncols*D->T_ncols; E->lf_ktrn = L_handle_make(E->length); if (!E->lf_ktrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = D->Y_ncols*D->T_ncols; E->lf_utrn = L_handle_make(E->length); if (!E->lf_utrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; E->lf_ktrn = L_handle_make(E->length); if (!E->lf_ktrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)D->Y_ncols*(unsigned long long int)D->T_ncols; E->lf_utrn = L_handle_make(E->length); if (!E->lf_utrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
     /* if strategy */}
   E->lf_ktrun=NULL;E->lf_ktrkn=NULL;
   if (strstr(D->QC_strategy,"ZtSWn")){
-    E->length = E->A_rbother*E->M_An->cpop_b*E->M_Yn->cpop_b*D->T_cpop_b; E->lf_ktrun = L_handle_make(E->length); if (!E->lf_ktrun){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = E->A_rbother*E->M_An->cpop_b*E->M_An->cpop_b*D->T_cpop_b; E->lf_ktrkn = L_handle_make(E->length) ;if (!E->lf_ktrkn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->A_rbother*(unsigned long long int)E->M_An->cpop_b*(unsigned long long int)E->M_Yn->cpop_b*(unsigned long long int)D->T_cpop_b; E->lf_ktrun = L_handle_make(E->length); if (!E->lf_ktrun){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->A_rbother*(unsigned long long int)E->M_An->cpop_b*(unsigned long long int)E->M_An->cpop_b*(unsigned long long int)D->T_cpop_b; E->lf_ktrkn = L_handle_make(E->length) ;if (!E->lf_ktrkn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
     /* if strategy */}  
   /* QC YnWt lrup */
   E->lf_kn_ajdk=NULL; E->lf_zn_ajdk=NULL; E->lf_hn_ajdk=NULL; /* E->lf_vn_ajdk=NULL; */ E->lf_an_ajdk=NULL;
   if (strstr(D->QC_strategy,"YnWt")){
-    E->length = E->A_nrows*AJDK_TOT; E->lf_kn_ajdk = L_handle_make(E->length); if (!E->lf_kn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = E->Z_nrows*AJDK_TOT; E->lf_zn_ajdk = L_handle_make(E->length); if (!E->lf_zn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = E->A_nrows*AJDK_TOT; E->lf_hn_ajdk = L_handle_make(E->length); if (!E->lf_hn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    if (E->lf_vn_ajdk==NULL){ E->length = E->Z_nrows*AJDK_TOT; E->lf_vn_ajdk = L_handle_make(E->length); if (!E->lf_vn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}}
-    E->length = E->A_nrows*AJDK_TOT; E->lf_an_ajdk = L_handle_make(E->length); if (!E->lf_an_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->A_nrows*(unsigned long long int)AJDK_TOT; E->lf_kn_ajdk = L_handle_make(E->length); if (!E->lf_kn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->Z_nrows*(unsigned long long int)AJDK_TOT; E->lf_zn_ajdk = L_handle_make(E->length); if (!E->lf_zn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)E->A_nrows*(unsigned long long int)AJDK_TOT; E->lf_hn_ajdk = L_handle_make(E->length); if (!E->lf_hn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    if (E->lf_vn_ajdk==NULL){ E->length = (unsigned long long int)E->Z_nrows*(unsigned long long int)AJDK_TOT; E->lf_vn_ajdk = L_handle_make(E->length); if (!E->lf_vn_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}}
+    E->length = (unsigned long long int)E->A_nrows*(unsigned long long int)AJDK_TOT; E->lf_an_ajdk = L_handle_make(E->length); if (!E->lf_an_ajdk){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
     /* if strategy */}
   /* QC YnWt lrup */
   E->lf_attn=NULL; E->lf_jttn=NULL; /* E->lf_ktrn=NULL; */ E->lf_htrn=NULL; E->lf_ztsn=NULL; E->lf_vtsn=NULL;
   if (strstr(D->QC_strategy,"YnWt")){
-    E->length = D->A_ncols*D->T_ncols; E->lf_attn = L_handle_make(E->length); if (!E->lf_attn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = D->A_ncols*D->T_ncols; E->lf_jttn = L_handle_make(E->length); if (!E->lf_jttn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    if (E->lf_ktrn==NULL){ E->length = D->A_ncols*D->T_ncols; E->lf_ktrn = L_handle_make(E->length); if (!E->lf_ktrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}}
-    E->length = D->A_ncols*D->T_ncols; E->lf_htrn = L_handle_make(E->length); if (!E->lf_htrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = D->A_ncols*D->T_ncols; E->lf_ztsn = L_handle_make(E->length); if (!E->lf_ztsn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-    E->length = D->A_ncols*D->T_ncols; E->lf_vtsn = L_handle_make(E->length); if (!E->lf_vtsn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; E->lf_attn = L_handle_make(E->length); if (!E->lf_attn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; E->lf_jttn = L_handle_make(E->length); if (!E->lf_jttn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    if (E->lf_ktrn==NULL){ E->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; E->lf_ktrn = L_handle_make(E->length); if (!E->lf_ktrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}}
+    E->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; E->lf_htrn = L_handle_make(E->length); if (!E->lf_htrn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; E->lf_ztsn = L_handle_make(E->length); if (!E->lf_ztsn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+    E->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; E->lf_vtsn = L_handle_make(E->length); if (!E->lf_vtsn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
     /* if strategy */}
   E->lf_jn=NULL; E->lf_vn=NULL;
-  if (strstr(D->QC_strategy,"YnWt")){
-    if (strstr(D->QC_strategy,"condense")){
-      E->length = E->A_rbother*E->A_nrows*cdrop; 
+  if (strstr(D->QR_strategy,"YnWt")){
+    if (strstr(D->QR_strategy,"condense")){
+      E->length = (unsigned long long int)E->A_rbother*(unsigned long long int)E->A_nrows*(unsigned long long int)cdrop; 
       mm = 8*(double)E->length;
-      if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d --> %d; memory required %0.2fG\n",E->A_nrows,cdrop,E->length,8*(double)E->length/1e9);}
+      if (verbose || mm>1024*1024*256){ printf(" %% (condense) allocation for E->lf_jn: E->length %d*%d --> %llu; memory required %0.2fG\n",E->A_nrows,cdrop,E->length,8*(double)E->length/1e9);}
       E->lf_jn = L_handle_make(E->length); if (!E->lf_jn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-      E->length = E->Z_rbother*E->Z_nrows*cdrop; 
+      E->length = (unsigned long long int)E->Z_rbother*(unsigned long long int)E->Z_nrows*(unsigned long long int)cdrop; 
       mm = 8*(double)E->length;
-      if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d --> %d; memory required %0.2fG\n",E->Z_nrows,cdrop,E->length,8*(double)E->length/1e9);}
+      if (verbose || mm>1024*1024*256){ printf(" %% (condense) allocation for E->lf_vn: E->length %d*%d --> %llu; memory required %0.2fG\n",E->Z_nrows,cdrop,E->length,8*(double)E->length/1e9);}
       E->lf_vn = L_handle_make(E->length); if (!E->lf_vn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
       /* if strategy */}
     /* if strategy */}
   E->lf_ztsvn=NULL; E->lf_attjn=NULL; E->lf_ktrhn=NULL;
   if (strstr(D->QC_strategy,"YnWt")){
     if (strstr(D->QC_strategy,"store one")){
-      E->length = E->Z_rbother*ckeep*cdrop; 
+      E->length = (unsigned long long int)E->Z_rbother*(unsigned long long int)ckeep*(unsigned long long int)cdrop; 
       mm = 8*(double)E->length;
-      if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d --> %d; memory required %0.2fG\n",ckeep,cdrop,E->length,8*(double)E->length/1e9);}
+      if (verbose || mm>1024*1024*256){ printf(" %% (store one) allocation for E->lf_ztsvn: E->length %d*%d --> %llu; memory required %0.2fG\n",ckeep,cdrop,E->length,8*(double)E->length/1e9);}
       E->lf_ztsvn = L_handle_make(E->length); if (!E->lf_ztsvn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-      E->length = E->A_rbother*ckeep*cdrop; 
+      E->length = (unsigned long long int)E->A_rbother*(unsigned long long int)ckeep*(unsigned long long int)cdrop; 
       mm = 8*(double)E->length;
-      if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d --> %d; memory required %0.2fG\n",ckeep,cdrop,E->length,8*(double)E->length/1e9);}
+      if (verbose || mm>1024*1024*256){ printf(" %% (store one) allocation for E->lf_attjn: E->length %d*%d --> %llu; memory required %0.2fG\n",ckeep,cdrop,E->length,8*(double)E->length/1e9);}
       E->lf_attjn = L_handle_make(E->length); if (!E->lf_attjn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
-      E->length = E->A_rbother*ckeep*cdrop; 
+      E->length = (unsigned long long int)E->A_rbother*(unsigned long long int)ckeep*(unsigned long long int)cdrop; 
       mm = 8*(double)E->length;
-      if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d --> %d; memory required %0.2fG\n",ckeep,cdrop,E->length,8*(double)E->length/1e9);}
+      if (verbose || mm>1024*1024*256){ printf(" %% (store one) allocation for E->lf_ktrhn: E->length %d*%d --> %llu; memory required %0.2fG\n",ckeep,cdrop,E->length,8*(double)E->length/1e9);}
       E->lf_ktrhn = L_handle_make(E->length); if (!E->lf_ktrhn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
       /* if strategy */}
     else /* store all */{
-      E->length = E->Z_rbother*ckeep*cdrop*D->T_ncols; E->lf_ztsvn = L_handle_make(E->length); if (!E->lf_ztsvn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      E->length = (unsigned long long int)E->Z_rbother*(unsigned long long int)ckeep*(unsigned long long int)cdrop*(unsigned long long int)D->T_ncols; 
       mm = 8*(double)E->length;
-      if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d*%d --> %d; memory required %0.2fG\n",ckeep,cdrop,D->T_ncols,E->length,8*(double)E->length/1e9);}
-      E->length = E->A_rbother*ckeep*cdrop*D->T_ncols; E->lf_attjn = L_handle_make(E->length); if (!E->lf_attjn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      if (verbose || mm>1024*1024*256){ printf(" %% (store all) allocation for E->lf_ztsvn: E->length %d*%d*%d --> %llu; memory required %0.2fG\n",ckeep,cdrop,D->T_ncols,E->length,8*(double)E->length/1e9);}
+      E->lf_ztsvn = L_handle_make(E->length); if (!E->lf_ztsvn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      E->length = (unsigned long long int)E->A_rbother*(unsigned long long int)ckeep*(unsigned long long int)cdrop*(unsigned long long int)D->T_ncols; 
       mm = 8*(double)E->length;
-      if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d*%d --> %d; memory required %0.2fG\n",ckeep,cdrop,D->T_ncols,E->length,8*(double)E->length/1e9);}
-      E->length = E->A_rbother*ckeep*cdrop*D->T_ncols; E->lf_ktrhn = L_handle_make(E->length); if (!E->lf_ktrhn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      if (verbose || mm>1024*1024*256){ printf(" %% (store all) allocation for E->lf_attjn: E->length %d*%d*%d --> %llu; memory required %0.2fG\n",ckeep,cdrop,D->T_ncols,E->length,8*(double)E->length/1e9);}
+      E->lf_attjn = L_handle_make(E->length); if (!E->lf_attjn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+      E->length = (unsigned long long int)E->A_rbother*(unsigned long long int)ckeep*(unsigned long long int)cdrop*(unsigned long long int)D->T_ncols; 
       mm = 8*(double)E->length;
-      if (verbose || mm>1024*1024*256){ printf(" %% E->length %d*%d*%d --> %d; memory required %0.2fG\n",ckeep,cdrop,D->T_ncols,E->length,8*(double)E->length/1e9);}
+      if (verbose || mm>1024*1024*256){ printf(" %% (store all) allocation for E->lf_ktrhn: E->length %d*%d*%d --> %llu; memory required %0.2fG\n",ckeep,cdrop,D->T_ncols,E->length,8*(double)E->length/1e9);}
+      E->lf_ktrhn = L_handle_make(E->length); if (!E->lf_ktrhn){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
       /* if strategy */}
     /* if strategy */}
   if (verbose>1){ printf(" %% initializing singlestudy\n");}
@@ -800,8 +812,8 @@ void bcc_single_init_lf(struct bcc_single *E)
   E->length = 1; E->lf_et_An_a1d1 = L_handle_make(E->length);
   E->length = D->T_ncols; E->lf_Tt_An_a1d1 = L_handle_make(E->length);
   /* E->length = D->A_ncols*D->T_ncols; E->lf_At_T_An_a1d1 = L_handle_make(E->length); */
-  E->length = D->T_ncols*E->A_nrows; E->lf_T_AnAt_YnYt = L_handle_make(E->length);
-  E->length = D->T_ncols*E->A_nrows; E->lf_T_AnAt_AnAt = L_handle_make(E->length); if (!E->lf_T_AnAt_AnAt){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
+  E->length = (unsigned long long int)D->T_ncols*(unsigned long long int)E->A_nrows; E->lf_T_AnAt_YnYt = L_handle_make(E->length);
+  E->length = (unsigned long long int)D->T_ncols*(unsigned long long int)E->A_nrows; E->lf_T_AnAt_AnAt = L_handle_make(E->length); if (!E->lf_T_AnAt_AnAt){ printf(" %% Warning! not enough memory in bcc_single_init_lf\n");}
   if (verbose>1){ printf(" %% initializing storage for singlestudy\n");}
   E->M_1 = M_handle_v_make(D->bitj,1,1,NULL,NULL,NULL,NULL);
   M_flag = 1;
@@ -825,19 +837,20 @@ void bcc_single_init_lf(struct bcc_single *E)
   n1a = D->A_cbother*D->A_ncols; n1b = D->A_cbother*D->A_cpop_b;
   n2a = D->T_ncols; n2b = D->T_cpop_b; 
   bcc_single_init_lf_excerpt(prefix,n1a,n1b,n2a,n2b,&(E->lf_a2d2_AtTn),M_flag,&(E->M_a2d2_AtTn));
+  if (verbose){ printf(" %% [finished bcc_single_init_lf]\n");}
 }
 
 void bcc_double_copy_lf_excerpt(char *prefix,int n1a,int n1b,int n2a,int n2b,struct L_handle **L_p,int M_flag,int *trm_flag_p,struct M_handle **M_p,struct L_handle **L_in_p,struct M_handle **M_in_p)
 {
   int verbose=0;
-  int length=0;
-  length  = n1b*n2b; L_handle_copy(*L_p,*L_in_p);
+  unsigned long long int length=0;
+  length  = (unsigned long long int)n1b*(unsigned long long int)n2b; L_handle_copy(*L_p,*L_in_p);
   if (M_flag){
     if (0){}
     else if (n2b<=n1b){ *trm_flag_p = 0; M_handle_copy(*M_p,*M_in_p);}
     else if (n1b<=n2b){ *trm_flag_p = 1; M_handle_copy(*M_p,*M_in_p);}
     /* if (M_flag){ } */}
-  if (verbose){ printf(" %% %s n1a %d n1b %d n2a %d n2b %d --> length %d trm_flag %d \n",prefix,n1a,n1b,n2a,n2b,length,*trm_flag_p);}
+  if (verbose){ printf(" %% %s n1a %d n1b %d n2a %d n2b %d --> length %llu trm_flag %d \n",prefix,n1a,n1b,n2a,n2b,length,*trm_flag_p);}
 }
 
 void bcc_double_copy_lf(struct bcc_double *F,struct bcc_double *F_in)
@@ -861,7 +874,9 @@ void bcc_double_copy_lf(struct bcc_double *F,struct bcc_double *F_in)
     n1a = F->E_nb1->M_An->nrows; n1b = F->E_nb1->M_An->rpop_b; n2a = F->E_nb2->M_An->nrows; n2b = F->E_nb2->M_An->rpop_b; sprintf(prefix,"F->M_AnAt");
     bcc_double_copy_lf_excerpt(prefix,n1a,n1b,n2a,n2b,&(F->lf_AnAt),M_flag,&(F->M_AnAt_trm),&(F->M_AnAt),&(F_in->lf_AnAt),&(F_in->M_AnAt));
     /* if strategy */}
-  get_xdrop(D->A_rpop_j_total,D->A_cpop_j,&rdrop,NULL); rdrop2 = maximum(2,rdrop);
+  get_xdrop(D->A_rpop_j_total,D->A_cpop_j,&rdrop,NULL); 
+  if (strstr(GLOBAL_TEST_TYPE,"scorebox") && GLOBAL_scorebox_row_num>1 && GLOBAL_scorebox_row_max>0){ rdrop = ceil((double)GLOBAL_scorebox_row_max/(double)(GLOBAL_scorebox_row_num-1));}
+  rdrop2 = maximum(2,rdrop);
   /* QR YnWt lrup */
   if (strstr(D->QR_strategy,"YnWt")){
     L_handle_copy(F->lf_jnvt,F_in->lf_jnvt);
@@ -977,8 +992,8 @@ void bcc_double_copy_lf(struct bcc_double *F,struct bcc_double *F_in)
 void bcc_double_init_lf_excerpt(char *prefix,int n1a,int n1b,int n2a,int n2b,struct L_handle **L_p,int M_flag,int *trm_flag_p,struct M_handle **M_p)
 {
   int verbose=0;
-  int length=0;
-  length  = n1b*n2b; *L_p = L_handle_make(length); if (!(*L_p)){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  unsigned long long int length=0;
+  length  = (unsigned long long int)n1b*(unsigned long long int)n2b; *L_p = L_handle_make(length); if (!(*L_p)){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
   if (M_flag){
     if (0){}
     else if (n2b<=n1b){ *trm_flag_p = 0; *M_p = M_handle_w_make(BITJ,GLOBAL_B_MLT,n1a,n2b);}
@@ -1010,15 +1025,16 @@ void bcc_double_init_lf(struct bcc_double *F)
     bcc_double_init_lf_excerpt(prefix,n1a,n1b,n2a,n2b,&(F->lf_AnAt),M_flag,&(F->M_AnAt_trm),&(F->M_AnAt));
     /* if strategy */}
   get_xdrop(D->A_rpop_j_total,D->A_cpop_j,&rdrop,NULL); rdrop2 = maximum(2,rdrop);
+  if (strstr(GLOBAL_TEST_TYPE,"scorebox") && GLOBAL_scorebox_row_num>1 && GLOBAL_scorebox_row_max>0){ rdrop = ceil((double)GLOBAL_scorebox_row_max/(double)(GLOBAL_scorebox_row_num-1));}
   /* QR YnWt lrup */
   F->lf_jnvt=NULL; F->lf_jnjt=NULL;
   if (strstr(D->QR_strategy,"YnWt")){
     n1a = F->E_nb1->M_An->nrows; n1b = F->E_nb1->M_An->rpop_b; 
     n2a = F->E_nb2->M_Zn->nrows; n2b = F->E_nb2->M_Zn->rpop_b; 
-    F->length = n1b*n2b; F->lf_jnvt = L_handle_make(F->length); if (!F->lf_jnvt){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+    F->length = (unsigned long long int)n1b*(unsigned long long int)n2b; F->lf_jnvt = L_handle_make(F->length); if (!F->lf_jnvt){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
     n1a = F->E_nb1->M_An->nrows; n1b = F->E_nb1->M_An->rpop_b; 
     n2a = F->E_nb2->M_An->nrows; n2b = F->E_nb2->M_An->rpop_b; 
-    F->length = n1b*n2b; F->lf_jnjt = L_handle_make(F->length); if (!F->lf_jnjt){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+    F->length = (unsigned long long int)n1b*(unsigned long long int)n2b; F->lf_jnjt = L_handle_make(F->length); if (!F->lf_jnjt){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
     /* if strategy */}
   /* QC YnWt lrup */
   F->lf_unwt=NULL; F->lf_knzt=NULL; F->lf_hnvt=NULL; F->lf_ynut=NULL; F->lf_unyt=NULL; F->lf_unut=NULL; F->lf_ankt=NULL; F->lf_knat=NULL; F->lf_knkt=NULL;
@@ -1064,72 +1080,72 @@ void bcc_double_init_lf(struct bcc_double *F)
     /* if strategy */}
   F->lf_kt_r_unwt_s_zn=NULL; F->lf_kt_r_knzt_s_zn=NULL; F->lf_kt_r_hnvt_s_zn=NULL; F->lf_at_t_ynut_r_kn=NULL; F->lf_kt_r_unyt_t_an=NULL; F->lf_kt_r_unut_r_kn=NULL; F->lf_at_t_ankt_r_kn=NULL; F->lf_kt_r_knat_t_an=NULL; F->lf_kt_r_knkt_r_kn=NULL;
   if (strstr(D->QC_strategy,"YnWt")){
-    F->length = D->A_ncols*D->T_ncols; F->lf_kt_r_unwt_s_zn = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_kt_r_knzt_s_zn = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_kt_r_hnvt_s_zn = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_at_t_ynut_r_kn = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_kt_r_unyt_t_an = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_kt_r_unut_r_kn = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_at_t_ankt_r_kn = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_kt_r_knat_t_an = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_kt_r_knkt_r_kn = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_kt_r_unwt_s_zn = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_kt_r_knzt_s_zn = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_kt_r_hnvt_s_zn = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_at_t_ynut_r_kn = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_kt_r_unyt_t_an = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_kt_r_unut_r_kn = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_at_t_ankt_r_kn = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_kt_r_knat_t_an = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_kt_r_knkt_r_kn = L_handle_make(F->length);
     /* if strategy */}
   F->lf_attjn____vtszn=NULL; F->lf_attjn____jttan=NULL; F->lf_attjn____htrkn=NULL; F->lf_ktrhn____jttan=NULL; F->lf_ktrhn____htrkn=NULL;
   if (strstr(D->QC_strategy,"YnWt")){
-    F->length = D->A_ncols*D->T_ncols; F->lf_attjn____vtszn = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_attjn____jttan = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_attjn____htrkn = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_ktrhn____jttan = L_handle_make(F->length);
-    F->length = D->A_ncols*D->T_ncols; F->lf_ktrhn____htrkn = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_attjn____vtszn = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_attjn____jttan = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_attjn____htrkn = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_ktrhn____jttan = L_handle_make(F->length);
+    F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_ktrhn____htrkn = L_handle_make(F->length);
     /* if strategy */}
   if (verbose>1){ printf(" %% initializing lf_ \n");}
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnZtSWnYt = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnZtSZnAt = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnAtTYnYt = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnAtTAnAt = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnZt_S_WnYt = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnZt_S_ZnAt = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnAt_T_YnYt = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_AnAt_T_AnAt = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_An_ZtSWn_Yt = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_An_ZtSZn_At = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_An_AtTYn_Yt = L_handle_make(F->length);
-  F->length = F->E_nb1->M_An->nrows*D->T_ncols; F->lf_An_AtTAn_At = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_AtTYnWtSZn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_AtTAnZtSZn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_AtTYnYtTAn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_AtTAnAtTAn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_AtTYn____WtSZn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_AtTAn____ZtSZn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_AtTYn____YtTAn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_AtTAn____AtTAn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_At_T_YnWt_S_Zn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_At_T_AnZt_S_Zn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_At_T_YnYt_T_An = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->lf_At_T_AnAt_T_An = L_handle_make(F->length); if (!F->lf_At_T_AnAt_T_An){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_AnZtSWnYt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_AnZtSZnAt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_AnAtTYnYt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_AnAtTAnAt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_AnZt_S_WnYt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_AnZt_S_ZnAt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_AnAt_T_YnYt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_AnAt_T_AnAt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_An_ZtSWn_Yt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_An_ZtSZn_At = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_An_AtTYn_Yt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->M_An->nrows*(unsigned long long int)D->T_ncols; F->lf_An_AtTAn_At = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_AtTYnWtSZn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_AtTAnZtSZn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_AtTYnYtTAn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_AtTAnAtTAn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_AtTYn____WtSZn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_AtTAn____ZtSZn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_AtTYn____YtTAn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_AtTAn____AtTAn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_At_T_YnWt_S_Zn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_At_T_AnZt_S_Zn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_At_T_YnYt_T_An = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->lf_At_T_AnAt_T_An = L_handle_make(F->length); if (!F->lf_At_T_AnAt_T_An){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
   if (verbose>1){ printf(" %% initializing doublestudy\n");}
-  F->length = F->E_nb1->A_nrows*F->D->T_ncols; F->lf_An_a2d2_Zt_Sn = L_handle_make(F->length); if (!F->lf_An_a2d2_Zt_Sn){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
-  F->length = F->E_nb1->A_nrows*F->D->T_ncols; F->lf_An_a2d2_At_Tn = L_handle_make(F->length); if (!F->lf_An_a2d2_At_Tn){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  F->length = (unsigned long long int)F->E_nb1->A_nrows*(unsigned long long int)F->D->T_ncols; F->lf_An_a2d2_Zt_Sn = L_handle_make(F->length); if (!F->lf_An_a2d2_Zt_Sn){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  F->length = (unsigned long long int)F->E_nb1->A_nrows*(unsigned long long int)F->D->T_ncols; F->lf_An_a2d2_At_Tn = L_handle_make(F->length); if (!F->lf_An_a2d2_At_Tn){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
   if (verbose>1){ printf(" %% initializing F->QX\n");}
   F->QR_AnZtSWnYt=NULL; F->QR_AnZtSZnAt=NULL; F->QR_AnAtTYnYt=NULL; F->QR_AnAtTAnAt=NULL; F->QC_AtTYnWtSZn=NULL; F->QC_AtTAnZtSZn=NULL; F->QC_AtTYnYtTAn=NULL; F->QC_AtTAnAtTAn=NULL;
-  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnZtSWnYt = L_handle_make(F->length);
-  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnZtSZnAt = L_handle_make(F->length);
-  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnAtTYnYt = L_handle_make(F->length);
-  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnAtTAnAt = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->QC_AtTYnWtSZn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->QC_AtTAnZtSZn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->QC_AtTYnYtTAn = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->QC_AtTAnAtTAn = L_handle_make(F->length); if (!F->QC_AtTAnAtTAn){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  F->length = (unsigned long long int)F->E_nb1->A_nrows*(unsigned long long int)D->T_ncols; F->QR_AnZtSWnYt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->A_nrows*(unsigned long long int)D->T_ncols; F->QR_AnZtSZnAt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->A_nrows*(unsigned long long int)D->T_ncols; F->QR_AnAtTYnYt = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->A_nrows*(unsigned long long int)D->T_ncols; F->QR_AnAtTAnAt = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->QC_AtTYnWtSZn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->QC_AtTAnZtSZn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->QC_AtTYnYtTAn = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->QC_AtTAnAtTAn = L_handle_make(F->length); if (!F->QC_AtTAnAtTAn){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
   if (verbose>1){ printf(" %% initializing F->QX_uu\n");}
   F->QR_AnZtSWnYt_uu=NULL; F->QR_AnZtSZnAt_uu=NULL; F->QR_AnAtTYnYt_uu=NULL; F->QR_AnAtTAnAt_uu=NULL; F->QC_AtTYnWtSZn_uu=NULL; F->QC_AtTAnZtSZn_uu=NULL; F->QC_AtTYnYtTAn_uu=NULL; F->QC_AtTAnAtTAn_uu=NULL;
-  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnZtSWnYt_uu = L_handle_make(F->length);
-  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnZtSZnAt_uu = L_handle_make(F->length);
-  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnAtTYnYt_uu = L_handle_make(F->length);
-  F->length = F->E_nb1->A_nrows*D->T_ncols; F->QR_AnAtTAnAt_uu = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->QC_AtTYnWtSZn_uu = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->QC_AtTAnZtSZn_uu = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->QC_AtTYnYtTAn_uu = L_handle_make(F->length);
-  F->length = D->A_ncols*D->T_ncols; F->QC_AtTAnAtTAn_uu = L_handle_make(F->length); if (!F->QC_AtTAnAtTAn_uu){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
+  F->length = (unsigned long long int)F->E_nb1->A_nrows*(unsigned long long int)D->T_ncols; F->QR_AnZtSWnYt_uu = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->A_nrows*(unsigned long long int)D->T_ncols; F->QR_AnZtSZnAt_uu = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->A_nrows*(unsigned long long int)D->T_ncols; F->QR_AnAtTYnYt_uu = L_handle_make(F->length);
+  F->length = (unsigned long long int)F->E_nb1->A_nrows*(unsigned long long int)D->T_ncols; F->QR_AnAtTAnAt_uu = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->QC_AtTYnWtSZn_uu = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->QC_AtTAnZtSZn_uu = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->QC_AtTYnYtTAn_uu = L_handle_make(F->length);
+  F->length = (unsigned long long int)D->A_ncols*(unsigned long long int)D->T_ncols; F->QC_AtTAnAtTAn_uu = L_handle_make(F->length); if (!F->QC_AtTAnAtTAn_uu){ printf(" %% Warning! not enough memory in bcc_double_init_lf\n");}
   GLOBAL_toc(0,verbose," %% initializing data_structures: ");
 }
 
@@ -1162,7 +1178,6 @@ void bcc_copy_A_p(struct bcc_ajdk *D,struct bcc_ajdk *D_in)
 
 void bcc_X_nrows_total(struct bcc_ajdk *D)
 {
-  /* initializes D->A_nrows_total and D->Z_nrows_total for each column using row-mask mr_b, not mr_j */
   int verbose=0;
   int nbins = D->nbins; struct bcc_single **E_ = D->E_;
   int nb=0,nc=0;
@@ -1189,6 +1204,7 @@ void bcc_load_A_p(struct bcc_ajdk *D)
   double *AZ_rsum=NULL,*A_p=NULL,**A_ajdk_p=NULL,*YW_rsum=NULL,*Y_p=NULL,**Y_ajdk_p=NULL;
   unsigned char *A_bmc_b=NULL,*Y_bmc_b=NULL;
   double tmp_sum=0,tmp_num=0;
+  int tmp_d1=0,tmp_d2=0;
   if (verbose){ printf(" %% [entering bcc_load_A_p]\n"); wkspace_printf();}
   if (verbose){ printf(" %% \n");}
   D->A_pcols = psize(D->A_ncols)/* rup(D->A_ncols+D->A_ncols_extend,POPLENGTH)/POPLENGTH */; D->Y_pcols = psize(D->Y_ncols)/* rup(D->Y_ncols+D->Y_ncols_extend,POPLENGTH)/POPLENGTH */;
@@ -1239,48 +1255,60 @@ void bcc_load_A_p(struct bcc_ajdk *D)
     dra_plusequals(YW_rsum,D->Y_ncols,E_[nb]->lf_Wt_rsum->lf);
     /* for (nb=0;nb<nbins;nb++){ } */}
   if (verbose){ raprintf(YW_rsum,"double",1,Y_ncols," %% YW_rsum: "); wkspace_printf();}
-  if (verbose){ printf(" %% calculating A_p\n");}
-  for (nc_p=0;nc_p<A_pcols;nc_p++){ A_p[nc_p]=0.5;}
-  if (GLOBAL_TEST_sparse){
-    for (nc_p=0;nc_p<A_pcols;nc_p++){ 
-      nc_start = minimum(A_ncols-1,maximum(0,0 + (nc_p+0)*POPLENGTH - 0));
-      nc_final = minimum(A_ncols-1,maximum(0,0 + (nc_p+1)*POPLENGTH - 1));
-      if (verbose){ printf(" %% nc_p %d: [%d..%d]:",nc_p,nc_start,nc_final);}
-      tmp_sum = 0; tmp_num=0;
-      for (nc=nc_start;nc<=nc_final;nc++){
-	if (bget__on(A_bmc_b,nc)){ tmp_sum += AZ_rsum[nc]; tmp_num+=1;}
-	/* for (nc=nc_start;nc<=nc_final;nc++){ } */}
-      if (verbose){ printf(" tmp_sum %f tmp_num %f*(%d+%d);",tmp_sum,tmp_num,A_rpop_b_total,Z_rpop_b_total);}
-      if (tmp_num==0){ A_p[nc_p] = 0.5;}
-      else /* if (tmp_num>0) */{ A_p[nc_p] = crop((tmp_sum)/(tmp_num*(A_rpop_b_total+Z_rpop_b_total)),0.01,0.99);}
-      if (verbose){ printf(" A_p %f\n",A_p[nc_p]);}
-      /*  for (nc_p=0;nc_p<A_pcols;nc_p++){ } */}
-    /* if (GLOBAL_TEST_sparse){ } */}
+  if (GLOBAL_A_p_name!=NULL &&  strcmp(GLOBAL_A_p_name,"\0")){
+    mda_read_d2_r8(GLOBAL_A_p_name,&tmp_d1,&tmp_d2,NULL); if (tmp_d1!=A_pcols){ printf(" %% Warning! tmp_d1 %d A_pcols %d in bcc.c\n",tmp_d1,A_pcols);}
+    mda_read_d2_r8(GLOBAL_A_p_name,NULL,NULL,A_p);
+    /* if (GLOBAL_A_p_name!=NULL &&  strcmp(GLOBAL_A_p_name,"\0")){ } */}
+  else /* if (GLOBAL_A_p_name==NULL || !strcmp(GLOBAL_A_p_name,"\0")) */{
+    if (verbose){ printf(" %% calculating A_p\n");}
+    for (nc_p=0;nc_p<A_pcols;nc_p++){ A_p[nc_p]=0.5;}
+    if (GLOBAL_TEST_sparse){
+      for (nc_p=0;nc_p<A_pcols;nc_p++){ 
+	nc_start = minimum(A_ncols-1,maximum(0,0 + (nc_p+0)*POPLENGTH - 0));
+	nc_final = minimum(A_ncols-1,maximum(0,0 + (nc_p+1)*POPLENGTH - 1));
+	if (verbose){ printf(" %% nc_p %d: [%d..%d]:",nc_p,nc_start,nc_final);}
+	tmp_sum = 0; tmp_num=0;
+	for (nc=nc_start;nc<=nc_final;nc++){
+	  if (bget__on(A_bmc_b,nc)){ tmp_sum += AZ_rsum[nc]; tmp_num+=1;}
+	  /* for (nc=nc_start;nc<=nc_final;nc++){ } */}
+	if (verbose){ printf(" tmp_sum %f tmp_num %f*(%d+%d);",tmp_sum,tmp_num,A_rpop_b_total,Z_rpop_b_total);}
+	if (tmp_num==0){ A_p[nc_p] = 0.5;}
+	else /* if (tmp_num>0) */{ A_p[nc_p] = crop((tmp_sum)/(tmp_num*(A_rpop_b_total+Z_rpop_b_total)),0.01,0.99);}
+	if (verbose){ printf(" A_p %f\n",A_p[nc_p]);}
+	/*  for (nc_p=0;nc_p<A_pcols;nc_p++){ } */}
+      /* if (GLOBAL_TEST_sparse){ } */}
+    /* if (GLOBAL_A_p_name==NULL || !strcmp(GLOBAL_A_p_name,"\0")){ } */}
   if (verbose){ raprintf(A_p,"double",1,A_pcols," %% A_p: "); wkspace_printf();}
   calc_A_ajdk(A_p,A_pcols,A_ajdk_p); if (verbose){ raprintf(*A_ajdk_p,"double",A_pcols,AJDK_TOT," %% A_ajdk: "); wkspace_printf();}
-  if (verbose){ printf(" %% calculating Y_p\n");}
-  for (nc_p=0;nc_p<Y_pcols;nc_p++){ Y_p[nc_p]=0.5;}
-  if (GLOBAL_TEST_sparse){
-    for (nc_p=0;nc_p<Y_pcols;nc_p++){ 
-      nc_start = minimum(Y_ncols-1,maximum(0,0 + (nc_p+0)*POPLENGTH - 0));
-      nc_final = minimum(Y_ncols-1,maximum(0,0 + (nc_p+1)*POPLENGTH - 1));
-      if (verbose){ printf(" %% nc_p %d: [%d..%d]:",nc_p,nc_start,nc_final);}
-      tmp_sum = 0; tmp_num=0;
-      for (nc=nc_start;nc<=nc_final;nc++){
-	if (bget__on(Y_bmc_b,nc)){ tmp_sum += YW_rsum[nc]; tmp_num+=1;}
-	/* for (nc=nc_start;nc<=nc_final;nc++){ } */}
-      if (verbose){ printf(" tmp_sum %f tmp_num %f*(%d+%d);",tmp_sum,tmp_num,A_rpop_b_total,Z_rpop_b_total);}
-      if (tmp_num==0){ Y_p[nc_p] = 0.5;}
-      else /* if (tmp_num>0) */{ Y_p[nc_p] = crop((tmp_sum)/(tmp_num*(A_rpop_b_total+Z_rpop_b_total)),0.01,0.99);}
-      if (verbose){ printf(" Y_p %f\n",Y_p[nc_p]);}
-      /*  for (nc_p=0;nc_p<Y_pcols;nc_p++){ } */}
-    /* if (GLOBAL_TEST_sparse){ } */}
+  if (GLOBAL_Y_p_name!=NULL &&  strcmp(GLOBAL_Y_p_name,"\0")){
+    mda_read_d2_r8(GLOBAL_Y_p_name,&tmp_d1,&tmp_d2,NULL); if (tmp_d1!=Y_pcols){ printf(" %% Warning! tmp_d1 %d Y_pcols %d in bcc.c\n",tmp_d1,Y_pcols);}
+    mda_read_d2_r8(GLOBAL_Y_p_name,NULL,NULL,Y_p);
+    /* if (GLOBAL_Y_p_name!=NULL &&  strcmp(GLOBAL_Y_p_name,"\0")){ } */}
+  else /* if (GLOBAL_Y_p_name==NULL || !strcmp(GLOBAL_Y_p_name,"\0")) */{
+    if (verbose){ printf(" %% calculating Y_p\n");}
+    for (nc_p=0;nc_p<Y_pcols;nc_p++){ Y_p[nc_p]=0.5;}
+    if (GLOBAL_TEST_sparse){
+      for (nc_p=0;nc_p<Y_pcols;nc_p++){ 
+	nc_start = minimum(Y_ncols-1,maximum(0,0 + (nc_p+0)*POPLENGTH - 0));
+	nc_final = minimum(Y_ncols-1,maximum(0,0 + (nc_p+1)*POPLENGTH - 1));
+	if (verbose){ printf(" %% nc_p %d: [%d..%d]:",nc_p,nc_start,nc_final);}
+	tmp_sum = 0; tmp_num=0;
+	for (nc=nc_start;nc<=nc_final;nc++){
+	  if (bget__on(Y_bmc_b,nc)){ tmp_sum += YW_rsum[nc]; tmp_num+=1;}
+	  /* for (nc=nc_start;nc<=nc_final;nc++){ } */}
+	if (verbose){ printf(" tmp_sum %f tmp_num %f*(%d+%d);",tmp_sum,tmp_num,A_rpop_b_total,Z_rpop_b_total);}
+	if (tmp_num==0){ Y_p[nc_p] = 0.5;}
+	else /* if (tmp_num>0) */{ Y_p[nc_p] = crop((tmp_sum)/(tmp_num*(A_rpop_b_total+Z_rpop_b_total)),0.01,0.99);}
+	if (verbose){ printf(" Y_p %f\n",Y_p[nc_p]);}
+	/*  for (nc_p=0;nc_p<Y_pcols;nc_p++){ } */}
+      /* if (GLOBAL_TEST_sparse){ } */}
+    /* if (GLOBAL_Y_p_name==NULL || !strcmp(GLOBAL_Y_p_name,"\0")){ } */}
   if (verbose){ raprintf(Y_p,"double",1,Y_pcols," %% Y_p: "); wkspace_printf();}
   calc_A_ajdk(Y_p,Y_pcols,Y_ajdk_p); if (verbose){ raprintf(*Y_ajdk_p,"double",Y_pcols,AJDK_TOT," %% Y_ajdk: "); wkspace_printf();}
-  sprintf(tempchar,"%s/AZ_rsum.mda",GLOBAL_DIR_NAME); mda_write_r8(tempchar,A_ncols,1,AZ_rsum);
-  sprintf(tempchar,"%s/YW_rsum.mda",GLOBAL_DIR_NAME); mda_write_r8(tempchar,Y_ncols,1,YW_rsum);
-  sprintf(tempchar,"%s/A_p.mda",GLOBAL_DIR_NAME); mda_write_r8(tempchar,A_pcols,1,A_p);
-  sprintf(tempchar,"%s/Y_p.mda",GLOBAL_DIR_NAME); mda_write_r8(tempchar,Y_pcols,1,Y_p);
+  sprintf(tempchar,"%s/AZ_rsum.mda",GLOBAL_DIR_NAME); mda_write_d2_r8(tempchar,A_ncols,1,AZ_rsum);
+  sprintf(tempchar,"%s/YW_rsum.mda",GLOBAL_DIR_NAME); mda_write_d2_r8(tempchar,Y_ncols,1,YW_rsum);
+  sprintf(tempchar,"%s/A_p.mda",GLOBAL_DIR_NAME); mda_write_d2_r8(tempchar,A_pcols,1,A_p);
+  sprintf(tempchar,"%s/Y_p.mda",GLOBAL_DIR_NAME); mda_write_d2_r8(tempchar,Y_pcols,1,Y_p);
   if (verbose){ printf(" %% [finished bcc_load_A_p]\n");  wkspace_printf();}
 }
 
@@ -1315,22 +1343,22 @@ void bcc_copy_QX(struct bcc_ajdk *D,struct bcc_ajdk *D_in)
   memcpy(D->QC_AtTAnZtSZn_nrm,D_in->QC_AtTAnZtSZn_nrm,D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double));
   memcpy(D->QC_AtTYnYtTAn_nrm,D_in->QC_AtTYnYtTAn_nrm,D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double));
   memcpy(D->QC_AtTAnAtTAn_nrm,D_in->QC_AtTAnAtTAn_nrm,D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double));
-  memcpy(D->QC_sra,D_in->QC_sra,D->A_ncols*sizeof(double));
-  memcpy(D->QC_lmc_a,D_in->QC_lmc_a,D->A_ncols*sizeof(int));
-  memcpy(D->QC_lmc_b,D_in->QC_lmc_b,D->A_ncols*sizeof(int));
-  memcpy(D->QC_lmc_j,D_in->QC_lmc_j,D->A_ncols*sizeof(int));
-  memcpy(D->QR_sra,D_in->QR_sra,D->A_nrows_total*sizeof(double));
-  memcpy(D->QR_imr_a,D_in->QR_imr_a,D->A_nrows_total*sizeof(int));
-  memcpy(D->QR_imr_b,D_in->QR_imr_b,D->A_nrows_total*sizeof(int));
-  memcpy(D->QR_imr_j,D_in->QR_imr_j,D->A_nrows_total*sizeof(int));
-  memcpy(D->QR_lmr_a,D_in->QR_lmr_a,D->A_nrows_total*sizeof(int));
-  memcpy(D->QR_lmr_b,D_in->QR_lmr_b,D->A_nrows_total*sizeof(int));
-  memcpy(D->QR_lmr_j,D_in->QR_lmr_j,D->A_nrows_total*sizeof(int));
-  memcpy(D->QR_lnb,D_in->QR_lnb,D->A_nrows_total*sizeof(int));
+  memcpy(D->QC_svalue,D_in->QC_svalue,D->A_ncols*sizeof(double));
+  memcpy(D->QC_index_local_mc_a,D_in->QC_index_local_mc_a,D->A_ncols*sizeof(int));
+  memcpy(D->QC_index_local_mc_b,D_in->QC_index_local_mc_b,D->A_ncols*sizeof(int));
+  memcpy(D->QC_index_local_mc_j,D_in->QC_index_local_mc_j,D->A_ncols*sizeof(int));
+  memcpy(D->QR_svalue,D_in->QR_svalue,D->A_nrows_total*sizeof(double));
+  memcpy(D->QR_index_global_mr_a,D_in->QR_index_global_mr_a,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_index_global_mr_b,D_in->QR_index_global_mr_b,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_index_global_mr_j,D_in->QR_index_global_mr_j,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_index_local_mr_a,D_in->QR_index_local_mr_a,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_index_local_mr_b,D_in->QR_index_local_mr_b,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_index_local_mr_j,D_in->QR_index_local_mr_j,D->A_nrows_total*sizeof(int));
+  memcpy(D->QR_index_local_nb,D_in->QR_index_local_nb,D->A_nrows_total*sizeof(int));
   for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];
-    memcpy(E->QR_imr_a,E_in_[nb1]->QR_imr_a,E->A_nrows*sizeof(int));
-    memcpy(E->QR_imr_b,E_in_[nb1]->QR_imr_b,E->A_nrows*sizeof(int));
-    memcpy(E->QR_imr_j,E_in_[nb1]->QR_imr_j,E->A_nrows*sizeof(int));
+    memcpy(E->QR_index_global_mr_a,E_in_[nb1]->QR_index_global_mr_a,E->A_nrows*sizeof(int));
+    memcpy(E->QR_index_global_mr_b,E_in_[nb1]->QR_index_global_mr_b,E->A_nrows*sizeof(int));
+    memcpy(E->QR_index_global_mr_j,E_in_[nb1]->QR_index_global_mr_j,E->A_nrows*sizeof(int));
     memcpy(E->QR_AnZtSWnYt_nrm,E_in_[nb1]->QR_AnZtSWnYt_nrm,E->A_nrows*D->T_ncols*nbins*sizeof(double));
     memcpy(E->QR_AnZtSZnAt_nrm,E_in_[nb1]->QR_AnZtSZnAt_nrm,E->A_nrows*D->T_ncols*nbins*sizeof(double));
     memcpy(E->QR_AnAtTYnYt_nrm,E_in_[nb1]->QR_AnAtTYnYt_nrm,E->A_nrows*D->T_ncols*nbins*sizeof(double));
@@ -1349,30 +1377,30 @@ void bcc_init_QX(struct bcc_ajdk *D)
   D->QC_AtTAnZtSZn_nrm = (double *) wkspace_all0c(D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double)); if (!D->QC_AtTAnZtSZn_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
   D->QC_AtTYnYtTAn_nrm = (double *) wkspace_all0c(D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double)); if (!D->QC_AtTYnYtTAn_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
   D->QC_AtTAnAtTAn_nrm = (double *) wkspace_all0c(D->A_ncols*D->T_ncols*nbins*nbins*sizeof(double)); if (!D->QC_AtTAnAtTAn_nrm){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");}
-  D->QC_sra=(double *)wkspace_all0c(D->A_ncols*sizeof(double)); if (!D->QC_sra){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QC_lmc_a=(int *)wkspace_all0c(D->A_ncols*sizeof(int)); if (!D->QC_lmc_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QC_lmc_b=(int *)wkspace_all0c(D->A_ncols*sizeof(int)); if (!D->QC_lmc_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QC_lmc_j=(int *)wkspace_all0c(D->A_ncols*sizeof(int)); if (!D->QC_lmc_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QR_sra=(double *)wkspace_all0c(D->A_nrows_total*sizeof(double)); if (!D->QR_sra){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QR_imr_a=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_imr_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QR_imr_b=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_imr_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QR_imr_j=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_imr_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QR_lmr_a=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_lmr_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QR_lmr_b=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_lmr_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QR_lmr_j=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_lmr_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-  D->QR_lnb=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_lnb){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QC_svalue=(double *)wkspace_all0c(D->A_ncols*sizeof(double)); if (!D->QC_svalue){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QC_index_local_mc_a=(int *)wkspace_all0c(D->A_ncols*sizeof(int)); if (!D->QC_index_local_mc_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QC_index_local_mc_b=(int *)wkspace_all0c(D->A_ncols*sizeof(int)); if (!D->QC_index_local_mc_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QC_index_local_mc_j=(int *)wkspace_all0c(D->A_ncols*sizeof(int)); if (!D->QC_index_local_mc_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_svalue=(double *)wkspace_all0c(D->A_nrows_total*sizeof(double)); if (!D->QR_svalue){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_index_global_mr_a=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_index_global_mr_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_index_global_mr_b=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_index_global_mr_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_index_global_mr_j=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_index_global_mr_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_index_local_mr_a=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_index_local_mr_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_index_local_mr_b=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_index_local_mr_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_index_local_mr_j=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_index_local_mr_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+  D->QR_index_local_nb=(int *)wkspace_all0c(D->A_nrows_total*sizeof(int)); if (!D->QR_index_local_nb){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
   mx_a=0; mx_b=0;
   for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];
-    E->QR_imr_a = (int *)wkspace_all0c(E->A_nrows*sizeof(int)); if (!E->QR_imr_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-    E->QR_imr_b = (int *)wkspace_all0c(E->A_nrows*sizeof(int)); if (!E->QR_imr_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
-    E->QR_imr_j = (int *)wkspace_all0c(E->A_nrows*sizeof(int)); if (!E->QR_imr_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+    E->QR_index_global_mr_a = (int *)wkspace_all0c(E->A_nrows*sizeof(int)); if (!E->QR_index_global_mr_a){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+    E->QR_index_global_mr_b = (int *)wkspace_all0c(E->A_nrows*sizeof(int)); if (!E->QR_index_global_mr_b){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
+    E->QR_index_global_mr_j = (int *)wkspace_all0c(E->A_nrows*sizeof(int)); if (!E->QR_index_global_mr_j){ printf(" %% Warning! not enough memory in bcc_init_X_QX\n");} 
     mr_a=0;mr_b=0;mr_j=0;
     while (mr_a<E->A_nrows){
-      E->QR_imr_a[mr_a] = mx_a;
+      E->QR_index_global_mr_a[mr_a] = mx_a;
       if (bget__on(E->A_bmr_b,mr_a)){
-	E->QR_imr_b[mr_a] = mx_b;
+	E->QR_index_global_mr_b[mr_a] = mx_b;
 	if (bget__on(E->A_bmr_j,mr_a)){
-	  E->QR_imr_j[mr_a] = mx_j;
+	  E->QR_index_global_mr_j[mr_a] = mx_j;
 	  mr_j++; mx_j++; /* if (bget__on(E->A_bmr_j,mr_a)){ } */}
 	mr_b++; mx_b++; /* if (bget__on(E->A_bmr_b,mr_b)){ } */}
       mr_a++; mx_a++; /* while (mr_a<E->A_nrows){ } */}
@@ -1385,6 +1413,10 @@ void bcc_init_QX(struct bcc_ajdk *D)
 
 void bcc_M_mxset(struct bcc_ajdk *D)
 {
+  /* Updates D->A_cpop_j, etc. and E->A_rpop_j, etc. ;
+     Copies D->A_bmc_j into E->M_An->mc_j, and updates E->M_An->n_a_, etc. ;
+     Copies E_[nb]->A_bmr_j into E->M_An->mr_j and updates E->M_An->m_a_, etc.
+  */
   int verbose=GLOBAL_verbose;
   int nbins = D->nbins; struct bcc_single **E_ = D->E_;
   int nb=0;

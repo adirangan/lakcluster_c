@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void *get_AttAn_vv(void *vp)
 {
   /* This function takes in M_At,M_Tt,M_Yt==M_At and ns_j and calculates :
@@ -169,15 +173,15 @@ int wrap_AttAn_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int output_spa
    */
   int verbose=0;
   /* unsigned char *wkspace_mark=NULL; */
-  int length_a=0,length_y=0,length_t=0,length=0,ip=0;
+  unsigned long long int length_a=0,length_y=0,length_t=0,length=0,ip=0;
   if (verbose){ printf(" %% [entering wrap_AttAn_vv__run] tidx %d \n",*tidx);}
   if (verbose){ M_handle_printf(M_At,verbose," %% M_At: ");}
   if (verbose){ M_handle_printf(M_Tt,verbose," %% M_Tt: ");}
   if (verbose){ M_handle_printf(M_Yt,verbose," %% M_Yt: ");}
   switch (output_spacing_a){ case SPACING_j: length_a = M_At->rpop_j; break; case SPACING_b: length_a = M_At->rpop_b; break; case SPACING_a: length_a = M_At->nrows; break; default: break; /* switch (output_spacing_a){ } */}
   switch (output_spacing_y){ case SPACING_j: length_y = M_Yt->rpop_j; break; case SPACING_b: length_y = M_Yt->rpop_b; break; case SPACING_a: length_y = M_Yt->nrows; break; default: break; /* switch (output_spacing_y){ } */}
-  length = length_a*length_y; if (verbose){ printf(" %% length %d*%d=%d\n",length_a,length_y,length);}
-  length = length_a*length_y; if (*output_AttAn_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_AttAn_p = L_handle_make(length);}
+  length = length_a*length_y; if (verbose){ printf(" %% length %llu*%llu=%llu\n",length_a,length_y,length);}
+  length = length_a*length_y; if (*output_AttAn_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_AttAn_p = L_handle_make(length);}
   if (verbose>2){ bprintf(M_At->mr_b,M_At->bitj,1,M_At->nrows," %% M_At->mr_b: ");}
   if (verbose>2){ bprintf(M_At->mr_j,M_At->bitj,1,M_At->nrows," %% M_At->mr_j: ");}
   if (verbose>2){ bprintf(M_At->mc_b,M_At->bitj,1,M_At->ncols," %% M_At->mc_b: ");}
@@ -186,7 +190,7 @@ int wrap_AttAn_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int output_spa
   if (verbose>2){ bprintf(M_Yt->mr_j,M_Yt->bitj,1,M_Yt->nrows," %% M_Yt->mr_j: ");}
   if (verbose>2){ bprintf(M_Yt->mc_b,M_Yt->bitj,1,M_Yt->ncols," %% M_Yt->mc_b: ");}
   if (verbose>2){ bprintf(M_Yt->mc_j,M_Yt->bitj,1,M_Yt->ncols," %% M_Yt->mc_j: ");}
-  length = length_a*length_y; if ((*output_AttAn_p)->length<length){ printf(" %% Warning! length %d<%d in wrap_AttAn_vv__run\n",(*output_AttAn_p)->length,length);} memset((*output_AttAn_p)->lf,0,length*sizeof(double));
+  length = length_a*length_y; if ((*output_AttAn_p)->length<length){ printf(" %% Warning! length %llu<%llu in wrap_AttAn_vv__run\n",(*output_AttAn_p)->length,length);} memset((*output_AttAn_p)->lf,0,length*sizeof(double));
   if (ns_j<0 || ns_j>addressable_int_length-1){ printf(" %% Warning! ns_j %d in wrap_AttAn_vv_run\n",ns_j);}
   ip=0;
   vpra[ip++] = tidx; vpra[ip++] = M_At; vpra[ip++] = M_Tt; vpra[ip++] = &(addressable_int[ns_j]); vpra[ip++] = M_Yt; vpra[ip++] = A_ajdk; vpra[ip++] = Y_ajdk; vpra[ip++] = lf_AtTn; vpra[ip++] = lf_YtTn; vpra[ip++] = *output_AttAn_p; 

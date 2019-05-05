@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void GLOBAL_ops_reset_all(){ int nt; for (nt=0;nt<MAX_THREADS;nt++){ GLOBAL_ops_f_[nt]=0; GLOBAL_ops_b_[nt]=0;}}
 
 void GLOBAL_ops_reset_one(int nt){ GLOBAL_ops_f_[nt]=0; GLOBAL_ops_b_[nt]=0;}

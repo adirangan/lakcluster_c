@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void calc_A_ajdk(double *A_p,int A_pcols,double **A_ajdk_p)
 {
   /* A_ajdk[(0:A_pcols-1) + AJDK_j_k*A_pcols] stores alpha.^j.*D.^k, where alpha=p-q and D=1/(4*p*q);
@@ -199,8 +203,8 @@ void wrap_M_setup_test(char *error_vs_speed,double mrnd,int nbins,int *A_n_rows,
   lf_An_ajdk = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   lf_Zn_ajdk = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   for (nb=0;nb<nbins;nb++){
-    lf_An_ajdk[nb] = L_handle_make(A_n_rows[nb]*AJDK_TOT);
-    lf_Zn_ajdk[nb] = L_handle_make(Z_n_rows[nb]*AJDK_TOT);
+    lf_An_ajdk[nb] = L_handle_make((unsigned long long int)A_n_rows[nb]*(unsigned long long int)AJDK_TOT);
+    lf_Zn_ajdk[nb] = L_handle_make((unsigned long long int)Z_n_rows[nb]*(unsigned long long int)AJDK_TOT);
     /* for (nb=0;nb<nbins;nb++){ } */}
   Y_pcols = psize(Y_n_cols);
   Y_p = (double *)wkspace_all0c(Y_pcols*sizeof(double));
@@ -210,8 +214,8 @@ void wrap_M_setup_test(char *error_vs_speed,double mrnd,int nbins,int *A_n_rows,
   lf_Yn_ajdk = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   lf_Wn_ajdk = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   for (nb=0;nb<nbins;nb++){
-    lf_Yn_ajdk[nb] = L_handle_make(A_n_rows[nb]*AJDK_TOT);
-    lf_Wn_ajdk[nb] = L_handle_make(Z_n_rows[nb]*AJDK_TOT);
+    lf_Yn_ajdk[nb] = L_handle_make((unsigned long long int)A_n_rows[nb]*(unsigned long long int)AJDK_TOT);
+    lf_Wn_ajdk[nb] = L_handle_make((unsigned long long int)Z_n_rows[nb]*(unsigned long long int)AJDK_TOT);
     /* for (nb=0;nb<nbins;nb++){ } */}
   if (verbose){ printf(" %% setting output: \n");}
   if (M_An_p!=NULL){ *M_An_p = M_An;} if (M_At_p!=NULL){ *M_At_p = M_At;}
@@ -364,15 +368,15 @@ int wrap_An_ajdk_v(int *tidx,void **vpra,pthread_t *thread_in,int type_flag,int 
      variable space in **vpra (should be at least size 6) */
   int verbose=0;
   /* unsigned char *wkspace_mark=NULL; */
-  int length=0,length_r=0,ip=0;
+  unsigned long long int length=0,length_r=0,ip=0;
   if (verbose){ printf(" %% [entering wrap_An_ajdk_v] *tidx %d\n",*tidx);}
   switch (output_spacing_r){ case SPACING_j: length_r = M_An->rpop_j; break; case SPACING_b: length_r = M_An->rpop_b; break; case SPACING_a: length_r = M_An->nrows; break; default: break; /* switch (output_spacing_r){ } */}
-  length = length_r*AJDK_TOT; if (*output_An_ajdk_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_An_ajdk_p = L_handle_make(length);}
+  length = length_r*AJDK_TOT; if (*output_An_ajdk_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_An_ajdk_p = L_handle_make(length);}
   if (verbose>2){ bprintf(M_An->mr_b,M_An->bitj,1,M_An->nrows," %% M_An->mr_b: ");}
   if (verbose>2){ bprintf(M_An->mr_j,M_An->bitj,1,M_An->nrows," %% M_An->mr_j: ");}
   if (verbose>2){ bprintf(M_An->mc_b,M_An->bitj,1,M_An->ncols," %% M_An->mc_b: ");}
   if (verbose>2){ bprintf(M_An->mc_j,M_An->bitj,1,M_An->ncols," %% M_An->mc_j: ");}
-  length = length_r*AJDK_TOT; if ((*output_An_ajdk_p)->length<length){ printf(" %% Error! length %d<%d in wrap_An_ajdk_v\n",(*output_An_ajdk_p)->length,length);} memset((*output_An_ajdk_p)->lf,0,length*sizeof(double)); 
+  length = length_r*AJDK_TOT; if ((*output_An_ajdk_p)->length<length){ printf(" %% Error! length %llu<%llu in wrap_An_ajdk_v\n",(*output_An_ajdk_p)->length,length);} memset((*output_An_ajdk_p)->lf,0,length*sizeof(double)); 
   ip=0; vpra[ip++] = tidx; vpra[ip++] = M_An; vpra[ip++] = A_ajdk; vpra[ip++] = *output_An_ajdk_p;
   switch (type_flag){ case TYPE_p0: vpra[ip++] = &addressable_type_p0; break; case TYPE_pm: vpra[ip++] = &addressable_type_pm; break; case TYPE_00: vpra[ip++] = &addressable_type_00; break; default: break; /* switch (type_flag){ } */}
   switch (output_spacing_r){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing){ } */}
@@ -445,15 +449,15 @@ int wrap_An_ajdk_u(int *tidx,void **vpra,pthread_t *thread_in,int type_flag,int 
      variable space in **vpra (should be at least size 6) */
   int verbose=0;
   /* unsigned char *wkspace_mark=NULL; */
-  int length=0,length_r=0,ip=0;
+  unsigned long long int length=0,length_r=0,ip=0;
   if (verbose){ printf(" %% [entering wrap_An_ajdk_u] *tidx %d\n",*tidx);}
   switch (output_spacing_r){ case SPACING_j: length_r = M_An->rpop_j; break; case SPACING_b: length_r = M_An->rpop_b; break; case SPACING_a: length_r = M_An->nrows; break; default: break; /* switch (output_spacing_r){ } */}
-  length = length_r*AJDK_TOT; if (*output_An_ajdk_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_An_ajdk_p = L_handle_make(length);}
+  length = length_r*AJDK_TOT; if (*output_An_ajdk_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_An_ajdk_p = L_handle_make(length);}
   if (verbose>2){ bprintf(M_An->mr_b,M_An->bitj,1,M_An->nrows," %% M_An->mr_b: ");}
   if (verbose>2){ bprintf(M_An->mr_j,M_An->bitj,1,M_An->nrows," %% M_An->mr_j: ");}
   if (verbose>2){ bprintf(M_An->mc_b,M_An->bitj,1,M_An->ncols," %% M_An->mc_b: ");}
   if (verbose>2){ bprintf(M_An->mc_j,M_An->bitj,1,M_An->ncols," %% M_An->mc_j: ");}
-  length = length_r*AJDK_TOT; if ((*output_An_ajdk_p)->length<length){ printf(" %% Warning! length %d<%d in wrap_An_ajdk_u\n",(*output_An_ajdk_p)->length,length);} memset((*output_An_ajdk_p)->lf,0,length*sizeof(double)); 
+  length = length_r*AJDK_TOT; if ((*output_An_ajdk_p)->length<length){ printf(" %% Warning! length %llu<%llu in wrap_An_ajdk_u\n",(*output_An_ajdk_p)->length,length);} memset((*output_An_ajdk_p)->lf,0,length*sizeof(double)); 
   ip=0; vpra[ip++] = tidx; vpra[ip++] = M_An; vpra[ip++] = A_ajdk; vpra[ip++] = *output_An_ajdk_p;
   switch (type_flag){ case TYPE_p0: vpra[ip++] = &addressable_type_p0; break; case TYPE_pm: vpra[ip++] = &addressable_type_pm; break; case TYPE_00: vpra[ip++] = &addressable_type_00; break; default: break; /* switch (type_flag){ } */}
   switch (output_spacing_r){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (output_spacing){ } */}
@@ -525,10 +529,10 @@ void wrap_An_ajdk_v_test()
     lf_Yn_ajdk_u = (struct L_handle **) wkspace_all0c(sizeof(struct L_handle *)*nbins);
     lf_Wn_ajdk_u = (struct L_handle **) wkspace_all0c(sizeof(struct L_handle *)*nbins);
     for (nb=0;nb<nbins;nb++){
-      lf_An_ajdk_u[nb] = L_handle_make(M_An[nb]->nrows*AJDK_TOT);
-      lf_Zn_ajdk_u[nb] = L_handle_make(M_Zn[nb]->nrows*AJDK_TOT);
-      lf_Yn_ajdk_u[nb] = L_handle_make(M_Yn[nb]->nrows*AJDK_TOT);
-      lf_Wn_ajdk_u[nb] = L_handle_make(M_Wn[nb]->nrows*AJDK_TOT);
+      lf_An_ajdk_u[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)AJDK_TOT);
+      lf_Zn_ajdk_u[nb] = L_handle_make((unsigned long long int)M_Zn[nb]->nrows*(unsigned long long int)AJDK_TOT);
+      lf_Yn_ajdk_u[nb] = L_handle_make((unsigned long long int)M_Yn[nb]->nrows*(unsigned long long int)AJDK_TOT);
+      lf_Wn_ajdk_u[nb] = L_handle_make((unsigned long long int)M_Wn[nb]->nrows*(unsigned long long int)AJDK_TOT);
       /* for (nb=0;nb<nbins;nb++){ } */}
     /* if (error_check){ } */}
   for (n_type=1;n_type<=2;n_type++){ for (n_spacing_A=0;n_spacing_A<=2;n_spacing_A++){

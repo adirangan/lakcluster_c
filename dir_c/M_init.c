@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
 unsigned long long int M_wkspace_copy(struct M_handle *M,struct M_handle *M_in)
@@ -112,6 +116,12 @@ void M_handle_printf(struct M_handle *M,int verbose,char *prefix)
     if (verbose){ sprintf(tmpchar,"%s mr_j: ",prefix); bprintf(M->mr_j,M->bitj,1,M->nrows,tmpchar);}
     if (verbose){ sprintf(tmpchar,"%s mc_b: ",prefix); bprintf(M->mc_b,M->bitj,1,M->ncols,tmpchar);}
     if (verbose){ sprintf(tmpchar,"%s mc_j: ",prefix); bprintf(M->mc_j,M->bitj,1,M->ncols,tmpchar);}
+    if (verbose){
+      sprintf(tmpchar,"%s m_a_: ",prefix); raprintf(M->m_a_,"int",1,M->rpop_j,tmpchar);
+      sprintf(tmpchar,"%s m_b_: ",prefix); raprintf(M->m_b_,"int",1,M->rpop_j,tmpchar);
+      sprintf(tmpchar,"%s n_a_: ",prefix); raprintf(M->n_a_,"int",1,M->cpop_j,tmpchar);
+      sprintf(tmpchar,"%s n_b_: ",prefix); raprintf(M->n_b_,"int",1,M->cpop_j,tmpchar);
+      /* if (verbose){ } */}
     if (verbose>1 && M->A_name!=NULL && M->A_fp!=NULL){ printf("%sA_name %s\n",prefix,M->A_name); binary_read(M->A_name,&bitj,&A_n_cols,&A_n_rows,&bAra); sprintf(tmpchar,"%s Afp: ",prefix); bprintf(bAra,bitj,A_n_rows,A_n_cols,tmpchar); }
     if (verbose>1 && M->Ara!=NULL){ sprintf(tmpchar,"%s Ara : ",prefix); bprintf(M->Ara,POPLENGTH,M->nrows,M->ncols,tmpchar);}
     if (verbose>1 && M->wX!=NULL){

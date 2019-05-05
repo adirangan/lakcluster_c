@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
 void dcc_An_ajdk(struct dcc_ajdk *D)
@@ -17,9 +21,17 @@ void dcc_An_ajdk(struct dcc_ajdk *D)
       GLOBAL_pthread_tic();
       wrap_An_ajdk_v(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_An,D->A_ajdk,&(E->lf_An_ajdk));
       GLOBAL_pthread_toc(); /* if bother */}
+    if (E->A_rbother && D->Y_cbother){ 
+      GLOBAL_pthread_tic();
+      wrap_An_ajdk_v(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_Yn,D->Y_ajdk,&(E->lf_Yn_ajdk));
+      GLOBAL_pthread_toc(); /* if bother */}
     if (E->Z_rbother && D->A_cbother){ 
       GLOBAL_pthread_tic();
       wrap_An_ajdk_v(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_Zn,D->A_ajdk,&(E->lf_Zn_ajdk));
+      GLOBAL_pthread_toc(); /* if bother */}
+    if (E->Z_rbother && D->Y_cbother){ 
+      GLOBAL_pthread_tic();
+      wrap_An_ajdk_v(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,E->M_Wn,D->Y_ajdk,&(E->lf_Wn_ajdk));
       GLOBAL_pthread_toc(); /* if bother */}
     /* for (nb=0;nb<nbins;nb++){ } */}
   GLOBAL_pthread_tuc(); 
@@ -30,7 +42,9 @@ void dcc_An_ajdk(struct dcc_ajdk *D)
     for (nb=0;nb<nbins;nb++){ E = E_[nb];
       printf(" %% nb %d\n",nb);
       lfprintf(E->lf_An_ajdk," %% lf_An_ajdk->lf: ");
+      lfprintf(E->lf_Yn_ajdk," %% lf_Yn_ajdk->lf: ");
       lfprintf(E->lf_Zn_ajdk," %% lf_Zn_ajdk->lf: ");
+      lfprintf(E->lf_Wn_ajdk," %% lf_Wn_ajdk->lf: ");
       /* for (nb=0;nb<nbins;nb++){ } */}
     /* if (verbose>2){ } */}
   if (verbose){ printf(" %% [finished dcc_An_ajdk]\n");}
@@ -53,9 +67,17 @@ void dcc_lf_ZtSn(struct dcc_ajdk *D)
       GLOBAL_pthread_tic(); 
       wrap_AnZt_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_At,E->M_Tt,NULL,NULL,NULL,&(E->lf_AtTn));
       GLOBAL_pthread_toc(); /* if bother */}
+    if (E->A_rbother && D->Y_cbother){ 
+      GLOBAL_pthread_tic(); 
+      wrap_AnZt_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_Yt,E->M_Tt,NULL,NULL,NULL,&(E->lf_YtTn));
+      GLOBAL_pthread_toc(); /* if bother */}
     if (E->Z_rbother && D->A_cbother){ 
       GLOBAL_pthread_tic(); 
       wrap_AnZt_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_Zt,E->M_St,NULL,NULL,NULL,&(E->lf_ZtSn));
+      GLOBAL_pthread_toc(); /* if bother */} 
+    if (E->Z_rbother && D->Y_cbother){ 
+      GLOBAL_pthread_tic(); 
+      wrap_AnZt_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_A,n_spacing_A,E->M_Wt,E->M_St,NULL,NULL,NULL,&(E->lf_WtSn));
       GLOBAL_pthread_toc(); /* if bother */} 
     /* for (nb=0;nb<nbins;nb++){ } */}
   GLOBAL_pthread_tuc();
@@ -67,7 +89,9 @@ void dcc_lf_ZtSn(struct dcc_ajdk *D)
       printf(" %% nb %d\n",nb);
       bprintf(E->M_An->mc_j,D->bitj,1,D->A_ncols," %% A_bmc_j: ");
       lfprintf(E->lf_AtTn," %% lf_AtTn: ");
+      lfprintf(E->lf_AtTn," %% lf_YtTn: ");
       lfprintf(E->lf_ZtSn," %% lf_ZtSn: ");
+      lfprintf(E->lf_ZtSn," %% lf_WtSn: ");
       /* for (nb=0;nb<nbins;nb++){ } */}
     /* if (verbose>2){ } */}
   if (verbose){ printf(" %% [finished dcc_lf_ZtSn]\n");}
@@ -87,6 +111,22 @@ void dcc_lf_D_AtTn_ZtSn_vv(struct dcc_ajdk *D)
   GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
   GLOBAL_nf_cur=0; GLOBAL_nf_opn=0; 
   for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx=nb1+nb2*nbins; E_nb1 = E_[nb1]; E_nb2 = E_[nb2]; F = F_[nbx];
+      if (E_nb1->A_rbother && D->A_cbother && E_nb2->Z_rbother && D->Y_cbother){
+	GLOBAL_pthread_tic();
+	wrap_D_AtTn_ZtSn_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yt,E_nb1->M_Tt,E_nb2->M_Wt,E_nb2->M_St,D->Y_ajdk,E_nb1->lf_YtTn,E_nb2->lf_WtSn,&(F->lf_D_YtTn_WtSn_vv));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E_nb1->A_rbother && D->A_cbother && E_nb2->A_rbother && D->Y_cbother){
+	if (nb1==nb2){
+	  GLOBAL_pthread_tic();
+	  wrap_D_AtTn_AtTn_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yt,E_nb1->M_Tt,E_nb2->M_Yt,E_nb2->M_Tt,D->Y_ajdk,E_nb1->lf_YtTn,E_nb2->lf_YtTn,&(F->lf_D_YtTn_YtTn_vv));
+	  GLOBAL_pthread_toc();
+	  /* if (nb1==nb2){ } */}
+	if (nb1!=nb2){
+	  GLOBAL_pthread_tic();
+	  wrap_D_AtTn_ZtSn_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yt,E_nb1->M_Tt,E_nb2->M_Yt,E_nb2->M_Tt,D->Y_ajdk,E_nb1->lf_YtTn,E_nb2->lf_YtTn,&(F->lf_D_YtTn_YtTn_vv));
+	  GLOBAL_pthread_toc();
+	  /* if (nb1!=nb2){ } */}
+	/* if bother */}
       if (E_nb1->A_rbother && D->A_cbother && E_nb2->Z_rbother && D->A_cbother){
 	GLOBAL_pthread_tic();
 	wrap_D_AtTn_ZtSn_vv__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb2->M_Zt,E_nb2->M_St,D->A_ajdk,E_nb1->lf_AtTn,E_nb2->lf_ZtSn,&(F->lf_D_AtTn_ZtSn_vv));
@@ -113,6 +153,8 @@ void dcc_lf_D_AtTn_ZtSn_vv(struct dcc_ajdk *D)
 	printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
 	bprintf(E_nb1->M_At->mr_j,D->bitj,1,D->A_ncols," %% A_bmc_j: ");
 	bprintf(E_nb1->M_Tt->mr_j,D->bitj,1,D->T_ncols," %% T_bmc_j: ");
+	lfprintf(F->lf_D_YtTn_WtSn_vv," %% lf_D_YtTn_WtSn_vv: ");
+	lfprintf(F->lf_D_YtTn_YtTn_vv," %% lf_D_YtTn_YtTn_vv: ");
 	lfprintf(F->lf_D_AtTn_ZtSn_vv," %% lf_D_AtTn_ZtSn_vv: ");
 	lfprintf(F->lf_D_AtTn_AtTn_vv," %% lf_D_AtTn_AtTn_vv: ");
 	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
@@ -133,6 +175,22 @@ void dcc_lf_D_AtTn_ZtSn_uu(struct dcc_ajdk *D)
   GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
   GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
   for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2; F_trn = F_[nb2+nb1*nbins];
+      if (D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	GLOBAL_pthread_tic(); 
+	wrap_D_AtTn_ZtSn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yt,E_nb1->M_Tt,E_nb2->M_Wt,E_nb2->M_St,D->Y_ajdk,&(F->lf_D_YtTn_WtSn_uu));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	if (nb1==nb2){
+	  GLOBAL_pthread_tic(); 
+	  wrap_D_AtTn_AtTn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yt,E_nb1->M_Tt,E_nb2->M_Yt,E_nb2->M_Tt,D->Y_ajdk,&(F->lf_D_YtTn_YtTn_uu));
+	  GLOBAL_pthread_toc(); 
+	  /* if (nb1==nb2){ } */}
+	if (nb1!=nb2){
+	  GLOBAL_pthread_tic(); 
+	  wrap_D_AtTn_ZtSn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yt,E_nb1->M_Tt,E_nb2->M_Yt,E_nb2->M_Tt,D->Y_ajdk,&(F->lf_D_YtTn_YtTn_uu));
+	  GLOBAL_pthread_toc(); 
+	  /* if (nb1!=nb2){ } */}
+	/* if bother */}
       if (D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
 	GLOBAL_pthread_tic(); 
 	wrap_D_AtTn_ZtSn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_At,E_nb1->M_Tt,E_nb2->M_Zt,E_nb2->M_St,D->A_ajdk,&(F->lf_D_AtTn_ZtSn_uu));
@@ -166,7 +224,6 @@ void dcc_lf_D_AtTn_ZtSn_uu(struct dcc_ajdk *D)
   if (verbose){ printf(" %% [finished dcc_lf_D_AtTn_ZtSn_uu]\n");}
 }
 
-
 void dcc_lf_D_AtTn_ZtSn_error(int verbose,struct dcc_ajdk *D)
 {
   int nbins=D->nbins; struct dcc_single **E_=D->E_; struct dcc_double **F_=D->F_;
@@ -174,6 +231,12 @@ void dcc_lf_D_AtTn_ZtSn_error(int verbose,struct dcc_ajdk *D)
   for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
       length = D->A_ncols * D->T_ncols;
       printf(" %% nb1 %d nb2 %d length %d*%d=%d\n",nb1,nb2,D->A_ncols,D->T_ncols,length);
+      if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	printf(" %% lf_D_YtTn_WtSn_vv - lf_D_YtTn_WtSn_uu %0.16f\n",dra_diff(F->lf_D_YtTn_WtSn_vv->lf,F->lf_D_YtTn_WtSn_uu->lf,length,1));
+	/* if bother */}
+      if (D->A_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	printf(" %% lf_D_YtTn_YtTn_vv - lf_D_YtTn_YtTn_uu %0.16f\n",dra_diff(F->lf_D_YtTn_YtTn_vv->lf,F->lf_D_YtTn_YtTn_uu->lf,length,1));
+	/* if bother */}
       if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
 	printf(" %% lf_D_AtTn_ZtSn_vv - lf_D_AtTn_ZtSn_uu %0.16f\n",dra_diff(F->lf_D_AtTn_ZtSn_vv->lf,F->lf_D_AtTn_ZtSn_uu->lf,length,1));
 	/* if bother */}
@@ -213,7 +276,9 @@ void dcc_lf_TAnZtS_ww(struct dcc_ajdk *D)
 	printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
 	bprintf(E_nb1->M_An->mr_j,D->bitj,1,E_nb1->A_nrows," %% A_bmr_j: ");
 	bprintf(E_nb1->M_Tt->mr_j,D->bitj,1,D->T_ncols," %% T_bmc_j: ");
+	lfprintf(F->lf_TYnWtS_ww," %% lf_TYnWtS_ww: ");
 	lfprintf(F->lf_TAnZtS_ww," %% lf_TAnZtS_ww: ");
+	lfprintf(F->lf_TYnYtT_ww," %% lf_TYnYtT_ww: ");
 	lfprintf(F->lf_TAnAtT_ww," %% lf_TAnAtT_ww: ");
 	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
     /* if (verbose>2){ } */}
@@ -232,10 +297,26 @@ void dcc_lf_TAnZtS_uu(struct dcc_ajdk *D)
   GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
   GLOBAL_nf_cur=0; GLOBAL_nf_opn=0; 
   for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx=nb1+nb2*nbins; E_nb1 = E_[nb1]; E_nb2 = E_[nb2]; F = F_[nbx];
+      if (E_nb1->A_rbother && D->Y_cbother && E_nb2->Z_rbother && D->Y_cbother){
+	GLOBAL_pthread_tic();
+	wrap_TAnZtS_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yn,E_nb1->M_Tt,E_nb2->M_Wn,E_nb2->M_St,D->Y_ajdk,&(F->lf_TYnWtS_uu));
+	GLOBAL_pthread_toc(); /* if bother */}
       if (E_nb1->A_rbother && D->A_cbother && E_nb2->Z_rbother && D->A_cbother){
 	GLOBAL_pthread_tic();
 	wrap_TAnZtS_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb1->M_Tt,E_nb2->M_Zn,E_nb2->M_St,D->A_ajdk,&(F->lf_TAnZtS_uu));
 	GLOBAL_pthread_toc(); /* if bother */}
+      if (E_nb1->A_rbother && D->Y_cbother && E_nb2->A_rbother && D->Y_cbother){
+	if (nb1==nb2){
+	  GLOBAL_pthread_tic();
+	  wrap_TAnAtT_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yn,E_nb1->M_Tt,E_nb2->M_Yn,E_nb2->M_Tt,D->Y_ajdk,&(F->lf_TYnYtT_uu));
+	  GLOBAL_pthread_toc();
+	  /* if (nb1==nb2){ } */}
+	if (nb1!=nb2){
+	  GLOBAL_pthread_tic();
+	  wrap_TAnZtS_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yn,E_nb1->M_Tt,E_nb2->M_Yn,E_nb2->M_Tt,D->Y_ajdk,&(F->lf_TYnYtT_uu));
+	  GLOBAL_pthread_toc();
+	  /* if (nb1!=nb2){ } */}
+	/* if bother */}
       if (E_nb1->A_rbother && D->A_cbother && E_nb2->A_rbother && D->A_cbother){
 	if (nb1==nb2){
 	  GLOBAL_pthread_tic();
@@ -256,7 +337,6 @@ void dcc_lf_TAnZtS_uu(struct dcc_ajdk *D)
   if (verbose){ printf(" %% [finished dcc_TAnZtS_uu]\n");}
 }
 
-
 void dcc_lf_TAnZtS_error(int verbose,struct dcc_ajdk *D)
 {
   int nbins=D->nbins; struct dcc_single **E_=D->E_; struct dcc_double **F_=D->F_;
@@ -264,8 +344,14 @@ void dcc_lf_TAnZtS_error(int verbose,struct dcc_ajdk *D)
   for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
       length = E_nb1->A_nrows * D->T_ncols;
       printf(" %% nb1 %d nb2 %d length %d*%d=%d\n",nb1,nb2,E_nb1->A_nrows,D->T_ncols,length);
+      if (D->Y_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
+	printf(" %% lf_TYnWtS_ww - lf_TYnWtS_uu %0.16f\n",dra_diff(F->lf_TYnWtS_ww->lf,F->lf_TYnWtS_uu->lf,length,1));
+	/* if bother */}
       if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->Z_rbother){ 
 	printf(" %% lf_TAnZtS_ww - lf_TAnZtS_uu %0.16f\n",dra_diff(F->lf_TAnZtS_ww->lf,F->lf_TAnZtS_uu->lf,length,1));
+	/* if bother */}
+      if (D->Y_cbother && D->Y_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
+	printf(" %% lf_TYnYtT_ww - lf_TYnYtT_uu %0.16f\n",dra_diff(F->lf_TYnYtT_ww->lf,F->lf_TYnYtT_uu->lf,length,1));
 	/* if bother */}
       if (D->A_cbother && D->A_cbother && E_nb1->A_rbother && E_nb2->A_rbother){ 
 	printf(" %% lf_TAnAtT_ww - lf_TAnAtT_uu %0.16f\n",dra_diff(F->lf_TAnAtT_ww->lf,F->lf_TAnAtT_uu->lf,length,1));
@@ -290,7 +376,9 @@ void dcc_lf_TAnZtS_test()
 
 void *get_halfloop(void *vp)
 {
-  /* This function converts from SPACING_a to SPACING_b along the T_ncols dimension. */
+  /* This function converts from SPACING_a to SPACING_b along the T_ncols dimension.
+     Warning! Later on we expect D->T_bmc_b to include only contiguous bits.
+     This ensures that D->T_bmc_j will serve as a mask for QR_TAnAtT etc. after switching to SPACING_b. */
   int verbose=0;
   int ip=0,nc=0;
   void **vpra=(void **)vp;
@@ -298,30 +386,62 @@ void *get_halfloop(void *vp)
   struct dcc_double *F = (struct dcc_double *)(vpra[ip++]); struct dcc_ajdk *D = F->D; struct dcc_single *E_nb1 = F->E_nb1, *E_nb2 = F->E_nb2;
   struct M_handle *M_An_nb1 = E_nb1->M_An;
   struct M_handle *M_At_nb1 = E_nb1->M_At;
+  struct M_handle *M_Yn_nb1 = E_nb1->M_Yn;
+  struct M_handle *M_Yt_nb1 = E_nb1->M_Yt;
   struct M_handle *M_Tt_nb1 = E_nb1->M_Tt;
   struct M_handle *M_At_nb2 = E_nb2->M_At;
   struct M_handle *M_Tt_nb2 = E_nb2->M_Tt;
-  int A_ncols = M_At_nb1->nrows, T_ncols = M_Tt_nb1->nrows;
+  int A_ncols = M_At_nb1->nrows, Y_ncols = M_Yt_nb1->nrows, T_ncols = M_Tt_nb1->nrows;
   int A_nrows_nb1 = M_At_nb1->ncols, A_nrows_nb2 = M_At_nb2->ncols;
+  struct L_handle *lf_TYnWtS = F->lf_TYnWtS_ww;
   struct L_handle *lf_TAnZtS = F->lf_TAnZtS_ww;
+  struct L_handle *lf_TYnYtT = F->lf_TYnYtT_ww;
   struct L_handle *lf_TAnAtT = F->lf_TAnAtT_ww;
   struct L_handle *lf_D_AtTn_ZtSn = F->lf_D_AtTn_ZtSn_vv;
   struct L_handle *lf_D_AtTn_AtTn = F->lf_D_AtTn_AtTn_vv;
+  struct L_handle *lf_D_YtTn_WtSn = F->lf_D_YtTn_WtSn_vv;
+  struct L_handle *lf_D_YtTn_YtTn = F->lf_D_YtTn_YtTn_vv;
+  int QR_TYnWtS_bother = E_nb1->A_rbother && D->Y_cbother && E_nb2->Z_rbother && D->Y_cbother;
   int QR_TAnZtS_bother = E_nb1->A_rbother && D->A_cbother && E_nb2->Z_rbother && D->A_cbother;
+  int QR_TYnYtT_bother = E_nb1->A_rbother && D->Y_cbother && E_nb2->A_rbother && D->Y_cbother;
   int QR_TAnAtT_bother = E_nb1->A_rbother && D->A_cbother && E_nb2->A_rbother && D->A_cbother;
+  int QC_TYnWtS_bother = E_nb1->A_rbother && D->Y_cbother && E_nb2->Z_rbother && D->Y_cbother;
   int QC_TAnZtS_bother = E_nb1->A_rbother && D->A_cbother && E_nb2->Z_rbother && D->A_cbother;
-  int QC_TAnAtT_bother = E_nb1->A_rbother && D->A_cbother && E_nb2->A_rbother && D->A_cbother;  
+  int QC_TYnYtT_bother = E_nb1->A_rbother && D->Y_cbother && E_nb2->A_rbother && D->Y_cbother;
+  int QC_TAnAtT_bother = E_nb1->A_rbother && D->A_cbother && E_nb2->A_rbother && D->A_cbother;
   struct L_handle *lf_tmp=NULL;
+  lf_tmp = F->QR_TYnWtS; lf_tmp->row_stride = A_nrows_nb1; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = T_ncols; lf_tmp->spacing_col = SPACING_b; L_zero(lf_tmp);
   lf_tmp = F->QR_TAnZtS; lf_tmp->row_stride = A_nrows_nb1; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = T_ncols; lf_tmp->spacing_col = SPACING_b; L_zero(lf_tmp);
+  lf_tmp = F->QR_TYnYtT; lf_tmp->row_stride = A_nrows_nb1; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = T_ncols; lf_tmp->spacing_col = SPACING_b; L_zero(lf_tmp);
   lf_tmp = F->QR_TAnAtT; lf_tmp->row_stride = A_nrows_nb1; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = T_ncols; lf_tmp->spacing_col = SPACING_b; L_zero(lf_tmp);
+  lf_tmp = F->QC_TYnWtS; lf_tmp->row_stride = Y_ncols; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = T_ncols; lf_tmp->spacing_col = SPACING_b; L_zero(lf_tmp);
   lf_tmp = F->QC_TAnZtS; lf_tmp->row_stride = A_ncols; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = T_ncols; lf_tmp->spacing_col = SPACING_b; L_zero(lf_tmp);
+  lf_tmp = F->QC_TYnYtT; lf_tmp->row_stride = Y_ncols; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = T_ncols; lf_tmp->spacing_col = SPACING_b; L_zero(lf_tmp);
   lf_tmp = F->QC_TAnAtT; lf_tmp->row_stride = A_ncols; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = T_ncols; lf_tmp->spacing_col = SPACING_b; L_zero(lf_tmp);
+  struct L_handle *QR_TYnWtS = F->QR_TYnWtS;
   struct L_handle *QR_TAnZtS = F->QR_TAnZtS;
+  struct L_handle *QR_TYnYtT = F->QR_TYnYtT;
   struct L_handle *QR_TAnAtT = F->QR_TAnAtT;
+  struct L_handle *QC_TYnWtS = F->QC_TYnWtS;
   struct L_handle *QC_TAnZtS = F->QC_TAnZtS;
+  struct L_handle *QC_TYnYtT = F->QC_TYnYtT;
   struct L_handle *QC_TAnAtT = F->QC_TAnAtT;
   int ns_j=0,ns_b=0,ns_a=0;
   int na_j=0,na_b=0,na_a=0,ma_j=0,ma_b=0,ma_a=0;
+  int ny_j=0,ny_b=0,ny_a=0,my_j=0,my_b=0,my_a=0;
+  if (QR_TYnWtS_bother || QR_TYnYtT_bother){
+    if (verbose>3){ printf(" %% QR_TYnWtS QR_TYnYtT\n");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
+      ns_a = M_Tt_nb2->m_a_[ns_j]; ns_b = M_Tt_nb2->m_b_[ns_j];
+      my_j=0; while (my_j<M_Yn_nb1->rpop_j){
+	my_a = M_Yn_nb1->m_a_[my_j]; my_b = M_Yn_nb1->m_b_[my_j];
+	if (QR_TYnWtS_bother){ L2_set(QR_TYnWtS , my_j,my_b,my_a , ns_j,ns_b,ns_a , (*L2_get(lf_TYnWtS , my_j,my_b,my_a , ns_j,ns_b,ns_a)));}
+	if (QR_TYnYtT_bother){ L2_set(QR_TYnYtT , my_j,my_b,my_a , ns_j,ns_b,ns_a , (*L2_get(lf_TYnYtT , my_j,my_b,my_a , ns_j,ns_b,ns_a)));}
+	my_j++; /* while (my_j<M_Yn_nb1->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_Tt_nb2->rpop_j){ } */}
+    if (verbose>3){ lfprintf(QR_TYnWtS," %% QR_TYnWtS: ");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    if (verbose>3){ lfprintf(QR_TYnYtT," %% QR_TYnYtT: ");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    /* if bother */}
   if (QR_TAnZtS_bother || QR_TAnAtT_bother){
     if (verbose>3){ printf(" %% QR_TAnZtS QR_TAnAtT\n");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
     ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
@@ -335,6 +455,19 @@ void *get_halfloop(void *vp)
     if (verbose>3){ lfprintf(QR_TAnZtS," %% QR_TAnZtS: ");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
     if (verbose>3){ lfprintf(QR_TAnAtT," %% QR_TAnAtT: ");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
     /* if bother */}
+  if (QC_TYnWtS_bother || QC_TYnYtT_bother){
+    if (verbose>3){ printf(" %% QC_TYnWtS, QC_TYnYtT\n");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
+      ns_a = M_Tt_nb2->m_a_[ns_j]; ns_b = M_Tt_nb2->m_b_[ns_j];
+      ny_j=0; while (ny_j<M_Yt_nb1->rpop_j){
+	ny_a = M_Yt_nb1->m_a_[ny_j]; ny_b = M_Yt_nb1->m_b_[ny_j];
+	if (QC_TYnWtS_bother){ L2_set(QC_TYnWtS , ny_j,ny_b,ny_a , ns_j,ns_b,ns_a , (*L2_get(lf_D_YtTn_WtSn , ny_j,ny_b,ny_a , ns_j,ns_b,ns_a)));}
+	if (QC_TYnYtT_bother){ L2_set(QC_TYnYtT , ny_j,ny_b,ny_a , ns_j,ns_b,ns_a , (*L2_get(lf_D_YtTn_YtTn , ny_j,ny_b,ny_a , ns_j,ns_b,ns_a)));}
+	ny_j++; /* while (ny_j<M_Yt_nb1->rpop_j){ } */}
+      ns_j++; /* while (ns_j<M_Tt_nb2->rpop_j){ } */}
+    if (verbose>3){ lfprintf(QC_TYnWtS," %% QC_TYnWtS: ");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    if (verbose>3){ lfprintf(QC_TYnYtT," %% QC_TYnYtT: ");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
+    /* if (QC_TYnWtS_bother || QC_TAnAtT_bother){ } */}
   if (QC_TAnZtS_bother || QC_TAnAtT_bother){
     if (verbose>3){ printf(" %% QC_TAnZtS, QC_TAnAtT\n");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
     ns_j=0; while (ns_j<M_Tt_nb2->rpop_j){
@@ -395,6 +528,8 @@ void dcc_halfloop(struct dcc_ajdk *D)
 
 void dcc_lrup_mxdup(struct dcc_ajdk *D)
 {
+  /* Copies bmc_j_rtn into bmc_j, and bmr_j_rtn into bmr_j */
+  /* Also copies umc_j_rtn into umc_j, and umr_j_rtn into umr_j */
   int verbose=GLOBAL_verbose;
   int nbins = D->nbins; struct dcc_single **E_ = D->E_; struct dcc_single *E=NULL;
   int nb=0;

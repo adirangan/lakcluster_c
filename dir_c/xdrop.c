@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void get_xdrop(double lrij,double lcij,int *rdrop_p,int *cdrop_p)
 {
   int verbose=0; double dbl1=1.000000-0.000001;
@@ -56,17 +60,100 @@ void get_xdrop(double lrij,double lcij,int *rdrop_p,int *cdrop_p)
   if (verbose){ printf(" %% [finished get_xdrop] rdrop %d cdrop %d\n",rdrop,cdrop);}
 }
 
-int get_xdrop_total(double lrij,double lcij)
+int get_xdrop_length(double lrij,double lcij)
 {
+  int verbose=0;
   double lrij_tmp=lrij,lcij_tmp=lcij;
   int rdrop=0,cdrop=0;
   int continue_flag=1;
   int length=0;
+  if (verbose){ printf(" %% [entering get_xdrop_length] lrij %0.2f lcij %0.2f\n",lrij,lcij);}
   while (continue_flag){
     length++;
     get_xdrop(lrij_tmp,lcij_tmp,&rdrop,&cdrop);
     lrij_tmp-=rdrop; lcij_tmp-=cdrop;
+    if (verbose>1){ printf(" %% length %d, rdrop %d cdrop %d lrij_tmp %0.2f lcij_tmp %0.2f\n",length,rdrop,cdrop,lrij_tmp,lcij_tmp);}
     continue_flag = (lrij_tmp>0 && lcij_tmp>0);
     /* while (continue_flag){ } */}
+  if (verbose){ printf(" %% [finished get_xdrop_length]\n");}
   return length;
+}
+
+void get_xdrop_array(double lrij,double lcij,int *length_p,int **rdrop_p_,int **cdrop_p_,int **rkeep_p_,int **ckeep_p_)
+{
+  /* Stores rdrop and cdrop values across all iterations.
+     Also stores number remaining (rkeep and ckeep).
+  */
+  int verbose=0;
+  int length=0,nl=0,rdrop=0,cdrop=0;
+  double lrij_tmp=0,lcij_tmp=0;
+  if (verbose){ printf(" %% [entering get_xdrop_array] lrij %d lcij %d\n",(int)lrij,(int)lcij);}
+  length = get_xdrop_length(lrij,lcij);
+  if (length_p!=NULL){ *length_p = length;}
+  if (*rdrop_p_==NULL){ (*rdrop_p_) = (int *) wkspace_all0c(length*sizeof(int));}
+  if (*cdrop_p_==NULL){ (*cdrop_p_) = (int *) wkspace_all0c(length*sizeof(int));}
+  if (*rkeep_p_==NULL){ (*rkeep_p_) = (int *) wkspace_all0c(length*sizeof(int));}
+  if (*ckeep_p_==NULL){ (*ckeep_p_) = (int *) wkspace_all0c(length*sizeof(int));}
+  lrij_tmp=lrij; lcij_tmp=lcij;
+  for (nl=0;nl<length;nl++){
+    get_xdrop(lrij_tmp,lcij_tmp,&rdrop,&cdrop);
+    (*rdrop_p_)[nl] = rdrop; (*cdrop_p_)[nl] = cdrop;
+    lrij_tmp-=rdrop; lcij_tmp-=cdrop;
+    (*rkeep_p_)[nl] = round(lrij_tmp); (*ckeep_p_)[nl] = round(lcij_tmp);
+    /* for (nl=0;nl<length;nl++){ } */}  
+  if (verbose>1){ raprintf((*rdrop_p_),"int",1,length," %% rdrop_: ");}
+  if (verbose>1){ raprintf((*rkeep_p_),"int",1,length," %% rkeep_: ");}
+  if (verbose>1){ raprintf((*cdrop_p_),"int",1,length," %% cdrop_: ");}
+  if (verbose>1){ raprintf((*ckeep_p_),"int",1,length," %% ckeep_: ");}
+  if (verbose){ printf(" %% [finished get_xdrop_array]\n");}  
+}
+
+void get_xdrop_array_sub(double lrij,double lcij,int iteration_num,int iteration_max,int iteration_min,int *length_p,int **rdrop_p_,int **cdrop_p_,int **rkeep_p_,int **ckeep_p_)
+{
+  /* Stores rdrop and cdrop values across a subset of iterations.
+     Also stores number remaining (rkeep and ckeep).
+     The subset of iterations to be stored starts at iteration_min, and runs up to iteration_max, both values in the range [0,..,length-1].
+     The total number of iterations to be stored is iteration_num.
+     The jth iteration stored is round(iteration_min + (iteration_max-iteration_min)*j/(iteration_num-1)).
+  */
+  int verbose=0;
+  int iteration_[iteration_num],ni=0;
+  int length=0,nl=0,rdrop=0,cdrop=0;
+  double lrij_tmp=0,lcij_tmp=0;
+  if (verbose){ printf(" %% [entering get_xdrop_array_sub] gamma %0.16f lrij %d lcij %d iteration_num %d iteration_max %d iteration_min %d\n",GLOBAL_gamma,(int)lrij,(int)lcij,iteration_num,iteration_max,iteration_min);}
+  length = get_xdrop_length(lrij,lcij); if (length_p!=NULL){ *length_p = length;}
+  if (length<iteration_num){ printf(" %% Warning! length %d < iteration_num %d in get_xdrop_array_sub\n",length,iteration_num);}
+  if (iteration_num==1){ 
+    iteration_[0] = minimum(iteration_min,iteration_max);
+    /* if (iteration_num==1){ } */}
+  if (iteration_num>1){
+    for (nl=0;nl<iteration_num;nl++){
+      iteration_[nl] = round(iteration_min + (iteration_max-iteration_min)*(double)nl/(double)(iteration_num-1));
+      /* for (nl=0;nl<iteration_num;nl++){ } */}
+    /* if (iteration_num>1){ } */}
+  if (*rdrop_p_==NULL){ (*rdrop_p_) = (int *) wkspace_all0c(iteration_num*sizeof(int));}
+  if (*cdrop_p_==NULL){ (*cdrop_p_) = (int *) wkspace_all0c(iteration_num*sizeof(int));}
+  if (*rkeep_p_==NULL){ (*rkeep_p_) = (int *) wkspace_all0c(iteration_num*sizeof(int));}
+  if (*ckeep_p_==NULL){ (*ckeep_p_) = (int *) wkspace_all0c(iteration_num*sizeof(int));}
+  lrij_tmp=lrij; lcij_tmp=lcij; (*rdrop_p_)[0] = 0; (*cdrop_p_)[0] = 0;
+  for (nl=0;nl<iteration_min;nl++){
+    get_xdrop(lrij_tmp,lcij_tmp,&rdrop,&cdrop);
+    lrij_tmp-=rdrop; lcij_tmp-=cdrop;
+    (*rdrop_p_)[0] += rdrop; (*cdrop_p_)[0] += cdrop;
+    /* for (nl=0;nl<iteration_min;nl++){ } */}
+  (*rkeep_p_)[0] = round(lrij_tmp); (*ckeep_p_)[0] = round(lcij_tmp);
+  for (ni=1;ni<iteration_num;ni++){
+    (*rdrop_p_)[ni] = 0; (*cdrop_p_)[ni] = 0;
+    for (nl=iteration_[ni-1];nl<iteration_[ni];nl++){
+      get_xdrop(lrij_tmp,lcij_tmp,&rdrop,&cdrop);
+      lrij_tmp-=rdrop; lcij_tmp-=cdrop;
+      (*rdrop_p_)[ni] += rdrop; (*cdrop_p_)[ni] += cdrop;
+      /* for (nl=iteration_[ni-1];nl<iteration_[ni];nl++){ } */}
+    (*rkeep_p_)[ni] = round(lrij_tmp); (*ckeep_p_)[ni] = round(lcij_tmp);
+    /* for (ni=1;ni<iteration_num;ni++){ } */}
+  if (verbose>1){ raprintf((*rdrop_p_),"int",1,iteration_num," %% rdrop_: ");}
+  if (verbose>1){ raprintf((*rkeep_p_),"int",1,iteration_num," %% rkeep_: ");}
+  if (verbose>1){ raprintf((*cdrop_p_),"int",1,iteration_num," %% cdrop_: ");}
+  if (verbose>1){ raprintf((*ckeep_p_),"int",1,iteration_num," %% ckeep_: ");}
+  if (verbose){ printf(" %% [finished get_xdrop_array_sub]\n");}  
 }

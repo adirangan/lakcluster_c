@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 
 void xcc_out_trace_get(char *fname,int *nlines_,int **out_trace_ni_,int **out_trace_nr_,int **out_trace_nc_,double **out_trace_QR_,double **out_trace_QC_,int **out_trace_nb_)
 {
@@ -38,10 +42,13 @@ void bcc_sumscores_mxB(struct bcc_ajdk *D)
   /* writes E->A_umr_j into E->A_bmr_j  */
   /* writes E->A_umr_j_rmv into E->A_bmr_j_rmv  */
   /* writes E->A_umr_j_rtn into E->A_bmr_j_rtn */
-  /* finally, copies all of the 
+  /* finally, calls bcc_lrup_mxset, 
+     which copies all of the 
      A_bmr_j_rtn etc (i.e., retained) and 
      A_bmr_j_rmv etc (i.e., removed) bitmasks 
-     into the temporary variables used for lrup (i.e., low-rank update) */
+     into the temporary variables used for lrup 
+     (e.g., E->M_an used in low-rank update) 
+  */
   int verbose=0;
   int nbins = D->nbins; struct bcc_single **E_ = D->E_;
   int nb1=0,nr=0,nc=0; struct bcc_single *E=NULL;
@@ -70,25 +77,8 @@ void bcc_sumscores_mxB(struct bcc_ajdk *D)
   for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];
     E->A_rpop_j_rmv = popcount_uchar_array(E->A_bmr_j_rmv,E->A_mr_length);
     E->A_rpop_j_rtn = popcount_uchar_array(E->A_bmr_j_rtn,E->A_mr_length);
-    M_mxset(E->M_an,E->A_bmr_j_rtn,D->A_bmc_j_rtn);
-    M_mxset(E->M_at,D->A_bmc_j_rtn,E->A_bmr_j_rtn);
-    M_mxset(E->M_jn,E->A_bmr_j_rtn,D->A_bmc_j_rmv);
-    M_mxset(E->M_jt,D->A_bmc_j_rmv,E->A_bmr_j_rtn);
-    M_mxset(E->M_hn,E->A_bmr_j_rmv,D->A_bmc_j_rmv);
-    M_mxset(E->M_ht,D->A_bmc_j_rmv,E->A_bmr_j_rmv);
-    M_mxset(E->M_kn,E->A_bmr_j_rmv,D->A_bmc_j_rtn);
-    M_mxset(E->M_kt,D->A_bmc_j_rtn,E->A_bmr_j_rmv);
-    M_mxset(E->M_vn,E->Z_bmr_j,D->A_bmc_j_rmv);
-    M_mxset(E->M_vt,D->A_bmc_j_rmv,E->Z_bmr_j);
-    M_mxset(E->M_un,E->A_bmr_j_rmv,D->Y_bmc_j);
-    M_mxset(E->M_ut,D->Y_bmc_j,E->A_bmr_j_rmv);
-    M_mxset(E->M_tt,D->T_bmc_j,E->A_bmr_j_rtn);
-    M_mxset(E->M_rt,D->T_bmc_j,E->A_bmr_j_rmv);
-    M_mxset(E->M_zn,E->Z_bmr_j,D->A_bmc_j_rtn);
-    M_mxset(E->M_zt,D->A_bmc_j_rtn,E->Z_bmr_j);
-    M_mxset(E->M_yn,E->A_bmr_j_rtn,D->Y_bmc_j);
-    M_mxset(E->M_yt,D->Y_bmc_j,E->A_bmr_j_rtn);
     /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  bcc_lrup_mxset(D);
   if (verbose){ printf(" %% [finished bcc_sumscores_mxB]\n");}
 }
 
@@ -98,8 +88,8 @@ void bcc_sumscores_mxC(struct bcc_ajdk *D)
      0: out_iteration ;
      1: A_rpop_j_total ; rows remaining
      2: A_cpop_j ; columns remaining
-     3: average of QR_sra ; average row-score
-     4: average of QC_sra ; average col-score
+     3: average of QR_svalue ; average row-score
+     4: average of QC_svalue ; average col-score
      5: nb_rem ; covariate categories remaining
   */
   int verbose=0;
@@ -123,9 +113,9 @@ void bcc_sumscores_mxC(struct bcc_ajdk *D)
   D->out_trace[0 + D->out_iteration*D->out_trace_length] = D->out_iteration;
   D->out_trace[1 + D->out_iteration*D->out_trace_length] = D->A_rpop_j_total;
   D->out_trace[2 + D->out_iteration*D->out_trace_length] = D->A_cpop_j;
-  ra_stats(D->QR_sra,"double",D->A_rpop_j_total,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
+  ra_stats(D->QR_svalue,"double",D->A_rpop_j_total,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
   D->out_trace[3 + D->out_iteration*D->out_trace_length] = tmp_mean; 
-  ra_stats(D->QC_sra,"double",D->A_cpop_j,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
+  ra_stats(D->QC_svalue,"double",D->A_cpop_j,NULL,NULL,&tmp_mean,NULL); if (!isfinite(tmp_mean)){ tmp_mean = 1.0;}
   D->out_trace[4 + D->out_iteration*D->out_trace_length] = tmp_mean;
   D->out_trace[5 + D->out_iteration*D->out_trace_length] = D->Irem;
   D->out_iteration++;
@@ -139,8 +129,8 @@ void bcc_sumscores_dmp(struct bcc_ajdk *D)
      0: out_iteration ;
      1: A_rpop_j_total ; rows remaining
      2: A_cpop_j ; columns remaining
-     3: average of QR_sra ; average row-score
-     4: average of QC_sra ; average col-score
+     3: average of QR_svalue ; average row-score
+     4: average of QC_svalue ; average col-score
      5: nb_rem ; covariate categories remaining
   */
   int verbose=0;
@@ -166,14 +156,24 @@ void bcc_sumscores_dmp(struct bcc_ajdk *D)
 
 void bcc_sumscores_mxA(struct bcc_ajdk *D)
 {
-  /* obtains rdrop and cdrop from get_xdrop ;
-     copies D->A_bmc_j to D->A_umc_j ; 
-     define D->A_umc_j_rmv and D->A_umc_j_rtn ; removing first cdrop entries of D->QC_lmc_a ;
-     copies E->A_bmr_j to E->A_umr_j ; 
-     define E->A_umr_j_rmv and E->A_umr_j_rtn ; removing first rdrop entries of D->QR_lmr_a ; using D->QR_lnb to index nb ;
-     call bcc_sumscores_mxB ; copying all instances of umc and umr to associated bmc and bmr respectively ;
-     call bcc_sumscores_mxC ; writing data to out_trace ;
-     define D->out_xdrop_a and D->out_xdrop_b ; dump row-indices first, then col-indices ;
+  /* Obtains rdrop and cdrop from get_xdrop (based on GLOBAL_gamma). ;
+     Copies D->A_bmc_j to D->A_umc_j. ; 
+     Defines D->A_umc_j_rmv and D->A_umc_j_rtn ; removing first cdrop entries of D->QC_index_local_mc_a. ;
+     Copies E->A_bmr_j to E->A_umr_j. ; 
+     Defines E->A_umr_j_rmv and E->A_umr_j_rtn ; removing first rdrop entries of D->QR_index_local_mr_a ; using D->QR_index_local_nb to index nb. ;
+     Call bcc_sumscores_mxB ; 
+      Copies all instances of umc and umr to associated bmc and bmr respectively ;
+      Note that bcc_sumscores_mxB also calls 
+      bcc_lrup_mxset:
+       Copies all of the 
+       A_bmr_j_rtn etc (i.e., retained) and 
+       A_bmr_j_rmv etc (i.e., removed) bitmasks 
+       into the temporary variables used for lrup 
+       (e.g., E->M_an used in low-rank update).
+     Call bcc_sumscores_mxC:
+      Writing data to out_trace ;
+     Finally: add to D->out_xdrop_a and D->out_xdrop_b (using D->QR_index_global_mr_x for rows, and D->QC_index_local_mc for cols). ; 
+     Note: D->out_xdrop_x lists row-indices first, then col-indices ;
    */
   int verbose=0; 
   int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
@@ -182,29 +182,60 @@ void bcc_sumscores_mxA(struct bcc_ajdk *D)
   if (verbose){ printf(" %% [entering bcc_sumscores_mxA]\n");}
   get_xdrop(D->A_rpop_j_total,D->A_cpop_j,&rdrop,&cdrop);
   for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j[nc] = bget__on(D->A_bmc_j,nc);} for (nc=0;nc<D->A_ncols;nc++){ D->A_umc_j_rtn[nc] = D->A_umc_j[nc]; D->A_umc_j_rmv[nc] = 0;}
-  for (nc=0;nc<minimum(cdrop,D->A_cpop_j);nc++){ D->A_umc_j_rmv[D->QC_lmc_a[nc]]=1; D->A_umc_j_rtn[D->QC_lmc_a[nc]]=0;}
+  for (nc=0;nc<minimum(cdrop,D->A_cpop_j);nc++){ D->A_umc_j_rmv[D->QC_index_local_mc_a[nc]]=1; D->A_umc_j_rtn[D->QC_index_local_mc_a[nc]]=0;}
   for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];
     for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j[nr] = bget__on(E->A_bmr_j,nr);} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j_rtn[nr] = E->A_umr_j[nr]; E->A_umr_j_rmv[nr] = 0;}
     /* for (nb1=0;nb1<nbins;nb1++){ } */}
-  for (nr=0;nr<minimum(rdrop,D->A_rpop_j_total);nr++){ E_[D->QR_lnb[nr]]->A_umr_j_rmv[D->QR_lmr_a[nr]]=1; E_[D->QR_lnb[nr]]->A_umr_j_rtn[D->QR_lmr_a[nr]]=0;}
+  for (nr=0;nr<minimum(rdrop,D->A_rpop_j_total);nr++){ E_[D->QR_index_local_nb[nr]]->A_umr_j_rmv[D->QR_index_local_mr_a[nr]]=1; E_[D->QR_index_local_nb[nr]]->A_umr_j_rtn[D->QR_index_local_mr_a[nr]]=0;}
   bcc_sumscores_mxB(D); bcc_sumscores_mxC(D);
   if (verbose){ raprintf(D->out_trace,"double_trn",D->out_trace_length,D->out_iteration," %% D->out_trace: ");}
   for (nr=0;nr<minimum(rdrop,D->A_rpop_j_total);nr++){ 
-    D->out_xdrop_a[0 + D->out_xdrop_ij*2] = D->QR_imr_a[nr]; D->out_xdrop_a[1 + D->out_xdrop_ij*2] = -1;
-    D->out_xdrop_b[0 + D->out_xdrop_ij*2] = D->QR_imr_b[nr]; D->out_xdrop_b[1 + D->out_xdrop_ij*2] = -1;
+    D->out_xdrop_a[0 + D->out_xdrop_ij*2] = D->QR_index_global_mr_a[nr]; D->out_xdrop_a[1 + D->out_xdrop_ij*2] = -1;
+    D->out_xdrop_b[0 + D->out_xdrop_ij*2] = D->QR_index_global_mr_b[nr]; D->out_xdrop_b[1 + D->out_xdrop_ij*2] = -1;
     D->out_xdrop_ij++; /* for (nr=0;nr<minimum(rdrop,D->A_rpop_j_total);nr++){ } */}
   for (nc=0;nc<minimum(cdrop,D->A_cpop_j);nc++){ 
-    D->out_xdrop_a[1 + D->out_xdrop_ij*2] = D->QC_lmc_a[nc]; D->out_xdrop_a[0 + D->out_xdrop_ij*2] = -1; 
-    D->out_xdrop_b[1 + D->out_xdrop_ij*2] = D->QC_lmc_b[nc]; D->out_xdrop_b[0 + D->out_xdrop_ij*2] = -1; 
+    D->out_xdrop_a[1 + D->out_xdrop_ij*2] = D->QC_index_local_mc_a[nc]; D->out_xdrop_a[0 + D->out_xdrop_ij*2] = -1; 
+    D->out_xdrop_b[1 + D->out_xdrop_ij*2] = D->QC_index_local_mc_b[nc]; D->out_xdrop_b[0 + D->out_xdrop_ij*2] = -1; 
     D->out_xdrop_ij++; /* for (nc=0;nc<minimum(cdrop,D->A_cpop_j);nc++){ } */}
   if (verbose){ raprintf(D->out_xdrop_a,"int",2,D->out_xdrop_ij," %% D->out_xdrop_a: ");}
   if (verbose){ raprintf(D->out_xdrop_b,"int",2,D->out_xdrop_ij," %% D->out_xdrop_b: ");}
   if (verbose){ printf(" %% [finished bcc_sumscores_mxA]\n");}
 }
 
+void xcc_get_Ireq(char *strategy,int nbins,int Irem,int *Ireq_p,int *Irow_p,int *Icol_p)
+{
+  int Ireq=0,Irow=0,Icol=0;
+  if (strstr(strategy,"empty high")){ /* If empty bins are sorted high */
+    Ireq = maximum(0,minimum(nbins,minimum(Irem,GLOBAL_Ireq)));
+    if (Ireq<=0){ Irow=0; Icol=0;} 
+    if (Ireq>0){ Irow = Irem - Ireq; Icol = Irem*Irem - Ireq*Ireq;}
+    /* if (strstr(strategy,"empty high")){ } */}
+  if (strstr(strategy,"empty low")){ /* If empty bins are sorted low */
+    Ireq = maximum(0,minimum(nbins,GLOBAL_Ireq));
+    if (Ireq<=0){ Irow=0; Icol=0;} 
+    if (Ireq>0){ Irow = nbins - Ireq; Icol = nbins*nbins - Ireq*Ireq;}
+    /* if (strstr(strategy,"empty low")){ } */}
+  if (Ireq_p!=NULL){ *Ireq_p = Ireq;}
+  if (Irow_p!=NULL){ *Irow_p = Irow;}
+  if (Icol_p!=NULL){ *Icol_p = Icol;}
+}
+
 void bcc_sumscores_xij(struct bcc_ajdk *D)
 {
-  /* sorts scores in increasing order */
+  /* Sets D->QC_index_local_mc_x.
+     These arrays store the indices (i.e., index locations) of the masks 
+     M_An->mc_x==D->A_bmc_x.
+     Then sorts col-scores in increasing order across columns.
+     At this point the first few entries of D->QC_index_local_mc_x correspond to the columns that are least likely to participate in a bicluster. ;
+     Sets D->QR_index_local_mr_x and D->QR_index_local_nb.
+     These arrays store the indices (i.e., index locations) of the masks 
+     M_An[nb]->mr==E->A_bmr_x.
+     Also copies D->QR_index_global_mr_x from E->QR_index_globalL_mr_x.
+     These arrays store the overall index locations of the masks M_An->mr accumulated across bins. ;
+     Then sorts row-scores in increasing order across rows.
+     At this point the first few entries of D->QR_index_global_mr_x correspond to the rows that are least likely to participate in a bicluster. ;
+     Also redefines D->A_rpop_j_total using E->A_bmr_b and E->A_bmr_j. 
+  */
   int verbose=0; 
   int nbins = D->nbins; struct bcc_single **E_ = D->E_;
   int nb1=0; struct bcc_single *E=NULL;
@@ -213,8 +244,7 @@ void bcc_sumscores_xij(struct bcc_ajdk *D)
   unsigned int nn=0;
   if (verbose){ printf(" %% [entering bcc_sumscores_xij]\n");}
   D->Irem=0; for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1]; D->Irem += (E->A_rpop_j>0?1:0);} 
-  D->Ireq = minimum(nbins,minimum(D->Irem,GLOBAL_Ireq));
-  if (GLOBAL_Ireq<=0){ Irow=0; Icol=0;} else if (GLOBAL_Ireq>0){ Irow = D->Irem - D->Ireq; Icol = D->Irem*D->Irem - D->Ireq*D->Ireq;}
+  xcc_get_Ireq("empty low",nbins,D->Irem,&(D->Ireq),&(Irow),&(Icol));
   if (verbose){ printf(" %% found D->Irem %d/%d, using D->Ireq %d; Irow %d Icol %d\n",D->Irem,nbins,D->Ireq,Irow,Icol);}
   if (verbose){
     printf(" %% D->A_ncols %d D->A_cpop_b %d D->A_cpop_j %d\n",D->A_ncols,D->A_cpop_b,D->A_cpop_j);
@@ -226,24 +256,24 @@ void bcc_sumscores_xij(struct bcc_ajdk *D)
     while (na_a<D->A_ncols){
       if (bget__on(D->A_bmc_b,na_a)){
 	if (bget__on(D->A_bmc_j,na_a)){
-	  D->QC_sra[na_j] = D->QC_AtTAnAtTAn_nrm[na_a + 0*D->A_ncols + Icol*D->A_ncols*D->T_ncols];
-	  D->QC_lmc_a[na_j] = na_a; D->QC_lmc_b[na_j] = na_b; D->QC_lmc_j[na_j] = na_j;
+	  D->QC_svalue[na_j] = D->QC_AtTAnAtTAn_nrm[na_a + 0*D->A_ncols + Icol*D->A_ncols*D->T_ncols];
+	  D->QC_index_local_mc_a[na_j] = na_a; D->QC_index_local_mc_b[na_j] = na_b; D->QC_index_local_mc_j[na_j] = na_j;
 	  na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
 	na_b++; /* if (bget__on(D->A_bmc_b,na_a)){ } */}
       na_a++;/* while (na_a<D->A_ncols){ } */}
     if (verbose>1){
-      raprintf(  D->QC_sra,"double",1,D->A_cpop_j," %%   D->QC_sra pre :");
-      raprintf(D->QC_lmc_a,   "int",1,D->A_cpop_j," %% D->QC_lmc_a pre :");
-      raprintf(D->QC_lmc_b,   "int",1,D->A_cpop_j," %% D->QC_lmc_b pre :");
-      raprintf(D->QC_lmc_j,   "int",1,D->A_cpop_j," %% D->QC_lmc_j pre :");
+      raprintf(  D->QC_svalue,"double",1,D->A_cpop_j," %%   D->QC_svalue pre :");
+      raprintf(D->QC_index_local_mc_a,   "int",1,D->A_cpop_j," %% D->QC_index_local_mc_a pre :");
+      raprintf(D->QC_index_local_mc_b,   "int",1,D->A_cpop_j," %% D->QC_index_local_mc_b pre :");
+      raprintf(D->QC_index_local_mc_j,   "int",1,D->A_cpop_j," %% D->QC_index_local_mc_j pre :");
       /* if (verbose){ } */}
-    nn = dQuickSort_xij(0,D->QC_sra,1,D->QC_lmc_a,D->QC_lmc_b,D->QC_lmc_j,NULL,NULL,NULL,0,D->A_cpop_j-1);
-    if (verbose>1){ printf(" %% finished sorting QC_sra, maximum recursion_level %d\n",nn);}
+    nn = dQuickSort_xij(0,D->QC_svalue,1,D->QC_index_local_mc_a,D->QC_index_local_mc_b,D->QC_index_local_mc_j,NULL,NULL,NULL,0,D->A_cpop_j-1);
+    if (verbose>1){ printf(" %% finished sorting QC_svalue, maximum recursion_level %d\n",nn);}
     if (verbose>1){
-      raprintf(  D->QC_sra,"double",1,D->A_cpop_j," %%   D->QC_sra pos :");
-      raprintf(D->QC_lmc_a,   "int",1,D->A_cpop_j," %% D->QC_lmc_a pos :");
-      raprintf(D->QC_lmc_b,   "int",1,D->A_cpop_j," %% D->QC_lmc_b pos :");
-      raprintf(D->QC_lmc_j,   "int",1,D->A_cpop_j," %% D->QC_lmc_j pos :");
+      raprintf(  D->QC_svalue,"double",1,D->A_cpop_j," %%   D->QC_svalue pos :");
+      raprintf(D->QC_index_local_mc_a,   "int",1,D->A_cpop_j," %% D->QC_index_local_mc_a pos :");
+      raprintf(D->QC_index_local_mc_b,   "int",1,D->A_cpop_j," %% D->QC_index_local_mc_b pos :");
+      raprintf(D->QC_index_local_mc_j,   "int",1,D->A_cpop_j," %% D->QC_index_local_mc_j pos :");
       /* if (verbose){ } */}
     /* if (D->A_cbother && D->A_rpop_b_total){ } */}
   if (D->A_rpop_b_total && D->A_cbother){
@@ -258,32 +288,32 @@ void bcc_sumscores_xij(struct bcc_ajdk *D)
       while (ma_a<E->A_nrows){
 	if (bget__on(E->A_bmr_b,ma_a)){
 	  if (bget__on(E->A_bmr_j,ma_a)){
-	    D->QR_sra[D->A_rpop_j_total] = E->QR_AnAtTAnAt_nrm[ma_a + 0*E->A_nrows + Irow*E->A_nrows*D->T_ncols];
-	    D->QR_lmr_a[D->A_rpop_j_total] = ma_a; D->QR_lmr_b[D->A_rpop_j_total] = ma_b; D->QR_lmr_j[D->A_rpop_j_total] = ma_j; D->QR_lnb[D->A_rpop_j_total] = nb1; 
-	    D->QR_imr_a[D->A_rpop_j_total] = E->QR_imr_a[ma_a]; D->QR_imr_b[D->A_rpop_j_total] = E->QR_imr_b[ma_a];
+	    D->QR_svalue[D->A_rpop_j_total] = E->QR_AnAtTAnAt_nrm[ma_a + 0*E->A_nrows + Irow*E->A_nrows*D->T_ncols];
+	    D->QR_index_local_mr_a[D->A_rpop_j_total] = ma_a; D->QR_index_local_mr_b[D->A_rpop_j_total] = ma_b; D->QR_index_local_mr_j[D->A_rpop_j_total] = ma_j; D->QR_index_local_nb[D->A_rpop_j_total] = nb1; 
+	    D->QR_index_global_mr_a[D->A_rpop_j_total] = E->QR_index_global_mr_a[ma_a]; D->QR_index_global_mr_b[D->A_rpop_j_total] = E->QR_index_global_mr_b[ma_a];
 	    ma_j++; D->A_rpop_j_total++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
 	  ma_b++; D->A_rpop_b_total++; /* while (ma_a<E->A_nrows){ } */}
 	ma_a++; D->A_nrows_total++; /* while (ma_a<E->A_nrows){ } */}
       /* for (nb1=0;nb1<nbins;nb1++){ } */}
     if (verbose>1){
-      raprintf(  D->QR_sra,"double",1,D->A_rpop_j_total," %%   D->QR_sra pre :");
-      raprintf(D->QR_lmr_a,   "int",1,D->A_rpop_j_total," %% D->QR_lmr_a pre :");
-      raprintf(D->QR_lmr_b,   "int",1,D->A_rpop_j_total," %% D->QR_lmr_b pre :");
-      raprintf(D->QR_lmr_j,   "int",1,D->A_rpop_j_total," %% D->QR_lmr_j pre :");
-      raprintf( D->QR_lnb,   "int",1,D->A_rpop_j_total," %%  D->QR_lnb pre :");
-      raprintf( D->QR_imr_a,   "int",1,D->A_rpop_j_total," %%  D->QR_imr_a pre :");
-      raprintf( D->QR_imr_b,   "int",1,D->A_rpop_j_total," %%  D->QR_imr_b pre :");
+      raprintf(  D->QR_svalue,"double",1,D->A_rpop_j_total," %%   D->QR_svalue pre :");
+      raprintf(D->QR_index_local_mr_a,   "int",1,D->A_rpop_j_total," %% D->QR_index_local_mr_a pre :");
+      raprintf(D->QR_index_local_mr_b,   "int",1,D->A_rpop_j_total," %% D->QR_index_local_mr_b pre :");
+      raprintf(D->QR_index_local_mr_j,   "int",1,D->A_rpop_j_total," %% D->QR_index_local_mr_j pre :");
+      raprintf( D->QR_index_local_nb,   "int",1,D->A_rpop_j_total," %%  D->QR_index_local_nb pre :");
+      raprintf( D->QR_index_global_mr_a,   "int",1,D->A_rpop_j_total," %%  D->QR_index_global_mr_a pre :");
+      raprintf( D->QR_index_global_mr_b,   "int",1,D->A_rpop_j_total," %%  D->QR_index_global_mr_b pre :");
       /* if (verbose){ } */}
-    nn = dQuickSort_xij(0,D->QR_sra,1,D->QR_lmr_a,D->QR_lmr_b,D->QR_lmr_j,D->QR_lnb,D->QR_imr_a,D->QR_imr_b,0,D->A_rpop_j_total-1);
-    if (verbose>1){ printf(" %% finished sorting QR_sra, maximum recursion_level %d\n",nn);}    
+    nn = dQuickSort_xij(0,D->QR_svalue,1,D->QR_index_local_mr_a,D->QR_index_local_mr_b,D->QR_index_local_mr_j,D->QR_index_local_nb,D->QR_index_global_mr_a,D->QR_index_global_mr_b,0,D->A_rpop_j_total-1);
+    if (verbose>1){ printf(" %% finished sorting QR_svalue, maximum recursion_level %d\n",nn);}    
     if (verbose>1){
-      raprintf(  D->QR_sra,"double",1,D->A_rpop_j_total," %%   D->QR_sra pos :");
-      raprintf(D->QR_lmr_a,   "int",1,D->A_rpop_j_total," %% D->QR_lmr_a pos :");
-      raprintf(D->QR_lmr_b,   "int",1,D->A_rpop_j_total," %% D->QR_lmr_b pos :");
-      raprintf(D->QR_lmr_j,   "int",1,D->A_rpop_j_total," %% D->QR_lmr_j pos :");
-      raprintf( D->QR_lnb,   "int",1,D->A_rpop_j_total," %%  D->QR_lnb pos :");
-      raprintf( D->QR_imr_a,   "int",1,D->A_rpop_j_total," %%  D->QR_imr_a pos :");
-      raprintf( D->QR_imr_b,   "int",1,D->A_rpop_j_total," %%  D->QR_imr_b pos :");
+      raprintf(  D->QR_svalue,"double",1,D->A_rpop_j_total," %%   D->QR_svalue pos :");
+      raprintf(D->QR_index_local_mr_a,   "int",1,D->A_rpop_j_total," %% D->QR_index_local_mr_a pos :");
+      raprintf(D->QR_index_local_mr_b,   "int",1,D->A_rpop_j_total," %% D->QR_index_local_mr_b pos :");
+      raprintf(D->QR_index_local_mr_j,   "int",1,D->A_rpop_j_total," %% D->QR_index_local_mr_j pos :");
+      raprintf( D->QR_index_local_nb,   "int",1,D->A_rpop_j_total," %%  D->QR_index_local_nb pos :");
+      raprintf( D->QR_index_global_mr_a,   "int",1,D->A_rpop_j_total," %%  D->QR_index_global_mr_a pos :");
+      raprintf( D->QR_index_global_mr_b,   "int",1,D->A_rpop_j_total," %%  D->QR_index_global_mr_b pos :");
       /* if (verbose){ } */}
     /* if (D->A_rpop_b_total && D->A_cbother){ } */}
   if (verbose){ printf(" %% [finished bcc_sumscores_xij]\n");}
@@ -291,6 +321,8 @@ void bcc_sumscores_xij(struct bcc_ajdk *D)
 
 void bcc_sumscores_cmb(struct bcc_ajdk *D)
 {
+  /* Combines scores such as AtTAnAtTAn and AtTYnYtTAn to form final score. ;
+   */
   int verbose=0;
   int nbins = D->nbins; struct bcc_single **E_ = D->E_;
   int nb1=0,nb2=0,nbx=0; struct bcc_single *E=NULL; unsigned char bmc1=255;
@@ -323,6 +355,9 @@ void bcc_sumscores_cmb(struct bcc_ajdk *D)
 
 void bcc_sumscores_srt(struct bcc_ajdk *D)
 {
+  /* If GLOBAL_Ireq>0, then we sort the scores by bin. ;
+     Otherwise, if GLOBAL_Ireq<=0, we use the summed scores over all bins (already stored in nb==0).
+  */
   int verbose=0; 
   int nbins = D->nbins; struct bcc_single **E_ = D->E_;
   int nb1=0,nb2=0,nbx=0; struct bcc_single *E=NULL; 
@@ -339,110 +374,115 @@ void bcc_sumscores_srt(struct bcc_ajdk *D)
      end;%for nb1=0:nbins-1;
      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   */
-  for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];     
-    if (verbose){ printf(" %% nb1 %d\n",nb1);}
-    if (E->A_rbother && D->A_cbother && E->Z_rbother && D->Y_cbother){ 
-      ma_a=0; ma_b=0; ma_j=0; 
-      while (ma_a<E->A_nrows){
-	if (bget__on(E->A_bmr_b,ma_a)){
-	  if (bget__on(E->A_bmr_j,ma_a)){
-	    if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSWnYt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
-	    dQuickSort(0,&(E->QR_AnZtSWnYt_nrm[ma_a+0*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,0,nbins-1);   
-	    if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSWnYt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
-	    ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
-	  ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
-	ma_a++; /* while (ma_a<E->A_nrows){ } */}
-      /* if (E->A_rbother && D->A_cbother && E->Z_rbother && D->Y_cbother){ } */}
-    if (E->A_rbother && D->A_cbother && E->Z_rbother && D->A_cbother){ 
-      ma_a=0; ma_b=0; ma_j=0; 
-      while (ma_a<E->A_nrows){
-	if (bget__on(E->A_bmr_b,ma_a)){
-	  if (bget__on(E->A_bmr_j,ma_a)){
-	    if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSZnAt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
-	    dQuickSort(0,&(E->QR_AnZtSZnAt_nrm[ma_a+0*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,0,nbins-1);   
-	    if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSZnAt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
-	    ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
-	  ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
-	ma_a++; /* while (ma_a<E->A_nrows){ } */}
-      /* if (E->A_rbother && D->A_cbother && E->Z_rbother && D->A_cbother){ } */}
-    if (E->A_rbother && D->A_cbother && E->A_rbother && D->Y_cbother){ 
-      ma_a=0; ma_b=0; ma_j=0; 
-      while (ma_a<E->A_nrows){
-	if (bget__on(E->A_bmr_b,ma_a)){
-	  if (bget__on(E->A_bmr_j,ma_a)){
-	    if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTYnYt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
-	    dQuickSort(0,&(E->QR_AnAtTYnYt_nrm[ma_a+0*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,0,nbins-1);   
-	    if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTYnYt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
-	    ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
-	  ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
-	ma_a++; /* while (ma_a<E->A_nrows){ } */}
-      /* if (E->A_rbother && D->A_cbother && E->A_rbother && D->Y_cbother){ } */}
-    if (E->A_rbother && D->A_cbother && E->A_rbother && D->A_cbother){ 
-      ma_a=0; ma_b=0; ma_j=0; 
-      while (ma_a<E->A_nrows){
-	if (bget__on(E->A_bmr_b,ma_a)){
-	  if (bget__on(E->A_bmr_j,ma_a)){
-	    if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTAnAt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
-	    dQuickSort(0,&(E->QR_AnAtTAnAt_nrm[ma_a+0*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,0,nbins-1);   
-	    if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTAnAt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
-	    ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
-	  ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
-	ma_a++; /* while (ma_a<E->A_nrows){ } */}
-      /* if (E->A_rbother && D->A_cbother && E->A_rbother && D->A_cbother){ } */}
-    /* for (nb1=0;nb1<nbins;nb1++){ } */}
-  if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->Z_rpop_b_total){ 
-    na_a=0; na_b=0; na_j=0; 
-    while (na_a<D->A_ncols){
-      if (bget__on(D->A_bmc_b,na_a)){
-	if (bget__on(D->A_bmc_j,na_a)){
-	  if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnWtSZn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
-	  dQuickSort(0,&(D->QC_AtTYnWtSZn_nrm[na_a+0*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,0,nbins*nbins-1);   
-	  if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnWtSZn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
-	  na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
-	na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
-      na_a++; /* while (na_a<D->A_ncols){ } */}
-    /* if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->Z_rpop_b_total){ } */}
-  if (D->A_rpop_b_total && D->A_cbother && D->A_cbother && D->Z_rpop_b_total){ 
-    na_a=0; na_b=0; na_j=0; 
-    while (na_a<D->A_ncols){
-      if (bget__on(D->A_bmc_b,na_a)){
-	if (bget__on(D->A_bmc_j,na_a)){
-	  if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnZtSZn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
-	  dQuickSort(0,&(D->QC_AtTAnZtSZn_nrm[na_a+0*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,0,nbins*nbins-1);   
-	  if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnZtSZn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
-	  na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
-	na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
-      na_a++; /* while (na_a<D->A_ncols){ } */}
-    /* if (D->A_rpop_b_total && D->A_cbother && D->A_cbother && D->Z_rpop_b_total){ } */}
-  if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->A_rpop_b_total){ 
-    na_a=0; na_b=0; na_j=0; 
-    while (na_a<D->A_ncols){
-      if (bget__on(D->A_bmc_b,na_a)){
-	if (bget__on(D->A_bmc_j,na_a)){
-	  if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnYtTAn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
-	  dQuickSort(0,&(D->QC_AtTYnYtTAn_nrm[na_a+0*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,0,nbins*nbins-1);   
-	  if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnYtTAn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
-	  na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
-	na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
-      na_a++; /* while (na_a<D->A_ncols){ } */}
-    /* if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->A_rpop_b_total){ } */}
-  if (D->A_cbother && D->A_rpop_b_total){ 
-    na_a=0; na_b=0; na_j=0; 
-    while (na_a<D->A_ncols){
-      if (bget__on(D->A_bmc_b,na_a)){
-	if (bget__on(D->A_bmc_j,na_a)){
-	  if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnAtTAn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
-	  dQuickSort(0,&(D->QC_AtTAnAtTAn_nrm[na_a+0*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,0,nbins*nbins-1);   
-	  if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnAtTAn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
-	  na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
-	na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
-      na_a++; /* while (na_a<D->A_ncols){ } */}
-    /* if (D->A_cbother && D->A_rpop_b_total){ } */}
+  if (GLOBAL_Ireq>0){
+    for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];     
+      if (verbose){ printf(" %% nb1 %d\n",nb1);}
+      if (E->A_rbother && D->A_cbother && E->Z_rbother && D->Y_cbother){ 
+	ma_a=0; ma_b=0; ma_j=0; 
+	while (ma_a<E->A_nrows){
+	  if (bget__on(E->A_bmr_b,ma_a)){
+	    if (bget__on(E->A_bmr_j,ma_a)){
+	      if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSWnYt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+	      if (GLOBAL_Ireq>0){ dQuickSort(0,&(E->QR_AnZtSWnYt_nrm[ma_a+0*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,0,nbins-1);}
+	      if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSWnYt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+	      ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
+	    ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
+	  ma_a++; /* while (ma_a<E->A_nrows){ } */}
+	/* if (E->A_rbother && D->A_cbother && E->Z_rbother && D->Y_cbother){ } */}
+      if (E->A_rbother && D->A_cbother && E->Z_rbother && D->A_cbother){ 
+	ma_a=0; ma_b=0; ma_j=0; 
+	while (ma_a<E->A_nrows){
+	  if (bget__on(E->A_bmr_b,ma_a)){
+	    if (bget__on(E->A_bmr_j,ma_a)){
+	      if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSZnAt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+	      if (GLOBAL_Ireq>0){ dQuickSort(0,&(E->QR_AnZtSZnAt_nrm[ma_a+0*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,0,nbins-1);}
+	      if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSZnAt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+	      ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
+	    ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
+	  ma_a++; /* while (ma_a<E->A_nrows){ } */}
+	/* if (E->A_rbother && D->A_cbother && E->Z_rbother && D->A_cbother){ } */}
+      if (E->A_rbother && D->A_cbother && E->A_rbother && D->Y_cbother){ 
+	ma_a=0; ma_b=0; ma_j=0; 
+	while (ma_a<E->A_nrows){
+	  if (bget__on(E->A_bmr_b,ma_a)){
+	    if (bget__on(E->A_bmr_j,ma_a)){
+	      if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTYnYt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+	      if (GLOBAL_Ireq>0){ dQuickSort(0,&(E->QR_AnAtTYnYt_nrm[ma_a+0*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,0,nbins-1);}
+	      if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTYnYt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+	      ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
+	    ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
+	  ma_a++; /* while (ma_a<E->A_nrows){ } */}
+	/* if (E->A_rbother && D->A_cbother && E->A_rbother && D->Y_cbother){ } */}
+      if (E->A_rbother && D->A_cbother && E->A_rbother && D->A_cbother){ 
+	ma_a=0; ma_b=0; ma_j=0; 
+	while (ma_a<E->A_nrows){
+	  if (bget__on(E->A_bmr_b,ma_a)){
+	    if (bget__on(E->A_bmr_j,ma_a)){
+	      if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTAnAt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+	      if (GLOBAL_Ireq>0){ dQuickSort(0,&(E->QR_AnAtTAnAt_nrm[ma_a+0*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,0,nbins-1);}
+	      if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTAnAt_nrm[ma_a+0*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+	      ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
+	    ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
+	  ma_a++; /* while (ma_a<E->A_nrows){ } */}
+	/* if (E->A_rbother && D->A_cbother && E->A_rbother && D->A_cbother){ } */}
+      /* for (nb1=0;nb1<nbins;nb1++){ } */}
+    if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->Z_rpop_b_total){ 
+      na_a=0; na_b=0; na_j=0; 
+      while (na_a<D->A_ncols){
+	if (bget__on(D->A_bmc_b,na_a)){
+	  if (bget__on(D->A_bmc_j,na_a)){
+	    if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnWtSZn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+	    if (GLOBAL_Ireq>0){ dQuickSort(0,&(D->QC_AtTYnWtSZn_nrm[na_a+0*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,0,nbins*nbins-1);}
+	    if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnWtSZn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+	    na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
+	  na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
+	na_a++; /* while (na_a<D->A_ncols){ } */}
+      /* if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->Z_rpop_b_total){ } */}
+    if (D->A_rpop_b_total && D->A_cbother && D->A_cbother && D->Z_rpop_b_total){ 
+      na_a=0; na_b=0; na_j=0; 
+      while (na_a<D->A_ncols){
+	if (bget__on(D->A_bmc_b,na_a)){
+	  if (bget__on(D->A_bmc_j,na_a)){
+	    if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnZtSZn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+	    if (GLOBAL_Ireq>0){ dQuickSort(0,&(D->QC_AtTAnZtSZn_nrm[na_a+0*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,0,nbins*nbins-1);}
+	    if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnZtSZn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+	    na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
+	  na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
+	na_a++; /* while (na_a<D->A_ncols){ } */}
+      /* if (D->A_rpop_b_total && D->A_cbother && D->A_cbother && D->Z_rpop_b_total){ } */}
+    if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->A_rpop_b_total){ 
+      na_a=0; na_b=0; na_j=0; 
+      while (na_a<D->A_ncols){
+	if (bget__on(D->A_bmc_b,na_a)){
+	  if (bget__on(D->A_bmc_j,na_a)){
+	    if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnYtTAn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+	    if (GLOBAL_Ireq>0){ dQuickSort(0,&(D->QC_AtTYnYtTAn_nrm[na_a+0*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,0,nbins*nbins-1);}
+	    if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnYtTAn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+	    na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
+	  na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
+	na_a++; /* while (na_a<D->A_ncols){ } */}
+      /* if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->A_rpop_b_total){ } */}
+    if (D->A_cbother && D->A_rpop_b_total){ 
+      na_a=0; na_b=0; na_j=0; 
+      while (na_a<D->A_ncols){
+	if (bget__on(D->A_bmc_b,na_a)){
+	  if (bget__on(D->A_bmc_j,na_a)){
+	    if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnAtTAn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+	    if (GLOBAL_Ireq>0){ dQuickSort(0,&(D->QC_AtTAnAtTAn_nrm[na_a+0*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,0,nbins*nbins-1);}
+	    if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnAtTAn_nrm[na_a+0*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+	    na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
+	  na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
+	na_a++; /* while (na_a<D->A_ncols){ } */}
+      /* if (D->A_cbother && D->A_rpop_b_total){ } */}
+    /* if (GLOBAL_Ireq>0){ } */}
   if (verbose){ printf(" %% [finished bcc_sumscores_srt]\n");}
 }
 
 void bcc_sumscores_ifT(struct bcc_ajdk *D)
 {
+  /* If GLOBAL_Ireq>0, we correct each E_[nb1]->QR_AnAtTAnAt_nrm[0+nb2*A_nrows*T_ncols] for T, across all values of nb1 and nb2. ;
+     Otherwise, if GLOBAL_Ireq<=0 also correct each E_[nb1]->QR_AnAtTAnAt_nrm[0+nb2*A_nrows*T_ncols] for T, but only use the nb2==0 term for each nb1.
+  */
   int verbose=0; 
   int nbins = D->nbins; struct bcc_single **E_ = D->E_;
   int nb1=0,nb2=0,nbx=0; struct bcc_single *E=NULL; 
@@ -466,7 +506,7 @@ void bcc_sumscores_ifT(struct bcc_ajdk *D)
     if (GLOBAL_kappa_squared>0);{ mds_scale_factor = GLOBAL_kappa_squared;}
     if (verbose){ printf(" %% n_mds==%d, mds_scale_factor=%0.3f\n",n_mds,mds_scale_factor);}
     for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1]; 
-      for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; 
+      for (nb2=0;nb2<(GLOBAL_Ireq>0 ? nbins : 1);nb2++){ nbx = nb1+nb2*nbins; 
 	if (verbose){ printf(" %% nb1 %d nb2 %d nbx %d\n",nb1,nb2,nbx);}
 	if (E->A_rbother && D->A_cbother && E->Z_rbother && D->Y_cbother){ 
 	  dra_mds_pow_s___m_m(&(E->QR_AnZtSWnYt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,n_mds*mds_scale_factor,E->A_bmr_j,D->T_bmc_j); 
@@ -500,16 +540,21 @@ void bcc_sumscores_ifT(struct bcc_ajdk *D)
 	  dra_mds_nrm_s___m_m(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,n_mds*mds_scale_factor,D->A_bmc_j,D->T_bmc_j); 
 	  if (verbose){ raprintf(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTAnAtTAn_nrm: ");}
 	  /* if (D->A_cbother && D->A_rpop_b_total){ } */}
-	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}    
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<(GLOBAL_Ireq>0 ? nbins : 1);nb2++){ }} */}}    
     /* if (n_mds>0){ } */}
   if (verbose){ printf(" %% [finished bcc_sumscores_ifT]\n");}
 }
 
 void bcc_sumscores_nrm(struct bcc_ajdk *D)
 {
+  /* If GLOBAL_Ireq>0, we normalize by the number of summands in each bin. ;
+     Otherwise, if GLOBAL_Ireq<=0 we normalize by the number of summands across all bins, and then sum the results. ;
+  */
   int verbose=0; 
   int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
   int nb1=0,nb2=0,nbx=0; long long int lld=0; struct bcc_single *E=NULL; struct bcc_double *F=NULL;
+  int ns_a=0;
+  int ma_a=0,ma_b=0,ma_j=0,na_a=0,na_b=0,na_j=0;
   if (verbose){ printf(" %% [entering bcc_sumscores_nrm]\n");}
   /*
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -533,50 +578,201 @@ void bcc_sumscores_nrm(struct bcc_ajdk *D)
     end;end;%for nb1=0:nbins-1;for nb2=0:nbins-1;nb_tab = nb1+nb2*nbins;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   */
-  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins;
-      if (verbose){ printf(" %% nb1 %d nb2 %d nbx %d\n",nb1,nb2,nbx);}
-      E = E_[nb1]; F = F_[nbx];
-      if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->Y_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnZtSWnYt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double)); 
-	lld = (long long int)(E_[nb2]->M_Zn->rpop_j - 0*(nb1==nb2?1:0)) * (long long int)(E_[nb2]->M_Zn->cpop_j) * (long long int)(E_[nb2]->M_Wn->cpop_j);
-	dra_plusdivequals_s___m_m(&(E->QR_AnZtSWnYt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnZtSWnYt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
-	if (verbose){ raprintf(&(E->QR_AnZtSWnYt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnZtSWnYt_nrm: ");}
-	/* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->Y_cbother){ } */}
-      if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->A_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnZtSZnAt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double));
-	lld = (long long int)(E_[nb2]->M_Zn->rpop_j - 0*(nb1==nb2?1:0)) * (long long int)(E_[nb2]->M_Zn->cpop_j) * (long long int)(E_[nb2]->M_Zn->cpop_j - 1);
-	dra_plusdivequals_s___m_m(&(E->QR_AnZtSZnAt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnZtSZnAt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
-	if (verbose){ raprintf(&(E->QR_AnZtSZnAt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnZtSZnAt_nrm: ");}
-	/* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->A_cbother){ } */}
-      if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->Y_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnAtTYnYt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double));
-	lld = (long long int)(E_[nb2]->M_An->rpop_j - 1*(nb1==nb2?1:0)) * (long long int)(E_[nb2]->M_An->cpop_j) * (long long int)(E_[nb2]->M_Yn->cpop_j);
-	dra_plusdivequals_s___m_m(&(E->QR_AnAtTYnYt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnAtTYnYt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
-	if (verbose){ raprintf(&(E->QR_AnAtTYnYt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnAtTYnYt_nrm: ");}
-	/* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->Y_cbother){ } */}
-      if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->A_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnAtTAnAt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double));
-	lld = (long long int)(E_[nb2]->M_An->rpop_j - 1*(nb1==nb2?1:0)) * (long long int)(E_[nb2]->M_An->cpop_j) * (long long int)(E_[nb2]->M_An->cpop_j - 1);
-	dra_plusdivequals_s___m_m(&(E->QR_AnAtTAnAt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnAtTAnAt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
-	if (verbose){ raprintf(&(E->QR_AnAtTAnAt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnAtTAnAt_nrm: ");}
-	/* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->A_cbother){ } */}
-      if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->Z_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTYnWtSZn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
-	lld = (long long int)(E_[nb1]->M_Yn->rpop_j) * (long long int)(E_[nb1]->M_Yn->cpop_j - 0) * (long long int)(E_[nb2]->M_Wn->rpop_j);
-	dra_plusdivequals_s___m_m(&(D->QC_AtTYnWtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTYnWtSZn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
-	if (verbose){ raprintf(&(D->QC_AtTYnWtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTYnWtSZn_nrm: ");}
-	/* if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->Z_rbother){ } */}
-      if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->Z_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTAnZtSZn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
-	lld = (long long int)(E_[nb1]->M_An->rpop_j) * (long long int)(E_[nb1]->M_An->cpop_j - 1) * (long long int)(E_[nb2]->M_Zn->rpop_j);
-	dra_plusdivequals_s___m_m(&(D->QC_AtTAnZtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTAnZtSZn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
-	if (verbose){ raprintf(&(D->QC_AtTAnZtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTAnZtSZn_nrm: ");}
-	/* if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->Z_rbother){ } */}
-      if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->A_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTYnYtTAn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
-	lld = (long long int)(E_[nb1]->M_Yn->rpop_j) * (long long int)(E_[nb1]->M_Yn->cpop_j - 0) * (long long int)(E_[nb2]->M_Yn->rpop_j - 1*(nb1==nb2?1:0));
-	dra_plusdivequals_s___m_m(&(D->QC_AtTYnYtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTYnYtTAn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
-	if (verbose){ raprintf(&(D->QC_AtTYnYtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTYnYtTAn_nrm: ");}
-	/* if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->A_rbother){ } */}
-      if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->A_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
-	lld = (long long int)(E_[nb1]->M_An->rpop_j) * (long long int)(E_[nb1]->M_An->cpop_j - 1) * (long long int)(E_[nb2]->M_An->rpop_j - 1*(nb1==nb2?1:0));
-	dra_plusdivequals_s___m_m(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTAnAtTAn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
-	if (verbose){ raprintf(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTAnAtTAn_nrm: ");}
-	/* if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->A_rbother){ } */}
-      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+  if (GLOBAL_Ireq>0){
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins;
+	if (verbose){ printf(" %% nb1 %d nb2 %d nbx %d\n",nb1,nb2,nbx);}
+	E = E_[nb1]; F = F_[nbx];
+	if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->Y_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnZtSWnYt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double)); 
+	  lld = (long long int)(E_[nb2]->M_Zn->rpop_j - 0*(nb1==nb2?1:0)) * (long long int)(E_[nb2]->M_Zn->cpop_j) * (long long int)(E_[nb2]->M_Wn->cpop_j);
+	  dra_plusdivequals_s___m_m(&(E->QR_AnZtSWnYt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnZtSWnYt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(E->QR_AnZtSWnYt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnZtSWnYt_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->Y_cbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->A_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnZtSZnAt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double));
+	  lld = (long long int)(E_[nb2]->M_Zn->rpop_j - 0*(nb1==nb2?1:0)) * (long long int)(E_[nb2]->M_Zn->cpop_j) * (long long int)(E_[nb2]->M_Zn->cpop_j - 1);
+	  dra_plusdivequals_s___m_m(&(E->QR_AnZtSZnAt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnZtSZnAt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(E->QR_AnZtSZnAt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnZtSZnAt_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->A_cbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->Y_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnAtTYnYt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double));
+	  lld = (long long int)(E_[nb2]->M_An->rpop_j - 1*(nb1==nb2?1:0)) * (long long int)(E_[nb2]->M_An->cpop_j) * (long long int)(E_[nb2]->M_Yn->cpop_j);
+	  dra_plusdivequals_s___m_m(&(E->QR_AnAtTYnYt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnAtTYnYt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(E->QR_AnAtTYnYt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnAtTYnYt_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->Y_cbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->A_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnAtTAnAt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double));
+	  lld = (long long int)(E_[nb2]->M_An->rpop_j - 1*(nb1==nb2?1:0)) * (long long int)(E_[nb2]->M_An->cpop_j) * (long long int)(E_[nb2]->M_An->cpop_j - 1);
+	  dra_plusdivequals_s___m_m(&(E->QR_AnAtTAnAt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnAtTAnAt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(E->QR_AnAtTAnAt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnAtTAnAt_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->A_cbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->Z_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTYnWtSZn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
+	  lld = (long long int)(E_[nb1]->M_Yn->rpop_j) * (long long int)(E_[nb1]->M_Yn->cpop_j - 0) * (long long int)(E_[nb2]->M_Wn->rpop_j);
+	  dra_plusdivequals_s___m_m(&(D->QC_AtTYnWtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTYnWtSZn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(D->QC_AtTYnWtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTYnWtSZn_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->Z_rbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->Z_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTAnZtSZn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
+	  lld = (long long int)(E_[nb1]->M_An->rpop_j) * (long long int)(E_[nb1]->M_An->cpop_j - 1) * (long long int)(E_[nb2]->M_Zn->rpop_j);
+	  dra_plusdivequals_s___m_m(&(D->QC_AtTAnZtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTAnZtSZn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(D->QC_AtTAnZtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTAnZtSZn_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->Z_rbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->A_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTYnYtTAn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
+	  lld = (long long int)(E_[nb1]->M_Yn->rpop_j) * (long long int)(E_[nb1]->M_Yn->cpop_j - 0) * (long long int)(E_[nb2]->M_Yn->rpop_j - 1*(nb1==nb2?1:0));
+	  dra_plusdivequals_s___m_m(&(D->QC_AtTYnYtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTYnYtTAn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(D->QC_AtTYnYtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTYnYtTAn_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->A_rbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->A_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
+	  lld = (long long int)(E_[nb1]->M_An->rpop_j) * (long long int)(E_[nb1]->M_An->cpop_j - 1) * (long long int)(E_[nb2]->M_An->rpop_j - 1*(nb1==nb2?1:0));
+	  dra_plusdivequals_s___m_m(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTAnAtTAn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTAnAtTAn_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->A_rbother){ } */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    /* if (GLOBAL_Ireq>0){ } */}
+  if (GLOBAL_Ireq<=0){
+    for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins;
+	if (verbose){ printf(" %% nb1 %d nb2 %d nbx %d\n",nb1,nb2,nbx);}
+	E = E_[nb1]; F = F_[nbx];
+	if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->Y_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnZtSWnYt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double)); 
+	  lld = (long long int)(D->Z_rpop_j_total - 0) * (long long int)(E_[nb2]->M_Zn->cpop_j) * (long long int)(E_[nb2]->M_Wn->cpop_j);
+	  dra_plusdivequals_s___m_m(&(E->QR_AnZtSWnYt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnZtSWnYt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(E->QR_AnZtSWnYt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnZtSWnYt_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->Y_cbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->A_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnZtSZnAt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double));
+	  lld = (long long int)(D->Z_rpop_j_total - 0) * (long long int)(E_[nb2]->M_Zn->cpop_j) * (long long int)(E_[nb2]->M_Zn->cpop_j - 1);
+	  dra_plusdivequals_s___m_m(&(E->QR_AnZtSZnAt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnZtSZnAt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(E->QR_AnZtSZnAt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnZtSZnAt_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->Z_rbother && D->A_cbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->Y_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnAtTYnYt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double));
+	  lld = (long long int)(D->A_rpop_j_total - 1) * (long long int)(E_[nb2]->M_An->cpop_j) * (long long int)(E_[nb2]->M_Yn->cpop_j);
+	  dra_plusdivequals_s___m_m(&(E->QR_AnAtTYnYt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnAtTYnYt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(E->QR_AnAtTYnYt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnAtTYnYt_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->Y_cbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->A_cbother){ fill_uchar_zero((unsigned char *)(&(E->QR_AnAtTAnAt_nrm[nb2*E->A_nrows*D->T_ncols])),E->A_nrows*D->T_ncols*sizeof(double));
+	  lld = (long long int)(D->A_rpop_j_total - 1) * (long long int)(E_[nb2]->M_An->cpop_j) * (long long int)(E_[nb2]->M_An->cpop_j - 1);
+	  dra_plusdivequals_s___m_m(&(E->QR_AnAtTAnAt_nrm[nb2*E->A_nrows*D->T_ncols]),E->A_nrows,D->T_ncols,F->QR_AnAtTAnAt->lf,(double)lld,E->A_bmr_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(E->QR_AnAtTAnAt_nrm[nb2*E->A_nrows*D->T_ncols]),"double_trn",E->A_nrows,D->T_ncols," %%%% E->QR_AnAtTAnAt_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && E_[nb2]->A_rbother && D->A_cbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->Z_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTYnWtSZn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
+	  lld = (long long int)(D->A_rpop_j_total) * (long long int)(E_[nb1]->M_Yn->cpop_j - 0) * (long long int)(D->Z_rpop_j_total);
+	  dra_plusdivequals_s___m_m(&(D->QC_AtTYnWtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTYnWtSZn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(D->QC_AtTYnWtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTYnWtSZn_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->Z_rbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->Z_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTAnZtSZn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
+	  lld = (long long int)(D->A_rpop_j_total) * (long long int)(E_[nb1]->M_An->cpop_j - 1) * (long long int)(D->Z_rpop_j_total);
+	  dra_plusdivequals_s___m_m(&(D->QC_AtTAnZtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTAnZtSZn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(D->QC_AtTAnZtSZn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTAnZtSZn_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->Z_rbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->A_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTYnYtTAn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
+	  lld = (long long int)(D->A_rpop_j_total) * (long long int)(E_[nb1]->M_Yn->cpop_j - 0) * (long long int)(D->A_rpop_j_total - 1);
+	  dra_plusdivequals_s___m_m(&(D->QC_AtTYnYtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTYnYtTAn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(D->QC_AtTYnYtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTYnYtTAn_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && D->Y_cbother && E_[nb2]->A_rbother){ } */}
+	if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->A_rbother){ fill_uchar_zero((unsigned char *)(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols])),D->A_ncols*D->T_ncols*sizeof(double));
+	  lld = (long long int)(D->A_rpop_j_total) * (long long int)(E_[nb1]->M_An->cpop_j - 1) * (long long int)(D->A_rpop_j_total - 1);
+	  dra_plusdivequals_s___m_m(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),D->A_ncols,D->T_ncols,F->QC_AtTAnAtTAn->lf,(double)lld,D->A_bmc_j,D->T_bmc_j);
+	  if (verbose){ raprintf(&(D->QC_AtTAnAtTAn_nrm[nbx*D->A_ncols*D->T_ncols]),"double_trn",D->A_ncols,D->T_ncols," %%%% D->QC_AtTAnAtTAn_nrm: ");}
+	  /* if (E_[nb1]->A_rbother && D->A_cbother && D->A_cbother && E_[nb2]->A_rbother){ } */}
+	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+    for (ns_a=0;ns_a<D->T_ncols;ns_a++){
+      if (bget__on(D->T_bmc_j,ns_a)){
+	for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];     
+	  if (verbose){ printf(" %% nb1 %d\n",nb1);}
+	  if (E->A_rbother && D->A_cbother && E->Z_rbother && D->Y_cbother){ 
+	    ma_a=0; ma_b=0; ma_j=0; 
+	    while (ma_a<E->A_nrows){
+	      if (bget__on(E->A_bmr_b,ma_a)){
+		if (bget__on(E->A_bmr_j,ma_a)){
+		  if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSWnYt_nrm[ma_a+ns_a*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+		  dra_sumx(0,&(E->QR_AnZtSWnYt_nrm[ma_a+ns_a*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,nbins);
+		  if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSWnYt_nrm[ma_a+ns_a*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+		  ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
+		ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
+	      ma_a++; /* while (ma_a<E->A_nrows){ } */}
+	    /* if (E->A_rbother && D->A_cbother && E->Z_rbother && D->Y_cbother){ } */}
+	  if (E->A_rbother && D->A_cbother && E->Z_rbother && D->A_cbother){ 
+	    ma_a=0; ma_b=0; ma_j=0; 
+	    while (ma_a<E->A_nrows){
+	      if (bget__on(E->A_bmr_b,ma_a)){
+		if (bget__on(E->A_bmr_j,ma_a)){
+		  if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSZnAt_nrm[ma_a+ns_a*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+		  dra_sumx(0,&(E->QR_AnZtSZnAt_nrm[ma_a+ns_a*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,nbins);
+		  if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnZtSZnAt_nrm[ma_a+ns_a*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+		  ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
+		ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
+	      ma_a++; /* while (ma_a<E->A_nrows){ } */}
+	    /* if (E->A_rbother && D->A_cbother && E->Z_rbother && D->A_cbother){ } */}
+	  if (E->A_rbother && D->A_cbother && E->A_rbother && D->Y_cbother){ 
+	    ma_a=0; ma_b=0; ma_j=0; 
+	    while (ma_a<E->A_nrows){
+	      if (bget__on(E->A_bmr_b,ma_a)){
+		if (bget__on(E->A_bmr_j,ma_a)){
+		  if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTYnYt_nrm[ma_a+ns_a*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+		  dra_sumx(0,&(E->QR_AnAtTYnYt_nrm[ma_a+ns_a*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,nbins);
+		  if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTYnYt_nrm[ma_a+ns_a*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+		  ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
+		ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
+	      ma_a++; /* while (ma_a<E->A_nrows){ } */}
+	    /* if (E->A_rbother && D->A_cbother && E->A_rbother && D->Y_cbother){ } */}
+	  if (E->A_rbother && D->A_cbother && E->A_rbother && D->A_cbother){ 
+	    ma_a=0; ma_b=0; ma_j=0; 
+	    while (ma_a<E->A_nrows){
+	      if (bget__on(E->A_bmr_b,ma_a)){
+		if (bget__on(E->A_bmr_j,ma_a)){
+		  if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pre: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTAnAt_nrm[ma_a+ns_a*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+		  dra_sumx(0,&(E->QR_AnAtTAnAt_nrm[ma_a+ns_a*E->A_nrows+0*E->A_nrows*D->T_ncols]),E->A_nrows*D->T_ncols,nbins);
+		  if (verbose){ printf(" %% ma_a %d ma_b %d ma_j %d; pos: ",ma_a,ma_b,ma_j); for (nb2=0;nb2<nbins;nb2++){ printf(" %+07.3f",E->QR_AnAtTAnAt_nrm[ma_a+ns_a*E->A_nrows+nb2*E->A_nrows*D->T_ncols]);} printf("\n");}
+		  ma_j++; /* if (bget__on(E->A_bmr_j,ma_a)){ } */}
+		ma_b++; /* if (bget__on(E->A_bmr_b,ma_a)){ } */}
+	      ma_a++; /* while (ma_a<E->A_nrows){ } */}
+	    /* if (E->A_rbother && D->A_cbother && E->A_rbother && D->A_cbother){ } */}
+	  /* for (nb1=0;nb1<nbins;nb1++){ } */}
+	if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->Z_rpop_b_total){ 
+	  na_a=0; na_b=0; na_j=0; 
+	  while (na_a<D->A_ncols){
+	    if (bget__on(D->A_bmc_b,na_a)){
+	      if (bget__on(D->A_bmc_j,na_a)){
+		if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnWtSZn_nrm[na_a+ns_a*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+		dra_sumx(0,&(D->QC_AtTYnWtSZn_nrm[na_a+ns_a*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,nbins*nbins);
+		if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnWtSZn_nrm[na_a+ns_a*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+		na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
+	      na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
+	    na_a++; /* while (na_a<D->A_ncols){ } */}
+	  /* if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->Z_rpop_b_total){ } */}
+	if (D->A_rpop_b_total && D->A_cbother && D->A_cbother && D->Z_rpop_b_total){ 
+	  na_a=0; na_b=0; na_j=0; 
+	  while (na_a<D->A_ncols){
+	    if (bget__on(D->A_bmc_b,na_a)){
+	      if (bget__on(D->A_bmc_j,na_a)){
+		if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnZtSZn_nrm[na_a+ns_a*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+		dra_sumx(0,&(D->QC_AtTAnZtSZn_nrm[na_a+ns_a*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,nbins*nbins);
+		if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnZtSZn_nrm[na_a+ns_a*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+		na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
+	      na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
+	    na_a++; /* while (na_a<D->A_ncols){ } */}
+	  /* if (D->A_rpop_b_total && D->A_cbother && D->A_cbother && D->Z_rpop_b_total){ } */}
+	if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->A_rpop_b_total){ 
+	  na_a=0; na_b=0; na_j=0; 
+	  while (na_a<D->A_ncols){
+	    if (bget__on(D->A_bmc_b,na_a)){
+	      if (bget__on(D->A_bmc_j,na_a)){
+		if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnYtTAn_nrm[na_a+ns_a*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+		dra_sumx(0,&(D->QC_AtTYnYtTAn_nrm[na_a+ns_a*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,nbins*nbins);
+		if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTYnYtTAn_nrm[na_a+ns_a*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+		na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
+	      na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
+	    na_a++; /* while (na_a<D->A_ncols){ } */}
+	  /* if (D->A_rpop_b_total && D->A_cbother && D->Y_cbother && D->A_rpop_b_total){ } */}
+	if (D->A_cbother && D->A_rpop_b_total){ 
+	  na_a=0; na_b=0; na_j=0; 
+	  while (na_a<D->A_ncols){
+	    if (bget__on(D->A_bmc_b,na_a)){
+	      if (bget__on(D->A_bmc_j,na_a)){
+		if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pre: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnAtTAn_nrm[na_a+ns_a*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+		dra_sumx(0,&(D->QC_AtTAnAtTAn_nrm[na_a+ns_a*D->A_ncols+0*D->A_ncols*D->T_ncols]),D->A_ncols*D->T_ncols,nbins*nbins);
+		if (verbose){ printf(" %% na_a %d na_b %d na_j %d; pos: ",na_a,na_b,na_j); for (nbx=0;nbx<nbins*nbins;nbx++){ printf(" %+07.3f",D->QC_AtTAnAtTAn_nrm[na_a+ns_a*D->A_ncols+nbx*D->A_ncols*D->T_ncols]);} printf("\n");}
+		na_j++; /* if (bget__on(D->A_bmc_j,na_a)){ } */}
+	      na_b++; /* if (bget__on(E->A_bmc_b,na_a)){ } */}
+	    na_a++; /* while (na_a<D->A_ncols){ } */}
+	  /* if (D->A_cbother && D->A_rpop_b_total){ } */}
+	/* if (bget__on(D->T_bmc_j,ns_a)){ } */}
+      /* for (ns_a=0;ns_a<D->T_ncols;ns_a++){ } */}
+    /* if (GLOBAL_Ireq<=0){ } */}
   if (verbose){ printf(" %% [finished bcc_sumscores_nrm]\n");}
 }
 
@@ -669,7 +865,9 @@ void bcc_sumscores_test()
 void bcc_lrup_sumscores_test()
 {
   /* tests a combination of lrup, flattenloop and sumscores */
-  int verbose=GLOBAL_verbose; int error_check = (strcmp(GLOBAL_TEST_TYP2,"error")==0); int iteration_max = GLOBAL_TEST_niter; int xdrop_total = 0;
+  int verbose=GLOBAL_verbose; int error_check = (strcmp(GLOBAL_TEST_TYP2,"error")==0); int iteration_max = GLOBAL_TEST_niter; int xdrop_length = 0;
+  int *rdrop=NULL,*cdrop=NULL,*rkeep=NULL,*ckeep=NULL,*rcsum=NULL,*ccsum=NULL;
+  double tau_c_est=0,tau_r_est=0;
   struct bcc_ajdk *D=NULL;struct bcc_single **E_=NULL; struct bcc_double **F_=NULL;
   int nl=0; double ct=0,rt=0,r=0,it=0,et=0;
   if (error_check){ printf(" %% skipping inital subscore calculation; not checking for errors\n");}
@@ -677,7 +875,8 @@ void bcc_lrup_sumscores_test()
   GLOBAL_tic(1);
   bcc_init(GLOBAL_TEST_TYP2,GLOBAL_TEST_mrand,&D,&E_,&F_,GLOBAL_QR_strategy,GLOBAL_QC_strategy); bcc_init_QX(D);
   GLOBAL_toc(1,1+verbose," %% loading time: ");
-  xdrop_total = get_xdrop_total(D->A_rpop_j_total,D->A_cpop_j);
+  get_xdrop_array(D->A_rpop_j_total,D->A_cpop_j,&xdrop_length,&rdrop,&cdrop,&rkeep,&ckeep);
+  ira_cumulative_sum(rkeep,xdrop_length,&rcsum); ira_cumulative_sum(ckeep,xdrop_length,&ccsum);
   sprintf(GLOBAL_skip,"AnZt_vv AnAt_vv AtTYn_vv AtTAn_vv xcalc AtTYn____WtSZn_vv At_T_YnWt_S_Zn_ww AnZt_S_WnYt_vv An_ZtSWn_Yt_ww");
   if (verbose>1){ printf(" %% skipping initial loop-subscores.\n");}
   GLOBAL_tic(1);
@@ -704,8 +903,10 @@ void bcc_lrup_sumscores_test()
   GLOBAL_tic(3);
   nl=0;
   while ((iteration_max<=0 || nl<iteration_max) && (D->A_rpop_j_total>0 || D->A_cpop_j>0)){
-    GLOBAL_toc(3,0,""); ct = GLOBAL_elct[3]; rt = GLOBAL_elrt[3]; r=ct/maximum(1,rt); et = rt/maximum(1,nl)*xdrop_total;
-    if (verbose>-1){ printf(" %% iteration %.5d/%.5d, D %.5d-x-%.7d, elapsed time ct/rt %6.1fs(%2.1fh)/%6.1fs(%2.1fh) = %2.1f; estimated total time %6.1fs(%2.1fh) + %6.1fs(%2.1fh)\n",nl,xdrop_total,D->A_rpop_j_total,D->A_cpop_j,ct,ct/3600,rt,rt/3600,r,it,it/3600,et,et/3600);}
+    GLOBAL_toc(3,0,""); ct = GLOBAL_elct[3]; rt = GLOBAL_elrt[3]; r=ct/maximum(1,rt); tau_c_est = rt/ccsum[nl]; tau_r_est = rt/rcsum[nl]; 
+    //et = maximum(rcsum[xdrop_length-1]*tau_r_est,ccsum[xdrop_length-1]*tau_c_est);
+    et = ccsum[xdrop_length-1]*tau_c_est;
+    if (verbose>-1){ printf(" %% iteration %.5d/%.5d, D %.5d-x-%.7d, elapsed time ct/rt %6.1fs(%2.1fh)/%6.1fs(%2.1fh) = %2.1f; estimated total time %6.1fs(%2.1fh) + %6.1fs(%2.1fh)\n",nl,xdrop_length,D->A_rpop_j_total,D->A_cpop_j,ct,ct/3600,rt,rt/3600,r,it,it/3600,et,et/3600);}
     if (verbose>1){ printf(" %% combining subscores to form initial loop-scores.\n");}
     GLOBAL_tic(4); bcc_sumscores_nrm(D); GLOBAL_toc(4,1+verbose," %% sumscores_nrm: ");
     GLOBAL_tic(4); bcc_sumscores_ifT(D); GLOBAL_toc(4,1+verbose," %% sumscores_ifT: ");

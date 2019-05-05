@@ -1,4 +1,13 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
+#ifdef _MONOLITH
 static inline unsigned int popcount_uchar_array(unsigned char *wp,unsigned long wl)
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline unsigned int popcount_uchar_array(unsigned char *wp,unsigned long wl)
+#endif /* _MONOLITH */
 {
   unsigned char *we=&(wp[wl]);
   unsigned int p=0;
@@ -18,7 +27,13 @@ typedef union {
 // (specifically, (MULTIPLEX_DIST / BITCT) * 16 bytes).  The current code
 // assumes (MULTIPLEX / BITCT) is a multiple of 3, and no greater than 30.
 
-static inline long long int popcount(__m128i** mem1p, __m128i** maskp, __m128i** maskp_end) {
+#ifdef _MONOLITH
+static inline long long int popcount(__m128i** mem1p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline long long int popcount(__m128i** mem1p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+{
   const __m128i m1 = {FIVEMASK, FIVEMASK};
   const __m128i m2 = {0x3333333333333333LU, 0x3333333333333333LU};
   const __m128i m4 = {0x0f0f0f0f0f0f0f0fLU, 0x0f0f0f0f0f0f0f0fLU};
@@ -66,7 +81,13 @@ static inline long long int popcount(__m128i** mem1p, __m128i** maskp, __m128i**
   return d;
 }
 
-static inline long long int popcount_and(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) {
+#ifdef _MONOLITH
+static inline long long int popcount_and(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline long long int popcount_and(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+{
   int verbose=0;
   const __m128i m1 = {FIVEMASK, FIVEMASK};
   const __m128i m2 = {0x3333333333333333LU, 0x3333333333333333LU};
@@ -119,7 +140,13 @@ static inline long long int popcount_and(__m128i** mem1p, __m128i** mem2p, __m12
   return d;
 }
 
-static inline long long int popcount_xor(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) {
+#ifdef _MONOLITH
+static inline long long int popcount_xor(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline long long int popcount_xor(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+{
   const __m128i m1 = {FIVEMASK, FIVEMASK};
   const __m128i m2 = {0x3333333333333333LU, 0x3333333333333333LU};
   const __m128i m4 = {0x0f0f0f0f0f0f0f0fLU, 0x0f0f0f0f0f0f0f0fLU};
@@ -167,7 +194,13 @@ static inline long long int popcount_xor(__m128i** mem1p, __m128i** mem2p, __m12
   return d;
 }
 
-static inline long long int popcount_notxorxor(__m128i** mem1p, __m128i** memSp,__m128i** mem2p, __m128i** maskp, __m128i** maskp_end) {
+#ifdef _MONOLITH
+static inline long long int popcount_notxorxor(__m128i** mem1p, __m128i** memSp,__m128i** mem2p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline long long int popcount_notxorxor(__m128i** mem1p, __m128i** memSp,__m128i** mem2p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+{
   const __m128i m1 = {FIVEMASK, FIVEMASK};
   const __m128i m2 = {0x3333333333333333LU, 0x3333333333333333LU};
   const __m128i m4 = {0x0f0f0f0f0f0f0f0fLU, 0x0f0f0f0f0f0f0f0fLU};
@@ -215,7 +248,13 @@ static inline long long int popcount_notxorxor(__m128i** mem1p, __m128i** memSp,
   return d;
 }
 
-static inline double popcount_lf(__m128i** mem1p, __m128i** maskp, __m128i** maskp_end, double **dinp) {
+#ifdef _MONOLITH
+static inline double popcount_lf(__m128i** mem1p, __m128i** maskp, __m128i** maskp_end, double **dinp) 
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline double popcount_lf(__m128i** mem1p, __m128i** maskp, __m128i** maskp_end, double **dinp) 
+#endif /* _MONOLITH */
+{
   /* Here we calculate popcount(*mem1p), with interval (j+0)*POPLENGTH-->(j+1)*POPLENGTH-1 weighted by (*dinp)[j]. ;
      We use mask from *maskp to *maskp_end. ;
      Note that, as stated above, the vector *dinp is given only on a coarse-grid with grid-step POPLENGTH. ;
@@ -267,7 +306,13 @@ static inline double popcount_lf(__m128i** mem1p, __m128i** maskp, __m128i** mas
   return dout;
 }
 
-static inline double popcount_xor_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end, double **dinp) {
+#ifdef _MONOLITH
+static inline double popcount_xor_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end, double **dinp) 
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline double popcount_xor_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end, double **dinp) 
+#endif /* _MONOLITH */
+{
   /* Here we calculate popcount(xor(*mem1p,*mem2p)), with interval (j+0)*POPLENGTH-->(j+1)*POPLENGTH-1 weighted by (*dinp)[j]. ;
      We use mask from *maskp to *maskp_end. ;
      Note that, as stated above, the vector *dinp is given only on a coarse-grid with grid-step POPLENGTH. ;
@@ -319,7 +364,13 @@ static inline double popcount_xor_lf(__m128i** mem1p, __m128i** mem2p, __m128i**
   return dout;
 }
 
-static inline double popcount_and_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end, double **dinp) {
+#ifdef _MONOLITH
+static inline double popcount_and_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end, double **dinp) 
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline double popcount_and_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end, double **dinp) 
+#endif /* _MONOLITH */
+{
   /* Here we calculate popcount(and(*mem1p,*mem2p)), with interval (j+0)*POPLENGTH-->(j+1)*POPLENGTH-1 weighted by (*dinp)[j]. ;
      We use mask from *maskp to *maskp_end. ;
      Note that, as stated above, the vector *dinp is given only on a coarse-grid with grid-step POPLENGTH. ;
@@ -370,7 +421,13 @@ static inline double popcount_and_lf(__m128i** mem1p, __m128i** mem2p, __m128i**
   return dout;
 }
 
-static inline double popcount_pm0(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) {
+#ifdef _MONOLITH
+static inline double popcount_pm0(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline double popcount_pm0(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+{
   /* here we calculate transpose(*mem1p) * (*mem2p) ; */
   /* We use mask from *maskp to *maskp_end. ; */
   const __m128i m1 = {FIVEMASK, FIVEMASK};
@@ -431,7 +488,13 @@ static inline double popcount_pm0(__m128i** mem1p, __m128i** mem2p, __m128i** ma
   return dout;
 }
 
-static inline long long int popcount_pmpm0(__m128i** mem0p,__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) {
+#ifdef _MONOLITH
+static inline long long int popcount_pmpm0(__m128i** mem0p,__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline long long int popcount_pmpm0(__m128i** mem0p,__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end) 
+#endif /* _MONOLITH */
+{
   /* here we calculate transpose(*mem0p .* *mem1p) * (*mem2p), using mask *maskp-->*maksp_end */
   const __m128i m1 = {FIVEMASK, FIVEMASK};
   const __m128i m2 = {0x3333333333333333LU, 0x3333333333333333LU};
@@ -489,7 +552,13 @@ static inline long long int popcount_pmpm0(__m128i** mem0p,__m128i** mem1p, __m1
   return d;
 }
 
-static inline double popcount_pm0_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end,double **dinp) {
+#ifdef _MONOLITH
+static inline double popcount_pm0_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end,double **dinp) 
+#endif /* _MONOLITH */
+#ifndef _MONOLITH
+inline double popcount_pm0_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end,double **dinp) 
+#endif /* _MONOLITH */
+{
   /* here we calculate transpose(*mem1p) * (*mem2p), with interval (j+0)*POPLENGTH-->(j+1)*POPLENGTH-1 weighted by (*dinp)[j]. ; */
   /*      We use mask from *maskp to *maskp_end. ; */
   /*      Note that, as stated above, the vector *dinp is given only on a coarse-grid with grid-step POPLENGTH. ; */

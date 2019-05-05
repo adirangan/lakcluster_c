@@ -1,3 +1,45 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
+int iPartition(int *ira,int stride,int l,int r) 
+{
+  int pivot=0,tmpi=0;
+  int i=0,j=0;
+  pivot = ira[stride*l];
+  i = l; j = r+1;
+  do{
+    do{ i++;} while( ira[stride*i] <= pivot && i <= r );
+    do{ j--;} while( ira[stride*j] > pivot );
+    if( i >= j ) break;
+    tmpi = ira[stride*i]; ira[stride*i] = ira[stride*j]; ira[stride*j] = tmpi;
+  }while(1);
+  tmpi = ira[stride*l]; ira[stride*l] = ira[stride*j]; ira[stride*j] = tmpi;
+  return j;
+}
+
+void iQuickSort(unsigned int nn,int *ira,int stride,int l,int r)
+{
+  /* modified from http://www.comp.dit.ie/rlawlor/Alg_DS/sorting/quickSort.c */
+  /* test with: */
+  /*
+    int ira[] = { 7 , 8 , 6 , 3 , 2 , 9 , 10 , 11 , 6 , 7 , 6 };
+    raprintf(ira,"int",1,11," %% ira: ");
+    iQuickSort(0,ira,1,0,11-1);
+    raprintf(ira,"int",1,11," %% ira: ");
+  */
+  int j=0; 
+  if( l < r ) { 
+    if (nn<GLOBAL_recursion_limit){ 
+      j = iPartition(ira,stride,l,r); 
+      iQuickSort(nn+1,ira,stride,l,j-1); 
+      iQuickSort(nn+1,ira,stride,j+1,r);
+      /* if (nn<GLOBAL_recursion_limit){ } */}
+    else /* if (nn>=GLOBAL_recursion_limit) */{ 
+      printf(" %% Warning! recursion limit %d reached in iQuickSort\n",nn);
+      /* recursion_limit breached */}  
+    /* if( l < r ) { } */}
+}
 
 int dPartition(double *dra,int stride,int l,int r) 
 {
@@ -22,7 +64,7 @@ void dQuickSort(unsigned int nn,double *dra,int stride,int l,int r)
   /*
     double dra[] = { 7.0 , 8.0 , 6.0 , 3.0 , 2.0 , 9.0 , 10.0 , 11.0 , 6.0 , 7.0 , 6.0 };
     raprintf(dra,"double",1,11," %% dra: ");
-    dQuickSort(dra,ira,ira_b,ira_j,0,10);
+    dQuickSort(0,dra,1,0,11-1);
     raprintf(dra,"double",1,11," %% dra: ");
   */
   int j=0; 
@@ -79,7 +121,7 @@ unsigned int dQuickSort_xij(unsigned int nn,double *dra,int stride,int *ira,int 
     raprintf(dra,"double",1,11," %% dra: ");
     raprintf(ira,"int",1,11," %% ira: ");
     raprintf(lnb,"int",1,11," %% lnb: ");
-    dQuickSort_xij(dra,ira,ira_b,ira_j,0,10);
+    dQuickSort(0,dra,1,ira,ira_b,ira_j,lnb,NULL,NULL,0,11-1);
     raprintf(dra,"double",1,11," %% dra: ");
     raprintf(ira,"int",1,11," %% ira: ");
     raprintf(lnb,"int",1,11," %% lnb: ");
@@ -96,4 +138,16 @@ unsigned int dQuickSort_xij(unsigned int nn,double *dra,int stride,int *ira,int 
       /* recursion_limit breached */}
     /* if( l < r ) { } */}
   return maximum(n1,n2);
+}
+
+void irandperm(unsigned int nn,int *ira)
+{
+  int verbose=0;
+  double dra[nn];
+  int nj=0;
+  for (nj=0;nj<nn;nj++){ dra[nj] = rand01;}
+  if (verbose){ printf(" %% [entering irandperm] nn %d\n",nn);}
+  dQuickSort_xij(0,dra,1,ira,NULL,NULL,NULL,NULL,NULL,0,nn-1);
+  if (verbose){ raprintf(ira,"int",1,nn," %% ira: ");}
+  if (verbose){ printf(" %% [finished irandperm] nn %d\n",nn);}
 }

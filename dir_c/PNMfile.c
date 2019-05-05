@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void hsv2rgb(double h,double s,double v,double *r,double *g,double *b)
 {
   int i;

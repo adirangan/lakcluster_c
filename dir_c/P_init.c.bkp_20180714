@@ -1,0 +1,223 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
+void P_handle_make_excerpt_A_nrows_(struct P_handle *P,struct L_handle ***U__,struct M_handle ***M__)
+{
+  int nbins = P->D->nbins; int nb=0;
+  *(U__) = (struct L_handle **) wkspace_all0c(nbins*sizeof(struct L_handle *));
+  for (nb=0;nb<nbins;nb++){ 
+    (*U__)[nb] = L_handle_make(P->D->E_[nb]->A_nrows/* *P->D->T_ncols */*P->rank);
+    (*U__)[nb]->spacing_row = SPACING_a; (*U__)[nb]->row_stride = P->D->E_[nb]->A_nrows;
+    (*U__)[nb]->spacing_col = SPACING_a; (*U__)[nb]->col_stride = P->rank;
+    (*U__)[nb]->spacing_lyr = SPACING_a; (*U__)[nb]->lyr_stride = 1 /* P->D->T_ncols */;
+    L_zero((*U__)[nb]);
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  *(M__) = (struct M_handle **) wkspace_all0c(nbins*sizeof(struct M_handle *));
+  for (nb=0;nb<nbins;nb++){ (*M__)[nb] = M_handle_w_make(BITJ,P->b_mlt,P->D->E_[nb]->A_nrows/* *P->D->T_ncols */,P->rank);}
+}
+
+void P_handle_make_excerpt_Z_nrows_(struct P_handle *P,struct L_handle ***U__,struct M_handle ***M__)
+{
+  int nbins = P->D->nbins; int nb=0;
+  *(U__) = (struct L_handle **) wkspace_all0c(nbins*sizeof(struct L_handle *));
+  for (nb=0;nb<nbins;nb++){ 
+    (*U__)[nb] = L_handle_make(P->D->E_[nb]->Z_nrows/* *P->D->T_ncols */*P->rank);
+    (*U__)[nb]->spacing_row = SPACING_a; (*U__)[nb]->row_stride = P->D->E_[nb]->Z_nrows;
+    (*U__)[nb]->spacing_col = SPACING_a; (*U__)[nb]->col_stride = P->rank;
+    (*U__)[nb]->spacing_lyr = SPACING_a; (*U__)[nb]->lyr_stride = 1 /* P->D->T_ncols */;
+    L_zero((*U__)[nb]);
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  *(M__) = (struct M_handle **) wkspace_all0c(nbins*sizeof(struct M_handle *));
+  for (nb=0;nb<nbins;nb++){ (*M__)[nb] = M_handle_w_make(BITJ,P->b_mlt,P->D->E_[nb]->Z_nrows/* *P->D->T_ncols */,P->rank);}
+}
+
+void P_handle_make_excerpt_A_ncols_(struct P_handle *P,struct L_handle ***V__,struct M_handle ***M__)
+{
+  int nbins = P->D->nbins; int nb=0;
+  *(V__) = (struct L_handle **) wkspace_all0c(nbins*sizeof(struct L_handle *));
+  for (nb=0;nb<nbins;nb++){ 
+    (*V__)[nb] = L_handle_make(P->D->A_ncols*P->rank*P->D->T_ncols);
+    (*V__)[nb]->spacing_row = SPACING_a; (*V__)[nb]->row_stride = P->D->A_ncols;
+    (*V__)[nb]->spacing_col = SPACING_a; (*V__)[nb]->col_stride = P->rank;
+    (*V__)[nb]->spacing_lyr = SPACING_a; (*V__)[nb]->lyr_stride = P->D->T_ncols;
+    L_zero((*V__)[nb]);
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  *(M__) = (struct M_handle **) wkspace_all0c(nbins*sizeof(struct M_handle *));
+  for (nb=0;nb<nbins;nb++){ (*M__)[nb] = M_handle_w_make(BITJ,P->b_mlt,P->D->A_ncols*P->D->T_ncols,P->rank);}
+}
+
+void P_handle_make_excerpt_Y_ncols_(struct P_handle *P,struct L_handle ***V__,struct M_handle ***M__)
+{
+  int nbins = P->D->nbins; int nb=0;
+  *(V__) = (struct L_handle **) wkspace_all0c(nbins*sizeof(struct L_handle *));
+  for (nb=0;nb<nbins;nb++){ 
+    (*V__)[nb] = L_handle_make(P->D->Y_ncols*P->rank*P->D->T_ncols);
+    (*V__)[nb]->spacing_row = SPACING_a; (*V__)[nb]->row_stride = P->D->Y_ncols;
+    (*V__)[nb]->spacing_col = SPACING_a; (*V__)[nb]->col_stride = P->rank;
+    (*V__)[nb]->spacing_lyr = SPACING_a; (*V__)[nb]->lyr_stride = P->D->T_ncols;
+    L_zero((*V__)[nb]);
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  *(M__) = (struct M_handle **) wkspace_all0c(nbins*sizeof(struct M_handle *));
+  for (nb=0;nb<nbins;nb++){ (*M__)[nb] = M_handle_w_make(BITJ,P->b_mlt,P->D->Y_ncols*P->D->T_ncols,P->rank);}
+}
+
+void P_handle_make_excerpt_A_ncols(struct P_handle *P,struct L_handle **V_,struct M_handle **M_)
+{
+  int nbins = P->D->nbins; int nb=0;
+  *V_ = L_handle_make(P->D->A_ncols*P->rank);
+  (*V_)->spacing_row = SPACING_a; (*V_)->row_stride = P->D->A_ncols;
+  (*V_)->spacing_col = SPACING_a; (*V_)->col_stride = P->rank;
+  (*V_)->spacing_lyr = SPACING_a; (*V_)->lyr_stride = 1;
+  L_zero(*V_);
+  *M_ = M_handle_w_make(BITJ,P->b_mlt,P->D->A_ncols,P->rank);
+}
+
+void P_handle_make_excerpt_Y_ncols(struct P_handle *P,struct L_handle **V_,struct M_handle **M_)
+{
+  int nbins = P->D->nbins; int nb=0;
+  *V_ = L_handle_make(P->D->Y_ncols*P->rank);
+  (*V_)->spacing_row = SPACING_a; (*V_)->row_stride = P->D->Y_ncols;
+  (*V_)->spacing_col = SPACING_a; (*V_)->col_stride = P->rank;
+  (*V_)->spacing_lyr = SPACING_a; (*V_)->lyr_stride = 1;
+  L_zero(*V_);
+  *M_ = M_handle_w_make(BITJ,P->b_mlt,P->D->Y_ncols,P->rank);
+}
+
+struct P_handle *P_handle_make(char *fname,struct dcc_ajdk *D,int iteration_num,int iteration_max,int iteration_min,int rank,int b_mlt)
+{
+  int nbins = D->nbins,nb=0,nr=0;
+  struct P_handle *P=NULL;
+  P = (struct P_handle *)wkspace_all0c(sizeof(struct P_handle)*1);
+  unsigned char *bmc1_p=NULL;
+  sprintf(P->out_xdrop_name,fname);
+  P->D = D;
+  P->out_xdrop_nlines=0; /* number of lines in out_xdrop */
+  P->out_xdrop_nrows=0; /* number of row-indices stored in out_xdrop */
+  P->out_xdrop_ncols=0; /* number of col-indices stored in out_xdrop */
+  P->out_xdrop=NULL; /* actual array for out_xdrop */
+  P->mr_index_sort=NULL; /* row-indices from out_xdrop */
+  P->mc_index_sort=NULL; /* col-indices from out_xdrop */
+  P->mr_index_local_nb=NULL; /* local nb from row-indices */
+  P->mr_index_local_mr=NULL; /* local mr from row-indices */
+  P->iteration_num=iteration_num; /* number of iterations */
+  P->iteration_min=iteration_min; /* maximum iteration */
+  P->iteration_max=iteration_max; /* minimum iteration */
+  P->rkeep=NULL; /* array of r-values (rows remaining) */
+  P->rdrop=NULL; /* array of rdrop-values */
+  P->ckeep=NULL; /* array of c-values (cols remaining) */
+  P->cdrop=NULL; /* array of cdrop-values */
+  P->rank=rank; /* rank of pca */
+  P->A_rpop_j_total=NULL; /* output array (size iteration_num) */
+  P->A_cpop_j=NULL; /* output array (size iteration_num) */
+  P->Irem=NULL; /* output array (size iteration_num) */
+  P->U_=NULL; /* left singular-vectors (size P->D->A_nrows_total-x-P->rank-x-P->iteration_num) */
+  P->V_=NULL; /* right singular_vectors (size P->D->A_ncols-x-P->rank-x-P->iteration_num) */
+  P->b_mlt=b_mlt; /* precision used for xcalc */
+  xcc_out_xdrop_get(P->out_xdrop_name,&(P->out_xdrop_nlines),&(P->out_xdrop));
+  xcc_out_xdrop_srt(P->out_xdrop_nlines,P->out_xdrop,&(P->out_xdrop_nrows),&(P->mr_index_sort),&(P->out_xdrop_ncols),&(P->mc_index_sort));
+  P->A_rpop_j_total = (int *) wkspace_all0c(P->iteration_num*sizeof(int));
+  P->A_cpop_j = (int *) wkspace_all0c(P->iteration_num*sizeof(int));
+  P->Irem = (int *) wkspace_all0c(P->iteration_num*sizeof(int));
+  /* P->U_ = (double *) wkspace_all0c(P->D->A_nrows_total*P->rank*P->iteration_num*sizeof(double)); */
+  P->U_ = NULL;
+  P->V_ = (double *) wkspace_all0c(P->D->A_ncols*P->rank*P->iteration_num*sizeof(double));
+  /* Left singular vector U minimizes:
+     (1/A_nrows) * (AnAtU/A_ncols - YnYtU/Y_ncols)/^2 - (1/Z_nrows) * (ZnAtU/A_nrows - WnYtU/Y_ncols).^2,
+     implying that U is an eigenvector of:
+     + (1/A_nrows) * (AnAtAnAt/A_ncols^2 - AnAtYnYt/A_ncols/Y_ncols - YnYtAnAt/Y_ncols/A_ncols + YnYtYnYt/Y_ncols^2)
+     - (1/Z_nrows) * (AnZtZnAt/A_ncols^2 - AnZtWnYt/A_ncols/Y_ncols - YnWtZnAt/Y_ncols/A_ncols + YnWtWnYt/Y_ncols^2)
+   */
+  /* P_handle_make_excerpt_A_nrows_(P,&(P->lf_U_),&(P->M_U_)); */
+  P->lf_U_ = NULL; P->M_U_ = NULL;
+  /* Right singular vector V minimizes:
+     (1/A_ncols) * (AtAnV/A_nrows - ZtZnV/Z_nrows)/^2 - (1/Y_ncols) * (YtAnV/A_nrows - WtZnV/Z_nrows).^2,
+     implying that V is an eigenvector of:
+     + (1/A_ncols) * (AtAnAtAn/A_nrows^2 - AtAnZtZn/Z_nrows/A_nrows - ZtZnAtAn/A_nrows/Z_nrows + ZtZnZtZn/Z_nrows^2)
+     - (1/Y_ncols) * (AtYnYtAn/A_nrows^2 - AtYnWtZn/Z_nrows/A_nrows - ZtWnYtAn/A_nrows/Z_nrows + ZtWnWtZn/Z_nrows^2)
+   */
+  P_handle_make_excerpt_A_ncols(P,&(P->lf_V),&(P->M_V));
+  P->lf_R = L_handle_make(P->rank*P->rank);
+  P->lf_R->spacing_row = SPACING_a; P->lf_R->row_stride = P->rank;
+  P->lf_R->spacing_col = SPACING_a; P->lf_R->col_stride = P->rank;
+  P->lf_R->spacing_lyr = SPACING_a; P->lf_R->lyr_stride = 0;
+  L_zero(P->lf_R);
+  bmc1_p = wkspace_all0c(bsize(P->rank)); for (nr=0;nr<P->rank;nr++){ bset__on(bmc1_p,nr);}
+  P->M_rank = M_handle_v_make(BITJ,P->rank,1,NULL,NULL,bmc1_p,NULL);
+  M_mxset(P->M_rank,bmc1_p,NULL);
+  /*
+    Calculating V requires:
+    AnV_ (one for each bin), as well as AtAnV (summed over all bins) and YtAnV (summed over all bins);
+    ZnV_ (one for each bin), as well as ZtZnV (summed over all bins) and WtZnV (summed over all bins);
+    Once we have AtAnV and YtAnV, we can form AtAnV/A_nrows - ZtZnV/Z_nrows =: VA;
+    then form AnVA_ (one for each bin) as well as AtAnVA (summed over all bins);
+    also form ZnVA_ (one for each bin) as well as ZtZnVA (summed over all bins);
+    then finally form AtAnVA/A_nrows - ZtZnVA/Z_nrows =: VAZ;
+    Once we have YtAnV and WtZnV, we can form YtAnV/A_nrows - WtZnV/Z_nrows =: VY;
+    then form YnVY_ (one for each bin) as well as AtYnVY (summed over all bins);
+    also form WnVY_ (one for each bin) as well as ZtWnVY (summed over all bins);
+    then finally form AtYnVY/A_nrows - ZtWnVY/Z_nrows =: VYW;
+    Once we have VAZ and VYW we can form VAZ/A_ncols - VYW/Y_ncols =: V;
+   */
+  P_handle_make_excerpt_A_nrows_(P,&(P->lf_AnV_),&(P->M_AnV_)); P_handle_make_excerpt_Z_nrows_(P,&(P->lf_ZnV_),&(P->M_ZnV_));
+  P_handle_make_excerpt_A_ncols_(P,&(P->lf_AtAnV_),&(P->M_AtAnV_)); P_handle_make_excerpt_A_ncols(P,&(P->lf_AtAnV),&(P->M_AtAnV)); 
+  P_handle_make_excerpt_Y_ncols_(P,&(P->lf_YtAnV_),&(P->M_YtAnV_)); P_handle_make_excerpt_Y_ncols(P,&(P->lf_YtAnV),&(P->M_YtAnV));
+  P_handle_make_excerpt_A_ncols_(P,&(P->lf_ZtZnV_),&(P->M_ZtZnV_)); P_handle_make_excerpt_A_ncols(P,&(P->lf_ZtZnV),&(P->M_ZtZnV)); 
+  P_handle_make_excerpt_Y_ncols_(P,&(P->lf_WtZnV_),&(P->M_WtZnV_)); P_handle_make_excerpt_Y_ncols(P,&(P->lf_WtZnV),&(P->M_WtZnV));
+  P_handle_make_excerpt_A_ncols(P,&(P->lf_VA),&(P->M_VA));
+  P_handle_make_excerpt_A_nrows_(P,&(P->lf_AnVA_),&(P->M_AnVA_)); P_handle_make_excerpt_Z_nrows_(P,&(P->lf_ZnVA_),&(P->M_ZnVA_));
+  P_handle_make_excerpt_A_ncols_(P,&(P->lf_AtAnVA_),&(P->M_AtAnVA_)); P_handle_make_excerpt_A_ncols(P,&(P->lf_AtAnVA),&(P->M_AtAnVA));
+  P_handle_make_excerpt_A_ncols_(P,&(P->lf_ZtZnVA_),&(P->M_ZtZnVA_)); P_handle_make_excerpt_A_ncols(P,&(P->lf_ZtZnVA),&(P->M_ZtZnVA));
+  P_handle_make_excerpt_Y_ncols(P,&(P->lf_VY),&(P->M_VY));
+  P_handle_make_excerpt_A_nrows_(P,&(P->lf_YnVY_),&(P->M_YnVY_)); P_handle_make_excerpt_Z_nrows_(P,&(P->lf_WnVY_),&(P->M_WnVY_));
+  P_handle_make_excerpt_A_ncols_(P,&(P->lf_AtYnVY_),&(P->M_AtYnVY_)); P_handle_make_excerpt_A_ncols(P,&(P->lf_AtYnVY),&(P->M_AtYnVY));
+  P_handle_make_excerpt_A_ncols_(P,&(P->lf_ZtWnVY_),&(P->M_ZtWnVY_)); P_handle_make_excerpt_A_ncols(P,&(P->lf_ZtWnVY),&(P->M_ZtWnVY));
+  P_handle_make_excerpt_A_ncols(P,&(P->lf_VAZ),&(P->M_VAZ));
+  P_handle_make_excerpt_A_ncols(P,&(P->lf_VYW),&(P->M_VYW));
+  P->nx=0;
+  return P;
+}
+
+void P_init_dcc(struct dcc_ajdk *D,struct P_handle *P)
+{
+  dcc_out_xdrop_lkp(D,P->out_xdrop_nrows,P->mr_index_sort,&(P->mr_index_local_nb),&(P->mr_index_local_mr));
+  get_xdrop_array_sub(D->A_rpop_j_total,D->A_cpop_j,P->iteration_num,P->iteration_max,P->iteration_min,NULL,&(P->rdrop),&(P->cdrop),&(P->rkeep),&(P->ckeep));
+}
+
+void P_handle_printf(int verbose,struct P_handle *P,char *prefix)
+{
+  int nl=0,nx=0;
+  char tmpchar[FNAMESIZE];
+  if (verbose>0){ printf("%s iteration_num %d iteration_max %d iteration_min %d rank %d b_mlt %d\n",prefix,P->iteration_num,P->iteration_max,P->iteration_min,P->rank,P->b_mlt);}
+  if (verbose>0){ printf("%s nx %d\n",prefix,P->nx);}
+  if (verbose>1){ printf("%s out_xdrop_name: %s\n",prefix,P->out_xdrop_name);}
+  if (verbose>1){ printf("%s nlines %d, nrows %d, ncols %d\n",prefix,P->out_xdrop_nlines,P->out_xdrop_nrows,P->out_xdrop_ncols);}
+  if (verbose>2){
+    if (P->rkeep!=NULL){ sprintf(tmpchar,"%s rkeep:",prefix); raprintf(P->rkeep,"int",1,P->iteration_num,tmpchar);}
+    if (P->rdrop!=NULL){ sprintf(tmpchar,"%s rdrop:",prefix); raprintf(P->rdrop,"int",1,P->iteration_num,tmpchar);}
+    if (P->ckeep!=NULL){ sprintf(tmpchar,"%s ckeep:",prefix); raprintf(P->ckeep,"int",1,P->iteration_num,tmpchar);}
+    if (P->cdrop!=NULL){ sprintf(tmpchar,"%s cdrop:",prefix); raprintf(P->cdrop,"int",1,P->iteration_num,tmpchar);}
+    if (P->A_rpop_j_total!=NULL){ sprintf(tmpchar,"%s A_rpop_j_total:",prefix); raprintf(P->A_rpop_j_total,"int",1,P->iteration_num,tmpchar);}
+    if (P->A_cpop_j!=NULL){ sprintf(tmpchar,"%s A_cpop_j:",prefix); raprintf(P->A_cpop_j,"int",1,P->iteration_num,tmpchar);}
+    if (P->Irem!=NULL){ sprintf(tmpchar,"%s Irem:",prefix); raprintf(P->Irem,"int",1,P->iteration_num,tmpchar);}
+    /* for (nx=0;nx<P->xol_num;nx++){ */
+    /*   printf(" %% nx %d\n",nx); */
+    /*   for (nl=0;nl<P->rank;nl++){ */
+    /* 	if (P->U_!=NULL){ sprintf(tmpchar,"%s U_[%d]:",prefix,nl); raprintf(&(P->U_[0 + nl*P->D->A_nrows_total + nx*P->D->A_nrows_total*P->rank]),"double",1,P->D->A_nrows_total,tmpchar);} */
+    /* 	if (P->V_!=NULL){ sprintf(tmpchar,"%s V_[%d]:",prefix,nl); raprintf(&(P->V_[0 + nl*P->D->A_ncols + nx*P->D->A_ncols*P->rank]),"double",1,P->D->A_ncols,tmpchar);} */
+    /* 	/\* for (nl=0;nl<P->rank;nl++){ } *\/} */
+    /*   /\* for (nx=0;nx<P->xol_num;nx++){ } *\/} */
+    /* if (verbose>1){ } */}
+}
+
+void P_handle_dmp(struct P_handle *P)
+{
+  char prefix[FNAMESIZE];
+  char fname[FNAMESIZE];
+  sprintf(prefix,"pca_k%d_B%d",P->rank,P->b_mlt);
+  sprintf(fname,"%s/%s_A_rpop_j_total.mda",GLOBAL_DIR_NAME,prefix); mda_write_i4(fname,P->iteration_num,1,P->A_rpop_j_total);
+  sprintf(fname,"%s/%s_A_cpop_j.mda",GLOBAL_DIR_NAME,prefix); mda_write_i4(fname,P->iteration_num,1,P->A_cpop_j);
+  sprintf(fname,"%s/%s_Irem.mda",GLOBAL_DIR_NAME,prefix); mda_write_i4(fname,P->iteration_num,1,P->Irem);
+  /* sprintf(fname,"%s/%s_U_.mda",GLOBAL_DIR_NAME,prefix); mda_write_r8(fname,P->D->A_nrows_total*P->rank,P->xol_num,P->U_); */
+  /* sprintf(fname,"%s/%s_V_.mda",GLOBAL_DIR_NAME,prefix); mda_write_r8(fname,P->D->A_ncols*P->rank,P->xol_num,P->V_); */
+}

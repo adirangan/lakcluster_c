@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void *get_An_ZtSWn_Yt_ww(void *vp)
 {
   int verbose=0;
@@ -112,14 +116,14 @@ int wrap_An_ZtSWn_Yt_ww__run(int *tidx,void **vpra,pthread_t *thread_in,int spac
      variable space in **vpra (should be at least size 13)
    */
   int verbose=0;
-  int length_a=0,length_s=0,length=0,ip=0;
+  unsigned long long int length_a=0,length_s=0,length=0,ip=0;
   if (verbose){ printf(" %% [entering wrap_An_ZtSWn_Yt_ww__run] tidx %d\n",*tidx);}
   if (verbose){ M_handle_printf(M_An,verbose," %% M_An: ");}
   if (verbose){ M_handle_printf(M_St,verbose," %% M_St: ");}
   if (verbose){ M_handle_printf(M_Wt,verbose," %% M_Wt: ");}
   switch (spacing_a){ case SPACING_j: length_a = M_An->rpop_j; break; case SPACING_b: length_a = M_An->rpop_b; break; case SPACING_a: length_a = M_An->nrows; break; default: break; /* switch (spacing_a){ } */}
   switch (spacing_s){ case SPACING_j: length_s = M_St->rpop_j; break; case SPACING_b: length_s = M_St->rpop_b; break; case SPACING_a: length_s = M_St->nrows; break; default: break; /* switch (spacing_s){ } */}
-  length = length_a*length_s; if (verbose){ printf(" %% length %d*%d=%d\n",length_a,length_s,length);}
+  length = length_a*length_s; if (verbose){ printf(" %% length %llu*%llu=%llu\n",length_a,length_s,length);}
   if (verbose>2){ bprintf(M_An->mr_b,M_An->bitj,1,M_An->nrows," %% M_An->mr_b: ");}
   if (verbose>2){ bprintf(M_An->mr_j,M_An->bitj,1,M_An->nrows," %% M_An->mr_j: ");}
   if (verbose>2){ bprintf(M_An->mc_b,M_An->bitj,1,M_An->ncols," %% M_An->mc_b: ");}
@@ -128,8 +132,8 @@ int wrap_An_ZtSWn_Yt_ww__run(int *tidx,void **vpra,pthread_t *thread_in,int spac
   if (verbose>2){ bprintf(M_Wt->mr_j,M_Wt->bitj,1,M_Wt->nrows," %% M_Wt->mr_j: ");}
   if (verbose>2){ bprintf(M_Wt->mc_b,M_Wt->bitj,1,M_Wt->ncols," %% M_Wt->mc_b: ");}
   if (verbose>2){ bprintf(M_Wt->mc_j,M_Wt->bitj,1,M_Wt->ncols," %% M_Wt->mc_j: ");}
-  if (*output_An_ZtSWn_Yt_ww_p==NULL){ if (verbose){ printf(" %% allocating output size %d*%d\n",length,(int)sizeof(double));} *output_An_ZtSWn_Yt_ww_p = L_handle_make(length);}
-  if ((*output_An_ZtSWn_Yt_ww_p)->length<length){ printf(" %% Warning! length %d<%d in wrap_An_ZtSWn_Yt_ww__run\n",(*output_An_ZtSWn_Yt_ww_p)->length,length);}
+  if (*output_An_ZtSWn_Yt_ww_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_An_ZtSWn_Yt_ww_p = L_handle_make(length);}
+  if ((*output_An_ZtSWn_Yt_ww_p)->length<length){ printf(" %% Warning! length %llu<%llu in wrap_An_ZtSWn_Yt_ww__run\n",(*output_An_ZtSWn_Yt_ww_p)->length,length);}
   memset((*output_An_ZtSWn_Yt_ww_p)->lf,0,length*sizeof(double));
   ip=0; vpra[ip++] = tidx; vpra[ip++] = M_An; vpra[ip++] = M_St; vpra[ip++] = M_ZtSWn_; vpra[ip++] = M_Wt; vpra[ip++] = M_Yn; vpra[ip++] = A_ajdk; vpra[ip++] = Y_ajdk; vpra[ip++] = *output_An_ZtSWn_Yt_ww_p;
   switch (spacing_a){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (spacing_a){ } */}
@@ -170,26 +174,26 @@ void wrap_An_ZtSWn_Yt_ww_test()
   lf_ZtSn = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   lf_WtSn = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   for (nb=0;nb<nbins;nb++){
-    lf_AtTn[nb] = L_handle_make(M_An[nb]->ncols*M_Tn[nb]->ncols);
-    lf_YtTn[nb] = L_handle_make(M_Yn[nb]->ncols*M_Tn[nb]->ncols);
-    lf_ZtSn[nb] = L_handle_make(M_An[nb]->ncols*M_Tn[nb]->ncols);
-    lf_WtSn[nb] = L_handle_make(M_Yn[nb]->ncols*M_Tn[nb]->ncols);
+    lf_AtTn[nb] = L_handle_make((unsigned long long int)M_An[nb]->ncols*(unsigned long long int)M_Tn[nb]->ncols);
+    lf_YtTn[nb] = L_handle_make((unsigned long long int)M_Yn[nb]->ncols*(unsigned long long int)M_Tn[nb]->ncols);
+    lf_ZtSn[nb] = L_handle_make((unsigned long long int)M_An[nb]->ncols*(unsigned long long int)M_Tn[nb]->ncols);
+    lf_WtSn[nb] = L_handle_make((unsigned long long int)M_Yn[nb]->ncols*(unsigned long long int)M_Tn[nb]->ncols);
     /* for (nb=0;nb<nbins;nb++){ } */}
   lf_AnZt = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   lf_AnAt = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   lf_YnWt = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   lf_YnYt = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   for (nb=0;nb<nbins;nb++){
-    lf_AnZt[nb] = L_handle_make(M_An[nb]->nrows*M_Zn[nb]->nrows);
-    lf_AnAt[nb] = L_handle_make(M_An[nb]->nrows*M_An[nb]->nrows);
-    lf_YnWt[nb] = L_handle_make(M_Yn[nb]->nrows*M_Wn[nb]->nrows);
-    lf_YnYt[nb] = L_handle_make(M_Yn[nb]->nrows*M_Yn[nb]->nrows);
+    lf_AnZt[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_Zn[nb]->nrows);
+    lf_AnAt[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_An[nb]->nrows);
+    lf_YnWt[nb] = L_handle_make((unsigned long long int)M_Yn[nb]->nrows*(unsigned long long int)M_Wn[nb]->nrows);
+    lf_YnYt[nb] = L_handle_make((unsigned long long int)M_Yn[nb]->nrows*(unsigned long long int)M_Yn[nb]->nrows);
     /* for (nb=0;nb<nbins;nb++){ } */}
   lf_ZtSWn = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   lf_AtTYn = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins);
   for (nb=0;nb<nbins;nb++){
-    lf_ZtSWn[nb] = L_handle_make(M_Zt[nb]->nrows*M_Wt[nb]->nrows*M_St[nb]->nrows);
-    lf_AtTYn[nb] = L_handle_make(M_At[nb]->nrows*M_Yt[nb]->nrows*M_Tt[nb]->nrows);
+    lf_ZtSWn[nb] = L_handle_make((unsigned long long int)M_Zt[nb]->nrows*(unsigned long long int)M_Wt[nb]->nrows*(unsigned long long int)M_St[nb]->nrows);
+    lf_AtTYn[nb] = L_handle_make((unsigned long long int)M_At[nb]->nrows*(unsigned long long int)M_Yt[nb]->nrows*(unsigned long long int)M_Tt[nb]->nrows);
     /* for (nb=0;nb<nbins;nb++){ } */}
   M_ZtSWn_ = (struct M_handle ***)wkspace_all0c(sizeof(struct M_handle **)*nbins);
   M_AtTYn_ = (struct M_handle ***)wkspace_all0c(sizeof(struct M_handle **)*nbins);
@@ -204,8 +208,8 @@ void wrap_An_ZtSWn_Yt_ww_test()
   lf_An_ZtSWn_Yt_ww = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_An_ZtSWn_Yt_ww = (int *)wkspace_all0c(sizeof(int)*nbins);
   lf_An_AtTYn_Yt_ww = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_An_AtTYn_Yt_ww = (int *)wkspace_all0c(sizeof(int)*nbins);
   for (nb=0;nb<nbins;nb++){
-    lf_An_ZtSWn_Yt_ww[nb] = L_handle_make(M_An[nb]->nrows*M_St[nb]->nrows);
-    lf_An_AtTYn_Yt_ww[nb] = L_handle_make(M_An[nb]->nrows*M_Tt[nb]->nrows);
+    lf_An_ZtSWn_Yt_ww[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_St[nb]->nrows);
+    lf_An_AtTYn_Yt_ww[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_Tt[nb]->nrows);
     /* for (nb=0;nb<nbins;nb++){ } */}
   M_WtSZn_ = (struct M_handle ***)wkspace_all0c(sizeof(struct M_handle **)*nbins);
   M_YtTAn_ = (struct M_handle ***)wkspace_all0c(sizeof(struct M_handle **)*nbins);
@@ -220,20 +224,20 @@ void wrap_An_ZtSWn_Yt_ww_test()
   lf_Yn_WtSZn_At_ww = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_Yn_WtSZn_At_ww = (int *)wkspace_all0c(sizeof(int)*nbins);
   lf_Yn_YtTAn_At_ww = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_Yn_YtTAn_At_ww = (int *)wkspace_all0c(sizeof(int)*nbins);
   for (nb=0;nb<nbins;nb++){
-    lf_Yn_WtSZn_At_ww[nb] = L_handle_make(M_Yn[nb]->nrows*M_St[nb]->nrows);
-    lf_Yn_YtTAn_At_ww[nb] = L_handle_make(M_Yn[nb]->nrows*M_Tt[nb]->nrows);
+    lf_Yn_WtSZn_At_ww[nb] = L_handle_make((unsigned long long int)M_Yn[nb]->nrows*(unsigned long long int)M_St[nb]->nrows);
+    lf_Yn_YtTAn_At_ww[nb] = L_handle_make((unsigned long long int)M_Yn[nb]->nrows*(unsigned long long int)M_Tt[nb]->nrows);
     /* for (nb=0;nb<nbins;nb++){ } */}
   lf_AnAt_T_YnYt_vv = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_AnAt_T_YnYt_vv = (int *)wkspace_all0c(sizeof(int)*nbins);
   lf_AnZt_S_WnYt_vv = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_AnZt_S_WnYt_vv = (int *)wkspace_all0c(sizeof(int)*nbins);
   for (nb=0;nb<nbins;nb++){ 
-    lf_AnAt_T_YnYt_vv[nb] = L_handle_make(M_An[nb]->nrows*M_Tn[nb]->ncols);
-    lf_AnZt_S_WnYt_vv[nb] = L_handle_make(M_An[nb]->nrows*M_Sn[nb]->ncols);
+    lf_AnAt_T_YnYt_vv[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_Tn[nb]->ncols);
+    lf_AnZt_S_WnYt_vv[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_Sn[nb]->ncols);
     /* for (nb=0;nb<nbins;nb++){ } */}
   lf_An_ZtSWn_Yt_vv = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_An_ZtSWn_Yt_vv = (int *)wkspace_all0c(sizeof(int)*nbins);
   lf_An_AtTYn_Yt_vv = (struct L_handle **)wkspace_all0c(sizeof(struct L_handle *)*nbins); length_An_AtTYn_Yt_vv = (int *)wkspace_all0c(sizeof(int)*nbins);
   for (nb=0;nb<nbins;nb++){ 
-    lf_An_ZtSWn_Yt_vv[nb] = L_handle_make(M_An[nb]->nrows*M_Sn[nb]->ncols);
-    lf_An_AtTYn_Yt_vv[nb] = L_handle_make(M_An[nb]->nrows*M_Tn[nb]->ncols);
+    lf_An_ZtSWn_Yt_vv[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_Sn[nb]->ncols);
+    lf_An_AtTYn_Yt_vv[nb] = L_handle_make((unsigned long long int)M_An[nb]->nrows*(unsigned long long int)M_Tn[nb]->ncols);
     /* for (nb=0;nb<nbins;nb++){ } */}
   for (n_type=1;n_type<=1;n_type++){ for (n_spacing_B=0;n_spacing_B<=2;n_spacing_B++){ for (n_spacing_A=0;n_spacing_A<=2;n_spacing_A++){
   	if (verbose){ printf(" %% %s; %s; %s\n",TYPE_name[n_type],SPACING_name[n_spacing_B],SPACING_name[n_spacing_A]);}

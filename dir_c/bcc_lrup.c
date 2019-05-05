@@ -1,3 +1,7 @@
+#ifndef _MONOLITH
+#include "lakcluster_header.h"
+#endif /* _MONOLITH */
+
 void bcc_lrup_QC_YnWt_stage_a0(struct bcc_ajdk *D)
 {
   int verbose=GLOBAL_verbose;
@@ -587,6 +591,9 @@ void bcc_lrup_QC_YnWt_stage_b3(struct bcc_ajdk *D)
 
 void bcc_lrup_QC_YnWt_stage_c(struct bcc_ajdk *D)
 {
+  /* Updates terms for QC such as F->lf_At_T_YnWt_S_Zn 
+     using low-rank terms such as F->lf_kt_r_unwt_s_zn, etc. 
+  */
   int verbose=GLOBAL_verbose;
   int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_double **F_ = D->F_;
   int nbx=0,nb1=0,nb2=0; struct bcc_single *E_nb1=NULL,*E_nb2=NULL; struct bcc_double *F=NULL;
@@ -783,8 +790,7 @@ void bcc_lrup_QR_YnWt_stage_2(struct bcc_ajdk *D)
 	if (D->A_cbother && E_nb1->Z_rbother){ 
 	  GLOBAL_pthread_tic(); 
 	  wrap_M_At_to_L2_run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_type,n_spacing_B,n_spacing_A,E_nb1->M_vt,D->A_ajdk,&(E_nb1->lf_vn));
-	  GLOBAL_pthread_toc();
-	  /* if bother */}
+	  GLOBAL_pthread_toc(); /* if bother */}
 	/* for (nb1=0;nb1<nbins;nb1++){ } */}
     GLOBAL_pthread_tuc();
     GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% M_At_to_L2: ");
@@ -1004,6 +1010,7 @@ void bcc_lrup_QC_ZtSWn_stage_2(struct bcc_ajdk *D)
 
 void bcc_test_mxcut(struct bcc_ajdk *D)
 {
+  /* Removes a few randomly chosen rows and columns from the row- and column-masks, storing the results in D->A_bmc_j, etc. */
   int verbose=GLOBAL_verbose;
   int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
   int nb=0,nr=0,nc=0,cdrop=0,rdrop=0;
@@ -1051,6 +1058,11 @@ void bcc_test_mxcut(struct bcc_ajdk *D)
 
 void bcc_lrup_mxcut(struct bcc_ajdk *D)
 {
+  /* Removes a few randomly chosen rows and columns from the row- and column-masks.
+     New masks are not immediately stored in D->A_umc_j, D->A_bmc_j, etc.
+     Instead, these masks are preserved, while the newer masks are stored in D->A_umc_j_rtn, D->A_umc_j_rmv, D->A_bmc_j_rtn, D->A_bmc_j_rmv, etc. ;
+     These (temporary) masks are used to define the (temporary) submatrices used for the low-rank update (e.g. E->M_an, E->M_jn, E->M_kn, E->M_hn, etc.). ;
+  */
   int verbose=GLOBAL_verbose;
   int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
   int nb=0,nr=0,nc=0,rdrop=0,rkeep=0,rdrop_max=0,cdrop=0,ckeep=0,cdrop_max=0,drop_flag=0;
@@ -1088,6 +1100,12 @@ void bcc_lrup_mxcut(struct bcc_ajdk *D)
 
 void bcc_lrup_mxset(struct bcc_ajdk *D)
 {
+  /* Copies all of the 
+     A_bmr_j_rtn etc (i.e., retained) and 
+     A_bmr_j_rmv etc (i.e., removed) bitmasks 
+     into the temporary variables used for lrup
+     (e.g., E->M_an used in low-rank update).
+  */
   int verbose=GLOBAL_verbose;
   int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
   int nb=0;
@@ -1109,6 +1127,9 @@ void bcc_lrup_mxset(struct bcc_ajdk *D)
 
 void bcc_lrup_mxdup(struct bcc_ajdk *D)
 {
+  /* Copies D->A_bmc_j_rtn into D->A_bmc_j, and E->A_bmr_j_rtn into E->A_bmr_j.
+     Copies D->A_umc_j_rtn into D->A_umc_j, and E->A_umr_j_rtn into E->A_umr_j.
+  */
   int verbose=GLOBAL_verbose;
   int nbins = D->nbins; struct bcc_single **E_ = D->E_; struct bcc_single *E=NULL;
   int nb=0;
