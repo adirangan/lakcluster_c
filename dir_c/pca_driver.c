@@ -675,6 +675,7 @@ void pca_stage_b9(struct P_handle *P)
   GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% xcalc: ");
   GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+<<<<<<< HEAD
   if (flag_ww_vs_uu==1){
     GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
     GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
@@ -712,13 +713,22 @@ void pca_stage_b9(struct P_handle *P)
     /* if (flag_ww_vs_uu==0){ } */}
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
   if (verbose>4){
-    for (nb=0;nb<nbins;nb++){ E = E_[nb];
-      printf(" %% nb %d: P->lf_AnV_[nb] length %d row_stride %d col_stride %d lyr_stride %d\n",nb,P->lf_AnV_[nb]->length,P->lf_AnV_[nb]->row_stride,P->lf_AnV_[nb]->col_stride,P->lf_AnV_[nb]->lyr_stride);
-      lfprintf(P->lf_AnV_[nb]," %% P->lf_AnV_[nb]->lf: ");
-      printf(" %% nb %d: P->lf_ZnV_[nb] length %d row_stride %d col_stride %d lyr_stride %d\n",nb,P->lf_ZnV_[nb]->length,P->lf_ZnV_[nb]->row_stride,P->lf_ZnV_[nb]->col_stride,P->lf_ZnV_[nb]->lyr_stride);
-      lfprintf(P->lf_ZnV_[nb]," %% P->lf_ZnV_[nb]->lf: ");
-      /* for (nb=0;nb<nbins;nb++){ } */}
-    /* if (verbose>2){ } */}
+=======
+  GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+  GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+  for (nb=0;nb<nbins;nb++){ E = E_[nb];
+    if (E->A_rbother && D->A_cbother){ 
+      GLOBAL_pthread_tic();
+      wrap_An_Xn_ww__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_An,P->M_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_AnV_[nb]));
+      GLOBAL_pthread_toc(); /* if bother */}
+    if (E->Z_rbother && D->A_cbother){ 
+      GLOBAL_pthread_tic();
+      wrap_An_Xn_ww__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_Zn,P->M_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_ZnV_[nb]));
+      GLOBAL_pthread_toc(); /* if bother */}
+    /* for (nb=0;nb<nbins;nb++){ } */}
+  GLOBAL_pthread_tuc();
+  GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% An_Xn_ww : ");
+  GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
   if (verbose>2){
     for (nb=0;nb<nbins;nb++){ E = E_[nb];
