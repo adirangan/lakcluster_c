@@ -655,9 +655,9 @@ void pca_stage_b9(struct P_handle *P)
 {
   int verbose=GLOBAL_verbose;
   int flag_ww_vs_uu=0;
-  struct dcc_ajdk *D = P->D; 
+  struct dcc_ajdk *D = P->D;
   struct dcc_single **E_ = D->E_;
-  int nbins = D->nbins; 
+  int nbins = D->nbins;
   int nb=0; struct dcc_single *E=NULL;
   int n_type = TYPE_pm;
   int n_spacing_A = SPACING_a;
@@ -667,27 +667,26 @@ void pca_stage_b9(struct P_handle *P)
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
   GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
   GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
-  if (D->A_cbother){ 
-    GLOBAL_pthread_tic(); 
+  if (D->A_cbother){
+    GLOBAL_pthread_tic();
     wrap_xcalc(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),P->D->A_bmc_j,P->D->A_bmc_b,P->M_rank->mr_j,P->M_rank->mr_b,P->lf_V,P->lf_V->lf,&(P->D->A_ncols),&(P->M_rank->nrows),&(P->M_V),&(P->b_mlt),(addressable_0));
     GLOBAL_pthread_toc(); /* if bother */}
-  GLOBAL_pthread_tuc(); 
+  GLOBAL_pthread_tuc();
   GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% xcalc: ");
   GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-<<<<<<< HEAD
   if (flag_ww_vs_uu==1){
     GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
     GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
     for (nb=0;nb<nbins;nb++){ E = E_[nb];
       if (E->A_rbother && D->A_cbother){
-	GLOBAL_pthread_tic();
-	wrap_An_Xn_ww__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_An,P->M_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_AnV_[nb]));
-	GLOBAL_pthread_toc(); /* if bother */}
+        GLOBAL_pthread_tic();
+        wrap_An_Xn_ww__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_An,P->M_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_AnV_[nb]));
+        GLOBAL_pthread_toc(); /* if bother */}
       if (E->Z_rbother && D->A_cbother){
-	GLOBAL_pthread_tic();
-	wrap_An_Xn_ww__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_Zn,P->M_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_ZnV_[nb]));
-	GLOBAL_pthread_toc(); /* if bother */}
+        GLOBAL_pthread_tic();
+        wrap_An_Xn_ww__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_Zn,P->M_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_ZnV_[nb]));
+        GLOBAL_pthread_toc(); /* if bother */}
       /* for (nb=0;nb<nbins;nb++){ } */}
     GLOBAL_pthread_tuc();
     GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% An_Xn_ww : ");
@@ -698,14 +697,14 @@ void pca_stage_b9(struct P_handle *P)
     GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
     GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
     for (nb=0;nb<nbins;nb++){ E = E_[nb];
-      if (E->A_rbother && D->A_cbother){ 
-	GLOBAL_pthread_tic();
-	wrap_An_Xn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_An,P->lf_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_AnV_[nb]));
-	GLOBAL_pthread_toc(); /* if bother */}
-      if (E->Z_rbother && D->A_cbother){ 
-	GLOBAL_pthread_tic();
-	wrap_An_Xn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_Zn,P->lf_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_ZnV_[nb]));
-	GLOBAL_pthread_toc(); /* if bother */}
+      if (E->A_rbother && D->A_cbother){
+        GLOBAL_pthread_tic();
+        wrap_An_Xn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_An,P->lf_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_AnV_[nb]));
+        GLOBAL_pthread_toc(); /* if bother */}
+      if (E->Z_rbother && D->A_cbother){
+        GLOBAL_pthread_tic();
+        wrap_An_Xn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_Zn,P->lf_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_ZnV_[nb]));
+        GLOBAL_pthread_toc(); /* if bother */}
       /* for (nb=0;nb<nbins;nb++){ } */}
     GLOBAL_pthread_tuc();
     GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% An_Xn_uu : ");
@@ -713,43 +712,34 @@ void pca_stage_b9(struct P_handle *P)
     /* if (flag_ww_vs_uu==0){ } */}
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
   if (verbose>4){
-=======
-  GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
-  GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
-  for (nb=0;nb<nbins;nb++){ E = E_[nb];
-    if (E->A_rbother && D->A_cbother){ 
-      GLOBAL_pthread_tic();
-      wrap_An_Xn_ww__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_An,P->M_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_AnV_[nb]));
-      GLOBAL_pthread_toc(); /* if bother */}
-    if (E->Z_rbother && D->A_cbother){ 
-      GLOBAL_pthread_tic();
-      wrap_An_Xn_ww__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,n_spacing_A,E->M_Zn,P->M_V,P->M_rank,P->D->A_ajdk,(addressable_0),&(P->lf_ZnV_[nb]));
-      GLOBAL_pthread_toc(); /* if bother */}
-    /* for (nb=0;nb<nbins;nb++){ } */}
-  GLOBAL_pthread_tuc();
-  GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% An_Xn_ww : ");
-  GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+    for (nb=0;nb<nbins;nb++){ E = E_[nb];
+      printf(" %% nb %d: P->lf_AnV_[nb] length %d row_stride %d col_stride %d lyr_stride %d\n",nb,P->lf_AnV_[nb]->length,P->lf_AnV_[nb]->row_stride,P->lf_AnV_[nb]->col_stride,P->lf_AnV_[nb]->lyr_stride);
+      lfprintf(P->lf_AnV_[nb]," %% P->lf_AnV_[nb]->lf: ");
+      printf(" %% nb %d: P->lf_ZnV_[nb] length %d row_stride %d col_stride %d lyr_stride %d\n",nb,P->lf_ZnV_[nb]->length,P->lf_ZnV_[nb]->row_stride,P->lf_ZnV_[nb]->col_stride,P->lf_ZnV_[nb]->lyr_stride);
+      lfprintf(P->lf_ZnV_[nb]," %% P->lf_ZnV_[nb]->lf: ");
+      /* for (nb=0;nb<nbins;nb++){ } */}
+    /* if (verbose>2){ } */}
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
   if (verbose>2){
     for (nb=0;nb<nbins;nb++){ E = E_[nb];
       printf(" %% nb %d: P->lf_AnV_[nb] length %d row_stride %d col_stride %d lyr_stride %d\n",nb,P->lf_AnV_[nb]->length,P->lf_AnV_[nb]->row_stride,P->lf_AnV_[nb]->col_stride,P->lf_AnV_[nb]->lyr_stride);
       itmp=0;
       for (nl=0;nl<P->lf_AnV_[nb]->row_stride;nl++){
-	dtmp_row = P->lf_AnV_[nb]->lf[nl + 0*P->lf_AnV_[nb]->row_stride];
-	dtmp_col = P->lf_AnV_[nb]->lf[nl + 1*P->lf_AnV_[nb]->row_stride];
-	if ((itmp<32) && ((dtmp_row!=0) || (dtmp_col!=0))){
-	  printf(" %% itmp %2d: P->lf_AnV_[%d]->lf[%d] = %+16.8f , %+16.8f\n",itmp,nb,dtmp_row,dtmp_col);
-	  itmp++; /* if ((itmp<32) && ((dtmp_row!=0) || (dtmp_col!=0))){ } */}
-	/* for (nl=0;nl<P->lf_AnV_[nb]->row_stride;nl++){ } */}
+        dtmp_row = P->lf_AnV_[nb]->lf[nl + 0*P->lf_AnV_[nb]->row_stride];
+        dtmp_col = P->lf_AnV_[nb]->lf[nl + 1*P->lf_AnV_[nb]->row_stride];
+        if ((itmp<32) && ((dtmp_row!=0) || (dtmp_col!=0))){
+          printf(" %% itmp %2d: P->lf_AnV_[%d]->lf[%d] = %+16.8f , %+16.8f\n",itmp,nb,dtmp_row,dtmp_col);
+          itmp++; /* if ((itmp<32) && ((dtmp_row!=0) || (dtmp_col!=0))){ } */}
+        /* for (nl=0;nl<P->lf_AnV_[nb]->row_stride;nl++){ } */}
       printf(" %% nb %d: P->lf_ZnV_[nb] length %d row_stride %d col_stride %d lyr_stride %d\n",nb,P->lf_ZnV_[nb]->length,P->lf_ZnV_[nb]->row_stride,P->lf_ZnV_[nb]->col_stride,P->lf_ZnV_[nb]->lyr_stride);
       itmp=0;
       for (nl=0;nl<P->lf_ZnV_[nb]->row_stride;nl++){
-	dtmp_row = P->lf_ZnV_[nb]->lf[nl + 0*P->lf_ZnV_[nb]->row_stride];
-	dtmp_col = P->lf_ZnV_[nb]->lf[nl + 1*P->lf_ZnV_[nb]->row_stride];
-	if ((itmp<32) && ((dtmp_row!=0) || (dtmp_col!=0))){
-	  printf(" %% itmp %2d: P->lf_ZnV_[%d]->lf[%d] = %+16.8f , %+16.8f\n",itmp,nb,dtmp_row,dtmp_col);
-	  itmp++; /* if ((itmp<32) && ((dtmp_row!=0) || (dtmp_col!=0))){ } */}
-	/* for (nl=0;nl<P->lf_ZnV_[nb]->row_stride;nl++){ } */}
+        dtmp_row = P->lf_ZnV_[nb]->lf[nl + 0*P->lf_ZnV_[nb]->row_stride];
+        dtmp_col = P->lf_ZnV_[nb]->lf[nl + 1*P->lf_ZnV_[nb]->row_stride];
+        if ((itmp<32) && ((dtmp_row!=0) || (dtmp_col!=0))){
+          printf(" %% itmp %2d: P->lf_ZnV_[%d]->lf[%d] = %+16.8f , %+16.8f\n",itmp,nb,dtmp_row,dtmp_col);
+          itmp++; /* if ((itmp<32) && ((dtmp_row!=0) || (dtmp_col!=0))){ } */}
+        /* for (nl=0;nl<P->lf_ZnV_[nb]->row_stride;nl++){ } */}
       /* for (nb=0;nb<nbins;nb++){ } */}
     /* if (verbose>2){ } */}
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
