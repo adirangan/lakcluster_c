@@ -175,7 +175,7 @@ void bcc_ajdk_init(double mrnd,struct bcc_ajdk *D)
 
 void bcc_single_copy_M_An(struct bcc_single *E,struct bcc_single *E_in)
 {
-  /* copy from file */
+  /* copy from variable */
   int verbose=0;
   struct bcc_ajdk *D=E->D,*D_in=E_in->D;
   int nb_given = E->nb;

@@ -52,6 +52,7 @@
 /* scorebox functions */
 #include "bcc_scorebox.c"
 #include "dcc_scorebox.c"
+#include "dcg_scorebox.c"
 #include "S_init.c"
 #include "lakcluster_scorebox.c"
 #include "dexcluster_scorebox.c"
@@ -63,3 +64,9 @@
 /* scramble functions */
 #include "R_init.c"
 #include "boxmuller.c" 
+
+/* dcgxpander functions */
+#include "dcg.c"
+#include "dcg_lf.c"
+#include "dcg_sumscores.c"
+#include "dcgxpander_driver.c"

@@ -126,6 +126,9 @@ char GLOBAL_S_n_name[FNAMESIZE]="\0";
 char GLOBAL_S_t_name[FNAMESIZE]="\0";
 char **GLOBAL_S_n_name_=NULL;
 char **GLOBAL_S_t_name_=NULL;
+char GLOBAL_J_n_rind[FNAMESIZE]="\0";
+char **GLOBAL_J_n_rind_=NULL;
+char GLOBAL_K_n_cind[FNAMESIZE]="\0";
 char GLOBAL_out_name[FNAMESIZE]="\0";
 char GLOBAL_scorebox_out_xdrop[FNAMESIZE]="\0";
 int GLOBAL_scorebox_row_max=0;
@@ -323,6 +326,12 @@ int main(int argc, char** argv) {
   if (strcmp(GLOBAL_TEST_TYPE,"pca_driver")==0){ pca_driver();}
   if (strcmp(GLOBAL_TEST_TYPE,"pca_proj_test")==0){ pca_proj_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"pca_proj_driver")==0){ pca_proj_driver();}
+  if (strcmp(GLOBAL_TEST_TYPE,"dcg_init")==0){ dcg_init_test();}
+  if (strcmp(GLOBAL_TEST_TYPE,"dcg_lf_D_AtTn_ZtSn")==0){ dcg_lf_D_AtTn_ZtSn_test();}
+  if (strcmp(GLOBAL_TEST_TYPE,"dcg_lf_TAnZtS")==0){ dcg_lf_TAnZtS_test();}
+  if (strcmp(GLOBAL_TEST_TYPE,"dcg_sumscores")==0){ dcg_sumscores_test();}
+  if (strcmp(GLOBAL_TEST_TYPE,"dcg_time_sumscores")==0){ dcg_time_sumscores_test();}
+  if (strcmp(GLOBAL_TEST_TYPE,"dcgxpander_driver")==0){ dcgxpander_driver();}
   free(wkspace_ua); exit(RET_SUCCESS);
   return 0;
 }

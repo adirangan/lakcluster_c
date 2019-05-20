@@ -29,7 +29,7 @@ void dexcluster_scorebox_excerpt_1(int verbose,struct dcc_ajdk *D,struct S_handl
   GLOBAL_toc(1,verbose," %% subscore calculation time: ");
   GLOBAL_tic(1);
   if (verbose>1){ printf(" %% correcting for collapsed-halfloops.\n");}
-  dcc_halfloop(D); 
+  dcc_wrap_dcc_halfloop(D); 
   GLOBAL_toc(1,verbose," %% collapsed-halfloop correction time: ");
   if (verbose>1){ printf(" %% combining subscores.\n");}
   dcc_sumscores_nrm(D);
@@ -52,7 +52,7 @@ void dexcluster_scorebox_excerpt_2(int verbose,struct dcc_ajdk *D,struct S_handl
   dcc_lf_ZtSn(D); 
   dcc_lf_D_AtTn_ZtSn_vv(D); 
   dcc_lf_TAnZtS_ww(D); 
-  dcc_halfloop(D); 
+  dcc_wrap_dcc_halfloop(D); 
   GLOBAL_toc(1,verbose," %% low-rank update time: ");
   if (verbose>1){ printf(" %% combining subscores.\n");}
   dcc_sumscores_nrm(D);

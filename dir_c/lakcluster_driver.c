@@ -143,9 +143,9 @@ void lakcluster_driver()
 	At this point the first few entries of D->QC_index_local_mc_x correspond to the columns that are least likely to participate in a bicluster. ;
 	Sets D->QR_index_local_mr_x and D->QR_index_local_nb.
 	These arrays store the indices (i.e., index locations) of the masks 
-	M_An[nb]->mr==E->A_bmr_x.
-	Also copies D->QR_index_global_mr_x from E->QR_index_globalL_mr_x.
-	These arrays store the overall index locations of the masks M_An->mr accumulated across bins. ;
+	M_An[nb]->mr_x==E->A_bmr_x.
+	Also copies D->QR_index_global_mr_x from E->QR_index_global_mr_x.
+	These arrays store the overall index locations of the masks M_An->mr_x accumulated across bins. ;
         Then sorts row-scores in increasing order across rows.
 	At this point the first few entries of D->QR_index_global_mr_x correspond to the rows that are least likely to participate in a bicluster. ;
 	Also redefines D->A_rpop_j_total using E->A_bmr_b and E->A_bmr_j. 

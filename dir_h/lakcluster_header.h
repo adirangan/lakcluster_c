@@ -220,6 +220,9 @@ extern int GLOBAL_pca_iteration_max;
 extern int GLOBAL_pca_iteration_min;
 extern int GLOBAL_pca_rank;
 extern double GLOBAL_pca_tolerance;
+extern char GLOBAL_J_n_rind[FNAMESIZE];
+extern char **GLOBAL_J_n_rind_;
+extern char GLOBAL_K_n_cind[FNAMESIZE];
 
 #define rup(A,B) ((A) + !!((A)%(B))*((B) - ((A)%(B))))
 #define maximum(A,B) ((A) > (B) ? (A) : (B))
@@ -244,6 +247,7 @@ extern unsigned char popcount_uchar[256];
 #include "R_handle.h"
 #include "bcc.h"
 #include "dcc.h"
+#include "dcg.h"
 
 /* thread management */
 extern int GLOBAL_NBINS;
@@ -508,9 +512,9 @@ void dcc_lf_TAnZtS_ww(struct dcc_ajdk *D);
 void dcc_lf_TAnZtS_uu(struct dcc_ajdk *D);
 void dcc_lf_TAnZtS_error(int verbose,struct dcc_ajdk *D);
 void dcc_lf_TAnZtS_test();
-void *get_halfloop(void *vp);
-void wrap_halfloop(int *tidx,void **vpra,pthread_t *thread_in,struct dcc_double *F);
-void dcc_halfloop(struct dcc_ajdk *D);
+void *get_dcc_halfloop(void *vp);
+void wrap_dcc_halfloop(int *tidx,void **vpra,pthread_t *thread_in,struct dcc_double *F);
+void dcc_wrap_dcc_halfloop(struct dcc_ajdk *D);
 void dcc_lrup_mxdup(struct dcc_ajdk *D);
 void dcc_scorebox_mxA(struct dcc_ajdk *D,int rdrop,int cdrop);
 void dcc_scorebox_svalue(struct dcc_ajdk *D);
@@ -649,12 +653,12 @@ void S_init_bcc(struct bcc_ajdk *D,struct S_handle *S);
 void S_init_dcc(struct dcc_ajdk *D,struct S_handle *S);
 void S_handle_printf(int verbose,struct S_handle *S,char *prefix);
 void S_handle_dmp(struct S_handle *S);
-void *get_TAnZtS_ww_stage_0(void *vp);
-void wrap_TAnZtS_ww_stage_0(int *tidx,void **vpra,pthread_t *thread_in,struct dcc_single *E);
+void *get_dcc_TAnZtS_ww_stage_0(void *vp);
+void wrap_dcc_TAnZtS_ww_stage_0(int *tidx,void **vpra,pthread_t *thread_in,struct dcc_single *E);
 void dcc_TAnZtS_ww_stage_0(struct dcc_ajdk *D);
 void dcc_TAnZtS_ww_stage_1(struct dcc_ajdk *D);
-void *get_TAnZtS_ww_stage_2(void *vp);
-void wrap_TAnZtS_ww_stage_2(int *tidx,void **vpra,pthread_t *thread_in,struct dcc_double *F);
+void *get_dcc_TAnZtS_ww_stage_2(void *vp);
+void wrap_dcc_TAnZtS_ww_stage_2(int *tidx,void **vpra,pthread_t *thread_in,struct dcc_double *F);
 void dcc_TAnZtS_ww_stage_2(struct dcc_ajdk *D);
 void *get_TAnZtS_uu(void *vp);
 int wrap_TAnZtS_uu__run(int *tidx,void **vpra,pthread_t *thread_in,int output_spacing_a,int output_spacing_s,struct M_handle *M_An,struct M_handle *M_Tt,struct M_handle *M_Zn,struct M_handle *M_St,double *A_ajdk,struct L_handle **output_p);
@@ -705,5 +709,62 @@ void dcc_scramble(struct dcc_ajdk *D,struct R_handle *R);
 void bcc_scramble(struct bcc_ajdk *D,struct R_handle *R);
 void wrap_dcc_scramble(struct dcc_ajdk *D);
 void wrap_bcc_scramble(struct bcc_ajdk *D);
-
-
+/* %%%%%%%%%%%%%%%% */
+void dcg_ajdk_copy(struct dcg_ajdk *D,struct dcg_ajdk *D_in);
+void dcg_ajdk_load(struct dcg_ajdk *D);
+void dcg_ajdk_init(double mrnd,struct dcg_ajdk *D);
+void dcg_single_copy_M_An(struct dcg_single *E,struct dcg_single *E_in);
+void dcg_single_load_M_An(struct dcg_single *E);
+void dcg_single_init_M_An(char *error_vs_speed,double mrnd,struct dcg_single *E);
+void dcg_single_copy_lf(struct dcg_single *E,struct dcg_single *E_in);
+void dcg_single_init_lf_excerpt(char *prefix,int n1a,int n1b,int n2a,int n2b,struct L_handle **L_p,int M_flag,struct M_handle **M_p);
+void dcg_single_init_lf(struct dcg_single *E);
+void dcg_double_copy_lf(struct dcg_double *F,struct dcg_double *F_in);
+void dcg_double_init_lf(struct dcg_double *F);
+void dcg_copy_A_p(struct dcg_ajdk *D,struct dcg_ajdk *D_in);
+void dcg_X_nrows_total(struct dcg_ajdk *D);
+void dcg_load_A_p(struct dcg_ajdk *D);
+void dcg_init_A_p(double mrnd,struct dcg_ajdk *D);
+void dcg_copy_QX(struct dcg_ajdk *D,struct dcg_ajdk *D_in);
+void dcg_init_QX(struct dcg_ajdk *D);
+void dcg_M_mxset(struct dcg_ajdk *D);
+void dcg_copy(struct dcg_ajdk *D,struct dcg_ajdk *D_in);
+void dcg_load(struct dcg_ajdk **D_p,struct dcg_single ***E_p,struct dcg_double ***F_p);
+void dcg_init(char *error_vs_speed,double mrnd,struct dcg_ajdk **D_p,struct dcg_single ***E_p,struct dcg_double ***F_p);
+void dcg_init_test();
+void dcg_An_ajdk(struct dcg_ajdk *D);
+void dcg_lf_ZtSn(struct dcg_ajdk *D);
+void dcg_lf_D_AtTn_ZtSn_vv(struct dcg_ajdk *D);
+void dcg_lf_D_AtTn_ZtSn_uu(struct dcg_ajdk *D);
+void dcg_lf_D_AtTn_ZtSn_error(int verbose,struct dcg_ajdk *D);
+void dcg_lf_D_AtTn_ZtSn_test();
+void dcg_lf_TAnZtS_ww(struct dcg_ajdk *D);
+void dcg_lf_TAnZtS_uu(struct dcg_ajdk *D);
+void dcg_lf_TAnZtS_error(int verbose,struct dcg_ajdk *D);
+void dcg_lf_TAnZtS_test();
+void *get_dcg_halfloop(void *vp);
+void wrap_dcg_halfloop(int *tidx,void **vpra,pthread_t *thread_in,struct dcg_double *F);
+void dcg_wrap_dcg_halfloop(struct dcg_ajdk *D);
+void dcg_lrup_mxdup(struct dcg_ajdk *D);
+void dcg_scorebox_mxA(struct dcg_ajdk *D,int rdrop,int cdrop);
+void dcg_scorebox_svalue(struct dcg_ajdk *D);
+void dcg_scorebox_srt(struct dcg_ajdk *D,int nrows,int *mr_index_local_nb,int *mr_index_local_mr,int ncols,int *mc_srt);
+void dcg_out_xdrop_lkp(struct dcg_ajdk *D,int nrows,int *mr_index_sort,int **mr_index_local_nb_,int **mr_index_local_mr_);
+void dcg_sumscores_mxB(struct dcg_ajdk *D);
+void dcg_sumscores_mxC(struct dcg_ajdk *D);
+void dcg_sumscores_dmp(struct dcg_ajdk *D);
+void dcg_sumscores_mxA(struct dcg_ajdk *D);
+void dcg_sumscores_xij(struct dcg_ajdk *D);
+void dcg_sumscores_cmb(struct dcg_ajdk *D);
+void dcg_sumscores_srt(struct dcg_ajdk *D);
+void dcg_sumscores_ifT(struct dcg_ajdk *D);
+void dcg_sumscores_nrm(struct dcg_ajdk *D);
+void dcg_sumscores_test();
+void dcg_time_sumscores_test();
+void dcgxpander_driver();
+void dcg_TAnZtS_ww_stage_0(struct dcg_ajdk *D);
+void dcg_TAnZtS_ww_stage_1(struct dcg_ajdk *D);
+void wrap_dcg_TAnZtS_ww_stage_2(int *tidx,void **vpra,pthread_t *thread_in,struct dcg_double *F);
+void dcg_TAnZtS_ww_stage_2(struct dcg_ajdk *D);
+void dcg_scramble(struct dcg_ajdk *D,struct R_handle *R);
+void wrap_dcg_scramble(struct dcg_ajdk *D);

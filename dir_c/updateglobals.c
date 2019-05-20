@@ -53,6 +53,7 @@ void updateglobals(char *vname)
       GLOBAL_T_t_name_ = (char **) wkspace_alloc(GLOBAL_NBINS*sizeof(char *)); 
       GLOBAL_S_n_name_ = (char **) wkspace_alloc(GLOBAL_NBINS*sizeof(char *)); 
       GLOBAL_S_t_name_ = (char **) wkspace_alloc(GLOBAL_NBINS*sizeof(char *)); 
+      GLOBAL_J_n_rind_ = (char **) wkspace_alloc(GLOBAL_NBINS*sizeof(char *)); 
       for (nv=0;nv<length;nv++){ 
 	GLOBAL_A_n_name_[nv] = (char *) wkspace_alloc(FNAMESIZE*sizeof(char)); GLOBAL_A_n_name_[nv][0]='\0';
 	GLOBAL_A_t_name_[nv] = (char *) wkspace_alloc(FNAMESIZE*sizeof(char)); GLOBAL_A_t_name_[nv][0]='\0';
@@ -68,6 +69,7 @@ void updateglobals(char *vname)
 	GLOBAL_T_t_name_[nv] = (char *) wkspace_alloc(FNAMESIZE*sizeof(char)); GLOBAL_T_t_name_[nv][0]='\0';
 	GLOBAL_S_n_name_[nv] = (char *) wkspace_alloc(FNAMESIZE*sizeof(char)); GLOBAL_S_n_name_[nv][0]='\0';
 	GLOBAL_S_t_name_[nv] = (char *) wkspace_alloc(FNAMESIZE*sizeof(char)); GLOBAL_S_t_name_[nv][0]='\0';
+	GLOBAL_J_n_rind_[nv] = (char *) wkspace_alloc(FNAMESIZE*sizeof(char)); GLOBAL_J_n_rind_[nv][0]='\0';
 	/* for (nv=0;nv<length;nv++){ } */}
       /* if (GLOBAL_NBINS>0){ } */}
     /* else if (strcmp(vname,"GLOBAL_NBINS")==0){ } */}
@@ -111,6 +113,9 @@ void updateglobals(char *vname)
   /* else if (strcmp(vname,"GLOBAL_S_n_name")==0){ scanf("%[^,;]",GLOBAL_S_n_name); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_S_n_name);}} */
   else if (strcmp(vname,"GLOBAL_S_t_name_")==0){ length=GLOBAL_NBINS; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_S_t_name_[nv]); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_S_t_name_[nv]); sprintf(GLOBAL_S_t_name_[nv],"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_S_t_name_[nv]);}}}
   /* else if (strcmp(vname,"GLOBAL_S_t_name")==0){ scanf("%[^,;]",GLOBAL_S_t_name); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_S_t_name);}} */
+  else if (strcmp(vname,"GLOBAL_J_n_rind_")==0){ length=GLOBAL_NBINS; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_J_n_rind_[nv]); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_J_n_rind_[nv]); sprintf(GLOBAL_J_n_rind_[nv],"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_J_n_rind_[nv]);}}}
+  /* else if (strcmp(vname,"GLOBAL_J_n_rind")==0){ scanf("%[^,;]",GLOBAL_J_n_rind); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_J_n_rind);}} */
+  else if (strcmp(vname,"GLOBAL_K_n_cind")==0){ scanf("%[^,;]",GLOBAL_K_n_cind); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_K_n_cind); sprintf(GLOBAL_K_n_cind,"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_K_n_cind);}}
   else if (strcmp(vname,"GLOBAL_DIR_XPRE")==0){ scanf("%[^,;]",GLOBAL_DIR_XPRE); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_DIR_XPRE);} /* else if (strcmp(vname,"GLOBAL_DIR_XPRE")==0){ } */}
   else if (strcmp(vname,"GLOBAL_DIR_BASE")==0){ scanf("%[^,;]",GLOBAL_DIR_BASE); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_DIR_BASE);} /* else if (strcmp(vname,"GLOBAL_DIR_BASE")==0){ } */}
   else if (strcmp(vname,"GLOBAL_out_name")==0){ scanf("%[^,;]",GLOBAL_out_name); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_out_name);} /* else if (strcmp(vname,"GLOBAL_out_name")==0){ } */}

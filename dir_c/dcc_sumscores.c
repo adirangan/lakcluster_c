@@ -33,9 +33,11 @@ void dcc_sumscores_mxB(struct dcc_ajdk *D)
     fill_uchar_zero(E->A_bmr_j_rtn,bsize(E->A_nrows)/* rup(E->A_nrows+E->A_nrows_extend,POPLENGTH)/BIT8 */); for (nr=0;nr<E->A_nrows;nr++){ b_copy_u(E->A_bmr_j_rtn,E->A_umr_j_rtn,nr);}
     sprintf(D->tmpAnchar," %%%% E_[%.2d]->A_bmr_j_rtn: ",nb1); if (verbose){ bprintf(E->A_bmr_j_rtn,D->bitj,1,E->A_nrows,D->tmpAnchar);}
     /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  D->A_cpop_j = popcount_uchar_array(D->A_bmc_j,D->A_mc_length);
   D->A_cpop_j_rmv = popcount_uchar_array(D->A_bmc_j_rmv,D->A_mc_length);
   D->A_cpop_j_rtn = popcount_uchar_array(D->A_bmc_j_rtn,D->A_mc_length);
   for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];
+    E->A_rpop_j = popcount_uchar_array(E->A_bmr_j,E->A_mr_length);
     E->A_rpop_j_rmv = popcount_uchar_array(E->A_bmr_j_rmv,E->A_mr_length);
     E->A_rpop_j_rtn = popcount_uchar_array(E->A_bmr_j_rtn,E->A_mr_length);
     /* for (nb1=0;nb1<nbins;nb1++){ } */}
@@ -251,12 +253,12 @@ void dcc_sumscores_cmb(struct dcc_ajdk *D)
   if (verbose){ printf(" %% [entering dcc_sumscores_cmb]\n");}
   /*
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    QC = QC_AAAA_min - QC_AAZZ_min;
+    QC = QC_TAAT_min - QC_TAZS_min;
     Note, we cannot compute
-    QC = QC_AAAA_min - QC_AAZZ_min - QC_YYYY_min + QC_YYWW_min;
-    because QC_YYYY_min and QC_YYWW_min have Y_ncols columns. ;
+    QC = QC_TAAT_min - QC_TAZS_min - QC_TYYT_min + QC_TYWS_min;
+    because QC_TYYT_min and QC_TYWS_min have Y_ncols columns. ;
     for nb1=0:nbins-1;
-    QR{1+nb1} = QR_AAAA{1+nb1} - QR_AZZA{1+nb1} - QR_YYYY{1+nb1} + QR_YWWY{1+nb1};
+    QR{1+nb1} = QR_TAAT{1+nb1} - QR_TAZS{1+nb1} - QR_TYYT{1+nb1} + QR_TYWS{1+nb1};
     end;%for nb1=0:nbins-1;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   */
@@ -418,7 +420,7 @@ void dcc_sumscores_ifT(struct dcc_ajdk *D)
   if (verbose){ printf(" %% [entering dcc_sumscores_ifT], n_mds %d\n",n_mds);}
   /*
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    n_mds = 5; mds_scale_factor = [1.00,0.30,0.12,0.10,0.09];
+    n_mds = 5; mds_scale_factor = {1.00 , 0.34 , 0.19 , 0.13 , 0.10 , 0.09};
     QC_all = temp_D_At_T_AnAt_T_An{1+0}/((A_nrows_(1+0) - 1)*A_ncols*(A_ncols-1));
     QR_all = temp_AnAt_T_AnAt{1+0}/(A_nrows_(1+0)*(A_nrows_(1+0) - 1)*A_ncols);
     QC = QC_all(:,1) - sum(QC_all(:,2:end),2)/n_mds/mds_scale_factor(n_mds);
@@ -717,7 +719,7 @@ void dcc_sumscores_test()
   if (error_check){ if (verbose>1){ printf(" %% checking errors.\n");}}
   if (error_check){ dcc_lf_D_AtTn_ZtSn_error(verbose,D);}
   if (error_check){ dcc_lf_TAnZtS_error(verbose,D);}
-  dcc_halfloop(D);
+  dcc_wrap_dcc_halfloop(D);
   if (verbose>1){ printf(" %% beginning iteration.\n");}
   nl=0;
   while ((iteration_max<=0 || nl<iteration_max) && (D->A_rpop_j_total>0 || D->A_cpop_j>0)){
@@ -744,7 +746,7 @@ void dcc_sumscores_test()
     if (error_check){ if (verbose>1){ printf(" %% checking errors.\n");}}
     if (error_check){ dcc_lf_D_AtTn_ZtSn_error(verbose,D);}
     if (error_check){ dcc_lf_TAnZtS_error(verbose,D);}
-    dcc_halfloop(D);
+    dcc_wrap_dcc_halfloop(D);
     nl++; /* while (nl<iteration_max && D->A_cpop_j>2 && D->A_rpop_j_total>2){ } */}
   GLOBAL_toc(2,0,""); ct = GLOBAL_elct[2]; rt = GLOBAL_elrt[2]; r=ct/maximum(1,rt);
   if (verbose>-1){ printf(" %% total elapsed time ct/rt %6.1fs(%2.1fh)/%6.1fs(%2.1fh) = %2.1f; finished.\n",ct,ct/3600,rt,rt/3600,r);}
@@ -768,7 +770,7 @@ void dcc_time_sumscores_test()
   GLOBAL_tic(4); dcc_lf_D_AtTn_ZtSn_vv(D); GLOBAL_toc(4,1+verbose," %% lf_D_AtTn_ZtSn: ");
   GLOBAL_tic(4); dcc_lf_TAnZtS_ww(D); GLOBAL_toc(4,1+verbose," %% lf_TAnZtS: ");
   GLOBAL_toc(1,1+verbose," %% initial subscore : ");
-  GLOBAL_tic(4); dcc_halfloop(D); GLOBAL_toc(4,1+verbose," %% halfloop: ");
+  GLOBAL_tic(4); dcc_wrap_dcc_halfloop(D); GLOBAL_toc(4,1+verbose," %% halfloop: ");
   GLOBAL_toc(2,0,""); ct = GLOBAL_elct[2]; rt = GLOBAL_elrt[2]; r=ct/maximum(1,rt); it = rt;
   if (verbose>1){ printf(" %% elapsed time ct/rt %6.1fs(%2.1fh)/%6.1fs(%2.1fh) = %2.1f; beginning iteration.\n",ct,ct/3600,rt,rt/3600,r);}
   GLOBAL_tic(3);
@@ -791,7 +793,7 @@ void dcc_time_sumscores_test()
     GLOBAL_tic(4); dcc_lf_ZtSn(D); GLOBAL_toc(4,1+verbose," %% lf_ZtSn: ");
     GLOBAL_tic(4); dcc_lf_D_AtTn_ZtSn_vv(D); GLOBAL_toc(4,1+verbose," %% lf_D_AtTn_ZtSn: ");
     GLOBAL_tic(4); dcc_lf_TAnZtS_ww(D); GLOBAL_toc(4,1+verbose," %% lf_TAnZtS: ");
-    GLOBAL_tic(4); dcc_halfloop(D); GLOBAL_toc(4,1+verbose," %% halfloop: ");
+    GLOBAL_tic(4); dcc_wrap_dcc_halfloop(D); GLOBAL_toc(4,1+verbose," %% halfloop: ");
     nl++; /* while (nl<iteration_max && D->A_cpop_j>2 && D->A_rpop_j_total>2){ } */}
   GLOBAL_toc(2,0,""); ct = GLOBAL_elct[2]; rt = GLOBAL_elrt[2]; r=ct/maximum(1,rt);
   if (verbose>-1){ printf(" %% total elapsed time ct/rt %6.1fs(%2.1fh)/%6.1fs(%2.1fh) = %2.1f; finished.\n",ct,ct/3600,rt,rt/3600,r);}

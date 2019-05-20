@@ -89,9 +89,9 @@ void dcc_lf_ZtSn(struct dcc_ajdk *D)
       printf(" %% nb %d\n",nb);
       bprintf(E->M_An->mc_j,D->bitj,1,D->A_ncols," %% A_bmc_j: ");
       lfprintf(E->lf_AtTn," %% lf_AtTn: ");
-      lfprintf(E->lf_AtTn," %% lf_YtTn: ");
+      lfprintf(E->lf_YtTn," %% lf_YtTn: ");
       lfprintf(E->lf_ZtSn," %% lf_ZtSn: ");
-      lfprintf(E->lf_ZtSn," %% lf_WtSn: ");
+      lfprintf(E->lf_WtSn," %% lf_WtSn: ");
       /* for (nb=0;nb<nbins;nb++){ } */}
     /* if (verbose>2){ } */}
   if (verbose){ printf(" %% [finished dcc_lf_ZtSn]\n");}
@@ -217,6 +217,8 @@ void dcc_lf_D_AtTn_ZtSn_uu(struct dcc_ajdk *D)
 	printf(" %% nb1 %d nb2 %d\n",nb1,nb2);
 	bprintf(E_nb1->M_At->mr_j,D->bitj,1,D->A_ncols," %% A_bmc_j: ");
 	bprintf(E_nb1->M_Tt->mr_j,D->bitj,1,D->T_ncols," %% T_bmc_j: ");
+	lfprintf(F->lf_D_YtTn_WtSn_uu," %% lf_D_YtTn_WtSn_uu: ");
+	lfprintf(F->lf_D_YtTn_YtTn_uu," %% lf_D_YtTn_YtTn_uu: ");
 	lfprintf(F->lf_D_AtTn_ZtSn_uu," %% lf_D_AtTn_ZtSn_uu: ");
 	lfprintf(F->lf_D_AtTn_AtTn_uu," %% lf_D_AtTn_AtTn_uu: ");
 	/* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
@@ -374,7 +376,7 @@ void dcc_lf_TAnZtS_test()
 
 /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
-void *get_halfloop(void *vp)
+void *get_dcc_halfloop(void *vp)
 {
   /* This function converts from SPACING_a to SPACING_b along the T_ncols dimension.
      Warning! Later on we expect D->T_bmc_b to include only contiguous bits.
@@ -481,47 +483,47 @@ void *get_halfloop(void *vp)
     if (verbose>3){ lfprintf(QC_TAnZtS," %% QC_TAnZtS: ");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
     if (verbose>3){ lfprintf(QC_TAnAtT," %% QC_TAnAtT: ");} if (verbose>3){ printf(" %% /******************************************************************/\n");}
     /* if (QC_TAnZtS_bother || QC_TAnAtT_bother){ } */}
-  if (verbose>1){ printf(" %% [finished get_halfloop] tidx %d\n",tidx);}
+  if (verbose>1){ printf(" %% [finished get_dcc_halfloop] tidx %d\n",tidx);}
   return NULL;
 }
 
-void wrap_halfloop(int *tidx,void **vpra,pthread_t *thread_in,struct dcc_double *F)
+void wrap_dcc_halfloop(int *tidx,void **vpra,pthread_t *thread_in,struct dcc_double *F)
 {
-  /* This function calls get_halfloop ; 
+  /* This function calls get_dcc_halfloop ; 
      No reloading of data is performed ; we assume all data is preloaded ;
      calculation performed in thread *thread_in ; thread number *tidx ;
      variable space in **vpra (should be at least size 2)
    */
   int verbose=0;
   int ip=0;
-  if (verbose){ printf(" %% [entering wrap_halfloop] tidx %d\n",*tidx);}
+  if (verbose){ printf(" %% [entering wrap_dcc_halfloop] tidx %d\n",*tidx);}
   ip=0;
   vpra[ip++] = tidx; vpra[ip++] = F;
-  if (*tidx>0){ if (pthread_create(thread_in,NULL,&get_halfloop,vpra)){ printf("Warning! cannot create thread %d in wrap_halfloop\n",*tidx);}}
-  else /* if (*tidx<=0) */{ get_halfloop(vpra);} /* must join threads later */;
-  if (verbose){ printf(" %% [finished wrap_halfloop] tidx %d\n",*tidx);}
+  if (*tidx>0){ if (pthread_create(thread_in,NULL,&get_dcc_halfloop,vpra)){ printf("Warning! cannot create thread %d in wrap_dcc_halfloop\n",*tidx);}}
+  else /* if (*tidx<=0) */{ get_dcc_halfloop(vpra);} /* must join threads later */;
+  if (verbose){ printf(" %% [finished wrap_dcc_halfloop] tidx %d\n",*tidx);}
 }
 
-void dcc_halfloop(struct dcc_ajdk *D)
+void dcc_wrap_dcc_halfloop(struct dcc_ajdk *D)
 {
   int verbose=GLOBAL_verbose;
   int nbins = D->nbins; struct dcc_double **F_ = D->F_; 
   int nbx=0,nb1=0,nb2=0; struct dcc_double *F=NULL;
-  if (verbose){ printf(" %% [entering dcc_halfloop]\n");}
+  if (verbose){ printf(" %% [entering dcc_wrap_dcc_halfloop]\n");}
   if (verbose){ printf(" %% calculating halfloop.\n");}
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
   GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
   GLOBAL_nf_cur=0; GLOBAL_nf_opn=0; 
   for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx];
     GLOBAL_pthread_tic();
-    wrap_halfloop(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),F);
+    wrap_dcc_halfloop(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),F);
     GLOBAL_pthread_toc();
     /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
   GLOBAL_pthread_tuc(); 
   GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% halfloop: ");
   GLOBAL_ops_toc(-1,0,verbose," %% total time: ");  
   /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-  if (verbose){ printf(" %% [finished dcc_halfloop]\n");}
+  if (verbose){ printf(" %% [finished dcc_wrap_dcc_halfloop]\n");}
 }
 
 /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
