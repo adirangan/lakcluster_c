@@ -340,8 +340,11 @@ struct P_handle *P_handle_make(char *pca_infix,char *out_xdrop_fname,char *V_fna
 
 void P_xdrop_init(struct dcc_ajdk *D,struct P_handle *P)
 {
+  int verbose=0;
+  if (verbose>1){ printf(" %% [entering P_xdrop_init]\n");}
   dcc_out_xdrop_lkp(D,P->out_xdrop_nrows,P->mr_index_sort,&(P->mr_index_local_nb),&(P->mr_index_local_mr));
   get_xdrop_array_sub(D->A_rpop_j_total,D->A_cpop_j,P->iteration_num,P->iteration_max,P->iteration_min,NULL,&(P->rdrop),&(P->cdrop),&(P->rkeep),&(P->ckeep));
+  if (verbose>1){ printf(" %% [finished P_xdrop_init]\n");}
 }
 
 void P_handle_printf(int verbose,struct P_handle *P,char *prefix)
@@ -381,6 +384,10 @@ void P_handle_dmp(struct P_handle *P)
   sprintf(fname,"%s/%s_A_rpop_j_total.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->A_rpop_j_total);
   sprintf(fname,"%s/%s_A_cpop_j.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->A_cpop_j);
   sprintf(fname,"%s/%s_Irem.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->Irem);
+  sprintf(fname,"%s/%s_rdrop.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->rdrop);
+  sprintf(fname,"%s/%s_cdrop.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->cdrop);
+  sprintf(fname,"%s/%s_rkeep.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->rkeep);
+  sprintf(fname,"%s/%s_ckeep.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->ckeep);
   /* sprintf(fname,"%s/%s_U_.mda",GLOBAL_DIR_NAME,prefix); mda_write_d3_r8(fname,P->D->A_nrows_total,P->rank,P->iteration_num,P->U_); */
   sprintf(fname,"%s/%s_V_.mda",GLOBAL_DIR_NAME,prefix); mda_write_d3_r8(fname,P->D->A_ncols,P->rank,P->iteration_num,P->V_);
 }
@@ -394,6 +401,10 @@ void P_handle_proj_dmp(struct P_handle *P)
    sprintf(fname,"%s/%s_A_rpop_j_total.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->A_rpop_j_total);
   sprintf(fname,"%s/%s_A_cpop_j.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->A_cpop_j);
   sprintf(fname,"%s/%s_Irem.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->Irem);
+  sprintf(fname,"%s/%s_rdrop.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->rdrop);
+  sprintf(fname,"%s/%s_cdrop.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->cdrop);
+  sprintf(fname,"%s/%s_rkeep.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->rkeep);
+  sprintf(fname,"%s/%s_ckeep.mda",GLOBAL_DIR_NAME,prefix); mda_write_d2_i4(fname,P->iteration_num,1,P->ckeep);
   sprintf(fname,"%s/%s_AnV_.mda",GLOBAL_DIR_NAME,prefix); mda_write_d3_r8(fname,P->D->A_nrows_total,P->rank,P->iteration_num,P->AnV_);
   sprintf(fname,"%s/%s_ZnV_.mda",GLOBAL_DIR_NAME,prefix); mda_write_d3_r8(fname,P->D->Z_nrows_total,P->rank,P->iteration_num,P->ZnV_);
 }
