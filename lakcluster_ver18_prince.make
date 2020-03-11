@@ -19,6 +19,7 @@ header_dev = ./dir_h/S_handle.h \
 	./dir_h/M_handle.h \
 	./dir_h/bcc.h \
 	./dir_h/dcc.h \
+	./dir_h/dcg.h \
 	./dir_h/lakcluster_header.h
 
 sources_dev = boxmuller.c \
@@ -53,6 +54,11 @@ sources_dev = boxmuller.c \
 	dcc_sumscores.c \
 	dexcluster_driver.c \
 	dexcluster_scorebox.c \
+	dcg.c \
+	dcg_lf.c \
+	dcg_scorebox.c \
+	dcg_sumscores.c \
+	dcgxpander_driver.c \
 	fillzero.c \
 	GLOBAL_pthread.c \
 	lakcluster_driver.c \
