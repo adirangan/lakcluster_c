@@ -36,6 +36,11 @@
 #define MULTIPLEX_2DIST (MULTIPLEX_DIST * 2)
 #define BIT8 8
 #define BITJ 16
+#define SNP_AND_TAG 3
+#define SNP_XOR_TAG 2
+#define SNP_NOR_TAG 0
+#define SNP_MSS_TAG 1
+#define SNP_NOT_TAG 5
 
 /* 5 --> 0101 */
 #define FIVEMASK 0x5555555555555555LU
@@ -297,8 +302,14 @@ double RISIGET(unsigned long int *,double);
 
 /* ---------------------------------------------------------------- */
 
-inline void ping();
-inline void pong();
+
+#ifndef _MONOLITH
+void fill_uchar_zero(unsigned char* iarr, size_t size);
+void fill_uchar_ones(unsigned char* iarr, size_t size);
+void fill_long_zero(long* larr, size_t size);
+#endif /* _MONOLITH */
+void ping();
+void pong();
 void calc_A_ajdk(double *A_p,int A_pcols,double **A_ajdk_p);
 void wrap_M_setup_test_excerpt_0(char *error_vs_speed,double mrnd,int nrows,int rpop_b,int ncols,int cpop_b,unsigned char *bn,unsigned char *bt);
 void wrap_M_setup_test_excerpt_1(char *error_vs_speed,double mrnd,int nrows,int ncols,unsigned char *mr_b,unsigned char *mc_b,unsigned char **bn_ra_p,unsigned char **bt_ra_p);
@@ -465,6 +476,13 @@ void bcc_sumscores_ifT(struct bcc_ajdk *D);
 void bcc_sumscores_nrm(struct bcc_ajdk *D);
 void bcc_sumscores_test();
 void bcc_lrup_sumscores_test();
+void MDA_io_test();
+void MDA_write_i4(int n_d,int *d_,int *i4_,char *fname);
+void MDA_read_i4(int *n_d_p,int **d_p,int **i4_p,char *fname);
+void MDA_write_r8(int n_d,int *d_,double *r8_,char *fname);
+void MDA_read_r8(int *n_d_p,int **d_p,double **r8_p,char *fname);
+void MDA_write_ulli(int n_d,int *d_,unsigned long long int *ulli_,char *fname);
+void MDA_read_ulli(int *n_d_p,int **d_p,unsigned long long int **ulli_p,char *fname);
 void binary_read(char *filename,int *bitj_p,int *nrows_p,int *ncols_p,unsigned char **A_p);
 void binary_read_getsize(char *filename,int *bitj_p,int *nrows_p,int *ncols_p);
 void binary_write(char *filename,int bitj,int nrows,int ncols,unsigned char *A);
@@ -614,22 +632,32 @@ void hsv2rgb(double h,double s,double v,double *r,double *g,double *b);
 void colorscale(double val,double valmin,double valmax,double *rcolor,double *gcolor,double *bcolor);
 int WritePNMfile_color(double *ra,int rows,int cols,double min,double max,char *filename);
 #ifndef _MONOLITH
-inline unsigned int popcount_uchar_array(unsigned char *wp,unsigned long wl);
-inline long long int popcount(__m128i** mem1p, __m128i** maskp, __m128i** maskp_end);
-inline long long int popcount_and(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end);
-inline long long int popcount_xor(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end);
-inline long long int popcount_notxorxor(__m128i** mem1p, __m128i** memSp,__m128i** mem2p, __m128i** maskp, __m128i** maskp_end);
-inline double popcount_lf(__m128i** mem1p, __m128i** maskp, __m128i** maskp_end, double **dinp);
-inline double popcount_xor_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end, double **dinp);
-inline double popcount_and_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end, double **dinp);
-inline double popcount_pm0(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end);
-inline long long int popcount_pmpm0(__m128i** mem0p,__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end);
-inline double popcount_pm0_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end,double **dinp);
+unsigned int popcount_uchar_array(unsigned char *wp,unsigned long wl);
+long long int popcount(__m128i** mem1p, __m128i** maskp, __m128i** maskp_end);
+long long int popcount_and(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end);
+long long int popcount_xor(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end);
+long long int popcount_notxorxor(__m128i** mem1p, __m128i** memSp,__m128i** mem2p, __m128i** maskp, __m128i** maskp_end);
+double popcount_lf(__m128i** mem1p, __m128i** maskp, __m128i** maskp_end, double **dinp);
+double popcount_xor_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end, double **dinp);
+double popcount_and_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end, double **dinp);
+double popcount_pm0(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end);
+long long int popcount_pmpm0(__m128i** mem0p,__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end);
+double popcount_pm0_lf(__m128i** mem1p, __m128i** mem2p, __m128i** maskp, __m128i** maskp_end,double **dinp);
 #endif /* _MONOLITH */
 int dPartition(double *dra,int stride,int l,int r);
 void dQuickSort(unsigned int nn,double *dra,int stride,int l,int r);
 int dPartition_xij(double *dra,int stride,int *ira,int *ira_b,int *ira_j,int *lnb,int *mr_a,int *mr_b,int l,int r);
 unsigned int dQuickSort_xij(unsigned int nn,double *dra,int stride,int *ira,int *ira_b,int *ira_j,int *lnb,int *mr_a,int *mr_b,int l,int r);
+int ulliPartition_index(unsigned long long int *ulli_,int stride,int *i_,int l,int r) ;
+unsigned int ulliQuickSort_index(unsigned int nn,unsigned long long int *ulli_,int stride,int *i_,int l,int r);
+void ulliQuickSort_index_driver(int n_ulli,unsigned long long int *ulli_,int stride,unsigned long long int *ulli_workspace_,int *i_);
+int dPartition_index(double *d_,int stride,int *i_,int l,int r) ;
+unsigned int dQuickSort_index(unsigned int nn,double *d_,int stride,int *i_,int l,int r);
+void dQuickSort_index_driver(int n_d,double *d_,int stride,double *d_workspace_,int *i_);
+void dQuickSort_index_index_driver(int n_d,double *d_,int stride,double *d_workspace_,int *i_orig_from_sort_,int *i_workspace_,int *i_sort_from_orig_);
+int lPartition_index(int *l_,int stride,int *i_,int l,int r);
+unsigned int lQuickSort_index(unsigned int nn,int *l_,int stride,int *i_,int l,int r);
+void lQuickSort_index_driver(int n_l,int *l_,int stride,int *l_workspace_,int *i_);
 void raprintf(void *vra,char *type,int rows,int cols,char *prefix);
 void ra_fprintf(char *fname,void *vra,char *type,int rows,int cols,char *prefix);
 void getBinW(unsigned char *w, char *str, int k);
@@ -768,3 +796,7 @@ void wrap_dcg_TAnZtS_ww_stage_2(int *tidx,void **vpra,pthread_t *thread_in,struc
 void dcg_TAnZtS_ww_stage_2(struct dcg_ajdk *D);
 void dcg_scramble(struct dcg_ajdk *D,struct R_handle *R);
 void wrap_dcg_scramble(struct dcg_ajdk *D);
+/* %%%%%%%%%%%%%%%% */
+unsigned long long int fsize_0(char *);
+unsigned long int wc_0(char *);
+void bed_to_b16_test();

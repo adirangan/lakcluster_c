@@ -332,6 +332,8 @@ int main(int argc, char** argv) {
   if (strcmp(GLOBAL_TEST_TYPE,"dcg_sumscores")==0){ dcg_sumscores_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"dcg_time_sumscores")==0){ dcg_time_sumscores_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"dcgxpander_driver")==0){ dcgxpander_driver();}
+  if (strcmp(GLOBAL_TEST_TYPE,"bed_to_b16_test")==0){ bed_to_b16_test();}  
+  if (strcmp(GLOBAL_TEST_TYPE,"MDA_io_test")==0){ MDA_io_test();}  
   free(wkspace_ua); exit(RET_SUCCESS);
   return 0;
 }

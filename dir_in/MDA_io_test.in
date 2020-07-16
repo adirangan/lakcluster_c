@@ -1,0 +1,6 @@
+GLOBAL_verbose= 1;
+GLOBAL_thread_count= 1;
+GLOBAL_omp_type= 0;
+GLOBAL_TEST_TYPE= MDA_io_test;
+GLOBAL_TEST_TYP2= error;
+END= 0;

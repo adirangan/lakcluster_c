@@ -5,6 +5,7 @@
 #include "GLOBAL_pthread.c" 
 #include "popcount.c"
 #include "raprintf.c"
+#include "MDA_io.c"
 #include "binary_read.c"
 #include "updateglobals.c"
 #include "L_init.c"
@@ -70,3 +71,6 @@
 #include "dcg_lf.c"
 #include "dcg_sumscores.c"
 #include "dcgxpander_driver.c"
+
+/* bed_to_b16 functions */
+#include "bed_to_b16.c"

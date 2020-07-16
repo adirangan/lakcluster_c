@@ -1,7 +1,7 @@
 
 # Compiler
 CC=gcc
-CCFLAGS_dev= -w -O2 -lpthread -fopenmp -lm -lgslcblas -I./dir_h -I./dir_c 
+CCFLAGS_dev= -w -O2 -lpthread -fopenmp -lm -lcblas -I./dir_h -I./dir_c
 CCFLAGS=$(CCFLAGS_dev) -D_MONOLITH
 
 vpath %.c ./dir_c
@@ -45,6 +45,7 @@ sources_dev = boxmuller.c \
 	bcc_lrup.c \
 	bcc_scorebox.c \
 	bcc_sumscores.c \
+	MDA_io.c \
 	binary_read.c \
 	D_AtTn_ZtSn.c \
 	dcc.c \
@@ -82,6 +83,7 @@ sources_dev = boxmuller.c \
 	P_init.c \
 	pca_driver.c \
 	R_init.c \
+	bed_to_b16.c \
 	lakcluster_ver18.c
 
 objects_dev = $(patsubst %.c,./dir_o/%.o,$(sources_dev)) 
@@ -99,7 +101,7 @@ $(project_dev): $(objects_dev) $(header_dev)
 
 $(project): $(objects_dev) $(header_dev)
 	rm -f $(project)
-	gcc -w -O2 -lpthread -fopenmp ./dir_c/lakcluster_ver18.c -o $(project) -L./dir_h -L./dir_c -I./dir_h -I./dir_c -D_MONOLITH -lgslcblas -lm
+	gcc -w -O2 -lpthread -fopenmp ./dir_c/lakcluster_ver18.c -o $(project) -L./dir_h -L./dir_c -I./dir_h -I./dir_c -D_MONOLITH -lcblas -lm
 
 ./dir_o/%.o : %.c ./dir_h/lakcluster_header.h
 	@echo $< 
