@@ -1,0 +1,17 @@
+GLOBAL_verbose= 1;
+GLOBAL_thread_count= 1;
+GLOBAL_omp_type= 0;
+GLOBAL_TEST_TYPE= bed_to_b16;
+GLOBAL_fname_bed_0in= /home/rangan/dir_bcc/dir_ukb/calls/ukb_cal_chr21_v2.bed;
+GLOBAL_fname_b16_out= /home/rangan/dir_bcc/dir_ukb/dir_b16/chr21_maf25.b16;
+GLOBAL_fname_bim_0in= /home/rangan/dir_bcc/dir_ukb/bim/ukb_snp_chr21_v2.bim;
+GLOBAL_fname_bim_out= /home/rangan/dir_bcc/dir_ukb/dir_b16/chr21_maf25.bim.ext;
+GLOBAL_fname_fam_0in= /home/rangan/dir_bcc/dir_ukb/fam_calls/ukb43036_cal_chr21_v2_s488288.fam;
+GLOBAL_fname_fam_out= /home/rangan/dir_bcc/dir_ukb/dir_b16/chr21_maf25.fam;
+GLOBAL_pat_mss_threshold= 0.04;
+GLOBAL_snp_mss_threshold= 0.01;
+GLOBAL_snp_maf_threshold= 0.25;
+GLOBAL_snp_I_opt_threshold= 0.01;
+GLOBAL_n_fam_char_max= 64;
+GLOBAL_n_bim_char_max= 64;
+END= 0;

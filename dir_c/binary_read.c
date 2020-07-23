@@ -258,3 +258,48 @@ void wrap_transpose(char *filename,char *outname,int nbytes_per_read)
   if (verbose){ printf(" %% [finished wrap_transpose] filename %s\n",filename);}
   wkspace_reset(wkspace_mark); GLOBAL_wkspace_point = 1;
 }
+
+void wrap_transpose_test()
+{
+  int verbose=1;
+  char fname_0in[1024];
+  char fname_1in[1024];
+  char fname_out[1024];
+  unsigned char *u_=NULL,*v_=NULL,*w_=NULL,*x_=NULL;
+  int x_n_row=0,x_n_col=0;
+  int u_n_row=0,u_n_col=0;
+  int v_n_row=0,v_n_col=0;
+  int nrow=0,ncol=0;
+  int bitj=16;
+  int e=0,nl=0;
+  if (verbose){ printf(" %% [entering wrap_transpose_test]\n");}
+  u_n_row = 137; u_n_col = 42;
+  u_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*u_n_row*u_n_col);
+  for (ncol=0;ncol<u_n_col;ncol++){
+    for (nrow=0;nrow<u_n_row;nrow++){
+      u_[nrow+ncol*u_n_row] = (rand01>0.5 ? 1 : 0);
+      /* for (nrow=0;nrow<u_n_row;nrow++){ } */}
+    /* for (ncol=0;ncol<u_n_col;ncol++){ } */}
+  sprintf(fname_0in,"./dir_test/wrap_transpose_test_0in.b16");
+  sprintf(fname_1in,"./dir_test/wrap_transpose_test_1in.b16");
+  sprintf(fname_out,"./dir_test/wrap_transpose_test_out.b16");
+  uchar_write_as_binary(fname_0in,bitj,u_n_row,u_n_col,u_);
+  wrap_transpose(fname_0in,fname_out,1*BIT8);
+  wrap_transpose(fname_out,fname_1in,1*BIT8);
+  binary_read(fname_0in,&bitj,&u_n_row,&u_n_col,&w_);
+  binary_read(fname_1in,&bitj,&x_n_row,&x_n_col,&x_);
+  binary_read(fname_out,&bitj,&v_n_row,&v_n_col,&v_);
+  for (nl=0;nl<(rup(u_n_row,BIT8)/BIT8)*u_n_col;nl++){ e+=abs((int)w_[nl]-(int)x_[nl]);}
+  if (verbose>0){ printf(" %% error %d\n",e);}
+  if (verbose>1){
+    printf("%% w_: \n");
+    bprintf(w_,bitj,u_n_col,u_n_row," %% w_: ");
+    printf("%% \n");
+    printf("%% x_: \n");
+    bprintf(x_,bitj,x_n_col,x_n_row," %% x_: ");
+    //printf("%% v_: \n");
+    //bprintf(v_,bitj,v_n_col,v_n_row," %% v_: ");
+    /* if (verbose>1){ } */}
+  wkspace_printf();
+  if (verbose){ printf(" %% [finished wrap_transpose_test]\n");}  
+}

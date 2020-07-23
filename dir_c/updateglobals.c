@@ -145,13 +145,25 @@ void updateglobals(char *vname)
   else if (strcmp(vname,"GLOBAL_pca_iteration_max")==0){ scanf("%d",&GLOBAL_pca_iteration_max); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_pca_iteration_max);}}
   else if (strcmp(vname,"GLOBAL_pca_iteration_min")==0){ scanf("%d",&GLOBAL_pca_iteration_min); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_pca_iteration_min);}}
   else if (strcmp(vname,"GLOBAL_pca_rank")==0){ scanf("%d",&GLOBAL_pca_rank); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_pca_rank);}}
-  else if (strcmp(vname,"GLOBAL_pca_tolerance")==0){ scanf("%lf",&GLOBAL_pca_tolerance); if (verbose>0){ printf("%s read to be %f\n",vname,GLOBAL_pca_tolerance);}}
+  else if (strcmp(vname,"GLOBAL_pca_tolerance")==0){ scanf("%lf",&GLOBAL_pca_tolerance); if (verbose>0){ printf("%s read to be %f\n",vname,GLOBAL_pca_tolerance);}}  
+  else if (strcmp(vname,"GLOBAL_fname_bed_0in")==0){ scanf("%[^,;]",GLOBAL_fname_bed_0in); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_fname_bed_0in);} /* else if (strcmp(vname,"GLOBAL_fname_bed_0in")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_fname_b16_out")==0){ scanf("%[^,;]",GLOBAL_fname_b16_out); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_fname_b16_out);} /* else if (strcmp(vname,"GLOBAL_fname_b16_out")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_fname_bim_0in")==0){ scanf("%[^,;]",GLOBAL_fname_bim_0in); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_fname_bim_0in);} /* else if (strcmp(vname,"GLOBAL_fname_bim_0in")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_fname_bim_out")==0){ scanf("%[^,;]",GLOBAL_fname_bim_out); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_fname_bim_out);} /* else if (strcmp(vname,"GLOBAL_fname_bim_out")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_fname_fam_0in")==0){ scanf("%[^,;]",GLOBAL_fname_fam_0in); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_fname_fam_0in);} /* else if (strcmp(vname,"GLOBAL_fname_fam_0in")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_fname_fam_out")==0){ scanf("%[^,;]",GLOBAL_fname_fam_out); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_fname_fam_out);} /* else if (strcmp(vname,"GLOBAL_fname_fam_out")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_fname_flip_flag")==0){ scanf("%[^,;]",GLOBAL_fname_flip_flag); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_fname_flip_flag);} /* else if (strcmp(vname,"GLOBAL_fname_flip_flag")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_snp_mss_threshold")==0){ scanf("%lf",&GLOBAL_snp_mss_threshold); if (verbose>0){ printf("%s read to be %f\n",vname,GLOBAL_snp_mss_threshold);}}  
+  else if (strcmp(vname,"GLOBAL_snp_maf_threshold")==0){ scanf("%lf",&GLOBAL_snp_maf_threshold); if (verbose>0){ printf("%s read to be %f\n",vname,GLOBAL_snp_maf_threshold);}}  
+  else if (strcmp(vname,"GLOBAL_snp_I_opt_threshold")==0){ scanf("%lf",&GLOBAL_snp_I_opt_threshold); if (verbose>0){ printf("%s read to be %f\n",vname,GLOBAL_snp_I_opt_threshold);}}  
+  else if (strcmp(vname,"GLOBAL_pat_mss_threshold")==0){ scanf("%lf",&GLOBAL_pat_mss_threshold); if (verbose>0){ printf("%s read to be %f\n",vname,GLOBAL_pat_mss_threshold);}}  
+  else if (strcmp(vname,"GLOBAL_n_fam_char_max")==0){ scanf("%d",&GLOBAL_n_fam_char_max); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_n_fam_char_max);}}
+  else if (strcmp(vname,"GLOBAL_n_bim_char_max")==0){ scanf("%d",&GLOBAL_n_bim_char_max); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_n_bim_char_max);}}
   else if (strcmp(vname,"GLOBAL_DIR_NAME")==0){ scanf("%[^,;]",GLOBAL_DIR_NAME); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_DIR_NAME);} /* else if (strcmp(vname,"GLOBAL_DIR_NAME")==0){ } */}
   else if (strcmp(vname,"END")==0){ /* do nothing */ if (verbose>0){ printf("end of input reached\n");}}
 /*   else if (strcmp(vname,"yy")==0){ scanf("%zz",&yy); if (verbose>0){ printf("%s read to be %zz\n",vname,yy);}} */
   else /* if anything else */{ printf(" %% Error! vname %s in updateglobals\n",vname); exit(RET_READ_FAIL); }
 }
-
 
 void read_input()
 {

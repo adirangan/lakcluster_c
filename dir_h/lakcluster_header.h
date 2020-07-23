@@ -124,6 +124,7 @@ extern double GLOBAL_kappa_squared_loop_scale_factor_[6];
 extern double GLOBAL_kappa_squared_half_scale_factor_[6];
 extern double GLOBAL_kappa_squared;
 
+/* global variables used for most routines */
 extern char GLOBAL_CWD[FNAMESIZE];
 extern char GLOBAL_DIR_BASE[FNAMESIZE];
 extern char GLOBAL_DIR_NAME[FNAMESIZE];
@@ -228,6 +229,20 @@ extern double GLOBAL_pca_tolerance;
 extern char GLOBAL_J_n_rind[FNAMESIZE];
 extern char **GLOBAL_J_n_rind_;
 extern char GLOBAL_K_n_cind[FNAMESIZE];
+/* bed_to_b16 */
+extern char GLOBAL_fname_bed_0in[FNAMESIZE];
+extern char GLOBAL_fname_b16_out[FNAMESIZE];
+extern char GLOBAL_fname_bim_0in[FNAMESIZE];
+extern char GLOBAL_fname_bim_out[FNAMESIZE];
+extern char GLOBAL_fname_fam_0in[FNAMESIZE];
+extern char GLOBAL_fname_fam_out[FNAMESIZE];
+extern char GLOBAL_fname_flip_flag[FNAMESIZE];
+extern double GLOBAL_snp_mss_threshold;
+extern double GLOBAL_snp_maf_threshold;
+extern double GLOBAL_snp_I_opt_threshold;
+extern double GLOBAL_pat_mss_threshold;
+extern int GLOBAL_n_fam_char_max;
+extern int GLOBAL_n_bim_char_max;
 
 #define rup(A,B) ((A) + !!((A)%(B))*((B) - ((A)%(B))))
 #define maximum(A,B) ((A) > (B) ? (A) : (B))
@@ -489,6 +504,7 @@ void binary_write(char *filename,int bitj,int nrows,int ncols,unsigned char *A);
 void uchar_write_as_binary(char *filename,int bitj,int nrows,int ncols,unsigned char *u_);
 void wrap_rand(char *filename,int bitj,int nrows,int ncols,int type_set);
 void wrap_transpose(char *filename,char *outname,int nbytes_per_read);
+void wrap_transpose_test();
 void *get_D_AtTn_ZtSn_vv(void *vp);
 int wrap_D_AtTn_ZtSn_vv__run(int *tidx,void **vpra,pthread_t *thread_in,int output_spacing_a,int output_spacing_s,struct M_handle *M_At,struct M_handle *M_Tt,struct M_handle *M_Zt,struct M_handle *M_St,double *A_ajdk,struct L_handle *lf_AtTn,struct L_handle *lf_ZtSn,struct L_handle **output_p);
 void *get_D_AtTn_AtTn_vv(void *vp);
@@ -800,3 +816,4 @@ void wrap_dcg_scramble(struct dcg_ajdk *D);
 unsigned long long int fsize_0(char *);
 unsigned long int wc_0(char *);
 void bed_to_b16_test();
+void bed_to_b16();

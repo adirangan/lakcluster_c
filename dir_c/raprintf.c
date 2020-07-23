@@ -171,7 +171,7 @@ void getBinW(unsigned char *w_, char *str_, int k)
 
 void bprintf(unsigned char *w_,int bitj,int nrows,int ncols,char *prefix)
 {
-  /* prints out binary array stored in *w_, assuming w_ is stored in column-major order (first column compressed first). 
+  /* prints out binary array stored in *w_, assuming w_ is stored in column-major order (i.e., columns varying quickly, rows varying slowly)
      This is useful for printing row-vectors on a single line. */
   char kstr_[ncols+2];
   int ncols_extend = (bitj - (ncols % bitj)) % bitj,nr=0;
