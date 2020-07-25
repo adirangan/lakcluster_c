@@ -272,7 +272,7 @@ void dQuickSort_index_driver(int n_d,double *d_,int stride,double *d_workspace_,
   dQuickSort_index(0,d_workspace_,1,i_,0,n_d-1);
 }
 
-void dQuickSort_index_index_driver(int n_d,double *d_,int stride,double *d_workspace_,int *i_orig_from_sort_,int *i_workspace_,int *i_sort_from_orig_)
+void dQuickSort_index_index_driver(int n_d,double *d_,int stride,double *d_workspace_,int *i_orig_from_sort_,int *i_sort_from_orig_,int *i_workspace_)
 {
   /* finds index listing i_orig_from_sort_ so that d_[stride*i_orig_from_sort_[.]] is sorted. */
   /* test with: ;
@@ -287,7 +287,7 @@ void dQuickSort_index_index_driver(int n_d,double *d_,int stride,double *d_works
   d_[4] = 13;
   d_[6] = 18;
   d_[8] = 20;
-  dQuickSort_index_index_driver(n_d,d_,2,d_workspace_,i_orig_from_sort_,i_workspace_,i_sort_from_orig_);
+  dQuickSort_index_index_driver(n_d,d_,2,d_workspace_,i_orig_from_sort_,i_sort_from_orig_,i_workspace_);
   raprintf(d_,"double",1,2*n_d," %% d_: ");
   raprintf(d_workspace_,"double",1,n_d," %% d_workspace_: ");
   raprintf(i_orig_from_sort_,"int",1,n_d," %% i_orig_from_sort_: ");
@@ -362,3 +362,108 @@ void lQuickSort_index_driver(int n_l,int *l_,int stride,int *l_workspace_,int *i
 }
 
 /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+int charpPartition_index(char **charp_,int stride,int *i_,int l,int r) 
+{
+  char *pivot=NULL,*tmpcharp=NULL;
+  int i=0,j=0,tmpi=0;
+  pivot = charp_[stride*l];
+  i = l; j = r+1;
+  do{
+    do{ i++;} while( strcmp(charp_[stride*i],pivot)<=0 && i <= r );
+    do{ j--;} while( strcmp(charp_[stride*j],pivot)> 0 );
+    if( i >= j ) break;
+    tmpcharp = charp_[stride*i]; charp_[stride*i] = charp_[stride*j]; charp_[stride*j] = tmpcharp;
+    if (i_!=NULL){ tmpi = i_[i]; i_[i] = i_[j]; i_[j] = tmpi;}
+  }while(1);
+  tmpcharp = charp_[stride*l]; charp_[stride*l] = charp_[stride*j]; charp_[stride*j] = tmpcharp;
+  if (i_!=NULL){ tmpi = i_[l]; i_[l] = i_[j]; i_[j] = tmpi;}
+  return j;
+}
+
+unsigned int charpQuickSort_index(unsigned int nn,char **charp_,int stride,int *i_,int l,int r)
+{
+  /* modified from http://www.comp.dit.ie/rlawlor/Alg_DS/sorting/quickSort.c */
+  int j=0; unsigned int n1=nn,n2=nn;
+  if( l < r ) { 
+    j = charpPartition_index(charp_,stride,i_,l,r); 
+    if (nn<GLOBAL_recursion_limit){ 
+      n1 = charpQuickSort_index(nn+1,charp_,stride,i_,l,j-1); 
+      n2 = charpQuickSort_index(nn+1,charp_,stride,i_,j+1,r); 
+      /* if (nn<GLOBAL_recursion_limit){ } */}
+    else /* (nn>=GLOBAL_recursion_limit) */{ 
+      printf(" %% Warning! recursion limit %d reached in charpQuickSort_index.\n %% This means that many row- and col-scores are identical.\n %% It is likely that your data is mostly zero or constant.\n",nn);
+      /* recursion_limit breached */}
+    /* if( l < r ) { } */}
+  return maximum(n1,n2);
+}
+
+void charpQuickSort_index_driver(int n_charp,char **charp_,int stride,char **charp_workspace_,int *i_)
+{
+  /* finds index listing i_ so that charp_[stride*i_[.]] is sorted. */
+  int ncharp=0;
+  for (ncharp=0;ncharp<n_charp;ncharp++){ charp_workspace_[ncharp] = charp_[stride*ncharp]; i_[ncharp]=ncharp;}
+  charpQuickSort_index(0,charp_workspace_,1,i_,0,n_charp-1);
+}
+
+void charpQuickSort_index_test()
+{
+  int n_charp = 5,ncharp=0;
+  int i_[n_charp];
+  char *charp_[2*n_charp];
+  char *charp_workspace_[1*n_charp];
+  charp_[0] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[0],"dog");
+  charp_[1] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[1]," ");
+  charp_[2] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[2],"cat");
+  charp_[3] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[3]," ");
+  charp_[4] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[4],"bird");
+  charp_[5] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[5]," ");
+  charp_[6] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[6],"pig");
+  charp_[7] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[7]," ");
+  charp_[8] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[8],"bug");
+  charp_[9] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[9]," ");
+  charpQuickSort_index_driver(n_charp,charp_,2,charp_workspace_,i_);
+  for (ncharp=0;ncharp<2*n_charp;ncharp++){ printf(" %% ncharp %d: %s\n",ncharp,charp_[ncharp]);}
+  raprintf(i_,"int",1,n_charp," %% i_: ");
+  //exit(0);
+}
+
+void charpQuickSort_index_index_driver(int n_charp,char **charp_,int stride,char **charp_workspace_,int *i_orig_from_sort_,int *i_sort_from_orig_,int *i_workspace_)
+{
+  /* finds index listing i_orig_from_sort_ so that charp_[stride*i_orig_from_sort_[.]] is sorted. */
+  int ncharp=0;
+  for (ncharp=0;ncharp<n_charp;ncharp++){ charp_workspace_[ncharp] = charp_[stride*ncharp]; i_orig_from_sort_[ncharp]=ncharp;}
+  charpQuickSort_index(0,charp_workspace_,1,i_orig_from_sort_,0,n_charp-1);
+  for (ncharp=0;ncharp<n_charp;ncharp++){ i_workspace_[ncharp] = i_orig_from_sort_[ncharp]; i_sort_from_orig_[ncharp]=ncharp;}
+  lQuickSort_index(0,i_workspace_,1,i_sort_from_orig_,0,n_charp-1);
+}
+
+void charpQuickSort_index_index_test()
+{
+  int n_charp = 5,ncharp=0;
+  int i_orig_from_sort_[n_charp];
+  int i_sort_from_orig_[n_charp];
+  char *charp_[2*n_charp];
+  char *charp_workspace_[1*n_charp];
+  int *i_workspace_[1*n_charp];
+  charp_[0] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[0],"dog");
+  charp_[1] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[1]," ");
+  charp_[2] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[2],"cat");
+  charp_[3] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[3]," ");
+  charp_[4] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[4],"bird");
+  charp_[5] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[5]," ");
+  charp_[6] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[6],"pig");
+  charp_[7] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[7]," ");
+  charp_[8] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[8],"bug");
+  charp_[9] = (char *)wkspace_all0c(sizeof(char)*8); sprintf(charp_[9]," ");
+  charpQuickSort_index_index_driver(n_charp,charp_,2,charp_workspace_,i_orig_from_sort_,i_sort_from_orig_,i_workspace_);
+  for (ncharp=0;ncharp<2*n_charp;ncharp++){ printf(" %% ncharp %d: %s\n",ncharp,charp_[ncharp]);}
+  raprintf(i_orig_from_sort_,"int",1,n_charp," %% i_orig_from_sort_: ");
+  raprintf(i_sort_from_orig_,"int",1,n_charp," %% i_sort_from_orig_: ");
+  exit(0);
+}
+
+void charpIntersect_index_index_driver(int n_charp_0,char **charp_0_,int n_charp_1,char **charp_1_,int n_intersect,int *i_charp_0_orig_from_intersect_,int *i_charp_0_intersect_from_orig_,int *i_charp_1_orig_from_intersect_,int *i_charp_1_intersect_from_orig_)
+{
+qwer
+}

@@ -351,6 +351,7 @@ int main(int argc, char** argv) {
   if (strcmp(GLOBAL_TEST_TYPE,"bed_to_b16_test")==0){ bed_to_b16_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"bed_to_b16")==0){ bed_to_b16();}  
   if (strcmp(GLOBAL_TEST_TYPE,"MDA_io_test")==0){ MDA_io_test();}  
+  if (strcmp(GLOBAL_TEST_TYPE,"b16_merge_test")==0){ b16_merge_test();}
   free(wkspace_ua); exit(RET_SUCCESS);
   return 0;
 }
