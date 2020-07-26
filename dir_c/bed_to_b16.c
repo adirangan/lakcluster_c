@@ -1429,8 +1429,9 @@ void b16_merge_test()
       /* for (nfam=0;nfam<n_fam_[nfile];nfam++){ } */}
     /* for (nfile=0;nfile<n_file;nfile++){ } */}
   free(fam_line);
-  charpQuickSort_index_test();
-  charpQuickSort_index_index_test();
+  //charpQuickSort_index_test();
+  //charpQuickSort_index_index_test();
+  charpIntersect_index_index_test();
   wkspace_printf();
   if (verbose){ printf(" %% [finished b16_merge_test]\n");}
 }

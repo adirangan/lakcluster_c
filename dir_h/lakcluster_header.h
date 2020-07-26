@@ -670,10 +670,15 @@ void ulliQuickSort_index_driver(int n_ulli,unsigned long long int *ulli_,int str
 int dPartition_index(double *d_,int stride,int *i_,int l,int r) ;
 unsigned int dQuickSort_index(unsigned int nn,double *d_,int stride,int *i_,int l,int r);
 void dQuickSort_index_driver(int n_d,double *d_,int stride,double *d_workspace_,int *i_);
-void dQuickSort_index_index_driver(int n_d,double *d_,int stride,double *d_workspace_,int *i_orig_from_sort_,int *i_workspace_,int *i_sort_from_orig_);
+void dQuickSort_index_index_driver(int n_d,double *d_,int stride,double *d_workspace_,int *i_orig_from_sort_,int *i_sort_from_orig_,int *i_workspace_);
 int lPartition_index(int *l_,int stride,int *i_,int l,int r);
 unsigned int lQuickSort_index(unsigned int nn,int *l_,int stride,int *i_,int l,int r);
 void lQuickSort_index_driver(int n_l,int *l_,int stride,int *l_workspace_,int *i_);
+int charpPartition_index(char **charp_,int stride,int *i_,int l,int r);
+unsigned int charpQuickSort_index(unsigned int nn,char **charp_,int stride,int *i_,int l,int r);
+void charpQuickSort_index_driver(int n_charp,char **charp_,int stride,char **charp_workspace_,int *i_);
+void charpQuickSort_index_test();
+void charpQuickSort_index_index_driver(int n_d,char **charp_,int stride,char **charp_workspace_,int *i_orig_from_sort_,int *i_sort_from_orig_,int *i_workspace_);
 void raprintf(void *vra,char *type,int rows,int cols,char *prefix);
 void ra_fprintf(char *fname,void *vra,char *type,int rows,int cols,char *prefix);
 void getBinW(unsigned char *w, char *str, int k);
