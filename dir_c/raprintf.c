@@ -12,6 +12,7 @@ void raprintf(void *v_,char *type,int rows,int cols,char *prefix)
   unsigned int *ui_=NULL;
   long *l_=NULL;
   long long *ll_=NULL;
+  unsigned long int *ul_=NULL;
   unsigned long long int *ull_=NULL;
   char *c_=NULL;
   unsigned char *uc_=NULL;
@@ -63,6 +64,9 @@ void raprintf(void *v_,char *type,int rows,int cols,char *prefix)
   else if (strcmp(type,"unsigned int")==0){
     ui_ = (unsigned int *) v_;
     for (nr=0;nr<rows;nr++){ printf("%s",prefix); for (nc=0;nc<cols;nc++){ printf(" %d",(int)ui_[nr+nc*rows]);} printf("\n");}}
+  else if (strcmp(type,"unsigned long int")==0){
+    ul_ = (unsigned long int *) v_;
+    for (nr=0;nr<rows;nr++){ printf("%s",prefix); for (nc=0;nc<cols;nc++){ printf(" %ld",ul_[nr+nc*rows]);} printf("\n");}}
   else if (strcmp(type,"unsigned long long int")==0){
     ull_ = (unsigned long long int *) v_;
     for (nr=0;nr<rows;nr++){ printf("%s",prefix); for (nc=0;nc<cols;nc++){ printf(" %lld",ull_[nr+nc*rows]);} printf("\n");}}

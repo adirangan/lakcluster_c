@@ -1356,7 +1356,7 @@ void bed_to_b16()
 
 void b16_merge_test()
 {
-  int verbose=1;
+  int verbose=3;
   int MDA_d_[2];
   int n_file=0,nfile=0;
   char **fname_b16_0in_=NULL;
@@ -1413,6 +1413,7 @@ void b16_merge_test()
     if ((fp_bim_0in_[nfile]=fopen(fname_bim_0in_[nfile],"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim_0in_[nfile]); exit(RET_READ_FAIL);}
     if ((fp_fam_0in_[nfile]=fopen(fname_fam_0in_[nfile],"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam_0in_[nfile]); exit(RET_READ_FAIL);}
     /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  raprintf(n_fam_,"unsigned long int",1,n_file," %% n_fam_: ");
   str_fam__ = (char **) wkspace_all0c(sizeof(char *)*n_file);
   for (nfile=0;nfile<n_file;nfile++){
     str_fam__[nfile] = (char *)wkspace_all0c(sizeof(char)*2*n_fam_char_max*n_fam_[nfile]);
@@ -1425,13 +1426,45 @@ void b16_merge_test()
       sscanf(fam_line,"%s %s",fam_field_0,fam_field_1);
       sprintf(fam_field_01,"%s%s",fam_field_0,fam_field_1);
       if (verbose>2){ if (nfam<3){ printf(" %% nfile %d : nfam %d : %s + %s --> %s\n",nfile,nfam,fam_field_0,fam_field_1,fam_field_01);}}
-      //sprintf(&(str_fam__[nfile][nfam*2*n_fam_char_max]),fam_field_0);
+      sprintf(&(str_fam__[nfile][nfam*2*n_fam_char_max]),fam_field_01);
       /* for (nfam=0;nfam<n_fam_[nfile];nfam++){ } */}
     /* for (nfile=0;nfile<n_file;nfile++){ } */}
   free(fam_line);
+  int n_list = n_file,nlist=0;
+  int *n_charp_=NULL,*stride_=NULL,ncharp=0,ncharp_max=0;
+  int n_intersect=0;
+  int **index_orig_from_sort__=NULL;
+  int **index_orig_from_intersect__=NULL;
+  int **index_intersect_from_orig__=NULL;
+  char ***charp__=NULL,**charp_workspace_=NULL;
+  n_charp_ = (int *) wkspace_all0c(sizeof(int)*n_list);
+  stride_ = (int *) wkspace_all0c(sizeof(int)*n_list);
+  ncharp_max=0;
+  for (nlist=0;nlist<n_list;nlist++){ n_charp_[nlist] = n_fam_[nlist]; ncharp_max = maximum(ncharp_max,n_charp_[nlist]); stride_[nlist] = 1;}
+  charp_workspace_ = (char **) wkspace_all0c(sizeof(char *)*ncharp_max);
+  charp__ = (char ***) wkspace_all0c(sizeof(char **)*n_list);
+  index_orig_from_sort__ = (int **) wkspace_all0c(sizeof(int *)*n_list);
+  index_orig_from_intersect__ = (int **) wkspace_all0c(sizeof(int *)*n_list);
+  index_intersect_from_orig__ = (int **) wkspace_all0c(sizeof(int *)*n_list);
+  for (nlist=0;nlist<n_list;nlist++){
+    charp__[nlist] = (char **) wkspace_all0c(sizeof(char *)*n_charp_[nlist]);
+    for (ncharp=0;ncharp<n_charp_[nlist];ncharp++){
+      charp__[nlist][ncharp] = &(str_fam__[nlist][ncharp*2*n_fam_char_max]);
+      if (verbose>0 && ncharp<3){ printf(" %% nlist %d: ncharp %d: %s\n",nlist,ncharp,charp__[nlist][ncharp]);}
+      /* for (ncharp=0;ncharp<n_charp_[nlist];ncharp++){ } */}
+    index_orig_from_sort__[nlist] = (int *) wkspace_all0c(sizeof(int)*n_charp_[nlist]);
+    index_orig_from_intersect__[nlist] = (int *) wkspace_all0c(sizeof(int)*n_charp_[nlist]);
+    index_intersect_from_orig__[nlist] = (int *) wkspace_all0c(sizeof(int)*n_charp_[nlist]);
+    /* for (nlist=0;nlist<n_list;nlist++){ } */}
+  nlist=0;
+  for (ncharp=19571-10;ncharp<10+19571;ncharp++){ printf(" %% %d: %s\n",ncharp,charp__[nlist][ncharp]);}
+  exit(0);
+  charpIntersectall_index_index_driver(n_list,n_charp_,charp__,stride_,charp_workspace_,&n_intersect,index_orig_from_sort__,index_orig_from_intersect__,index_intersect_from_orig__);
+
   //charpQuickSort_index_test();
   //charpQuickSort_index_index_test();
-  charpIntersect_index_index_test();
+  //charpIntersect_index_index_test();
+  //charpIntersectall_index_index_test();
   wkspace_printf();
   if (verbose){ printf(" %% [finished b16_merge_test]\n");}
 }
