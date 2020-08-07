@@ -643,7 +643,7 @@ void charpIntersectall_index_index_driver(int n_list,int *n_charp_,char ***charp
   for (nlist=0;nlist<n_list;nlist++){
     if (verbose>1){ printf(" %% nlist %d/%d calling QuickSort\n",nlist,n_list);}
     charpQuickSort_index_index_driver(n_charp_[nlist],charp__[nlist],stride_[nlist],charp_workspace_,index_orig_from_sort__[nlist],NULL,NULL);
-    if (verbose>2){ for (n_sort=0;n_sort<minimum(10,n_charp_[nlist]);n_sort++){ n_orig = index_orig_from_sort__[nlist][n_sort]; printf(" %% nlist %d: (%d,%d) <-- %s\n",nlist,n_sort,n_orig,charp__[nlist][stride_[nlist]*n_orig]);} /* if (verbose){ } */}
+    if (verbose>1){ for (n_sort=0;n_sort<minimum(10,n_charp_[nlist]);n_sort++){ n_orig = index_orig_from_sort__[nlist][n_sort]; printf(" %% nlist %d: (%d,%d) <-- %s\n",nlist,n_sort,n_orig,charp__[nlist][stride_[nlist]*n_orig]);} /* if (verbose){ } */}
     /* for (nlist=0;nlist<n_list;nlist++){ } */}
   /* now step through all the charp__[nlist] to count number of identical entries */
   for (nlist=0;nlist<n_list;nlist++){

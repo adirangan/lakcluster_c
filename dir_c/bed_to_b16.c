@@ -31,12 +31,12 @@ void bed_to_b16_test()
 {
   int verbose=1;
   int MDA_d_[2];
-  char fname_bed[1024];
-  char fname_bim[1024];
-  char fname_fam[1024];
-  FILE *fp_bim=NULL,*fp_bim_out=NULL;
-  FILE *fp_bed=NULL,*fp_bed_out=NULL;
-  FILE *fp_fam=NULL,*fp_fam_out=NULL;
+  char fname_bed_0in[1024];
+  char fname_bim_0in[1024];
+  char fname_fam_0in[1024];
+  FILE *fp_bim_0in=NULL,*fp_bim_out=NULL;
+  FILE *fp_bed_0in=NULL,*fp_bed_out=NULL;
+  FILE *fp_fam_0in=NULL,*fp_fam_out=NULL;
   char fname_b16_out[1024];
   FILE *fp_b16_out=NULL;
   double snp_mss_threshold = 0.01;
@@ -91,30 +91,30 @@ void bed_to_b16_test()
   int *i_workspace_=NULL;
   double *d_workspace_=NULL;
   if (verbose){ printf(" %% [entering bed_to_b16_test]\n");}
-  sprintf(fname_bed,"/home/rangan/dir_bcc/dir_ukb/calls/ukb_cal_chr21_v2.bed");
-  sprintf(fname_bim,"/home/rangan/dir_bcc/dir_ukb/bim/ukb_snp_chr21_v2.bim");
-  sprintf(fname_fam,"/home/rangan/dir_bcc/dir_ukb/fam_calls/ukb43036_cal_chr21_v2_s488288.fam");
-  //sprintf(fname_bed,"/home/rangan/dir_bcc/dir_ukb/calls/ukb_cal_chrMT_v2.bed");
-  //sprintf(fname_bim,"/home/rangan/dir_bcc/dir_ukb/bim/ukb_snp_chrMT_v2.bim");
-  //sprintf(fname_fam,"/home/rangan/dir_bcc/dir_ukb/fam_calls/ukb43036_cal_chrMT_v2_s488288.fam");
-  if (verbose){ printf(" %% bed: %s\n",fname_bed);}
-  if (verbose){ printf(" %% bim: %s -> wc %d\n",fname_bim,wc_0(fname_bim));}
-  if (verbose){ printf(" %% fam: %s -> wc %d\n",fname_fam,wc_0(fname_fam));}
-  if ((fp_bed=fopen(fname_bed,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed); exit(RET_READ_FAIL);}
-  if ((fp_bim=fopen(fname_bim,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim); exit(RET_READ_FAIL);}
-  if ((fp_fam=fopen(fname_fam,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam); exit(RET_READ_FAIL);}
-  fread(&key0,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
+  sprintf(fname_bed_0in,"/home/rangan/dir_bcc/dir_ukb/calls/ukb_cal_chr21_v2.bed");
+  sprintf(fname_bim_0in,"/home/rangan/dir_bcc/dir_ukb/bim/ukb_snp_chr21_v2.bim");
+  sprintf(fname_fam_0in,"/home/rangan/dir_bcc/dir_ukb/fam_calls/ukb43036_cal_chr21_v2_s488288.fam");
+  //sprintf(fname_bed_0in,"/home/rangan/dir_bcc/dir_ukb/calls/ukb_cal_chrMT_v2.bed");
+  //sprintf(fname_bim_0in,"/home/rangan/dir_bcc/dir_ukb/bim/ukb_snp_chrMT_v2.bim");
+  //sprintf(fname_fam_0in,"/home/rangan/dir_bcc/dir_ukb/fam_calls/ukb43036_cal_chrMT_v2_s488288.fam");
+  if (verbose){ printf(" %% bed: %s\n",fname_bed_0in);}
+  if (verbose){ printf(" %% bim: %s -> wc %d\n",fname_bim_0in,wc_0(fname_bim_0in));}
+  if (verbose){ printf(" %% fam: %s -> wc %d\n",fname_fam_0in,wc_0(fname_fam_0in));}
+  if ((fp_bed_0in=fopen(fname_bed_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed_0in); exit(RET_READ_FAIL);}
+  if ((fp_bim_0in=fopen(fname_bim_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim_0in); exit(RET_READ_FAIL);}
+  if ((fp_fam_0in=fopen(fname_fam_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam_0in); exit(RET_READ_FAIL);}
+  fread(&key0,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
   if (key0!=108){ printf(" %% Warning, key0 %d!=108\n",key0);}
-  fread(&key1,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
+  fread(&key1,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
   if (key1!= 27){ printf(" %% Warning, key1 %d!= 27\n",key1);}
-  fread(&key2,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
+  fread(&key2,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
   if (key2!=  1){ printf(" %% Warning, key2 %d!=  1\n",key2);}
   n_bam = n_fam/4 + ( n_fam%4==0 ? 0 : 1);
   n_bed = (unsigned long long int)3 + (unsigned long long int)n_bim*(unsigned long long int)n_bam;
-  size_bed = fsize_0(fname_bed);
+  size_bed = fsize_0(fname_bed_0in);
   if (verbose){ printf(" %% n_bed %lld vs size_bed %lld --> difference %lld\n",n_bed,size_bed,n_bed-size_bed);}
   if (size_bed<n_bed){ printf(" %% Warning, size_bed %lld < n_bed %lld\n",size_bed,n_bed);}
-  flip_allele_ = (int *)wkspace_all0c(sizeof(int)*n_bim);
+  flip_allele_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_bim);
   for (nbim=0;nbim<n_bim;nbim++){ flip_allele_[nbim] = +1; /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   flip_allele_[0]=-1;
   for (nbim=1;nbim<n_bim;nbim++){ flip_allele_[nbim] = -1*flip_allele_[nbim-1]; /* for (nbim=0;nbim<n_bim;nbim++){ } */}
@@ -122,10 +122,10 @@ void bed_to_b16_test()
   for (nbim=0;nbim<n_bim;nbim++){ n_flip_pos += flip_allele_[nbim]>0?1:0; n_flip_neg += flip_allele_[nbim]<0?1:0; /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   if (verbose){ printf(" %% n_flip_pos %d n_flip_neg %d\n",n_flip_pos,n_flip_neg);}
   if (verbose){ printf(" %% reading bed file.\n");}
-  snp__ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*n_val*n_bim);
-  pat__ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*n_val*n_val*n_bam);
-  tot_ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*n_val);
-  bed_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*n_bam);
+  snp__ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*(size_t)n_val*(size_t)n_bim);
+  pat__ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*(size_t)n_val*(size_t)n_val*(size_t)n_bam);
+  tot_ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*(size_t)n_val);
+  bed_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)n_bam);
   /* 
      Here the tags are: 
      00 --> 0 = 'nor' = homozygous (minor)
@@ -140,7 +140,7 @@ void bed_to_b16_test()
   snp_tab=0;
   for (nbim=0;nbim<n_bim;nbim++){
     if (verbose){ if ((nbim%1000)==0){ printf(" %% nbim %d/%d\n",nbim,n_bim);}}
-    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
+    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed_0in); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
     if (flip_allele_[nbim]==+1){
     nfam=0; pat_tab=0;
     for (nbam=0;nbam<n_bam;nbam++){
@@ -173,9 +173,9 @@ void bed_to_b16_test()
     snp_tab+=n_val;
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   raprintf(tot_,"unsigned long long int",1,n_val," %% tot_: ");
-  fclose(fp_bed); fp_bed = NULL;
-  fclose(fp_bim); fp_bim = NULL;
-  fclose(fp_fam); fp_fam = NULL;
+  fclose(fp_bed_0in); fp_bed_0in = NULL;
+  fclose(fp_bim_0in); fp_bim_0in = NULL;
+  fclose(fp_fam_0in); fp_fam_0in = NULL;
   if (verbose>0){
     if (verbose){ printf(" %% writing mda files.\n");}
     MDA_d_[0] = n_val; MDA_d_[1] = n_bim; MDA_write_ulli(2,MDA_d_,snp__,"/home/rangan/dir_bcc/dir_ukb/dir_mda/snp__.mda");
@@ -183,7 +183,7 @@ void bed_to_b16_test()
     MDA_d_[0] = n_val; MDA_d_[1] = 1; MDA_write_ulli(2,MDA_d_,tot_,"/home/rangan/dir_bcc/dir_ukb/dir_mda/tot_.mda");
     /* if (verbose>0){ } */}
   if (verbose){ printf(" %% calculating mode across all 4 tags (including mss).\n");}
-  snp_mode_ = (int *)wkspace_all0c(sizeof(int)*n_bim);
+  snp_mode_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_bim);
   snp_tab=0;
   for (nbim=0;nbim<n_bim;nbim++){
     bed_value=1; if (snp__[snp_tab+bed_value]>snp__[snp_tab+snp_mode_[nbim]]){ snp_mode_[nbim]=bed_value;};
@@ -191,7 +191,7 @@ void bed_to_b16_test()
     bed_value=3; if (snp__[snp_tab+bed_value]>snp__[snp_tab+snp_mode_[nbim]]){ snp_mode_[nbim]=bed_value;};
     snp_tab+=n_val;
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
-  pat_mode_ = (int *)wkspace_all0c(sizeof(int)*n_fam);
+  pat_mode_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_fam);
   pat_tab=0;
   for (nfam=0;nfam<n_fam;nfam++){
     bed_value=1; if (pat__[pat_tab+bed_value]>pat__[pat_tab+pat_mode_[nfam]]){ pat_mode_[nfam]=bed_value;};
@@ -223,14 +223,14 @@ void bed_to_b16_test()
     I_opt = frq_and*log(frq_and/p_opt^2) + frq_xor*log(frq_xor/(2*p_opt*q_opt)) + frq_nor*log(frq_nor/q_opt^2).
   */
   if (verbose){ printf(" %% calculating frequencies p_opt, q_opt and entropy I_opt.\n");}
-  snp_frq_and_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_frq_xor_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_frq_nor_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_frq_mss_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_tot_dat_=(unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*n_bim);
-  snp_p_opt_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_q_opt_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_I_opt_=(double *)wkspace_all0c(sizeof(double)*n_bim);
+  snp_frq_and_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_frq_xor_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_frq_nor_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_frq_mss_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_tot_dat_=(unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*(size_t)n_bim);
+  snp_p_opt_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_q_opt_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_I_opt_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
   snp_tab=0;
   for (nbim=0;nbim<n_bim;nbim++){
     snp_tot_dat_[nbim] = snp__[snp_tab+snp_and_tag]+snp__[snp_tab+snp_xor_tag]+snp__[snp_tab+snp_nor_tag];
@@ -249,7 +249,7 @@ void bed_to_b16_test()
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   /* find mode across only the nonmissing tags (i.e., and, xor, nor) */
   unsigned char *snp_tag_mode_=NULL;
-  snp_tag_mode_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*n_bim);
+  snp_tag_mode_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)n_bim);
   snp_tab=0;
   for (nbim=0;nbim<n_bim;nbim++){
     snp_tag_mode_[nbim] = snp_xor_tag;
@@ -272,11 +272,11 @@ void bed_to_b16_test()
     MDA_d_[0] = n_bim; MDA_d_[1] = 1; MDA_write_r8(2,MDA_d_,snp_q_opt_,"/home/rangan/dir_bcc/dir_ukb/dir_mda/snp_q_opt_.mda");
     MDA_d_[0] = n_bim; MDA_d_[1] = 1; MDA_write_r8(2,MDA_d_,snp_I_opt_,"/home/rangan/dir_bcc/dir_ukb/dir_mda/snp_I_opt_.mda");
     /* if (verbose>0){ } */}
-  pat_frq_and_=(double *)wkspace_all0c(sizeof(double)*n_fam);
-  pat_frq_xor_=(double *)wkspace_all0c(sizeof(double)*n_fam);
-  pat_frq_nor_=(double *)wkspace_all0c(sizeof(double)*n_fam);
-  pat_frq_mss_=(double *)wkspace_all0c(sizeof(double)*n_fam);
-  pat_tot_dat_=(unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*n_fam);
+  pat_frq_and_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_fam);
+  pat_frq_xor_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_fam);
+  pat_frq_nor_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_fam);
+  pat_frq_mss_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_fam);
+  pat_tot_dat_=(unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*(size_t)n_fam);
   pat_tab=0;
   for (nfam=0;nfam<n_fam;nfam++){
     pat_tot_dat_[nfam] = pat__[pat_tab+snp_and_tag]+pat__[pat_tab+snp_xor_tag]+pat__[pat_tab+snp_nor_tag];
@@ -295,8 +295,8 @@ void bed_to_b16_test()
     /* if (verbose>0){ } */}
   /* find snp indices that satisfy thresholds */
   if (verbose){ printf(" %% determining which snps satisfy thresholds.\n");}
-  index_snp_retain_from_bim_ = (int *)wkspace_all0c(sizeof(int)*n_bim);
-  index_bim_from_snp_retain_ = (int *)wkspace_all0c(sizeof(int)*n_bim);
+  index_snp_retain_from_bim_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_bim);
+  index_bim_from_snp_retain_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_bim);
   nsnp_retain = 0;
   for (nbim=0;nbim<n_bim;nbim++){
     if ( (snp_tot_dat_[nbim]>0) && (snp_frq_and_[nbim]>0) && (snp_frq_xor_[nbim]>0) && (snp_frq_nor_[nbim]>0) && (minimum(snp_p_opt_[nbim],snp_q_opt_[nbim])>=snp_maf_threshold) && (snp_frq_mss_[nbim]<=snp_mss_threshold) && (snp_I_opt_[nbim]<=snp_I_opt_threshold) ){ index_bim_from_snp_retain_[nsnp_retain] = nbim; index_snp_retain_from_bim_[nbim] = nsnp_retain; nsnp_retain++;}
@@ -304,8 +304,8 @@ void bed_to_b16_test()
   n_snp_retain = nsnp_retain;
   /* find pat indices that satisfy thresholds */
   if (verbose){ printf(" %% determining which pats satisfy thresholds.\n");}
-  index_pat_retain_from_fam_ = (int *)wkspace_all0c(sizeof(int)*n_fam);
-  index_fam_from_pat_retain_ = (int *)wkspace_all0c(sizeof(int)*n_fam);
+  index_pat_retain_from_fam_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_fam);
+  index_fam_from_pat_retain_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_fam);
   npat_retain = 0;
   for (nfam=0;nfam<n_fam;nfam++){
     if ( (pat_tot_dat_[nfam]>0) && (pat_frq_mss_[nfam]<=pat_mss_threshold) ){ index_fam_from_pat_retain_[npat_retain] = nfam; index_pat_retain_from_fam_[nfam] = npat_retain; npat_retain++;}
@@ -316,13 +316,13 @@ void bed_to_b16_test()
   if (verbose){ printf(" %% extracting alleles.\n");}
   int allele_nor_tag = 0; int allele_xor_tag = 1; int allele_and_tag = 2;
   n_allele = 3*n_snp_retain;
-  index_allele_from_allele_ = (int *)wkspace_all0c(sizeof(int)*n_allele);
-  index_snp_retain_from_allele_ = (int *)wkspace_all0c(sizeof(int)*n_allele);
-  index_allele_from_snp_retain__ = (int *)wkspace_all0c(sizeof(int)*n_allele); /* Contains a stack of 3 arrays, each of length n_snp_retain. The arrays correspond (respectively) to nor, xor and and. */
-  allele_frequency_ = (double *)wkspace_all0c(sizeof(double)*n_allele);
-  allele_maf_ = (double *)wkspace_all0c(sizeof(double)*n_allele);
-  allele_mss_ = (double *)wkspace_all0c(sizeof(double)*n_allele);
-  allele_I_opt_ = (double *)wkspace_all0c(sizeof(double)*n_allele);
+  index_allele_from_allele_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele);
+  index_snp_retain_from_allele_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele);
+  index_allele_from_snp_retain__ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele); /* Contains a stack of 3 arrays, each of length n_snp_retain. The arrays correspond (respectively) to nor, xor and and. */
+  allele_frequency_ = (double *)wkspace_all0c(sizeof(double)*(size_t)n_allele);
+  allele_maf_ = (double *)wkspace_all0c(sizeof(double)*(size_t)n_allele);
+  allele_mss_ = (double *)wkspace_all0c(sizeof(double)*(size_t)n_allele);
+  allele_I_opt_ = (double *)wkspace_all0c(sizeof(double)*(size_t)n_allele);
   for (nsnp_retain=0;nsnp_retain<n_snp_retain;nsnp_retain++){
     nbim = index_bim_from_snp_retain_[nsnp_retain];
     index_allele_from_allele_[allele_nor_tag + nsnp_retain*3] = allele_nor_tag + nsnp_retain*3;
@@ -350,10 +350,10 @@ void bed_to_b16_test()
     /* for (nsnp_retain=0;nsnp_retain<n_snp_retain;nsnp_retain++){ } */}
   /* sort the alleles by frequency */
   if (verbose){ printf(" %% sorting alleles.\n");}
-  index_allele_orig_from_sort_ = (int *)wkspace_all0c(sizeof(int)*n_allele);
-  index_allele_sort_from_orig_ = (int *)wkspace_all0c(sizeof(int)*n_allele);
-  i_workspace_ = (int *)wkspace_all0c(sizeof(int)*n_allele);
-  d_workspace_ = (double *)wkspace_all0c(sizeof(double)*n_allele);
+  index_allele_orig_from_sort_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele);
+  index_allele_sort_from_orig_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele);
+  i_workspace_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele);
+  d_workspace_ = (double *)wkspace_all0c(sizeof(double)*(size_t)n_allele);
   dQuickSort_index_index_driver(n_allele,allele_frequency_,1,d_workspace_,index_allele_orig_from_sort_,index_allele_sort_from_orig_,i_workspace_);
   /* build b16 array so that patients vary quickly and alleles vary slowly */
   if (verbose){ printf(" %% building b16 array.\n");}
@@ -369,15 +369,15 @@ void bed_to_b16_test()
   if (verbose){ printf(" %% size_A_n: %.2fGB\n",(double)l_pat_retain*(double)n_allele/1e9);}
   if (verbose){ printf(" %% size_A_t: %.2fGB\n",(double)l_allele*(double)n_pat_retain/1e9);}
   unsigned char *A_n_=NULL;
-  A_n_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)l_pat_retain*(size_t)n_allele);
+  A_n_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)l_pat_retain*(size_t)(size_t)n_allele);
   unsigned char *snp_tag_line_=NULL;
-  snp_tag_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*n_val*n_bam);
+  snp_tag_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)n_val*(size_t)n_bam);
   unsigned char *allele_nor_line_=NULL;
   unsigned char *allele_xor_line_=NULL;
   unsigned char *allele_and_line_=NULL;
-  allele_nor_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*l_pat_retain);
-  allele_xor_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*l_pat_retain);
-  allele_and_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*l_pat_retain);
+  allele_nor_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)l_pat_retain);
+  allele_xor_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)l_pat_retain);
+  allele_and_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)l_pat_retain);
   int nallele_nor_orig=0,nallele_xor_orig=0,nallele_and_orig=0;
   int nallele_nor_sort=0,nallele_xor_sort=0,nallele_and_sort=0;
   int nbim_target=0,nfam_target=0;
@@ -387,17 +387,17 @@ void bed_to_b16_test()
   unsigned char tmp_a=0,tmp_b=0;
   unsigned char *b_=NULL;
   if (verbose){ printf(" %% reading bed file.\n");}
-  if ((fp_bed=fopen(fname_bed,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed); exit(RET_READ_FAIL);}
-  fread(&key0,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
+  if ((fp_bed_0in=fopen(fname_bed_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed_0in); exit(RET_READ_FAIL);}
+  fread(&key0,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
   if (key0!=108){ printf(" %% Warning, key0 %d!=108\n",key0);}
-  fread(&key1,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
+  fread(&key1,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
   if (key1!= 27){ printf(" %% Warning, key1 %d!= 27\n",key1);}
-  fread(&key2,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
+  fread(&key2,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
   if (key2!=  1){ printf(" %% Warning, key2 %d!=  1\n",key2);}
   snp_tab=0; nsnp_retain=0; nbim_target = index_bim_from_snp_retain_[nsnp_retain];
   for (nbim=0;nbim<n_bim;nbim++){
     if (verbose){ if ((nbim%1000)==0){ printf(" %% nbim %d/%d\n",nbim,n_bim);}}
-    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
+    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed_0in); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
     if (flip_allele_[nbim]==+1){
     nfam=0;
     for (nbam=0;nbam<n_bam;nbam++){
@@ -478,7 +478,7 @@ void bed_to_b16_test()
     snp_tab+=n_val;
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   if (nsnp_retain!=n_snp_retain){ printf(" %% Warning, nsnp_retain %d n_snp_retain %d\n",nsnp_retain,n_snp_retain);}
-  fclose(fp_bed); fp_bed = NULL;
+  fclose(fp_bed_0in); fp_bed_0in = NULL;
   /* test a few entries */
   if (verbose){ printf(" %% testing some entries.\n");}
   int n_snp_test=0,nsnp_test=0;
@@ -495,12 +495,12 @@ void bed_to_b16_test()
   unsigned long long int n_mismatch=0;
   int nsnp_retain_target=0,npat_retain_target=0;
   if (verbose){ printf(" %% reading bed file.\n");}
-  if ((fp_bed=fopen(fname_bed,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed); exit(RET_READ_FAIL);}
-  fread(&key0,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
+  if ((fp_bed_0in=fopen(fname_bed_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed_0in); exit(RET_READ_FAIL);}
+  fread(&key0,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
   if (key0!=108){ printf(" %% Warning, key0 %d!=108\n",key0);}
-  fread(&key1,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
+  fread(&key1,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
   if (key1!= 27){ printf(" %% Warning, key1 %d!= 27\n",key1);}
-  fread(&key2,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
+  fread(&key2,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
   if (key2!=  1){ printf(" %% Warning, key2 %d!=  1\n",key2);}
   snp_tab=0; nsnp_test=0;
   nsnp_retain_target = floor((double)(n_snp_retain-1)*(double)nsnp_test/(double)(n_snp_test-1));
@@ -508,7 +508,7 @@ void bed_to_b16_test()
   nbim_target = index_bim_from_snp_retain_[nsnp_retain_target];
   for (nbim=0;nbim<n_bim;nbim++){
     if (verbose){ if ((nbim%1000)==0){ printf(" %% nbim %d/%d\n",nbim,n_bim);}}
-    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
+    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed_0in); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
     if (flip_allele_[nbim]==+1){
     nfam=0;
     for (nbam=0;nbam<n_bam;nbam++){
@@ -588,24 +588,24 @@ void bed_to_b16_test()
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   if (nsnp_test!=n_snp_test){ printf(" %% Warning, nsnp_test %d n_snp_test %d\n",nsnp_test,n_snp_test);}
   if (verbose){ printf(" %% n_mismatch %lld/%lld\n",n_mismatch,(unsigned long long int)n_snp_test*(unsigned long long int)n_pat_test);}
-  fclose(fp_bed); fp_bed = NULL;
+  fclose(fp_bed_0in); fp_bed_0in = NULL;
   /* writing extended bim and fam files */
   if (verbose){ printf(" %% writing fam file.\n");}
   int n_fam_char_max = 64;
   int n_fam_field = 6, nfam_field=0;
   char *fam_field__=NULL;
-  fam_field__ = (char *)wkspace_all0c(sizeof(char)*n_fam_char_max*n_fam_field*n_fam);
-  if ((fp_fam=fopen(fname_fam,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam); exit(RET_READ_FAIL);}
+  fam_field__ = (char *)wkspace_all0c(sizeof(char)*(size_t)n_fam_char_max*(size_t)n_fam_field*(size_t)n_fam);
+  if ((fp_fam_0in=fopen(fname_fam_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam_0in); exit(RET_READ_FAIL);}
   pat_tab=0;
   for (nfam=0;nfam<n_fam;nfam++){
     for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){
-      n_read = fscanf(fp_fam,"%s",&(fam_field__[pat_tab]));
-      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_fam); exit(RET_READ_FAIL);}
+      n_read = fscanf(fp_fam_0in,"%s",&(fam_field__[pat_tab]));
+      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_fam_0in); exit(RET_READ_FAIL);}
       if (verbose>2){ printf(" %% nfam %d nfam_field %d: %s\n",nfam,nfam_field,&(fam_field__[pat_tab]));}
       pat_tab+=n_fam_char_max;
       /* for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){ } */}
     /* for (nfam=0;nfam<n_fam;nfam++){ } */}
-  fclose(fp_fam); fp_fam=NULL;
+  fclose(fp_fam_0in); fp_fam_0in=NULL;
   char infix[1024];
   sprintf(infix,"maf%.2d",(int)floor(100*snp_maf_threshold));
   char fname_fam_out[1024];
@@ -628,18 +628,18 @@ void bed_to_b16_test()
   int n_bim_char_max = 64;
   int n_bim_field = 6, nbim_field=0;
   char *bim_field__=NULL;
-  bim_field__ = (char *)wkspace_all0c(sizeof(char)*n_bim_char_max*n_bim_field*n_bim);
-  if ((fp_bim=fopen(fname_bim,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim); exit(RET_READ_FAIL);}
+  bim_field__ = (char *)wkspace_all0c(sizeof(char)*(size_t)n_bim_char_max*(size_t)n_bim_field*(size_t)n_bim);
+  if ((fp_bim_0in=fopen(fname_bim_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim_0in); exit(RET_READ_FAIL);}
   snp_tab=0;
   for (nbim=0;nbim<n_bim;nbim++){
     for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
-      n_read = fscanf(fp_bim,"%s",&(bim_field__[snp_tab]));
-      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_bim); exit(RET_READ_FAIL);}
+      n_read = fscanf(fp_bim_0in,"%s",&(bim_field__[snp_tab]));
+      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_bim_0in); exit(RET_READ_FAIL);}
       if (verbose>2){ printf(" %% nbim %d nbim_field %d: %s\n",nbim,nbim_field,&(bim_field__[snp_tab]));}
       snp_tab+=n_bim_char_max;
       /* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
-  fclose(fp_bim); fp_bim=NULL;
+  fclose(fp_bim_0in); fp_bim_0in=NULL;
   char fname_bim_out[1024];
   sprintf(fname_bim_out,"/home/rangan/dir_bcc/dir_ukb/dir_b16/ukb43036_cal_chr21_v2_s488288_%s.bim.ext",infix);
   if (verbose){ printf(" %% writing %s\n",fname_bim_out);}
@@ -711,12 +711,12 @@ void bed_to_b16_test()
 void bed_to_b16()
 {
   int verbose=1;
-  char fname_bed[FNAMESIZE];
-  char fname_bim[FNAMESIZE];
-  char fname_fam[FNAMESIZE];
-  FILE *fp_bim=NULL,*fp_bim_out=NULL;
-  FILE *fp_bed=NULL,*fp_bed_out=NULL;
-  FILE *fp_fam=NULL,*fp_fam_out=NULL;
+  char fname_bed_0in[FNAMESIZE];
+  char fname_bim_0in[FNAMESIZE];
+  char fname_fam_0in[FNAMESIZE];
+  FILE *fp_bim_0in=NULL,*fp_bim_out=NULL;
+  FILE *fp_bed_0in=NULL,*fp_bed_out=NULL;
+  FILE *fp_fam_0in=NULL,*fp_fam_out=NULL;
   char fname_b16_out[FNAMESIZE];
   FILE *fp_b16_out=NULL;
   double snp_mss_threshold = GLOBAL_snp_mss_threshold;
@@ -769,29 +769,29 @@ void bed_to_b16()
   int *i_workspace_=NULL;
   double *d_workspace_=NULL;
   if (verbose){ printf(" %% [entering bed_to_b16]\n");}
-  sprintf(fname_bed,"%s",GLOBAL_fname_bed_0in);
-  sprintf(fname_bim,"%s",GLOBAL_fname_bim_0in);
-  sprintf(fname_fam,"%s",GLOBAL_fname_fam_0in);
-  if (verbose){ printf(" %% bed: %s\n",fname_bed);}
-  n_bim = wc_0(fname_bim);
-  if (verbose){ printf(" %% bim: %s -> wc %d\n",fname_bim,n_bim);}
-  n_fam = wc_0(fname_fam);
-  if (verbose){ printf(" %% fam: %s -> wc %d\n",fname_fam,n_fam);}
-  if ((fp_bed=fopen(fname_bed,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed); exit(RET_READ_FAIL);}
-  if ((fp_bim=fopen(fname_bim,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim); exit(RET_READ_FAIL);}
-  if ((fp_fam=fopen(fname_fam,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam); exit(RET_READ_FAIL);}
-  fread(&key0,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
+  sprintf(fname_bed_0in,"%s",GLOBAL_fname_bed_0in);
+  sprintf(fname_bim_0in,"%s",GLOBAL_fname_bim_0in);
+  sprintf(fname_fam_0in,"%s",GLOBAL_fname_fam_0in);
+  if (verbose){ printf(" %% bed: %s\n",fname_bed_0in);}
+  n_bim = wc_0(fname_bim_0in);
+  if (verbose){ printf(" %% bim: %s -> wc %d\n",fname_bim_0in,n_bim);}
+  n_fam = wc_0(fname_fam_0in);
+  if (verbose){ printf(" %% fam: %s -> wc %d\n",fname_fam_0in,n_fam);}
+  if ((fp_bed_0in=fopen(fname_bed_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed_0in); exit(RET_READ_FAIL);}
+  if ((fp_bim_0in=fopen(fname_bim_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim_0in); exit(RET_READ_FAIL);}
+  if ((fp_fam_0in=fopen(fname_fam_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam_0in); exit(RET_READ_FAIL);}
+  fread(&key0,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
   if (key0!=108){ printf(" %% Warning, key0 %d!=108\n",key0);}
-  fread(&key1,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
+  fread(&key1,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
   if (key1!= 27){ printf(" %% Warning, key1 %d!= 27\n",key1);}
-  fread(&key2,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
+  fread(&key2,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
   if (key2!=  1){ printf(" %% Warning, key2 %d!=  1\n",key2);}
   n_bam = n_fam/4 + ( n_fam%4==0 ? 0 : 1);
   n_bed = (unsigned long long int)3 + (unsigned long long int)n_bim*(unsigned long long int)n_bam;
-  size_bed = fsize_0(fname_bed);
+  size_bed = fsize_0(fname_bed_0in);
   if (verbose){ printf(" %% n_bed %lld vs size_bed %lld --> difference %lld\n",n_bed,size_bed,n_bed-size_bed);}
   if (size_bed<n_bed){ printf(" %% Warning, size_bed %lld < n_bed %lld\n",size_bed,n_bed);}
-  flip_allele_ = (int *)wkspace_all0c(sizeof(int)*n_bim);
+  flip_allele_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_bim);
   for (nbim=0;nbim<n_bim;nbim++){ flip_allele_[nbim] = +1; /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   if (GLOBAL_fname_flip_flag==NULL || !strcmp(GLOBAL_fname_flip_flag,"\0")){ /* do nothing */}
   else /* if flip flag defined */{ printf(" %% Warning, flip flag not yet implemented (or read) in bed_to_b16\n");}
@@ -799,10 +799,10 @@ void bed_to_b16()
   for (nbim=0;nbim<n_bim;nbim++){ n_flip_pos += flip_allele_[nbim]>0?1:0; n_flip_neg += flip_allele_[nbim]<0?1:0; /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   if (verbose){ printf(" %% n_flip_pos %d n_flip_neg %d\n",n_flip_pos,n_flip_neg);}
   if (verbose){ printf(" %% reading bed file.\n");}
-  snp__ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*n_val*n_bim);
-  pat__ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*n_val*n_val*n_bam);
-  tot_ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*n_val);
-  bed_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*n_bam);
+  snp__ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*(size_t)n_val*(size_t)n_bim);
+  pat__ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*(size_t)n_val*(size_t)n_val*(size_t)n_bam);
+  tot_ = (unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*(size_t)n_val);
+  bed_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)n_bam);
   /* 
      Here the tags are: 
      00 --> 0 = 'nor' = homozygous (minor)
@@ -817,7 +817,7 @@ void bed_to_b16()
   snp_tab=0;
   for (nbim=0;nbim<n_bim;nbim++){
     if (verbose){ if ((nbim%1000)==0){ printf(" %% nbim %d/%d\n",nbim,n_bim);}}
-    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
+    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed_0in); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
     if (flip_allele_[nbim]==+1){
     nfam=0; pat_tab=0;
     for (nbam=0;nbam<n_bam;nbam++){
@@ -850,11 +850,11 @@ void bed_to_b16()
     snp_tab+=n_val;
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   raprintf(tot_,"unsigned long long int",1,n_val," %% tot_: ");
-  fclose(fp_bed); fp_bed = NULL;
-  fclose(fp_bim); fp_bim = NULL;
-  fclose(fp_fam); fp_fam = NULL;
+  fclose(fp_bed_0in); fp_bed_0in = NULL;
+  fclose(fp_bim_0in); fp_bim_0in = NULL;
+  fclose(fp_fam_0in); fp_fam_0in = NULL;
   if (verbose){ printf(" %% calculating mode across all 4 tags (including mss).\n");}
-  snp_mode_ = (int *)wkspace_all0c(sizeof(int)*n_bim);
+  snp_mode_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_bim);
   snp_tab=0;
   for (nbim=0;nbim<n_bim;nbim++){
     bed_value=1; if (snp__[snp_tab+bed_value]>snp__[snp_tab+snp_mode_[nbim]]){ snp_mode_[nbim]=bed_value;};
@@ -862,7 +862,7 @@ void bed_to_b16()
     bed_value=3; if (snp__[snp_tab+bed_value]>snp__[snp_tab+snp_mode_[nbim]]){ snp_mode_[nbim]=bed_value;};
     snp_tab+=n_val;
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
-  pat_mode_ = (int *)wkspace_all0c(sizeof(int)*n_fam);
+  pat_mode_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_fam);
   pat_tab=0;
   for (nfam=0;nfam<n_fam;nfam++){
     bed_value=1; if (pat__[pat_tab+bed_value]>pat__[pat_tab+pat_mode_[nfam]]){ pat_mode_[nfam]=bed_value;};
@@ -889,14 +889,14 @@ void bed_to_b16()
     I_opt = frq_and*log(frq_and/p_opt^2) + frq_xor*log(frq_xor/(2*p_opt*q_opt)) + frq_nor*log(frq_nor/q_opt^2).
   */
   if (verbose){ printf(" %% calculating frequencies p_opt, q_opt and entropy I_opt.\n");}
-  snp_frq_and_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_frq_xor_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_frq_nor_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_frq_mss_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_tot_dat_=(unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*n_bim);
-  snp_p_opt_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_q_opt_=(double *)wkspace_all0c(sizeof(double)*n_bim);
-  snp_I_opt_=(double *)wkspace_all0c(sizeof(double)*n_bim);
+  snp_frq_and_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_frq_xor_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_frq_nor_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_frq_mss_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_tot_dat_=(unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*(size_t)n_bim);
+  snp_p_opt_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_q_opt_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
+  snp_I_opt_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_bim);
   snp_tab=0;
   for (nbim=0;nbim<n_bim;nbim++){
     snp_tot_dat_[nbim] = snp__[snp_tab+snp_and_tag]+snp__[snp_tab+snp_xor_tag]+snp__[snp_tab+snp_nor_tag];
@@ -915,7 +915,7 @@ void bed_to_b16()
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   /* find mode across only the nonmissing tags (i.e., and, xor, nor) */
   unsigned char *snp_tag_mode_=NULL;
-  snp_tag_mode_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*n_bim);
+  snp_tag_mode_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)n_bim);
   snp_tab=0;
   for (nbim=0;nbim<n_bim;nbim++){
     snp_tag_mode_[nbim] = snp_xor_tag;
@@ -924,11 +924,11 @@ void bed_to_b16()
     if ( (snp__[snp_tab+snp_and_tag]>=snp__[snp_tab+snp_xor_tag]) && (snp__[snp_tab+snp_and_tag]>=snp__[snp_tab+snp_nor_tag]) ){ snp_tag_mode_[nbim] = snp_and_tag;}
     snp_tab+=n_val;
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
-  pat_frq_and_=(double *)wkspace_all0c(sizeof(double)*n_fam);
-  pat_frq_xor_=(double *)wkspace_all0c(sizeof(double)*n_fam);
-  pat_frq_nor_=(double *)wkspace_all0c(sizeof(double)*n_fam);
-  pat_frq_mss_=(double *)wkspace_all0c(sizeof(double)*n_fam);
-  pat_tot_dat_=(unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*n_fam);
+  pat_frq_and_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_fam);
+  pat_frq_xor_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_fam);
+  pat_frq_nor_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_fam);
+  pat_frq_mss_=(double *)wkspace_all0c(sizeof(double)*(size_t)n_fam);
+  pat_tot_dat_=(unsigned long long int *)wkspace_all0c(sizeof(unsigned long long int)*(size_t)n_fam);
   pat_tab=0;
   for (nfam=0;nfam<n_fam;nfam++){
     pat_tot_dat_[nfam] = pat__[pat_tab+snp_and_tag]+pat__[pat_tab+snp_xor_tag]+pat__[pat_tab+snp_nor_tag];
@@ -941,8 +941,8 @@ void bed_to_b16()
     /* for (nfam=0;nfam<n_fam;nfam++){ } */}
   /* find snp indices that satisfy thresholds */
   if (verbose){ printf(" %% determining which snps satisfy thresholds.\n");}
-  index_snp_retain_from_bim_ = (int *)wkspace_all0c(sizeof(int)*n_bim);
-  index_bim_from_snp_retain_ = (int *)wkspace_all0c(sizeof(int)*n_bim);
+  index_snp_retain_from_bim_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_bim);
+  index_bim_from_snp_retain_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_bim);
   nsnp_retain = 0;
   for (nbim=0;nbim<n_bim;nbim++){
     if ( (snp_tot_dat_[nbim]>0) && (snp_frq_and_[nbim]>0) && (snp_frq_xor_[nbim]>0) && (snp_frq_nor_[nbim]>0) && (minimum(snp_p_opt_[nbim],snp_q_opt_[nbim])>=snp_maf_threshold) && (snp_frq_mss_[nbim]<=snp_mss_threshold) && (snp_I_opt_[nbim]<=snp_I_opt_threshold) ){ index_bim_from_snp_retain_[nsnp_retain] = nbim; index_snp_retain_from_bim_[nbim] = nsnp_retain; nsnp_retain++;}
@@ -950,8 +950,8 @@ void bed_to_b16()
   n_snp_retain = nsnp_retain;
   /* find pat indices that satisfy thresholds */
   if (verbose){ printf(" %% determining which pats satisfy thresholds.\n");}
-  index_pat_retain_from_fam_ = (int *)wkspace_all0c(sizeof(int)*n_fam);
-  index_fam_from_pat_retain_ = (int *)wkspace_all0c(sizeof(int)*n_fam);
+  index_pat_retain_from_fam_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_fam);
+  index_fam_from_pat_retain_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_fam);
   npat_retain = 0;
   for (nfam=0;nfam<n_fam;nfam++){
     if ( (pat_tot_dat_[nfam]>0) && (pat_frq_mss_[nfam]<=pat_mss_threshold) ){ index_fam_from_pat_retain_[npat_retain] = nfam; index_pat_retain_from_fam_[nfam] = npat_retain; npat_retain++;}
@@ -962,13 +962,13 @@ void bed_to_b16()
   if (verbose){ printf(" %% extracting alleles.\n");}
   int allele_nor_tag = 0; int allele_xor_tag = 1; int allele_and_tag = 2;
   n_allele = 3*n_snp_retain;
-  index_allele_from_allele_ = (int *)wkspace_all0c(sizeof(int)*n_allele);
-  index_snp_retain_from_allele_ = (int *)wkspace_all0c(sizeof(int)*n_allele);
-  index_allele_from_snp_retain__ = (int *)wkspace_all0c(sizeof(int)*n_allele); /* Contains a stack of 3 arrays, each of length n_snp_retain. The arrays correspond (respectively) to nor, xor and and. */
-  allele_frequency_ = (double *)wkspace_all0c(sizeof(double)*n_allele);
-  allele_maf_ = (double *)wkspace_all0c(sizeof(double)*n_allele);
-  allele_mss_ = (double *)wkspace_all0c(sizeof(double)*n_allele);
-  allele_I_opt_ = (double *)wkspace_all0c(sizeof(double)*n_allele);
+  index_allele_from_allele_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele);
+  index_snp_retain_from_allele_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele);
+  index_allele_from_snp_retain__ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele); /* Contains a stack of 3 arrays, each of length n_snp_retain. The arrays correspond (respectively) to nor, xor and and. */
+  allele_frequency_ = (double *)wkspace_all0c(sizeof(double)*(size_t)n_allele);
+  allele_maf_ = (double *)wkspace_all0c(sizeof(double)*(size_t)n_allele);
+  allele_mss_ = (double *)wkspace_all0c(sizeof(double)*(size_t)n_allele);
+  allele_I_opt_ = (double *)wkspace_all0c(sizeof(double)*(size_t)n_allele);
   for (nsnp_retain=0;nsnp_retain<n_snp_retain;nsnp_retain++){
     nbim = index_bim_from_snp_retain_[nsnp_retain];
     index_allele_from_allele_[allele_nor_tag + nsnp_retain*3] = allele_nor_tag + nsnp_retain*3;
@@ -996,10 +996,10 @@ void bed_to_b16()
     /* for (nsnp_retain=0;nsnp_retain<n_snp_retain;nsnp_retain++){ } */}
   /* sort the alleles by frequency */
   if (verbose){ printf(" %% sorting alleles.\n");}
-  index_allele_orig_from_sort_ = (int *)wkspace_all0c(sizeof(int)*n_allele);
-  index_allele_sort_from_orig_ = (int *)wkspace_all0c(sizeof(int)*n_allele);
-  i_workspace_ = (int *)wkspace_all0c(sizeof(int)*n_allele);
-  d_workspace_ = (double *)wkspace_all0c(sizeof(double)*n_allele);
+  index_allele_orig_from_sort_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele);
+  index_allele_sort_from_orig_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele);
+  i_workspace_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_allele);
+  d_workspace_ = (double *)wkspace_all0c(sizeof(double)*(size_t)n_allele);
   dQuickSort_index_index_driver(n_allele,allele_frequency_,1,d_workspace_,index_allele_orig_from_sort_,index_allele_sort_from_orig_,i_workspace_);
   /* build b16 array so that patients vary quickly and alleles vary slowly */
   if (verbose){ printf(" %% building b16 array.\n");}
@@ -1017,13 +1017,13 @@ void bed_to_b16()
   unsigned char *A_n_=NULL;
   A_n_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)l_pat_retain*(size_t)n_allele);
   unsigned char *snp_tag_line_=NULL;
-  snp_tag_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*n_val*n_bam);
+  snp_tag_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)n_val*(size_t)n_bam);
   unsigned char *allele_nor_line_=NULL;
   unsigned char *allele_xor_line_=NULL;
   unsigned char *allele_and_line_=NULL;
-  allele_nor_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*l_pat_retain);
-  allele_xor_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*l_pat_retain);
-  allele_and_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*l_pat_retain);
+  allele_nor_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)l_pat_retain);
+  allele_xor_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)l_pat_retain);
+  allele_and_line_ = (unsigned char *)wkspace_all0c(sizeof(unsigned char)*(size_t)l_pat_retain);
   int nallele_nor_orig=0,nallele_xor_orig=0,nallele_and_orig=0;
   int nallele_nor_sort=0,nallele_xor_sort=0,nallele_and_sort=0;
   int nbim_target=0,nfam_target=0;
@@ -1033,17 +1033,17 @@ void bed_to_b16()
   unsigned char tmp_a=0,tmp_b=0;
   unsigned char *b_=NULL;
   if (verbose){ printf(" %% reading bed file.\n");}
-  if ((fp_bed=fopen(fname_bed,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed); exit(RET_READ_FAIL);}
-  fread(&key0,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
+  if ((fp_bed_0in=fopen(fname_bed_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed_0in); exit(RET_READ_FAIL);}
+  fread(&key0,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
   if (key0!=108){ printf(" %% Warning, key0 %d!=108\n",key0);}
-  fread(&key1,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
+  fread(&key1,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
   if (key1!= 27){ printf(" %% Warning, key1 %d!= 27\n",key1);}
-  fread(&key2,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
+  fread(&key2,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
   if (key2!=  1){ printf(" %% Warning, key2 %d!=  1\n",key2);}
   snp_tab=0; nsnp_retain=0; nbim_target = index_bim_from_snp_retain_[nsnp_retain];
   for (nbim=0;nbim<n_bim;nbim++){
     if (verbose){ if ((nbim%1000)==0){ printf(" %% nbim %d/%d\n",nbim,n_bim);}}
-    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
+    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed_0in); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
     if (flip_allele_[nbim]==+1){
     nfam=0;
     for (nbam=0;nbam<n_bam;nbam++){
@@ -1124,7 +1124,7 @@ void bed_to_b16()
     snp_tab+=n_val;
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   if (nsnp_retain!=n_snp_retain){ printf(" %% Warning, nsnp_retain %d n_snp_retain %d\n",nsnp_retain,n_snp_retain);}
-  fclose(fp_bed); fp_bed = NULL;
+  fclose(fp_bed_0in); fp_bed_0in = NULL;
   /* test a few entries */
   if (verbose){ printf(" %% testing some entries.\n");}
   int n_snp_test=0,nsnp_test=0;
@@ -1141,12 +1141,12 @@ void bed_to_b16()
   unsigned long long int n_mismatch=0;
   int nsnp_retain_target=0,npat_retain_target=0;
   if (verbose){ printf(" %% reading bed file.\n");}
-  if ((fp_bed=fopen(fname_bed,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed); exit(RET_READ_FAIL);}
-  fread(&key0,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
+  if ((fp_bed_0in=fopen(fname_bed_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bed_0in); exit(RET_READ_FAIL);}
+  fread(&key0,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key0 read %.2x\n",key0);}
   if (key0!=108){ printf(" %% Warning, key0 %d!=108\n",key0);}
-  fread(&key1,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
+  fread(&key1,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key1 read %.2x\n",key1);}
   if (key1!= 27){ printf(" %% Warning, key1 %d!= 27\n",key1);}
-  fread(&key2,sizeof(unsigned char),1,fp_bed); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
+  fread(&key2,sizeof(unsigned char),1,fp_bed_0in); if (verbose>1){ printf(" %% bed: key2 read %.2x\n",key2);}
   if (key2!=  1){ printf(" %% Warning, key2 %d!=  1\n",key2);}
   snp_tab=0; nsnp_test=0;
   nsnp_retain_target = floor((double)(n_snp_retain-1)*(double)nsnp_test/(double)(n_snp_test-1));
@@ -1154,7 +1154,7 @@ void bed_to_b16()
   nbim_target = index_bim_from_snp_retain_[nsnp_retain_target];
   for (nbim=0;nbim<n_bim;nbim++){
     if (verbose){ if ((nbim%1000)==0){ printf(" %% nbim %d/%d\n",nbim,n_bim);}}
-    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
+    n_read = fread(&(bed_line_[0]),sizeof(unsigned char),n_bam,fp_bed_0in); if (n_read!=n_bam){ printf(" %% Warning, n_read %d < n_bam %d\n",n_read,n_bam);}
     if (flip_allele_[nbim]==+1){
     nfam=0;
     for (nbam=0;nbam<n_bam;nbam++){
@@ -1234,24 +1234,24 @@ void bed_to_b16()
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
   if (nsnp_test!=n_snp_test){ printf(" %% Warning, nsnp_test %d n_snp_test %d\n",nsnp_test,n_snp_test);}
   if (verbose){ printf(" %% n_mismatch %lld/%lld\n",n_mismatch,(unsigned long long int)n_snp_test*(unsigned long long int)n_pat_test);}
-  fclose(fp_bed); fp_bed = NULL;
+  fclose(fp_bed_0in); fp_bed_0in = NULL;
   /* writing extended bim and fam files */
   if (verbose){ printf(" %% writing fam file.\n");}
   int n_fam_char_max = GLOBAL_n_fam_char_max;
   int n_fam_field = 6, nfam_field=0;
   char *fam_field__=NULL;
-  fam_field__ = (char *)wkspace_all0c(sizeof(char)*n_fam_char_max*n_fam_field*n_fam);
-  if ((fp_fam=fopen(fname_fam,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam); exit(RET_READ_FAIL);}
+  fam_field__ = (char *)wkspace_all0c(sizeof(char)*(size_t)n_fam_char_max*(size_t)n_fam_field*(size_t)n_fam);
+  if ((fp_fam_0in=fopen(fname_fam_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam_0in); exit(RET_READ_FAIL);}
   pat_tab=0;
   for (nfam=0;nfam<n_fam;nfam++){
     for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){
-      n_read = fscanf(fp_fam,"%s",&(fam_field__[pat_tab]));
-      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_fam); exit(RET_READ_FAIL);}
+      n_read = fscanf(fp_fam_0in,"%s",&(fam_field__[pat_tab]));
+      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_fam_0in); exit(RET_READ_FAIL);}
       if (verbose>2){ printf(" %% nfam %d nfam_field %d: %s\n",nfam,nfam_field,&(fam_field__[pat_tab]));}
       pat_tab+=n_fam_char_max;
       /* for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){ } */}
     /* for (nfam=0;nfam<n_fam;nfam++){ } */}
-  fclose(fp_fam); fp_fam=NULL;
+  fclose(fp_fam_0in); fp_fam_0in=NULL;
   char infix[FNAMESIZE];
   sprintf(infix,"maf%.2d",(int)floor(100*snp_maf_threshold));
   char fname_fam_out[FNAMESIZE];
@@ -1274,18 +1274,18 @@ void bed_to_b16()
   int n_bim_char_max = GLOBAL_n_bim_char_max;
   int n_bim_field = 6, nbim_field=0;
   char *bim_field__=NULL;
-  bim_field__ = (char *)wkspace_all0c(sizeof(char)*n_bim_char_max*n_bim_field*n_bim);
-  if ((fp_bim=fopen(fname_bim,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim); exit(RET_READ_FAIL);}
+  bim_field__ = (char *)wkspace_all0c(sizeof(char)*(size_t)n_bim_char_max*(size_t)n_bim_field*(size_t)n_bim);
+  if ((fp_bim_0in=fopen(fname_bim_0in,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim_0in); exit(RET_READ_FAIL);}
   snp_tab=0;
   for (nbim=0;nbim<n_bim;nbim++){
     for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
-      n_read = fscanf(fp_bim,"%s",&(bim_field__[snp_tab]));
-      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_bim); exit(RET_READ_FAIL);}
+      n_read = fscanf(fp_bim_0in,"%s",&(bim_field__[snp_tab]));
+      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_bim_0in); exit(RET_READ_FAIL);}
       if (verbose>2){ printf(" %% nbim %d nbim_field %d: %s\n",nbim,nbim_field,&(bim_field__[snp_tab]));}
       snp_tab+=n_bim_char_max;
       /* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
     /* for (nbim=0;nbim<n_bim;nbim++){ } */}
-  fclose(fp_bim); fp_bim=NULL;
+  fclose(fp_bim_0in); fp_bim_0in=NULL;
   char fname_bim_out[FNAMESIZE];
   sprintf(fname_bim_out,"%s",GLOBAL_fname_bim_out);
   if (verbose){ printf(" %% writing %s\n",fname_bim_out);}
@@ -1368,26 +1368,54 @@ void b16_merge_test()
   FILE **fp_b16_0in_=NULL;
   FILE **fp_bim_0in_=NULL;
   FILE **fp_fam_0in_=NULL;
-  FILE *fp_b16_out_=NULL;
-  FILE *fp_bim_out_=NULL;
-  FILE *fp_fam_out_=NULL;
-  unsigned long int *n_bim_=NULL;
-  unsigned long int *n_fam_=NULL;
-  int bitj=0,n_bim=0,n_fam=0,nbim=0,nfam=0;
+  FILE *fp_b16_out=NULL;
+  FILE *fp_bim_out=NULL;
+  FILE *fp_fam_out=NULL;
+  int *n_bim_=NULL;
+  int *n_fam_=NULL;
+  int bitj=16,bit8=8,n_bim=0,n_fam=0,nbim=0,nfam=0;
   int n_read=0,n_tmp=0;
+  unsigned long long int size_tmp=0;
   char ***str_fam__=NULL,fam_field_0[FNAMESIZE],fam_field_1[FNAMESIZE],fam_field_01[FNAMESIZE];
   char *fam_line=NULL;
   int n_fam_char_max = 64;
+  int n_bim_char_max = 64;
+  int *stride_=NULL,n_fam_max=0;
+  int n_intersect=0,nintersect=0;
+  int n_bim_sum=0,n_bim_tmp=0;
+  int **index_orig_from_sort__=NULL;
+  int **index_orig_from_intersect__=NULL;
+  int **index_intersect_from_orig__=NULL;
+  char **charp_workspace_=NULL;
+  int n_fam_field = 6,nfam_field=0;
+  char ***fam_field__=NULL;
+  int nfile_0 = 0;
+  int n_bim_field = 11,nbim_field=0;
+  char ***bim_field__=NULL;
+  double *allele_frequency_=NULL;
+  int nbim_field_allele_frequency = 8;
+  int flag_found=0,nfile_min=0,*flag_continue_=NULL;
+  int *nbim_=NULL;
+  int *l_fam_=NULL,n_fam_extend=0,l_fam=0,lfam=0;
+  int tmp_bitj=0,tmp_n_fam=0,tmp_n_bim=0;
+  unsigned char **b16_line_0in__=NULL;
+  unsigned char *b16_line_0in_=NULL;
+  unsigned char *b16_line_out_=NULL;
+  int l_intersect=0,n_intersect_extend=0;
+  unsigned char tmp_a=0,tmp_b=0;
+  int *b16_nfile_=NULL;
+  int *b16_nbim_=NULL;
   if (verbose){ printf(" %% [entering b16_merge_test]\n");}
   n_file = 3;
-  fname_b16_0in_ = (char **)wkspace_all0c(sizeof(char *)*n_file); for (nfile=0;nfile<n_file;nfile++){ fname_b16_0in_[nfile] = (char *)wkspace_all0c(sizeof(char)*FNAMESIZE);}
-  fname_bim_0in_ = (char **)wkspace_all0c(sizeof(char *)*n_file); for (nfile=0;nfile<n_file;nfile++){ fname_bim_0in_[nfile] = (char *)wkspace_all0c(sizeof(char)*FNAMESIZE);}
-  fname_fam_0in_ = (char **)wkspace_all0c(sizeof(char *)*n_file); for (nfile=0;nfile<n_file;nfile++){ fname_fam_0in_[nfile] = (char *)wkspace_all0c(sizeof(char)*FNAMESIZE);}
-  fp_b16_0in_ = (FILE **)wkspace_all0c(sizeof(FILE *)*n_file); for (nfile=0;nfile<n_file;nfile++){ fp_b16_0in_[nfile]=NULL;}
-  fp_bim_0in_ = (FILE **)wkspace_all0c(sizeof(FILE *)*n_file); for (nfile=0;nfile<n_file;nfile++){ fp_bim_0in_[nfile]=NULL;}
-  fp_fam_0in_ = (FILE **)wkspace_all0c(sizeof(FILE *)*n_file); for (nfile=0;nfile<n_file;nfile++){ fp_fam_0in_[nfile]=NULL;}
-  n_bim_ = (unsigned long int *)wkspace_all0c(sizeof(unsigned long int)*n_file);
-  n_fam_ = (unsigned long int *)wkspace_all0c(sizeof(unsigned long int)*n_file);
+  if (verbose){ printf(" %% n_file %d\n",n_file);}
+  fname_b16_0in_ = (char **)wkspace_all0c(sizeof(char *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fname_b16_0in_[nfile] = (char *)wkspace_all0c(sizeof(char)*(size_t)FNAMESIZE);}
+  fname_bim_0in_ = (char **)wkspace_all0c(sizeof(char *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fname_bim_0in_[nfile] = (char *)wkspace_all0c(sizeof(char)*(size_t)FNAMESIZE);}
+  fname_fam_0in_ = (char **)wkspace_all0c(sizeof(char *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fname_fam_0in_[nfile] = (char *)wkspace_all0c(sizeof(char)*(size_t)FNAMESIZE);}
+  fp_b16_0in_ = (FILE **)wkspace_all0c(sizeof(FILE *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fp_b16_0in_[nfile]=NULL;}
+  fp_bim_0in_ = (FILE **)wkspace_all0c(sizeof(FILE *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fp_bim_0in_[nfile]=NULL;}
+  fp_fam_0in_ = (FILE **)wkspace_all0c(sizeof(FILE *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fp_fam_0in_[nfile]=NULL;}
+  n_bim_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_file);
+  n_fam_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_file);
   nfile=0;
   sprintf(fname_b16_0in_[nfile],"/home/rangan/dir_bcc/dir_ukb/dir_b16/chr19_maf25.b16"); nfile++;
   sprintf(fname_b16_0in_[nfile],"/home/rangan/dir_bcc/dir_ukb/dir_b16/chr20_maf25.b16"); nfile++;
@@ -1407,17 +1435,24 @@ void b16_merge_test()
     if (verbose){ printf(" %% nfile %.2d: (%.6d,%.6d) <-- %s\n",nfile,n_fam,n_bim,fname_b16_0in_[nfile]);}
     if (n_bim_[nfile]!=n_bim){ printf(" %% Warning, n_bim_[%d] %d vs %d\n",nfile,(int)(n_bim_[nfile]),(int)(n_bim));}
     if (n_fam_[nfile]!=n_fam){ printf(" %% Warning, n_fam_[%d] %d vs %d\n",nfile,(int)(n_fam_[nfile]),(int)(n_fam));}
-    /* for (nfile=0;nfile<n_file;nfile++){ } */}  
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  sprintf(fname_bim_out,"/home/rangan/dir_bcc/dir_ukb/dir_b16/chrXX_maf25.bim.ext");
+  sprintf(fname_fam_out,"/home/rangan/dir_bcc/dir_ukb/dir_b16/chrXX_maf25.fam");
+  sprintf(fname_b16_out,"/home/rangan/dir_bcc/dir_ukb/dir_b16/chrXX_maf25.b16");  
+  if (verbose){ printf(" %% opening file streams\n");}
   for (nfile=0;nfile<n_file;nfile++){
     if ((fp_b16_0in_[nfile]=fopen(fname_b16_0in_[nfile],"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_b16_0in_[nfile]); exit(RET_READ_FAIL);}
     if ((fp_bim_0in_[nfile]=fopen(fname_bim_0in_[nfile],"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim_0in_[nfile]); exit(RET_READ_FAIL);}
     if ((fp_fam_0in_[nfile]=fopen(fname_fam_0in_[nfile],"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam_0in_[nfile]); exit(RET_READ_FAIL);}
     /* for (nfile=0;nfile<n_file;nfile++){ } */}
-  raprintf(n_fam_,"unsigned long int",1,n_file," %% n_fam_: ");
-  str_fam__ = (char **) wkspace_all0c(sizeof(char *)*n_file);
+  if (verbose){ raprintf(n_fam_,"int",1,n_file," %% n_fam_: ");}
+  if (verbose){ printf(" %% reading str_fam__\n");}
+  str_fam__ = (char ***) wkspace_all0c(sizeof(char **)*(size_t)n_file);
   for (nfile=0;nfile<n_file;nfile++){
-    str_fam__[nfile] = (char *)wkspace_all0c(sizeof(char)*2*n_fam_char_max*n_fam_[nfile]);
+    str_fam__[nfile] = (char **)wkspace_all0c(sizeof(char *)*(size_t)n_fam_[nfile]);
+    for (nfam=0;nfam<n_fam_[nfile];nfam++){ str_fam__[nfile][nfam] = (char *)wkspace_all0c(sizeof(char)*(size_t)2*(size_t)n_fam_char_max);}
     /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  fam_line = (char *)wkspace_all0c(sizeof(char)*(size_t)6*(size_t)n_fam_char_max);
   for (nfile=0;nfile<n_file;nfile++){
     fseek(fp_fam_0in_[nfile], 0l, SEEK_SET);
     for (nfam=0;nfam<n_fam_[nfile];nfam++){
@@ -1426,41 +1461,191 @@ void b16_merge_test()
       sscanf(fam_line,"%s %s",fam_field_0,fam_field_1);
       sprintf(fam_field_01,"%s%s",fam_field_0,fam_field_1);
       if (verbose>2){ if (nfam<3){ printf(" %% nfile %d : nfam %d : %s + %s --> %s\n",nfile,nfam,fam_field_0,fam_field_1,fam_field_01);}}
-      sprintf(&(str_fam__[nfile][nfam*2*n_fam_char_max]),fam_field_01);
+      sprintf(str_fam__[nfile][nfam],"%s",fam_field_01);
       /* for (nfam=0;nfam<n_fam_[nfile];nfam++){ } */}
     /* for (nfile=0;nfile<n_file;nfile++){ } */}
-  free(fam_line);
-  int n_list = n_file,nlist=0;
-  int *n_charp_=NULL,*stride_=NULL,ncharp=0,ncharp_max=0;
-  int n_intersect=0;
-  int **index_orig_from_sort__=NULL;
-  int **index_orig_from_intersect__=NULL;
-  int **index_intersect_from_orig__=NULL;
-  char ***charp__=NULL,**charp_workspace_=NULL;
-  n_charp_ = (int *) wkspace_all0c(sizeof(int)*n_list);
-  stride_ = (int *) wkspace_all0c(sizeof(int)*n_list);
-  ncharp_max=0;
-  for (nlist=0;nlist<n_list;nlist++){ n_charp_[nlist] = n_fam_[nlist]; ncharp_max = maximum(ncharp_max,n_charp_[nlist]); stride_[nlist] = 1;}
-  charp_workspace_ = (char **) wkspace_all0c(sizeof(char *)*ncharp_max);
-  charp__ = (char ***) wkspace_all0c(sizeof(char **)*n_list);
-  index_orig_from_sort__ = (int **) wkspace_all0c(sizeof(int *)*n_list);
-  index_orig_from_intersect__ = (int **) wkspace_all0c(sizeof(int *)*n_list);
-  index_intersect_from_orig__ = (int **) wkspace_all0c(sizeof(int *)*n_list);
-  for (nlist=0;nlist<n_list;nlist++){
-    charp__[nlist] = (char **) wkspace_all0c(sizeof(char *)*n_charp_[nlist]);
-    for (ncharp=0;ncharp<n_charp_[nlist];ncharp++){
-      charp__[nlist][ncharp] = &(str_fam__[nlist][ncharp*2*n_fam_char_max]);
-      if (verbose>0 && ncharp<3){ printf(" %% nlist %d: ncharp %d: %s\n",nlist,ncharp,charp__[nlist][ncharp]);}
-      /* for (ncharp=0;ncharp<n_charp_[nlist];ncharp++){ } */}
-    index_orig_from_sort__[nlist] = (int *) wkspace_all0c(sizeof(int)*n_charp_[nlist]);
-    index_orig_from_intersect__[nlist] = (int *) wkspace_all0c(sizeof(int)*n_charp_[nlist]);
-    index_intersect_from_orig__[nlist] = (int *) wkspace_all0c(sizeof(int)*n_charp_[nlist]);
-    /* for (nlist=0;nlist<n_list;nlist++){ } */}
-  nlist=0;
-  for (ncharp=19571-10;ncharp<10+19571;ncharp++){ printf(" %% %d: %s\n",ncharp,charp__[nlist][ncharp]);}
-  exit(0);
-  charpIntersectall_index_index_driver(n_list,n_charp_,charp__,stride_,charp_workspace_,&n_intersect,index_orig_from_sort__,index_orig_from_intersect__,index_intersect_from_orig__);
-
+  if (verbose){ printf(" %% intersecting str_fam__\n");}
+  stride_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_file);
+  n_fam_max=0; for (nfile=0;nfile<n_file;nfile++){ n_fam_max = maximum(n_fam_max,n_fam_[nfile]); stride_[nfile] = 1;}
+  if (verbose){ printf(" %% n_fam_max %d\n",n_fam_max);}
+  charp_workspace_ = (char **) wkspace_all0c(sizeof(char *)*(size_t)n_fam_max);
+  index_orig_from_sort__ = (int **) wkspace_all0c(sizeof(int *)*(size_t)n_file);
+  index_orig_from_intersect__ = (int **) wkspace_all0c(sizeof(int *)*(size_t)n_file);
+  index_intersect_from_orig__ = (int **) wkspace_all0c(sizeof(int *)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){
+    index_orig_from_sort__[nfile] = (int *) wkspace_all0c(sizeof(int)*(size_t)(n_fam_[nfile]));
+    index_orig_from_intersect__[nfile] = (int *) wkspace_all0c(sizeof(int)*(size_t)(n_fam_[nfile]));
+    index_intersect_from_orig__[nfile] = (int *) wkspace_all0c(sizeof(int)*(size_t)(n_fam_[nfile]));
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  charpIntersectall_index_index_driver(n_file,n_fam_,str_fam__,stride_,charp_workspace_,&n_intersect,index_orig_from_sort__,index_orig_from_intersect__,index_intersect_from_orig__);
+  if (verbose){ printf(" %% creating fam file\n");}
+  nfile_0=0;
+  fam_field__ = (char ***) wkspace_all0c(sizeof(char **)*(size_t)n_fam_[nfile_0]);  
+  for (nfam=0;nfam<n_fam_[nfile_0];nfam++){
+    fam_field__[nfam] = (char **) wkspace_all0c(sizeof(char *)*(size_t)n_fam_field);
+    for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){
+      fam_field__[nfam][nfam_field] = (char *) wkspace_all0c(sizeof(char)*(size_t)n_fam_char_max);
+      /* for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){ } */}
+    /* for (nfam=0;nfam<n_fam_[nfile_0];nfam++){ } */}
+  fseek(fp_fam_0in_[nfile_0], 0l, SEEK_SET);
+  for (nfam=0;nfam<n_fam_[nfile_0];nfam++){
+    for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){
+      fscanf(fp_fam_0in_[nfile_0],"%s",fam_field__[nfam][nfam_field]);
+      /* for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){ } */}
+    /* for (nfam=0;nfam<n_fam_[nfile_0];nfam++){ } */}
+  if ((fp_fam_out=fopen(fname_fam_out,"w"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam_out); exit(RET_READ_FAIL);}
+  for (nintersect=0;nintersect<n_intersect;nintersect++){
+    nfam = index_orig_from_intersect__[nfile_0][nintersect];
+    for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){
+      fprintf(fp_fam_out,"%s",fam_field__[nfam][nfam_field]);
+      if (nfam_field< n_fam_field-1){ fprintf(fp_fam_out," ");}
+      if (nfam_field==n_fam_field-1){ fprintf(fp_fam_out,"\n");}
+      /* for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){ } */}    
+    /* for (nintersect=0;nintersect<n_intersect;nintersect++){ } */}
+  fclose(fp_fam_out); fp_fam_out=NULL;
+  if (verbose){ printf(" %% creating bim.ext file\n");}
+  if (verbose){ printf(" %% creating b16 file\n");}
+  n_bim_sum=0; for (nfile=0;nfile<n_file;nfile++){ n_bim_sum+=n_bim_[nfile];}
+  if (verbose){ printf(" %% n_bim_sum %d\n",n_bim_sum);}
+  bim_field__ = (char ***) wkspace_all0c(sizeof(char **)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){
+    bim_field__[nfile] = (char **) wkspace_all0c(sizeof(char *)*(size_t)n_bim_field);
+    for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
+      bim_field__[nfile][nbim_field] = (char *)wkspace_all0c(sizeof(char)*(size_t)n_bim_char_max);
+      /* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  allele_frequency_ = (double *) wkspace_all0c(sizeof(double)*(size_t)n_file);
+  l_fam_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){
+    bitj = 16; bit8 = 8;
+    n_fam_extend = (bitj - (n_fam_[nfile]%bitj))%bitj;
+    l_fam_[nfile] = (n_fam_[nfile] + n_fam_extend)/bit8;
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  if (verbose){ raprintf(l_fam_,"int",1,n_file," %% l_fam_: ");}
+  b16_line_0in__ = (unsigned char **) wkspace_all0c(sizeof(char *)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){ b16_line_0in__[nfile] = (unsigned char *) wkspace_all0c(sizeof(unsigned char)*(size_t)(l_fam_[nfile]));}
+  n_intersect_extend = (bitj - (n_intersect%bitj))%bitj;
+  l_intersect = (n_intersect + n_intersect_extend)/bit8;
+  if (verbose){ printf(" %% l_intersect %d\n",l_intersect);}
+  b16_line_out_ = (unsigned char *) wkspace_all0c(sizeof(char)*(size_t)l_intersect);
+  for (nfile=0;nfile<n_file;nfile++){ fseek(fp_bim_0in_[nfile], 0l, SEEK_SET);}
+  for (nfile=0;nfile<n_file;nfile++){
+    fseek(fp_b16_0in_[nfile], 0l, SEEK_SET);
+    fread(&tmp_bitj,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_bitj!=bitj){ printf(" %% Warning, tmp_bitj %d\n",tmp_bitj);}
+    fread(&tmp_n_fam,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_n_fam!=n_fam_[nfile]){ printf(" %% Warning, tmp_n_fam %d\n",tmp_n_fam);}
+    fread(&tmp_n_bim,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_n_bim!=n_bim_[nfile]){ printf(" %% Warning, tmp_n_bim %d\n",tmp_n_bim);}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  flag_continue_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_file);
+  nbim_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){ flag_continue_[nfile]=0; nbim_[nfile]=0;}
+  for (nfile=0;nfile<n_file;nfile++){
+    flag_continue_[nfile]=0;
+    if (nbim_[nfile]<n_bim_[nfile]){
+      flag_continue_[nfile]=1;
+      for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
+	n_read = fscanf(fp_bim_0in_[nfile],"%s",bim_field__[nfile][nbim_field]);
+	if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_bim_0in_[nfile]); exit(RET_READ_FAIL);}
+	/* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
+      allele_frequency_[nfile] = atof(bim_field__[nfile][nbim_field_allele_frequency]);
+      n_read = fread(b16_line_0in__[nfile],sizeof(unsigned char),l_fam_[nfile],fp_b16_0in_[nfile]);
+      if (n_read!=l_fam_[nfile]){ printf(" %% Warning, could not read %s\n",fname_b16_0in_[nfile]); exit(RET_READ_FAIL);}
+      /* if (nbim_[nfile]<n_bim_[nfile]){ } */}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  flag_found=0; nfile_min=-1;
+  for (nfile=0;nfile<n_file;nfile++){
+    if (flag_continue_[nfile]){
+      if (nfile_min<0){ nfile_min=nfile; flag_found=1;}
+      else /* if (nfile_min>=0) */{
+	if (allele_frequency_[nfile]<allele_frequency_[nfile_min]){ nfile_min = nfile; flag_found=1;}
+	/* if (nfile_min>=0){ } */}
+      /* if (flag_continue_[nfile]){ } */}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  if ((fp_b16_out=fopen(fname_b16_out,"w"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_b16_out); exit(RET_READ_FAIL);}  
+  fwrite(&bitj,sizeof(int),1,fp_b16_out);
+  fwrite(&n_intersect,sizeof(int),1,fp_b16_out);
+  fwrite(&n_bim_sum,sizeof(int),1,fp_b16_out);
+  if ((fp_bim_out=fopen(fname_bim_out,"w"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim_out); exit(RET_READ_FAIL);}
+  b16_nfile_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_bim_sum);
+  b16_nbim_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_bim_sum);
+  n_bim_tmp=0;
+  while (flag_found && (nfile_min>=0)){
+    if (verbose && !(n_bim_tmp%1024)){ printf(" %% n_bim_tmp %d/%d\n",n_bim_tmp,n_bim_sum);}
+    b16_nfile_[n_bim_tmp] = nfile_min;
+    b16_nbim_[n_bim_tmp] = nbim_[nfile_min];
+    for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
+      fprintf(fp_bim_out,"%s",bim_field__[nfile_min][nbim_field]);
+      if (nbim_field< n_bim_field-1){ fprintf(fp_bim_out,"\t");}
+      if (nbim_field==n_bim_field-1){ fprintf(fp_bim_out,"\n");}
+      /* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
+    b16_line_0in_ = b16_line_0in__[nfile_min]; for (lfam=0;lfam<l_intersect;lfam++){ b16_line_out_[lfam]=(unsigned char)0;}
+    for (nintersect=0;nintersect<n_intersect;nintersect++){
+      nfam = index_orig_from_intersect__[nfile_min][nintersect];
+      tmp_a = ( (unsigned char)(b16_line_0in_[nfam/bit8]) >> (7-(nfam%bit8)) ) & (unsigned char)1 ;
+      tmp_b = ( (unsigned char)(tmp_a) << (7-(nintersect%bit8)) ) ;
+      b16_line_out_[nintersect/bit8] |= tmp_b;
+      /* for (nintersect=0;nintersect<n_intersect;nintersect++){ } */}
+    n_read = fwrite(b16_line_out_,sizeof(unsigned char),l_intersect,fp_b16_out);
+    if (n_read!=l_intersect){ printf(" %% Warning, could not write %s\n",fname_b16_out); exit(RET_READ_FAIL);}    
+    nbim_[nfile_min] += 1;
+    flag_continue_[nfile_min] = (nbim_[nfile_min]<n_bim_[nfile_min] ? 1 : 0);
+    if (flag_continue_[nfile_min]){
+      for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
+	n_read = fscanf(fp_bim_0in_[nfile_min],"%s",bim_field__[nfile_min][nbim_field]);
+	if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_bim_0in_[nfile]); exit(RET_READ_FAIL);}
+	/* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
+      allele_frequency_[nfile_min] = atof(bim_field__[nfile_min][nbim_field_allele_frequency]);
+      n_read = fread(b16_line_0in__[nfile_min],sizeof(unsigned char),l_fam_[nfile_min],fp_b16_0in_[nfile_min]);
+      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_b16_0in_[nfile_min]); exit(RET_READ_FAIL);}
+      /* if (flag_continue_[nfile_min]){ } */}
+    flag_found=0; nfile_min=-1;
+    for (nfile=0;nfile<n_file;nfile++){
+      if (flag_continue_[nfile]){
+	if (nfile_min<0){ nfile_min=nfile; flag_found=1;}
+	else /* if (nfile_min>=0) */{
+	  if (allele_frequency_[nfile]<allele_frequency_[nfile_min]){ nfile_min = nfile; flag_found=1;}
+	  /* if (nfile_min>=0){ } */}
+	/* if (flag_continue_[nfile]){ } */}
+      /* for (nfile=0;nfile<n_file;nfile++){ } */}
+    n_bim_tmp+=1;
+    /* while (flag_found && (nfile_min>=0)){ } */}
+  if (n_bim_tmp!=n_bim_sum){ printf(" %% Warning, n_bim_tmp %d n_bim_sum %d\n",n_bim_tmp,n_bim_sum);}
+  fclose(fp_bim_out); fp_bim_out=NULL;
+  fclose(fp_b16_out); fp_b16_out=NULL;
+  if (verbose){ printf(" %% checking b16 file\n");}
+  int n_test = 16,ntest=0;
+  int nbim_target=0;
+  if ((fp_b16_out=fopen(fname_b16_out,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_b16_out); exit(RET_READ_FAIL);}
+  for (ntest=0;ntest<n_test;ntest++){
+    nbim_target = floor((double)ntest/(double)n_test * (double)n_bim_sum);
+    nfile = b16_nfile_[nbim_target];
+    nbim = b16_nbim_[nbim_target];
+    fseek(fp_b16_0in_[nfile], 0l, SEEK_SET);
+    fread(&tmp_bitj,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_bitj!=bitj){ printf(" %% Warning, tmp_bitj %d\n",tmp_bitj);}
+    fread(&tmp_n_fam,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_n_fam!=n_fam_[nfile]){ printf(" %% Warning, tmp_n_fam %d\n",tmp_n_fam);}
+    fread(&tmp_n_bim,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_n_bim!=n_bim_[nfile]){ printf(" %% Warning, tmp_n_bim %d\n",tmp_n_bim);}
+    fseek(fp_b16_0in_[nfile],nbim*l_fam_[nfile],SEEK_CUR);
+    fread(b16_line_0in__[nfile],sizeof(unsigned char),l_fam_[nfile],fp_b16_0in_[nfile]);
+    b16_line_0in_ = b16_line_0in__[nfile];
+    fseek(fp_b16_out, 0l, SEEK_SET);
+    fread(&tmp_bitj,sizeof(int),1,fp_b16_out); if (tmp_bitj!=bitj){ printf(" %% Warning, tmp_bitj %d\n",tmp_bitj);}
+    fread(&tmp_n_fam,sizeof(int),1,fp_b16_out); if (tmp_n_fam!=n_intersect){ printf(" %% Warning, tmp_n_fam %d\n",tmp_n_fam);}
+    fread(&tmp_n_bim,sizeof(int),1,fp_b16_out); if (tmp_n_bim!=n_bim_sum){ printf(" %% Warning, tmp_n_bim %d\n",tmp_n_bim);}
+    fseek(fp_b16_out,nbim_target*l_intersect,SEEK_CUR);
+    fread(b16_line_out_,sizeof(unsigned char),l_intersect,fp_b16_out);
+    for (nintersect=0;nintersect<n_intersect;nintersect++){
+      nfam = index_orig_from_intersect__[nfile][nintersect];
+      tmp_a = ( (unsigned char)(b16_line_0in_[nfam/bit8]) >> (7-(nfam%bit8)) ) & (unsigned char)1 ;
+      tmp_b = ( (unsigned char)(b16_line_out_[nintersect/bit8]) >> (7-(nintersect%bit8)) ) & (unsigned char)1 ;
+      if (tmp_a!=tmp_b){ printf(" %% Warning, mismatch: nbim_target %d nfile %d nbim %d nintersect %d nfam %d tmp_a %d tmp_b %d\n",nbim_target,nfile,nbim,nintersect,nfam,(int)tmp_a,(int)tmp_b);}
+      /* for (nintersect=0;nintersect<n_intersect;nintersect++){ } */}
+    /* for (ntest=0;ntest<n_test;ntest++){ } */}
+  fclose(fp_b16_out); fp_b16_out=NULL;
+  if (verbose){ printf(" %% finished checking b16 file: n_test %d\n",n_test);}
+  for (nfile=0;nfile<n_file;nfile++){
+    fclose(fp_fam_0in_[nfile]); fp_fam_0in_[nfile]=NULL;
+    fclose(fp_bim_0in_[nfile]); fp_bim_0in_[nfile]=NULL;
+    fclose(fp_b16_0in_[nfile]); fp_b16_0in_[nfile]=NULL;
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
   //charpQuickSort_index_test();
   //charpQuickSort_index_index_test();
   //charpIntersect_index_index_test();

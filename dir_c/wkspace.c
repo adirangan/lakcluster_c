@@ -72,6 +72,25 @@ unsigned char* wkspace_all0c(unsigned long long int size) {
   return retval;
 }
 
+unsigned char* wkspace_all0c_verbose(unsigned long long int size) {
+  int verbose=1;
+  unsigned char* retval;
+  uintptr_t wkspace_tmp;
+  if (wkspace_left < size) { printf(" %% Warning! out of memory (%lld < %llu)\n",wkspace_left,size); exit(RET_NOMEM); return NULL;}
+  if (verbose){ printf(" %% [entering wkspace_alloc_verbose] wkspace_alloc_verbose: wkspace_base %p; mod 16: %s\n",wkspace_base,((uintptr_t)wkspace_base/16)*16==(uintptr_t)wkspace_base ? "Yes" : "No!");}
+  wkspace_tmp = wkspace_base;
+  if (verbose){ printf(" %% wkspace_alloc_verbose: size %llu --> ",size);}
+  size = CACHEALIGN(size); if (verbose){ printf(" size %llu\n",size);}
+  retval = wkspace_base; wkspace_base += size; wkspace_left -= size; wkspace_used += size;
+  if (verbose){ printf(" %% [still in wkspace_alloc_verbose] wkspace_alloc_verbose: wkspace_base %p; mod 16: %s\n",(uintptr_t)wkspace_base,((uintptr_t)wkspace_base/16)*16==(uintptr_t)wkspace_base ? "Yes" : "No!");}
+  if (verbose){ printf(" %% [still in wkspace_alloc_verbose] wkspace_alloc_verbose: difference in wkspace_base %p --> %lld\n",wkspace_base-wkspace_tmp,(unsigned long long int) (wkspace_base-wkspace_tmp));}
+  fill_uchar_zero(retval,size);
+  if (GLOBAL_wkspace_point){ wkspace_point_t = wkspace_set_point(wkspace_point_t);}
+  if (verbose){ printf(" %% [still in wkspace_alloc_verbose] wkspace_alloc_verbose: difference in wkspace_base %p --> %lld\n",wkspace_base-wkspace_tmp,(unsigned long long int) (wkspace_base-wkspace_tmp));}
+  if (verbose){ printf(" %% [finished wkspace_alloc_verbose] wkspace_alloc_verbose: wkspace_base %p\n",(uintptr_t)wkspace_base);}
+  return retval;
+}
+
 void wkspace_reset(void* new_base) {
   unsigned long freed_bytes = wkspace_base - (unsigned char*)new_base;
   wkspace_base = (unsigned char*)new_base;
