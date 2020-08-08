@@ -1405,6 +1405,9 @@ void b16_merge_test()
   unsigned char tmp_a=0,tmp_b=0;
   int *b16_nfile_=NULL;
   int *b16_nbim_=NULL;
+  int n_test = 16,ntest=0;
+  int nbim_target=0;
+  unsigned long long int n_mismatch=0;
   if (verbose){ printf(" %% [entering b16_merge_test]\n");}
   n_file = 3;
   if (verbose){ printf(" %% n_file %d\n",n_file);}
@@ -1591,7 +1594,7 @@ void b16_merge_test()
     if (flag_continue_[nfile_min]){
       for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
 	n_read = fscanf(fp_bim_0in_[nfile_min],"%s",bim_field__[nfile_min][nbim_field]);
-	if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_bim_0in_[nfile]); exit(RET_READ_FAIL);}
+	if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_bim_0in_[nfile_min]); exit(RET_READ_FAIL);}
 	/* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
       allele_frequency_[nfile_min] = atof(bim_field__[nfile_min][nbim_field_allele_frequency]);
       n_read = fread(b16_line_0in__[nfile_min],sizeof(unsigned char),l_fam_[nfile_min],fp_b16_0in_[nfile_min]);
@@ -1612,8 +1615,7 @@ void b16_merge_test()
   fclose(fp_bim_out); fp_bim_out=NULL;
   fclose(fp_b16_out); fp_b16_out=NULL;
   if (verbose){ printf(" %% checking b16 file\n");}
-  int n_test = 16,ntest=0;
-  int nbim_target=0;
+  n_mismatch=0;
   if ((fp_b16_out=fopen(fname_b16_out,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_b16_out); exit(RET_READ_FAIL);}
   for (ntest=0;ntest<n_test;ntest++){
     nbim_target = floor((double)ntest/(double)n_test * (double)n_bim_sum);
@@ -1636,11 +1638,11 @@ void b16_merge_test()
       nfam = index_orig_from_intersect__[nfile][nintersect];
       tmp_a = ( (unsigned char)(b16_line_0in_[nfam/bit8]) >> (7-(nfam%bit8)) ) & (unsigned char)1 ;
       tmp_b = ( (unsigned char)(b16_line_out_[nintersect/bit8]) >> (7-(nintersect%bit8)) ) & (unsigned char)1 ;
-      if (tmp_a!=tmp_b){ printf(" %% Warning, mismatch: nbim_target %d nfile %d nbim %d nintersect %d nfam %d tmp_a %d tmp_b %d\n",nbim_target,nfile,nbim,nintersect,nfam,(int)tmp_a,(int)tmp_b);}
+      if (tmp_a!=tmp_b){ if (verbose>1){ printf(" %% Warning, mismatch: nbim_target %d nfile %d nbim %d nintersect %d nfam %d tmp_a %d tmp_b %d\n",nbim_target,nfile,nbim,nintersect,nfam,(int)tmp_a,(int)tmp_b);} n_mismatch += 1;}
       /* for (nintersect=0;nintersect<n_intersect;nintersect++){ } */}
     /* for (ntest=0;ntest<n_test;ntest++){ } */}
   fclose(fp_b16_out); fp_b16_out=NULL;
-  if (verbose){ printf(" %% finished checking b16 file: n_test %d\n",n_test);}
+  if (verbose){ printf(" %% finished checking b16 file: n_test %d, n_mismatch %lld\n",n_test,n_mismatch);}
   for (nfile=0;nfile<n_file;nfile++){
     fclose(fp_fam_0in_[nfile]); fp_fam_0in_[nfile]=NULL;
     fclose(fp_bim_0in_[nfile]); fp_bim_0in_[nfile]=NULL;
@@ -1652,6 +1654,302 @@ void b16_merge_test()
   //charpIntersectall_index_index_test();
   wkspace_printf();
   if (verbose){ printf(" %% [finished b16_merge_test]\n");}
+}
+
+void b16_merge()
+{
+  int verbose=1;
+  int MDA_d_[2];
+  int n_file=0,nfile=0;
+  char **fname_b16_0in_=NULL;
+  char **fname_bim_0in_=NULL;
+  char **fname_fam_0in_=NULL;
+  char fname_b16_out[FNAMESIZE];
+  char fname_bim_out[FNAMESIZE];
+  char fname_fam_out[FNAMESIZE];
+  FILE **fp_b16_0in_=NULL;
+  FILE **fp_bim_0in_=NULL;
+  FILE **fp_fam_0in_=NULL;
+  FILE *fp_b16_out=NULL;
+  FILE *fp_bim_out=NULL;
+  FILE *fp_fam_out=NULL;
+  int *n_bim_=NULL;
+  int *n_fam_=NULL;
+  int bitj=16,bit8=8,n_bim=0,n_fam=0,nbim=0,nfam=0;
+  int n_read=0,n_tmp=0;
+  unsigned long long int size_tmp=0;
+  char ***str_fam__=NULL,fam_field_0[GLOBAL_n_fam_char_max],fam_field_1[GLOBAL_n_fam_char_max],fam_field_01[2*GLOBAL_n_fam_char_max];
+  char *fam_line=NULL;
+  int n_fam_char_max = GLOBAL_n_fam_char_max;
+  int n_bim_char_max = GLOBAL_n_bim_char_max;
+  int *stride_=NULL,n_fam_max=0;
+  int n_intersect=0,nintersect=0;
+  int n_bim_sum=0,n_bim_tmp=0;
+  int **index_orig_from_sort__=NULL;
+  int **index_orig_from_intersect__=NULL;
+  int **index_intersect_from_orig__=NULL;
+  char **charp_workspace_=NULL;
+  int n_fam_field = 6,nfam_field=0;
+  char ***fam_field__=NULL;
+  int nfile_0 = 0;
+  int n_bim_field = 11,nbim_field=0;
+  char ***bim_field__=NULL;
+  double *allele_frequency_=NULL;
+  int nbim_field_allele_frequency = 8;
+  int flag_found=0,nfile_min=0,*flag_continue_=NULL;
+  int *nbim_=NULL;
+  int *l_fam_=NULL,n_fam_extend=0,l_fam=0,lfam=0;
+  int tmp_bitj=0,tmp_n_fam=0,tmp_n_bim=0;
+  unsigned char **b16_line_0in__=NULL;
+  unsigned char *b16_line_0in_=NULL;
+  unsigned char *b16_line_out_=NULL;
+  int l_intersect=0,n_intersect_extend=0;
+  unsigned char tmp_a=0,tmp_b=0;
+  int *b16_nfile_=NULL;
+  int *b16_nbim_=NULL;
+  int n_test = 128,ntest=0;
+  int nbim_target=0;
+  unsigned long long int n_mismatch=0,n_total=0;
+  if (verbose){ printf(" %% [entering b16_merge]\n");}
+  n_file = GLOBAL_n_file;
+  if (verbose){ printf(" %% n_file %d\n",n_file);}
+  fname_b16_0in_ = (char **)wkspace_all0c(sizeof(char *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fname_b16_0in_[nfile] = (char *)wkspace_all0c(sizeof(char)*(size_t)FNAMESIZE);}
+  fname_bim_0in_ = (char **)wkspace_all0c(sizeof(char *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fname_bim_0in_[nfile] = (char *)wkspace_all0c(sizeof(char)*(size_t)FNAMESIZE);}
+  fname_fam_0in_ = (char **)wkspace_all0c(sizeof(char *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fname_fam_0in_[nfile] = (char *)wkspace_all0c(sizeof(char)*(size_t)FNAMESIZE);}
+  fp_b16_0in_ = (FILE **)wkspace_all0c(sizeof(FILE *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fp_b16_0in_[nfile]=NULL;}
+  fp_bim_0in_ = (FILE **)wkspace_all0c(sizeof(FILE *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fp_bim_0in_[nfile]=NULL;}
+  fp_fam_0in_ = (FILE **)wkspace_all0c(sizeof(FILE *)*(size_t)n_file); for (nfile=0;nfile<n_file;nfile++){ fp_fam_0in_[nfile]=NULL;}
+  n_bim_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_file);
+  n_fam_ = (int *)wkspace_all0c(sizeof(int)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){
+    sprintf(fname_b16_0in_[nfile],"%s",GLOBAL_fname_b16_0in_[nfile]);
+    sprintf(fname_bim_0in_[nfile],"%s",GLOBAL_fname_bim_0in_[nfile]);
+    sprintf(fname_fam_0in_[nfile],"%s",GLOBAL_fname_fam_0in_[nfile]);
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  for (nfile=0;nfile<n_file;nfile++){ n_bim_[nfile] = wc_0(fname_bim_0in_[nfile]);}
+  for (nfile=0;nfile<n_file;nfile++){ n_fam_[nfile] = wc_0(fname_fam_0in_[nfile]);}
+  for (nfile=0;nfile<n_file;nfile++){
+    binary_read_getsize(fname_b16_0in_[nfile],&bitj,&n_fam,&n_bim);
+    if (verbose){ printf(" %% nfile %.2d: (%.6d,%.6d) <-- %s\n",nfile,n_fam,n_bim,fname_b16_0in_[nfile]);}
+    if (n_bim_[nfile]!=n_bim){ printf(" %% Warning, n_bim_[%d] %d vs %d\n",nfile,(int)(n_bim_[nfile]),(int)(n_bim));}
+    if (n_fam_[nfile]!=n_fam){ printf(" %% Warning, n_fam_[%d] %d vs %d\n",nfile,(int)(n_fam_[nfile]),(int)(n_fam));}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  sprintf(fname_b16_out,"%s",GLOBAL_fname_b16_out);
+  sprintf(fname_bim_out,"%s",GLOBAL_fname_bim_out);
+  sprintf(fname_fam_out,"%s",GLOBAL_fname_fam_out);
+  if (verbose){ printf(" %% opening file streams\n");}
+  for (nfile=0;nfile<n_file;nfile++){
+    if ((fp_b16_0in_[nfile]=fopen(fname_b16_0in_[nfile],"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_b16_0in_[nfile]); exit(RET_READ_FAIL);}
+    if ((fp_bim_0in_[nfile]=fopen(fname_bim_0in_[nfile],"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim_0in_[nfile]); exit(RET_READ_FAIL);}
+    if ((fp_fam_0in_[nfile]=fopen(fname_fam_0in_[nfile],"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam_0in_[nfile]); exit(RET_READ_FAIL);}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  if (verbose){ raprintf(n_fam_,"int",1,n_file," %% n_fam_: ");}
+  if (verbose){ printf(" %% reading str_fam__\n");}
+  str_fam__ = (char ***) wkspace_all0c(sizeof(char **)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){
+    str_fam__[nfile] = (char **)wkspace_all0c(sizeof(char *)*(size_t)n_fam_[nfile]);
+    for (nfam=0;nfam<n_fam_[nfile];nfam++){ str_fam__[nfile][nfam] = (char *)wkspace_all0c(sizeof(char)*(size_t)2*(size_t)n_fam_char_max);}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  fam_line = (char *)wkspace_all0c(sizeof(char)*(size_t)6*(size_t)n_fam_char_max);
+  for (nfile=0;nfile<n_file;nfile++){
+    fseek(fp_fam_0in_[nfile], 0l, SEEK_SET);
+    for (nfam=0;nfam<n_fam_[nfile];nfam++){
+      n_read = getline(&fam_line,&n_tmp,fp_fam_0in_[nfile]);
+      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_fam_0in_[nfile]); exit(RET_READ_FAIL);}
+      sscanf(fam_line,"%s %s",fam_field_0,fam_field_1);
+      sprintf(fam_field_01,"%s%s",fam_field_0,fam_field_1);
+      if (verbose>2){ if (nfam<3){ printf(" %% nfile %d : nfam %d : %s + %s --> %s\n",nfile,nfam,fam_field_0,fam_field_1,fam_field_01);}}
+      sprintf(str_fam__[nfile][nfam],"%s",fam_field_01);
+      /* for (nfam=0;nfam<n_fam_[nfile];nfam++){ } */}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  if (verbose){ printf(" %% intersecting str_fam__\n");}
+  stride_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_file);
+  n_fam_max=0; for (nfile=0;nfile<n_file;nfile++){ n_fam_max = maximum(n_fam_max,n_fam_[nfile]); stride_[nfile] = 1;}
+  if (verbose){ printf(" %% n_fam_max %d\n",n_fam_max);}
+  charp_workspace_ = (char **) wkspace_all0c(sizeof(char *)*(size_t)n_fam_max);
+  index_orig_from_sort__ = (int **) wkspace_all0c(sizeof(int *)*(size_t)n_file);
+  index_orig_from_intersect__ = (int **) wkspace_all0c(sizeof(int *)*(size_t)n_file);
+  index_intersect_from_orig__ = (int **) wkspace_all0c(sizeof(int *)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){
+    index_orig_from_sort__[nfile] = (int *) wkspace_all0c(sizeof(int)*(size_t)(n_fam_[nfile]));
+    index_orig_from_intersect__[nfile] = (int *) wkspace_all0c(sizeof(int)*(size_t)(n_fam_[nfile]));
+    index_intersect_from_orig__[nfile] = (int *) wkspace_all0c(sizeof(int)*(size_t)(n_fam_[nfile]));
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  charpIntersectall_index_index_driver(n_file,n_fam_,str_fam__,stride_,charp_workspace_,&n_intersect,index_orig_from_sort__,index_orig_from_intersect__,index_intersect_from_orig__);
+  if (verbose){ printf(" %% creating fam file\n");}
+  nfile_0=0;
+  fam_field__ = (char ***) wkspace_all0c(sizeof(char **)*(size_t)n_fam_[nfile_0]);  
+  for (nfam=0;nfam<n_fam_[nfile_0];nfam++){
+    fam_field__[nfam] = (char **) wkspace_all0c(sizeof(char *)*(size_t)n_fam_field);
+    for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){
+      fam_field__[nfam][nfam_field] = (char *) wkspace_all0c(sizeof(char)*(size_t)n_fam_char_max);
+      /* for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){ } */}
+    /* for (nfam=0;nfam<n_fam_[nfile_0];nfam++){ } */}
+  fseek(fp_fam_0in_[nfile_0], 0l, SEEK_SET);
+  for (nfam=0;nfam<n_fam_[nfile_0];nfam++){
+    for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){
+      fscanf(fp_fam_0in_[nfile_0],"%s",fam_field__[nfam][nfam_field]);
+      /* for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){ } */}
+    /* for (nfam=0;nfam<n_fam_[nfile_0];nfam++){ } */}
+  if ((fp_fam_out=fopen(fname_fam_out,"w"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_fam_out); exit(RET_READ_FAIL);}
+  for (nintersect=0;nintersect<n_intersect;nintersect++){
+    nfam = index_orig_from_intersect__[nfile_0][nintersect];
+    for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){
+      fprintf(fp_fam_out,"%s",fam_field__[nfam][nfam_field]);
+      if (nfam_field< n_fam_field-1){ fprintf(fp_fam_out," ");}
+      if (nfam_field==n_fam_field-1){ fprintf(fp_fam_out,"\n");}
+      /* for (nfam_field=0;nfam_field<n_fam_field;nfam_field++){ } */}    
+    /* for (nintersect=0;nintersect<n_intersect;nintersect++){ } */}
+  fclose(fp_fam_out); fp_fam_out=NULL;
+  if (verbose){ printf(" %% creating bim.ext file\n");}
+  if (verbose){ printf(" %% creating b16 file\n");}
+  n_bim_sum=0; for (nfile=0;nfile<n_file;nfile++){ n_bim_sum+=n_bim_[nfile];}
+  if (verbose){ printf(" %% n_bim_sum %d\n",n_bim_sum);}
+  bim_field__ = (char ***) wkspace_all0c(sizeof(char **)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){
+    bim_field__[nfile] = (char **) wkspace_all0c(sizeof(char *)*(size_t)n_bim_field);
+    for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
+      bim_field__[nfile][nbim_field] = (char *)wkspace_all0c(sizeof(char)*(size_t)n_bim_char_max);
+      /* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  allele_frequency_ = (double *) wkspace_all0c(sizeof(double)*(size_t)n_file);
+  l_fam_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){
+    bitj = 16; bit8 = 8;
+    n_fam_extend = (bitj - (n_fam_[nfile]%bitj))%bitj;
+    l_fam_[nfile] = (n_fam_[nfile] + n_fam_extend)/bit8;
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  if (verbose){ raprintf(l_fam_,"int",1,n_file," %% l_fam_: ");}
+  b16_line_0in__ = (unsigned char **) wkspace_all0c(sizeof(char *)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){ b16_line_0in__[nfile] = (unsigned char *) wkspace_all0c(sizeof(unsigned char)*(size_t)(l_fam_[nfile]));}
+  n_intersect_extend = (bitj - (n_intersect%bitj))%bitj;
+  l_intersect = (n_intersect + n_intersect_extend)/bit8;
+  if (verbose){ printf(" %% l_intersect %d\n",l_intersect);}
+  b16_line_out_ = (unsigned char *) wkspace_all0c(sizeof(char)*(size_t)l_intersect);
+  for (nfile=0;nfile<n_file;nfile++){ fseek(fp_bim_0in_[nfile], 0l, SEEK_SET);}
+  for (nfile=0;nfile<n_file;nfile++){
+    fseek(fp_b16_0in_[nfile], 0l, SEEK_SET);
+    fread(&tmp_bitj,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_bitj!=bitj){ printf(" %% Warning, tmp_bitj %d\n",tmp_bitj);}
+    fread(&tmp_n_fam,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_n_fam!=n_fam_[nfile]){ printf(" %% Warning, tmp_n_fam %d\n",tmp_n_fam);}
+    fread(&tmp_n_bim,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_n_bim!=n_bim_[nfile]){ printf(" %% Warning, tmp_n_bim %d\n",tmp_n_bim);}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  flag_continue_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_file);
+  nbim_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_file);
+  for (nfile=0;nfile<n_file;nfile++){ flag_continue_[nfile]=0; nbim_[nfile]=0;}
+  for (nfile=0;nfile<n_file;nfile++){
+    flag_continue_[nfile]=0;
+    if (nbim_[nfile]<n_bim_[nfile]){
+      flag_continue_[nfile]=1;
+      for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
+	n_read = fscanf(fp_bim_0in_[nfile],"%s",bim_field__[nfile][nbim_field]);
+	if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_bim_0in_[nfile]); exit(RET_READ_FAIL);}
+	/* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
+      allele_frequency_[nfile] = atof(bim_field__[nfile][nbim_field_allele_frequency]);
+      n_read = fread(b16_line_0in__[nfile],sizeof(unsigned char),l_fam_[nfile],fp_b16_0in_[nfile]);
+      if (n_read!=l_fam_[nfile]){ printf(" %% Warning, could not read %s\n",fname_b16_0in_[nfile]); exit(RET_READ_FAIL);}
+      /* if (nbim_[nfile]<n_bim_[nfile]){ } */}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  flag_found=0; nfile_min=-1;
+  for (nfile=0;nfile<n_file;nfile++){
+    if (flag_continue_[nfile]){
+      if (nfile_min<0){ nfile_min=nfile; flag_found=1;}
+      else /* if (nfile_min>=0) */{
+	if (allele_frequency_[nfile]<allele_frequency_[nfile_min]){ nfile_min = nfile; flag_found=1;}
+	/* if (nfile_min>=0){ } */}
+      /* if (flag_continue_[nfile]){ } */}
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  if ((fp_b16_out=fopen(fname_b16_out,"w"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_b16_out); exit(RET_READ_FAIL);}  
+  fwrite(&bitj,sizeof(int),1,fp_b16_out);
+  fwrite(&n_intersect,sizeof(int),1,fp_b16_out);
+  fwrite(&n_bim_sum,sizeof(int),1,fp_b16_out);
+  if ((fp_bim_out=fopen(fname_bim_out,"w"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_bim_out); exit(RET_READ_FAIL);}
+  b16_nfile_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_bim_sum);
+  b16_nbim_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_bim_sum);
+  n_bim_tmp=0;
+  while (flag_found && (nfile_min>=0)){
+    if (verbose && !(n_bim_tmp%1024)){ printf(" %% n_bim_tmp %d/%d\n",n_bim_tmp,n_bim_sum);}
+    b16_nfile_[n_bim_tmp] = nfile_min;
+    b16_nbim_[n_bim_tmp] = nbim_[nfile_min];
+    for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
+      fprintf(fp_bim_out,"%s",bim_field__[nfile_min][nbim_field]);
+      if (nbim_field< n_bim_field-1){ fprintf(fp_bim_out,"\t");}
+      if (nbim_field==n_bim_field-1){ fprintf(fp_bim_out,"\n");}
+      /* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
+    b16_line_0in_ = b16_line_0in__[nfile_min]; for (lfam=0;lfam<l_intersect;lfam++){ b16_line_out_[lfam]=(unsigned char)0;}
+    for (nintersect=0;nintersect<n_intersect;nintersect++){
+      nfam = index_orig_from_intersect__[nfile_min][nintersect];
+      tmp_a = ( (unsigned char)(b16_line_0in_[nfam/bit8]) >> (7-(nfam%bit8)) ) & (unsigned char)1 ;
+      tmp_b = ( (unsigned char)(tmp_a) << (7-(nintersect%bit8)) ) ;
+      b16_line_out_[nintersect/bit8] |= tmp_b;
+      /* for (nintersect=0;nintersect<n_intersect;nintersect++){ } */}
+    n_read = fwrite(b16_line_out_,sizeof(unsigned char),l_intersect,fp_b16_out);
+    if (n_read!=l_intersect){ printf(" %% Warning, could not write %s\n",fname_b16_out); exit(RET_READ_FAIL);}    
+    nbim_[nfile_min] += 1;
+    flag_continue_[nfile_min] = (nbim_[nfile_min]<n_bim_[nfile_min] ? 1 : 0);
+    if (flag_continue_[nfile_min]){
+      for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){
+	n_read = fscanf(fp_bim_0in_[nfile_min],"%s",bim_field__[nfile_min][nbim_field]);
+	if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_bim_0in_[nfile_min]); exit(RET_READ_FAIL);}
+	/* for (nbim_field=0;nbim_field<n_bim_field;nbim_field++){ } */}
+      allele_frequency_[nfile_min] = atof(bim_field__[nfile_min][nbim_field_allele_frequency]);
+      n_read = fread(b16_line_0in__[nfile_min],sizeof(unsigned char),l_fam_[nfile_min],fp_b16_0in_[nfile_min]);
+      if (n_read<=0){ printf(" %% Warning, could not read %s\n",fname_b16_0in_[nfile_min]); exit(RET_READ_FAIL);}
+      /* if (flag_continue_[nfile_min]){ } */}
+    flag_found=0; nfile_min=-1;
+    for (nfile=0;nfile<n_file;nfile++){
+      if (flag_continue_[nfile]){
+	if (nfile_min<0){ nfile_min=nfile; flag_found=1;}
+	else /* if (nfile_min>=0) */{
+	  if (allele_frequency_[nfile]<allele_frequency_[nfile_min]){ nfile_min = nfile; flag_found=1;}
+	  /* if (nfile_min>=0){ } */}
+	/* if (flag_continue_[nfile]){ } */}
+      /* for (nfile=0;nfile<n_file;nfile++){ } */}
+    n_bim_tmp+=1;
+    /* while (flag_found && (nfile_min>=0)){ } */}
+  if (n_bim_tmp!=n_bim_sum){ printf(" %% Warning, n_bim_tmp %d n_bim_sum %d\n",n_bim_tmp,n_bim_sum);}
+  fclose(fp_bim_out); fp_bim_out=NULL;
+  fclose(fp_b16_out); fp_b16_out=NULL;
+  if (verbose){ printf(" %% checking b16 file\n");}
+  n_mismatch=0; n_total=0;
+  if ((fp_b16_out=fopen(fname_b16_out,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_b16_out); exit(RET_READ_FAIL);}
+  for (ntest=0;ntest<n_test;ntest++){
+    nbim_target = floor((double)ntest/(double)n_test * (double)n_bim_sum);
+    nfile = b16_nfile_[nbim_target];
+    nbim = b16_nbim_[nbim_target];
+    fseek(fp_b16_0in_[nfile], 0l, SEEK_SET);
+    fread(&tmp_bitj,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_bitj!=bitj){ printf(" %% Warning, tmp_bitj %d\n",tmp_bitj);}
+    fread(&tmp_n_fam,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_n_fam!=n_fam_[nfile]){ printf(" %% Warning, tmp_n_fam %d\n",tmp_n_fam);}
+    fread(&tmp_n_bim,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_n_bim!=n_bim_[nfile]){ printf(" %% Warning, tmp_n_bim %d\n",tmp_n_bim);}
+    fseek(fp_b16_0in_[nfile],nbim*l_fam_[nfile],SEEK_CUR);
+    fread(b16_line_0in__[nfile],sizeof(unsigned char),l_fam_[nfile],fp_b16_0in_[nfile]);
+    b16_line_0in_ = b16_line_0in__[nfile];
+    fseek(fp_b16_out, 0l, SEEK_SET);
+    fread(&tmp_bitj,sizeof(int),1,fp_b16_out); if (tmp_bitj!=bitj){ printf(" %% Warning, tmp_bitj %d\n",tmp_bitj);}
+    fread(&tmp_n_fam,sizeof(int),1,fp_b16_out); if (tmp_n_fam!=n_intersect){ printf(" %% Warning, tmp_n_fam %d\n",tmp_n_fam);}
+    fread(&tmp_n_bim,sizeof(int),1,fp_b16_out); if (tmp_n_bim!=n_bim_sum){ printf(" %% Warning, tmp_n_bim %d\n",tmp_n_bim);}
+    fseek(fp_b16_out,nbim_target*l_intersect,SEEK_CUR);
+    fread(b16_line_out_,sizeof(unsigned char),l_intersect,fp_b16_out);
+    for (nintersect=0;nintersect<n_intersect;nintersect++){
+      nfam = index_orig_from_intersect__[nfile][nintersect];
+      tmp_a = ( (unsigned char)(b16_line_0in_[nfam/bit8]) >> (7-(nfam%bit8)) ) & (unsigned char)1 ;
+      tmp_b = ( (unsigned char)(b16_line_out_[nintersect/bit8]) >> (7-(nintersect%bit8)) ) & (unsigned char)1 ;
+      if (tmp_a!=tmp_b){ if (verbose>1){ printf(" %% Warning, mismatch: nbim_target %d nfile %d nbim %d nintersect %d nfam %d tmp_a %d tmp_b %d\n",nbim_target,nfile,nbim,nintersect,nfam,(int)tmp_a,(int)tmp_b);} n_mismatch += 1;}
+      n_total += 1;
+      /* for (nintersect=0;nintersect<n_intersect;nintersect++){ } */}
+    /* for (ntest=0;ntest<n_test;ntest++){ } */}
+  fclose(fp_b16_out); fp_b16_out=NULL;
+  if (verbose){ printf(" %% finished checking b16 file: n_test %d, n_mismatch %lld/%lld = %0.2f\n",n_test,n_mismatch,n_total,(double)n_mismatch/(double)n_total);}
+  for (nfile=0;nfile<n_file;nfile++){
+    fclose(fp_fam_0in_[nfile]); fp_fam_0in_[nfile]=NULL;
+    fclose(fp_bim_0in_[nfile]); fp_bim_0in_[nfile]=NULL;
+    fclose(fp_b16_0in_[nfile]); fp_b16_0in_[nfile]=NULL;
+    /* for (nfile=0;nfile<n_file;nfile++){ } */}
+  //charpQuickSort_index_test();
+  //charpQuickSort_index_index_test();
+  //charpIntersect_index_index_test();
+  //charpIntersectall_index_index_test();
+  wkspace_printf();
+  if (verbose){ printf(" %% [finished b16_merge]\n");}
 }
 
 

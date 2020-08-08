@@ -243,6 +243,11 @@ extern double GLOBAL_snp_I_opt_threshold;
 extern double GLOBAL_pat_mss_threshold;
 extern int GLOBAL_n_fam_char_max;
 extern int GLOBAL_n_bim_char_max;
+/* bed_merge */
+extern int GLOBAL_n_file;
+extern char **GLOBAL_fname_b16_0in_;
+extern char **GLOBAL_fname_bim_0in_;
+extern char **GLOBAL_fname_fam_0in_;
 
 #define rup(A,B) ((A) + !!((A)%(B))*((B) - ((A)%(B))))
 #define maximum(A,B) ((A) > (B) ? (A) : (B))

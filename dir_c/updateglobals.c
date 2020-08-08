@@ -159,6 +159,23 @@ void updateglobals(char *vname)
   else if (strcmp(vname,"GLOBAL_pat_mss_threshold")==0){ scanf("%lf",&GLOBAL_pat_mss_threshold); if (verbose>0){ printf("%s read to be %f\n",vname,GLOBAL_pat_mss_threshold);}}  
   else if (strcmp(vname,"GLOBAL_n_fam_char_max")==0){ scanf("%d",&GLOBAL_n_fam_char_max); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_n_fam_char_max);}}
   else if (strcmp(vname,"GLOBAL_n_bim_char_max")==0){ scanf("%d",&GLOBAL_n_bim_char_max); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_n_bim_char_max);}}
+  else if (strcmp(vname,"GLOBAL_n_file")==0){
+    scanf("%d",&GLOBAL_n_file); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_n_file);}
+    if (GLOBAL_n_file>0){
+      length=GLOBAL_n_file; 
+      GLOBAL_fname_b16_0in_ = (char **) wkspace_alloc(GLOBAL_n_file*sizeof(char *)); 
+      GLOBAL_fname_bim_0in_ = (char **) wkspace_alloc(GLOBAL_n_file*sizeof(char *)); 
+      GLOBAL_fname_fam_0in_ = (char **) wkspace_alloc(GLOBAL_n_file*sizeof(char *)); 
+      for (nv=0;nv<length;nv++){ 
+	GLOBAL_fname_b16_0in_[nv] = (char *) wkspace_alloc(FNAMESIZE*sizeof(char)); GLOBAL_fname_b16_0in_[nv][0]='\0';
+	GLOBAL_fname_bim_0in_[nv] = (char *) wkspace_alloc(FNAMESIZE*sizeof(char)); GLOBAL_fname_bim_0in_[nv][0]='\0';
+	GLOBAL_fname_fam_0in_[nv] = (char *) wkspace_alloc(FNAMESIZE*sizeof(char)); GLOBAL_fname_fam_0in_[nv][0]='\0';
+	/* for (nv=0;nv<length;nv++){ } */}
+      /* if (GLOBAL_n_file>0){ } */}
+    /* else if (strcmp(vname,"GLOBAL_n_file")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_fname_b16_0in_")==0){ length=GLOBAL_n_file; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_fname_b16_0in_[nv]); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_fname_b16_0in_[nv]); sprintf(GLOBAL_fname_b16_0in_[nv],"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_fname_b16_0in_[nv]);}}}
+  else if (strcmp(vname,"GLOBAL_fname_bim_0in_")==0){ length=GLOBAL_n_file; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_fname_bim_0in_[nv]); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_fname_bim_0in_[nv]); sprintf(GLOBAL_fname_bim_0in_[nv],"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_fname_bim_0in_[nv]);}}}
+  else if (strcmp(vname,"GLOBAL_fname_fam_0in_")==0){ length=GLOBAL_n_file; for (nv=0;nv<length;nv++){ scanf("%[^,;]",GLOBAL_fname_fam_0in_[nv]); if (strcmp(GLOBAL_DIR_XPRE,"\0")){ sprintf(tmpchar,GLOBAL_fname_fam_0in_[nv]); sprintf(GLOBAL_fname_fam_0in_[nv],"%s/%s",GLOBAL_DIR_XPRE,tmpchar);} if (nv<length-1){ scanf("%c",comma_vs_semicolon);} if (verbose>0){ printf("%s[%d] read to be %s\n",vname,nv,GLOBAL_fname_fam_0in_[nv]);}}}
   else if (strcmp(vname,"GLOBAL_DIR_NAME")==0){ scanf("%[^,;]",GLOBAL_DIR_NAME); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_DIR_NAME);} /* else if (strcmp(vname,"GLOBAL_DIR_NAME")==0){ } */}
   else if (strcmp(vname,"END")==0){ /* do nothing */ if (verbose>0){ printf("end of input reached\n");}}
 /*   else if (strcmp(vname,"yy")==0){ scanf("%zz",&yy); if (verbose>0){ printf("%s read to be %zz\n",vname,yy);}} */

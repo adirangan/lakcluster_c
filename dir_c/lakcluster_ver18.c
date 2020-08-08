@@ -147,19 +147,24 @@ int GLOBAL_scramble_num=0;
 char **GLOBAL_scramble_out_xdrop_=NULL;
 unsigned long int *GLOBAL_scramble_rseed_=NULL;
 /* bed_to_b16 */
-extern char GLOBAL_fname_bed_0in[FNAMESIZE]="\0";
-extern char GLOBAL_fname_b16_out[FNAMESIZE]="\0";
-extern char GLOBAL_fname_bim_0in[FNAMESIZE]="\0";
-extern char GLOBAL_fname_bim_out[FNAMESIZE]="\0";
-extern char GLOBAL_fname_fam_0in[FNAMESIZE]="\0";
-extern char GLOBAL_fname_fam_out[FNAMESIZE]="\0";
-extern char GLOBAL_fname_flip_flag[FNAMESIZE]="\0";
-extern double GLOBAL_snp_mss_threshold=0.01;
-extern double GLOBAL_snp_maf_threshold=0.25;
-extern double GLOBAL_snp_I_opt_threshold=0.01;
-extern double GLOBAL_pat_mss_threshold=0.04;
-extern int GLOBAL_n_fam_char_max=64;
-extern int GLOBAL_n_bim_char_max=64;
+char GLOBAL_fname_bed_0in[FNAMESIZE]="\0";
+char GLOBAL_fname_b16_out[FNAMESIZE]="\0";
+char GLOBAL_fname_bim_0in[FNAMESIZE]="\0";
+char GLOBAL_fname_bim_out[FNAMESIZE]="\0";
+char GLOBAL_fname_fam_0in[FNAMESIZE]="\0";
+char GLOBAL_fname_fam_out[FNAMESIZE]="\0";
+char GLOBAL_fname_flip_flag[FNAMESIZE]="\0";
+double GLOBAL_snp_mss_threshold=0.01;
+double GLOBAL_snp_maf_threshold=0.25;
+double GLOBAL_snp_I_opt_threshold=0.01;
+double GLOBAL_pat_mss_threshold=0.04;
+int GLOBAL_n_fam_char_max=64;
+int GLOBAL_n_bim_char_max=64;
+/* bed_merge */
+int GLOBAL_n_file=0;
+char **GLOBAL_fname_b16_0in_=NULL;
+char **GLOBAL_fname_bim_0in_=NULL;
+char **GLOBAL_fname_fam_0in_=NULL;
 
 /* popcount table */
 unsigned char popcount_uchar[256] = {0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8};
@@ -352,6 +357,7 @@ int main(int argc, char** argv) {
   if (strcmp(GLOBAL_TEST_TYPE,"bed_to_b16")==0){ bed_to_b16();}  
   if (strcmp(GLOBAL_TEST_TYPE,"MDA_io_test")==0){ MDA_io_test();}  
   if (strcmp(GLOBAL_TEST_TYPE,"b16_merge_test")==0){ b16_merge_test();}
+  if (strcmp(GLOBAL_TEST_TYPE,"b16_merge")==0){ b16_merge();}
   free(wkspace_ua); exit(RET_SUCCESS);
   return 0;
 }

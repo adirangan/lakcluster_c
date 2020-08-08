@@ -627,7 +627,7 @@ void charpIntersectall_index_index_driver(int n_list,int *n_charp_,char ***charp
   /* The indexed entries point to the first instances of each element in the intersection */
   /* We expect charp_workspace_ to be of size maximum(n_charp_). */
   /* charp_workspace_ ends up holding the intersection. */
-  int verbose=2;
+  int verbose=1;
   int nlist=0;
   int n_intersect=0,nintersect=0;
   int n_orig=0,n_sort=0;
