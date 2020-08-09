@@ -1709,7 +1709,7 @@ void b16_merge()
   int *b16_nbim_=NULL;
   int n_test = 128,ntest=0;
   int nbim_target=0;
-  unsigned long long int n_mismatch=0,n_total=0;
+  unsigned long long int n_mismatch=0,n_mismatch_tmp=0,n_mismatch_01=0,n_mismatch_10=0,n_total=0,n_1_0in=0,n_1_out=0,n_0_0in=0,n_0_out=0;
   if (verbose){ printf(" %% [entering b16_merge]\n");}
   n_file = GLOBAL_n_file;
   if (verbose){ printf(" %% n_file %d\n",n_file);}
@@ -1866,6 +1866,7 @@ void b16_merge()
   b16_nfile_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_bim_sum);
   b16_nbim_ = (int *) wkspace_all0c(sizeof(int)*(size_t)n_bim_sum);
   n_bim_tmp=0;
+  n_mismatch=0; n_total=0; n_mismatch_01=0; n_mismatch_10=0; ntest=0; nbim_target = floor((double)ntest/(double)n_test * (double)n_bim_sum);
   while (flag_found && (nfile_min>=0)){
     if (verbose && !(n_bim_tmp%1024)){ printf(" %% n_bim_tmp %d/%d\n",n_bim_tmp,n_bim_sum);}
     b16_nfile_[n_bim_tmp] = nfile_min;
@@ -1882,6 +1883,24 @@ void b16_merge()
       tmp_b = ( (unsigned char)(tmp_a) << (7-(nintersect%bit8)) ) ;
       b16_line_out_[nintersect/bit8] |= tmp_b;
       /* for (nintersect=0;nintersect<n_intersect;nintersect++){ } */}
+    /* testing b16 file in situ */
+    if (n_bim_tmp==nbim_target){
+      n_mismatch_tmp=0; n_1_0in=0; n_1_out=0; n_0_0in=0; n_0_out=0;
+      for (nintersect=0;nintersect<n_intersect;nintersect++){
+	nfam = index_orig_from_intersect__[nfile_min][nintersect];
+	tmp_a = ( (unsigned char)(b16_line_0in_[nfam/bit8]) >> (7-(nfam%bit8)) ) & (unsigned char)1 ; n_1_0in += tmp_a; n_0_0in += 1-tmp_a;
+	tmp_b = ( (unsigned char)(b16_line_out_[nintersect/bit8]) >> (7-(nintersect%bit8)) ) & (unsigned char)1 ; n_1_out += tmp_b; n_0_out += 1-tmp_b;
+	if (tmp_a!=tmp_b){
+	  if (verbose>1){ printf(" %% Warning, mismatch: nbim_target %d nfile_min %d nbim %d nintersect %d nfam %d tmp_a %d tmp_b %d\n",nbim_target,nfile_min,nbim,nintersect,nfam,(int)tmp_a,(int)tmp_b);}
+	  n_mismatch += 1; n_mismatch_tmp += 1;
+	  if (tmp_a>tmp_b){ n_mismatch_10 += 1;}
+	  if (tmp_a<tmp_b){ n_mismatch_01 += 1;}
+	  /* if (tmp_a!=tmp_b){ } */}
+	n_total += 1;
+	/* for (nintersect=0;nintersect<n_intersect;nintersect++){ } */}
+      if (verbose>0){ printf(" %% testing ntest %d: nbim_target %d (in situ) n_mismatch_tmp %lld n_mismatch %lld <-- n_0in (%lld,%lld) n_out (%lld,%lld)\n",ntest,nbim_target,n_mismatch_tmp,n_mismatch,n_1_0in,n_0_0in,n_1_out,n_0_out);}
+      ntest+=1; if (ntest<n_test){ nbim_target = floor((double)ntest/(double)n_test * (double)n_bim_sum);}
+      /* if (n_bim_tmp==nbim_target){ } */}
     n_read = fwrite(b16_line_out_,sizeof(unsigned char),l_intersect,fp_b16_out);
     if (n_read!=l_intersect){ printf(" %% Warning, could not write %s\n",fname_b16_out); exit(RET_READ_FAIL);}    
     nbim_[nfile_min] += 1;
@@ -1906,39 +1925,48 @@ void b16_merge()
       /* for (nfile=0;nfile<n_file;nfile++){ } */}
     n_bim_tmp+=1;
     /* while (flag_found && (nfile_min>=0)){ } */}
+  if (verbose){ printf(" %% finished checking b16 file (in situ): n_test %d, n_mismatch %lld/%lld = %0.2f, n_mismatch_01 %lld/%lld = %0.2f, n_mismatch_10 %lld/%lld = %0.2f\n",n_test,n_mismatch,n_total,(double)n_mismatch/(double)n_total,n_mismatch_01,n_total,(double)n_mismatch_01/(double)n_total,n_mismatch_10,n_total,(double)n_mismatch_10/(double)n_total);}
   if (n_bim_tmp!=n_bim_sum){ printf(" %% Warning, n_bim_tmp %d n_bim_sum %d\n",n_bim_tmp,n_bim_sum);}
   fclose(fp_bim_out); fp_bim_out=NULL;
   fclose(fp_b16_out); fp_b16_out=NULL;
-  if (verbose){ printf(" %% checking b16 file\n");}
-  n_mismatch=0; n_total=0;
+  if (verbose){ printf(" %% checking b16 file a posteriori\n");}
+  n_mismatch=0; n_total=0; n_mismatch_01=0; n_mismatch_10=0;
   if ((fp_b16_out=fopen(fname_b16_out,"r"))==NULL){ printf(" %% Warning, could not open %s.\n",fname_b16_out); exit(RET_READ_FAIL);}
   for (ntest=0;ntest<n_test;ntest++){
     nbim_target = floor((double)ntest/(double)n_test * (double)n_bim_sum);
+    if (verbose>0){ printf(" %% testing nbim_target %d (a posteriori)\n",nbim_target);}
     nfile = b16_nfile_[nbim_target];
     nbim = b16_nbim_[nbim_target];
     fseek(fp_b16_0in_[nfile], 0l, SEEK_SET);
     fread(&tmp_bitj,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_bitj!=bitj){ printf(" %% Warning, tmp_bitj %d\n",tmp_bitj);}
     fread(&tmp_n_fam,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_n_fam!=n_fam_[nfile]){ printf(" %% Warning, tmp_n_fam %d\n",tmp_n_fam);}
     fread(&tmp_n_bim,sizeof(int),1,fp_b16_0in_[nfile]); if (tmp_n_bim!=n_bim_[nfile]){ printf(" %% Warning, tmp_n_bim %d\n",tmp_n_bim);}
-    fseek(fp_b16_0in_[nfile],nbim*l_fam_[nfile],SEEK_CUR);
+    fseek(fp_b16_0in_[nfile],(unsigned long long int)nbim*(unsigned long long int)l_fam_[nfile],SEEK_CUR);
     fread(b16_line_0in__[nfile],sizeof(unsigned char),l_fam_[nfile],fp_b16_0in_[nfile]);
     b16_line_0in_ = b16_line_0in__[nfile];
     fseek(fp_b16_out, 0l, SEEK_SET);
     fread(&tmp_bitj,sizeof(int),1,fp_b16_out); if (tmp_bitj!=bitj){ printf(" %% Warning, tmp_bitj %d\n",tmp_bitj);}
     fread(&tmp_n_fam,sizeof(int),1,fp_b16_out); if (tmp_n_fam!=n_intersect){ printf(" %% Warning, tmp_n_fam %d\n",tmp_n_fam);}
     fread(&tmp_n_bim,sizeof(int),1,fp_b16_out); if (tmp_n_bim!=n_bim_sum){ printf(" %% Warning, tmp_n_bim %d\n",tmp_n_bim);}
-    fseek(fp_b16_out,nbim_target*l_intersect,SEEK_CUR);
+    fseek(fp_b16_out,(unsigned long long int)nbim_target*(unsigned long long int)l_intersect,SEEK_CUR);
     fread(b16_line_out_,sizeof(unsigned char),l_intersect,fp_b16_out);
+    n_mismatch_tmp=0; n_1_0in=0; n_1_out=0; n_0_0in=0; n_0_out=0;
     for (nintersect=0;nintersect<n_intersect;nintersect++){
       nfam = index_orig_from_intersect__[nfile][nintersect];
-      tmp_a = ( (unsigned char)(b16_line_0in_[nfam/bit8]) >> (7-(nfam%bit8)) ) & (unsigned char)1 ;
-      tmp_b = ( (unsigned char)(b16_line_out_[nintersect/bit8]) >> (7-(nintersect%bit8)) ) & (unsigned char)1 ;
-      if (tmp_a!=tmp_b){ if (verbose>1){ printf(" %% Warning, mismatch: nbim_target %d nfile %d nbim %d nintersect %d nfam %d tmp_a %d tmp_b %d\n",nbim_target,nfile,nbim,nintersect,nfam,(int)tmp_a,(int)tmp_b);} n_mismatch += 1;}
+      tmp_a = ( (unsigned char)(b16_line_0in_[nfam/bit8]) >> (7-(nfam%bit8)) ) & (unsigned char)1 ; n_1_0in += tmp_a; n_0_0in += 1-tmp_a;
+      tmp_b = ( (unsigned char)(b16_line_out_[nintersect/bit8]) >> (7-(nintersect%bit8)) ) & (unsigned char)1 ; n_1_out += tmp_b; n_0_out += 1-tmp_b;
+      if (tmp_a!=tmp_b){
+	if (verbose>1){ printf(" %% Warning, mismatch: nbim_target %d nfile %d nbim %d nintersect %d nfam %d tmp_a %d tmp_b %d\n",nbim_target,nfile,nbim,nintersect,nfam,(int)tmp_a,(int)tmp_b);}
+	n_mismatch += 1; n_mismatch_tmp += 1;
+	if (tmp_a>tmp_b){ n_mismatch_10 += 1;}
+	if (tmp_a<tmp_b){ n_mismatch_01 += 1;}
+	/* if (tmp_a!=tmp_b){ } */}
       n_total += 1;
       /* for (nintersect=0;nintersect<n_intersect;nintersect++){ } */}
+    if (verbose>0){ printf(" %% testing ntest %d: nbim_target %d (a posteriori -- nfile %d nbim %d) n_mismatch_tmp %lld n_mismatch %lld <-- n_0in (%lld,%lld) n_out (%lld,%lld)\n",ntest,nbim_target,nfile,nbim,n_mismatch_tmp,n_mismatch,n_1_0in,n_0_0in,n_1_out,n_0_out);}
     /* for (ntest=0;ntest<n_test;ntest++){ } */}
   fclose(fp_b16_out); fp_b16_out=NULL;
-  if (verbose){ printf(" %% finished checking b16 file: n_test %d, n_mismatch %lld/%lld = %0.2f\n",n_test,n_mismatch,n_total,(double)n_mismatch/(double)n_total);}
+  if (verbose){ printf(" %% finished checking b16 file (a posteriori): n_test %d, n_mismatch %lld/%lld = %0.2f, n_mismatch_01 %lld/%lld = %0.2f, n_mismatch_10 %lld/%lld = %0.2f\n",n_test,n_mismatch,n_total,(double)n_mismatch/(double)n_total,n_mismatch_01,n_total,(double)n_mismatch_01/(double)n_total,n_mismatch_10,n_total,(double)n_mismatch_10/(double)n_total);}
   for (nfile=0;nfile<n_file;nfile++){
     fclose(fp_fam_0in_[nfile]); fp_fam_0in_[nfile]=NULL;
     fclose(fp_bim_0in_[nfile]); fp_bim_0in_[nfile]=NULL;

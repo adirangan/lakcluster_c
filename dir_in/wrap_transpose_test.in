@@ -1,0 +1,5 @@
+GLOBAL_verbose= 1;
+GLOBAL_thread_count= 1;
+GLOBAL_omp_type= 0;
+GLOBAL_TEST_TYPE= wrap_transpose_test;
+END= 0;

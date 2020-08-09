@@ -171,91 +171,100 @@ void wrap_rand(char *filename,int bitj,int nrows,int ncols,int type_set)
   wkspace_reset(wkspace_mark); GLOBAL_wkspace_point = 1;
 }
 
-void wrap_transpose(char *filename,char *outname,int nbytes_per_read)
+void wrap_transpose(char *fname_0in,char *fname_out,int n_bytes_per_read)
 {
-  /* Slowly converts a binary array (stored in *filename) to a transpose of that array (stored in *outname) ;
+  /* Slowly converts a binary array (stored in *fname_0in) to a transpose of that array (stored in *fname_out) ;
      This is predicated on : ;
-     1. a header of size 3*sizeof(int) (containing (int) versions of bitj, nrows and ncols) ;
-     2. grabbing nbytes_per_read from rows of *filename and converting them into values ranging across nbytes_per_read separate columns of *outname ;
-     3. storage of (ncols+ncols_extend)*nbyptes_per_read is allocated to wp (workspace). */
-  int verbose=0;
-  FILE *fpin=NULL;
+     1. a header of size 3*sizeof(int) (containing (int) versions of bitj, n_row and n_col) ;
+     2. grabbing n_bytes_per_read from rows of *fname_0in and converting them into values ranging across n_bytes_per_read separate columns of *fname_out ;
+     3. storage of (n_col+n_col_extend)*n_bytes_per_read is allocated to wp (workspace). */
+  int verbose=GLOBAL_verbose;
+  FILE *fp_0in=NULL;
   /*uint8_t*/ int bitj_x=0;
-  /* uint32_t */ int nrows_x=0;
-  /* uint32_t */ int ncols_x=0;
-  int bitj=0,nrows=0,ncols=0,nrows_extend=0,ncols_extend=0;
-  unsigned long wp_length=0;
+  /* uint32_t */ int n_row_x=0;
+  /* uint32_t */ int n_col_x=0;
+  int bitj=0,n_row=0,n_col=0,n_row_extend=0,n_col_extend=0;
+  unsigned long long int wp_length=0;
   int current_row=0,nf=0,nc=0,nr=0,nrx=0;
-  FILE *fpout=NULL;
+  FILE *fp_out=NULL;
   unsigned char *wkspace_mark=NULL;
   unsigned char *wp=NULL;
   unsigned char *ip=NULL;
   unsigned char b1=0,b2=0;
+  unsigned long long int ulli_tab=0;
   char bstr1[9],bstr2[9],kstr[FNAMESIZE];
-  if (verbose){ printf(" %% [finished wrap_transpose] filename %s --> %s nbytes_per_read %d\n",filename,outname,nbytes_per_read);}
-  if (access(filename,F_OK)!=0){ printf(" Warning! cannot access %s in wrap_transpose\n",filename);}
-  if ((fpin=fopen(filename,"r"))==NULL){ printf(" Warning! cannot open %s in wrap_transpose\n",filename);}
-  fread(&bitj_x,sizeof(/*uint8_t*/ int),1,fpin);fread(&nrows_x,sizeof(/* uint32_t */ int),1,fpin);fread(&ncols_x,sizeof(/* uint32_t */ int),1,fpin); bitj=(int)bitj_x; nrows=(int)nrows_x; ncols=(int)ncols_x;
-  if (fpin!=NULL){ fclose(fpin);fpin=NULL;}
-  nbytes_per_read = BIT8*(nbytes_per_read/BIT8); if (nbytes_per_read==0){ nbytes_per_read=BIT8;}
-  nrows_extend = (bitj - (nrows % bitj)) % bitj;
-  ncols_extend = (bitj - (ncols % bitj)) % bitj;
-  if (verbose){ printf(" %% read bitj %d nrows %d+%d ncols %d+%d\n",bitj,nrows,nrows_extend,ncols,ncols_extend);}
-  if ((fpin=fopen(filename,"r"))==NULL){ printf(" Warning! cannot open %s in wrap_transpose\n",filename);}
-  if ((fpout=fopen(outname,"w"))==NULL){ printf(" Warning! cannot open %s in wrap_transpose\n",outname);}
-  bitj_x = (/*uint8_t*/ int)bitj; nrows_x = (/* uint32_t */ int)nrows; ncols_x = (/* uint32_t */ int)ncols;
-  fwrite(&bitj_x,sizeof(/*uint8_t*/ int),1,fpout);fwrite(&ncols_x,sizeof(/* uint32_t */ int),1,fpout);fwrite(&nrows_x,sizeof(/* uint32_t */ int),1,fpout);
-  wp_length = (ncols+ncols_extend) * nbytes_per_read; wp_length = rup(wp_length,sizeof(long)); wp_length /= BIT8;
+  double ct=0,rt=0,tratio=0,tau_est=0;
+  if (verbose){ printf(" %% [entering wrap_transpose] fname_0in %s --> %s n_bytes_per_read %d\n",fname_0in,fname_out,n_bytes_per_read);}
+  if (access(fname_0in,F_OK)!=0){ printf(" Warning! cannot access %s in wrap_transpose\n",fname_0in);}
+  if ((fp_0in=fopen(fname_0in,"r"))==NULL){ printf(" Warning! cannot open %s in wrap_transpose\n",fname_0in);}
+  fread(&bitj_x,sizeof(/*uint8_t*/ int),1,fp_0in);fread(&n_row_x,sizeof(/* uint32_t */ int),1,fp_0in);fread(&n_col_x,sizeof(/* uint32_t */ int),1,fp_0in); bitj=(int)bitj_x; n_row=(int)n_row_x; n_col=(int)n_col_x;
+  if (fp_0in!=NULL){ fclose(fp_0in);fp_0in=NULL;}
+  n_bytes_per_read = BIT8*(n_bytes_per_read/BIT8); if (n_bytes_per_read==0){ n_bytes_per_read=BIT8;}
+  n_row_extend = (bitj - (n_row % bitj)) % bitj;
+  n_col_extend = (bitj - (n_col % bitj)) % bitj;
+  if (verbose){ printf(" %% read bitj %d n_row %d+%d n_col %d+%d\n",bitj,n_row,n_row_extend,n_col,n_col_extend);}
+  if ((fp_0in=fopen(fname_0in,"r"))==NULL){ printf(" Warning! cannot open %s in wrap_transpose\n",fname_0in);}
+  if ((fp_out=fopen(fname_out,"w"))==NULL){ printf(" Warning! cannot open %s in wrap_transpose\n",fname_out);}
+  bitj_x = (/*uint8_t*/ int)bitj; n_row_x = (/* uint32_t */ int)n_row; n_col_x = (/* uint32_t */ int)n_col;
+  fwrite(&bitj_x,sizeof(/*uint8_t*/ int),1,fp_out);fwrite(&n_col_x,sizeof(/* uint32_t */ int),1,fp_out);fwrite(&n_row_x,sizeof(/* uint32_t */ int),1,fp_out);
+  wp_length = (unsigned long long int)(n_col+n_col_extend) * (unsigned long long int)n_bytes_per_read;
+  wp_length = rup(wp_length,sizeof(long)); wp_length /= BIT8;
+  if (verbose){ printf(" %% wp_length %lldUB --> %0.2fKB --> %0.2fMB --> %0.2fGB\n",wp_length,(double)wp_length/(double)pow(1024,1),(double)wp_length/(double)pow(1024,2),(double)wp_length/(double)pow(1024,3));}
   GLOBAL_wkspace_point = 0; wkspace_mark = wkspace_base; 
-  wp = wkspace_all0c(wp_length); if (!wp){ printf(" Warning! not enough memory, reduce nbytes_per_read %d in wrap_transpose\n",nbytes_per_read);}
+  wp = wkspace_all0c(wp_length); if (!wp){ printf(" Warning! not enough memory, reduce n_bytes_per_read %d in wrap_transpose\n",n_bytes_per_read);}
   fill_uchar_zero(wp,wp_length);
-  ip = wkspace_all0c(nbytes_per_read / BIT8 + 1); if (!ip){ printf(" Warning! not enough memory, reduce nbytes_per_read %d in wrap_transpose\n",nbytes_per_read);}
+  ip = wkspace_all0c(n_bytes_per_read / BIT8 + 1); if (!ip){ printf(" Warning! not enough memory, reduce n_bytes_per_read %d in wrap_transpose\n",n_bytes_per_read);}
+  GLOBAL_tic(3);
   current_row=0;
-  while (current_row<nrows){
-    fseek(fpin,3*sizeof(int) + (current_row)/BIT8,SEEK_SET);
+  while (current_row<n_row){
+    GLOBAL_toc(3,0,""); ct = GLOBAL_elct[3]; rt = GLOBAL_elrt[3]; tratio=ct/maximum(1,rt); tau_est = rt*(double)n_row/(double)maximum(1,current_row);
+    if ((verbose>0) && (current_row%1024==0)){ printf(" %% current_row %.5d/%.5d, elapsed time ct/rt %6.1fs(%2.1fh)/%6.1fs(%2.1fh) = %2.1f; estimated total time %6.1fs(%2.1fh)\n",current_row,n_row,ct,ct/3600,rt,rt/3600,tratio,tau_est,tau_est/3600);}
+    fseek(fp_0in,(size_t)3*sizeof(int) + (size_t)(current_row/BIT8),SEEK_SET);
     fill_uchar_zero(wp,wp_length);
-    nr = minimum(nbytes_per_read,nrows /* + nrows_extend */ - current_row);
+    nr = minimum(n_bytes_per_read,n_row /* + n_row_extend */ - current_row);
     nrx = rup(nr,BIT8);
     nc=0;
-    while (nc<ncols){ 
-      fread(ip,sizeof(unsigned char),nrx/BIT8,fpin);
-      if (verbose){
+    while (nc<n_col){ 
+      fread(ip,sizeof(unsigned char),nrx/BIT8,fp_0in);
+      if (verbose>2){
 	getBinW(ip,kstr,nrx);
 	printf("ip %s\n",kstr);
 	/* if (verbose){ } */}
       nf=0;
       while (nf<nr){
-	if (verbose){
+	ulli_tab = (unsigned long long int)(nc/8) + (unsigned long long int)nf*(unsigned long long int)((n_col+n_col_extend)/BIT8);
+	if (verbose>2){
 	  printf(" nc %.6d current_row %.6d nf %.6d (nr %.6d), ",nc,current_row,nf,nr);
 	  b1 = ip[nf/BIT8];getBinW(&b1,bstr1,8);
 	  b2 = ((((ip[nf/BIT8] >> (7-(nf%BIT8))) & 1 ) << (7 - (nc%BIT8))));getBinW(&b2,bstr2,8);
 	  printf("reading %s --> %s, ",bstr1,bstr2);
-	  b1 = wp[nc/8 + nf*((ncols+ncols_extend)/BIT8)];getBinW(&b1,bstr1,8);
-	  b2 = (wp[nc/8 + nf*((ncols+ncols_extend)/BIT8)] | ((((ip[nf/BIT8] >> (7-(nf%BIT8))) & 1 ) << (7 - (nc%BIT8)))));getBinW(&b2,bstr2,8);
+	  b1 = wp[ulli_tab];getBinW(&b1,bstr1,8);
+	  b2 = (wp[ulli_tab] | ((((ip[nf/BIT8] >> (7-(nf%BIT8))) & 1 ) << (7 - (nc%BIT8)))));getBinW(&b2,bstr2,8);
 	  printf("updating %s --> %s.\n",bstr1,bstr2);
 	  /* if (verbose){ } */}
-	wp[nc/8 + nf*((ncols+ncols_extend)/BIT8)] |= ((((ip[nf/BIT8] >> (7-(nf%BIT8))) & 1 ) << (7 - (nc%BIT8))));
+	wp[ulli_tab] |= ((((ip[nf/BIT8] >> (7-(nf%BIT8))) & 1 ) << (7 - (nc%BIT8))));
 	nf++;
-	/* while (nf<nbytes_per_read){ } */}
+	/* while (nf<n_bytes_per_read){ } */}
       nc++;
-      fseek(fpin,(nrows+nrows_extend)/BIT8 - nrx/BIT8,SEEK_CUR);
-      /* while (nc<ncols){ } */}
-    while (nc<ncols+ncols_extend){
+      fseek(fp_0in,(n_row+n_row_extend)/BIT8 - nrx/BIT8,SEEK_CUR);
+      /* while (nc<n_col){ } */}
+    while (nc<n_col+n_col_extend){
       nf=0;
       while (nf<nr){
-    	wp[nc/8 + nf*((ncols+ncols_extend)/BIT8)] &= (~0 ^ (1 << (7-(nc%BIT8))));
+	ulli_tab = (unsigned long long int)(nc/8) + (unsigned long long int)nf*(unsigned long long int)((n_col+n_col_extend)/BIT8);
+    	wp[ulli_tab] &= (~0 ^ (1 << (7-(nc%BIT8))));
     	nf++;
-    	/* while (nf<nbytes_per_read){ } */}
+    	/* while (nf<n_bytes_per_read){ } */}
       nc++;
-      /* while (nc<ncols){ } */}
-    fwrite(wp,sizeof(unsigned char),(ncols+ncols_extend)/BIT8 * nr,fpout);
-    current_row += nbytes_per_read;
-    if (verbose){ printf("\r%d rows complete.", current_row); fflush(stdout);}
-    /* while (current_row<nrows){ } */}
-  if (verbose){ printf("\r finished writing %s\n",outname); fflush(stdout);}
-  if (fpout!=NULL){ fclose(fpout);fpout=NULL;}
-  if (fpin!=NULL){ fclose(fpin);fpin=NULL;}
-  if (verbose){ printf(" %% [finished wrap_transpose] filename %s\n",filename);}
+      /* while (nc<n_col){ } */}
+    fwrite(wp,sizeof(unsigned char),(unsigned long long int)((n_col+n_col_extend)/BIT8) * (unsigned long long int)nr,fp_out);
+    current_row += n_bytes_per_read;
+    if (verbose>2){ printf("\r%d rows complete.", current_row); fflush(stdout);}
+    /* while (current_row<n_row){ } */}
+  if (verbose>2){ printf("\r finished writing %s\n",fname_out); fflush(stdout);}
+  if (fp_out!=NULL){ fclose(fp_out);fp_out=NULL;}
+  if (fp_0in!=NULL){ fclose(fp_0in);fp_0in=NULL;}
+  if (verbose){ printf(" %% [finished wrap_transpose] fname_0in %s\n",fname_0in);}
   wkspace_reset(wkspace_mark); GLOBAL_wkspace_point = 1;
 }
 
@@ -302,4 +311,9 @@ void wrap_transpose_test()
     /* if (verbose>1){ } */}
   wkspace_printf();
   if (verbose){ printf(" %% [finished wrap_transpose_test]\n");}  
+}
+
+void wrap_transpose_driver()
+{
+  wrap_transpose(GLOBAL_fname_b16_0in,GLOBAL_fname_b16_out,GLOBAL_n_bytes_per_read);
 }

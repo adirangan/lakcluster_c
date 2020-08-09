@@ -248,6 +248,9 @@ extern int GLOBAL_n_file;
 extern char **GLOBAL_fname_b16_0in_;
 extern char **GLOBAL_fname_bim_0in_;
 extern char **GLOBAL_fname_fam_0in_;
+/* wrap_transpose */
+extern char GLOBAL_fname_b16_0in[FNAMESIZE];
+extern int GLOBAL_n_bytes_per_read;
 
 #define rup(A,B) ((A) + !!((A)%(B))*((B) - ((A)%(B))))
 #define maximum(A,B) ((A) > (B) ? (A) : (B))

@@ -165,6 +165,9 @@ int GLOBAL_n_file=0;
 char **GLOBAL_fname_b16_0in_=NULL;
 char **GLOBAL_fname_bim_0in_=NULL;
 char **GLOBAL_fname_fam_0in_=NULL;
+/* wrap_transpose */
+char GLOBAL_fname_b16_0in[FNAMESIZE]="\0";
+int GLOBAL_n_bytes_per_read=0;
 
 /* popcount table */
 unsigned char popcount_uchar[256] = {0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8};
@@ -358,6 +361,8 @@ int main(int argc, char** argv) {
   if (strcmp(GLOBAL_TEST_TYPE,"MDA_io_test")==0){ MDA_io_test();}  
   if (strcmp(GLOBAL_TEST_TYPE,"b16_merge_test")==0){ b16_merge_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"b16_merge")==0){ b16_merge();}
+  if (strcmp(GLOBAL_TEST_TYPE,"wrap_transpose_test")==0){ wrap_transpose_test();}
+  if (strcmp(GLOBAL_TEST_TYPE,"wrap_transpose_driver")==0){ wrap_transpose_driver();}
   free(wkspace_ua); exit(RET_SUCCESS);
   return 0;
 }
