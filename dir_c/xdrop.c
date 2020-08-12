@@ -41,6 +41,8 @@ void get_xdrop(double lrij,double lcij,int *rdrop_p,int *cdrop_p)
     figure;subplot(2,3,1);plot(nr_,nc_,'o-');subplot(2,3,2);plot(log(nr_),log(nc_),'o-'); subplot(2,3,3);plot(sqrt(nr_),sqrt(nc_),'o-'); 
     subplot(2,3,4);plot(1:ii,nr_./nc_,'o-');subplot(2,3,5);plot(1:ii,log(nr_)./log(nc_),'o-');subplot(2,3,6);plot(1:ii,sqrt(nr_)./sqrt(nc_),'o-'); 
   */
+  if (lrij>lcij){ get_xdrop(lcij,lrij,cdrop_p,rdrop_p);}
+  else /* if (lrij<=lcij) */{
   if (lrij<=2){ /* drop everything */ rdrop = lrij; cdrop = lcij;}
   else /* if lrij>2 */{
     if (gamma>0){ gamma_tmp_row = maximum(gamma,(dbl1)/maximum(1,lrij)); ammag_tmp_row = minimum(1-gamma,(lrij-1)/maximum(1,lrij));}
@@ -58,6 +60,7 @@ void get_xdrop(double lrij,double lcij,int *rdrop_p,int *cdrop_p)
   if (rdrop_p!=NULL){ *rdrop_p=rdrop;}
   if (cdrop_p!=NULL){ *cdrop_p=cdrop;}
   if (verbose){ printf(" %% [finished get_xdrop] rdrop %d cdrop %d\n",rdrop,cdrop);}
+  /* if lrij<=lcij */}
 }
 
 int get_xdrop_length(double lrij,double lcij)
