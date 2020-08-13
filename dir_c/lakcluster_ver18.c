@@ -283,20 +283,20 @@ int main(int argc, char** argv) {
       cur_arg += 2; /* else if other */}
     else { printf("Error: Invalid argument (%s).", argv[cur_arg]); exit(RET_INVALID_CMDLINE);}
     /* while (cur_arg < argc) { } */}
-  bubble = (char*)malloc(67108864 * sizeof(char));
+  bubble = (char*)malloc((unsigned long long int)67108864 * sizeof(char));
   if (!bubble) { printf("Error: not enough memory!\n");}
-  GLOBAL_memory_mb = GLOBAL_memory_gb * 1024; GLOBAL_memory_kb = GLOBAL_memory_mb * 1024;
-  wkspace_ua = (unsigned char*)malloc(GLOBAL_memory_kb * 1024 * sizeof(char));
+  GLOBAL_memory_mb = GLOBAL_memory_gb * (unsigned long long int)1024; GLOBAL_memory_kb = GLOBAL_memory_mb * (unsigned long long int)1024;
+  wkspace_ua = (unsigned char*)malloc(GLOBAL_memory_kb * (unsigned long long int)1024 * sizeof(char));
   while (!wkspace_ua) { 
     if (GLOBAL_verbose>-2){ if (!wkspace_ua){ printf("Could not allocate %ld GB; trying %ld GB instead...\n",GLOBAL_memory_gb,GLOBAL_memory_gb - 1);}}
-    GLOBAL_memory_gb -= 1; GLOBAL_memory_mb = GLOBAL_memory_gb * 1024; GLOBAL_memory_kb = GLOBAL_memory_mb * 1024;
-    wkspace_ua = (unsigned char*)malloc(GLOBAL_memory_kb * 1024 * sizeof(char));
+    GLOBAL_memory_gb -= 1; GLOBAL_memory_mb = GLOBAL_memory_gb * (unsigned long long int)1024; GLOBAL_memory_kb = GLOBAL_memory_mb * (unsigned long long int)1024;
+    wkspace_ua = (unsigned char*)malloc(GLOBAL_memory_kb * (unsigned long long int)1024 * sizeof(char));
     if (wkspace_ua) { printf("Allocated %ld KB = %ld MB = %ld GB successfully.\n", GLOBAL_memory_kb,GLOBAL_memory_mb,GLOBAL_memory_gb);}
     /* while (!wkspace_ua) { } */}
   // force 64-byte align on OS X to make cache line sensitivity work
   wkspace = (unsigned char*)CACHEALIGN((unsigned long)wkspace_ua);
   wkspace_base = wkspace;
-  wkspace_left = GLOBAL_memory_kb * 1024 - (unsigned long long int)(wkspace - wkspace_ua);
+  wkspace_left = GLOBAL_memory_kb * (unsigned long long int)1024 - (unsigned long long int)(wkspace - wkspace_ua);
   free(bubble);
   if (GLOBAL_verbose>0){ wkspace_printf();}
   wkspace_point_0 = wkspace_make_point();
