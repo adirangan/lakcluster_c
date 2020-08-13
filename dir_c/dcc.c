@@ -248,7 +248,177 @@ void dcc_single_copy_M_An(struct dcc_single *E,struct dcc_single *E_in)
   if (verbose){ printf(" %% [finished dcc_single_copy_M_An]\n");}
 }
 
-void dcc_single_load_M_An(struct dcc_single *E)
+void dcc_single_load_M_An(struct dcc_single *E,struct dcc_single *E_0)
+{
+  /* load from file */
+  int verbose=0;
+  struct dcc_ajdk *D=E->D;
+  int nb_0 = 0, nb_given = E->nb;
+  int nr=0,nb=0,nc=0;
+  int bitj_tmp=0,nrows_tmp=0,ncols_tmp=0,nrows_tmp_extend,brows_tmp;
+  unsigned char *bXra_tmp=NULL;
+  if (verbose){ printf(" %% [entering dcc_single_load_M_An]\n");}
+  /* loading A_bmr_b etc */
+  nb = nb_given;
+  /* loading A */
+  binary_read_getsize(GLOBAL_A_t_name_[nb],&(D->bitj),&(D->A_ncols),&(E->A_nrows));
+  E->A_rbother = (E->A_nrows>0);
+  E->A_nrows_extend = (D->bitj - (E->A_nrows % D->bitj)) % D->bitj;
+  E->A_mr_length = bsize(E->A_nrows)/* rup(E->A_nrows+E->A_nrows_extend,POPLENGTH)/BIT8 */;
+  E->A_bmr_b = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_b){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");}
+  E->A_bmr_j = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_j){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");}
+  E->A_bmr_j_rmv = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_j_rmv){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");}
+  E->A_bmr_j_rtn = wkspace_all0c(E->A_mr_length); if (!E->A_bmr_j_rtn){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");}
+  if (GLOBAL_A_n_rind_[nb]==NULL || !strcmp(GLOBAL_A_n_rind_[nb],"\0")){ for (nr=0;nr<E->A_nrows;nr++){ bset__on(E->A_bmr_b,nr);}}
+  else{ binary_read(GLOBAL_A_n_rind_[nb],&bitj_tmp,&nrows_tmp,&ncols_tmp,&(E->A_bmr_b)); if (nrows_tmp!=E->A_nrows || bitj_tmp!=D->bitj){ printf(" %% Warning! A_: %s; improper mr_b_ %s, nrows %d instead of %d, bitj %d vs %d\n",GLOBAL_A_t_name_[nb],GLOBAL_A_n_rind_[nb],nrows_tmp,E->A_nrows,bitj_tmp,D->bitj);}}
+  for (nr=0;nr<E->A_mr_length;nr++){ E->A_bmr_j[nr] = E->A_bmr_b[nr];}
+  E->A_rpop_b = popcount_uchar_array(E->A_bmr_b,E->A_mr_length);
+  E->A_rpop_j = popcount_uchar_array(E->A_bmr_j,E->A_mr_length);
+  if (verbose>1){ printf(" %% reading GLOBAL_A_t_name_[%d] = %s\n",nb,GLOBAL_A_t_name_[nb]);}
+  if (verbose>1){ printf(" %% read GLOBAL_A_t_name_[%d] %d-x-%d (bitj %d)\n",nb,D->A_ncols,E->A_nrows,D->bitj);}
+  if (verbose>1){ printf(" %% A_nrows_extend_[%d] %d\n",nb,E->A_nrows_extend);}
+  if (verbose>1){ printf(" %% A_mr_length_[%d] %d\n",nb,E->A_mr_length);}
+  if (verbose>1){ printf(" %% reading GLOBAL_A_n_rind_[%d] = %s\n",nb,GLOBAL_A_n_rind_[nb]);} 
+  sprintf(D->tmpAnchar," %%%% E->A_bmr_b_[%.2d]:",nb); if (verbose>1){ bprintf(E->A_bmr_b,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+  sprintf(D->tmpAnchar," %%%% E->A_bmr_j_[%.2d]:",nb); if (verbose>1){ bprintf(E->A_bmr_j,D->bitj,1,E->A_nrows,D->tmpAnchar);}
+  if (verbose>1){ printf(" %% A_nrows_[%d]  = %d\n",nb,E->A_nrows);}
+  if (verbose>1){ printf(" %% A_rpop_b_[%d] = %d\n",nb,E->A_rpop_b);}
+  if (verbose>1){ printf(" %% A_rpop_j_[%d] = %d\n",nb,E->A_rpop_j);}
+  E->A_umr_b = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_b){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_b[nr] = bget__on(E->A_bmr_b,nr);}
+  E->A_umr_j = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_j){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j[nr] = bget__on(E->A_bmr_j,nr);}
+  E->A_umr_j_rmv = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_j_rmv){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j_rmv[nr] = bget__on(E->A_bmr_j_rmv,nr);}
+  E->A_umr_j_rtn = (unsigned char *) wkspace_all0c(E->A_nrows*sizeof(unsigned char)); if (!E->A_umr_j_rtn){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");} for (nr=0;nr<E->A_nrows;nr++){ E->A_umr_j_rtn[nr] = bget__on(E->A_bmr_j_rtn,nr);}
+  if (verbose>1){ printf(" %% generating M_An_[%d]\n",nb);}
+  E->M_An = M_handle_v_make(D->bitj,E->A_nrows,D->A_ncols,GLOBAL_A_t_name_[nb],NULL,E->A_bmr_b,D->A_bmc_b); M_mxget(E->M_An);
+  if (0){}
+  else if ((nb> nb_0) && (!strcmp(GLOBAL_A_n_name_[nb],GLOBAL_A_n_name_[nb_0]))){ /* old name: point to E_0->M_At */
+    if (verbose>-1){ printf(" %% dcc_single_load_M_An: nb %d: pointing E->M_At to E_0->M_At->wX\n",nb);}
+    E->M_At = M_handle_v_make(D->bitj,D->A_ncols,E->A_nrows,NULL,E_0->M_At->wX,D->A_bmc_b,E->A_bmr_b);
+    /* if old name */}
+  else if ((nb==nb_0) || (strcmp(GLOBAL_A_n_name_[nb],GLOBAL_A_n_name_[nb_0]))){ /* new name; load A_n */
+    E->M_At = M_handle_v_make(D->bitj,D->A_ncols,E->A_nrows,GLOBAL_A_n_name_[nb],NULL,D->A_bmc_b,E->A_bmr_b);
+    /* if new name */}
+  M_mxget(E->M_At);
+  /* loading Z */
+  if (GLOBAL_Z_t_name_[nb]==NULL || !strcmp(GLOBAL_Z_t_name_[nb],"\0")){ bitj_tmp=D->bitj;ncols_tmp=D->A_ncols;E->Z_nrows=0;}
+  else{ binary_read_getsize(GLOBAL_Z_t_name_[nb],&bitj_tmp,&ncols_tmp,&(E->Z_nrows));}
+  if (bitj_tmp!=D->bitj || ncols_tmp!=D->A_ncols){ printf(" %% Warning! Z_: %s; improper bitj %d vs %d, ncols %d vs %d\n",GLOBAL_Z_t_name_[nb],bitj_tmp,D->bitj,ncols_tmp,D->A_ncols);} 
+  E->Z_rbother = (E->Z_nrows>0);
+  E->Z_nrows_extend = (D->bitj - (E->Z_nrows % D->bitj)) % D->bitj;
+  E->Z_mr_length = bsize(E->Z_nrows)/* rup(E->Z_nrows+E->Z_nrows_extend,POPLENGTH)/BIT8 */;
+  E->Z_bmr_b = wkspace_all0c(E->Z_mr_length); if (!E->Z_bmr_b){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");}
+  E->Z_bmr_j = wkspace_all0c(E->Z_mr_length); if (!E->Z_bmr_j){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");}
+  if (GLOBAL_Z_n_rind_[nb]==NULL || !strcmp(GLOBAL_Z_n_rind_[nb],"\0")){ for (nr=0;nr<E->Z_nrows;nr++){ bset__on(E->Z_bmr_b,nr);}}
+  else{ binary_read(GLOBAL_Z_n_rind_[nb],&bitj_tmp,&nrows_tmp,&ncols_tmp,&(E->Z_bmr_b)); if (nrows_tmp!=E->Z_nrows || bitj_tmp!=D->bitj){ printf(" %% Warning! Z_: %s; improper mr_b_ %s, nrows %d instead of %d, bitj %d vs %d\n",GLOBAL_Z_t_name_[nb],GLOBAL_Z_n_rind_[nb],nrows_tmp,E->Z_nrows,bitj_tmp,D->bitj);}}
+  for (nr=0;nr<E->Z_mr_length;nr++){ E->Z_bmr_j[nr] = E->Z_bmr_b[nr];}
+  E->Z_rpop_b = popcount_uchar_array(E->Z_bmr_b,E->Z_mr_length);
+  E->Z_rpop_j = popcount_uchar_array(E->Z_bmr_j,E->Z_mr_length);
+  if (verbose>1){ printf(" %% reading GLOBAL_Z_t_name_[%d] = %s\n",nb,GLOBAL_Z_t_name_[nb]);}
+  if (verbose>1){ printf(" %% read GLOBAL_Z_t_name_[%d] %d-x-%d (bitj %d)\n",nb,D->A_ncols,E->Z_nrows,D->bitj);}
+  if (verbose>1){ printf(" %% Z_nrows_extend_[%d] %d\n",nb,E->Z_nrows_extend);}
+  if (verbose>1){ printf(" %% Z_mr_length_[%d] %d\n",nb,E->Z_mr_length);}
+  if (verbose>1){ printf(" %% reading Z_n_rind_[%d] = %s\n",nb,GLOBAL_Z_n_rind_[nb]);} 
+  sprintf(D->tmpZnchar," %%%% E->Z_bmr_b_[%.2d]:",nb); if (verbose>1){ bprintf(E->Z_bmr_b,D->bitj,1,E->Z_nrows,D->tmpZnchar);}
+  sprintf(D->tmpZnchar," %%%% E->Z_bmr_j_[%.2d]:",nb); if (verbose>1){ bprintf(E->Z_bmr_j,D->bitj,1,E->Z_nrows,D->tmpZnchar);}
+  if (verbose>1){ printf(" %% Z_nrows_[%d]  = %d\n",nb,E->Z_nrows);}
+  if (verbose>1){ printf(" %% Z_rpop_b_[%d] = %d\n",nb,E->Z_rpop_b);}
+  if (verbose>1){ printf(" %% Z_rpop_j_[%d] = %d\n",nb,E->Z_rpop_j);}
+  E->Z_umr_b = (unsigned char *) wkspace_all0c(E->Z_nrows*sizeof(unsigned char)); if (!E->Z_umr_b){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");} for (nr=0;nr<E->Z_nrows;nr++){ E->Z_umr_b[nr] = bget__on(E->Z_bmr_b,nr);}
+  E->Z_umr_j = (unsigned char *) wkspace_all0c(E->Z_nrows*sizeof(unsigned char)); if (!E->Z_umr_j){ printf(" %% Warning! not enough memory in dcc_single_load_M_An\n");} for (nr=0;nr<E->Z_nrows;nr++){ E->Z_umr_j[nr] = bget__on(E->Z_bmr_j,nr);}
+  if (verbose>1){ printf(" %% generating M_Zn_[%d]\n",nb);}
+  if (GLOBAL_Z_t_name_[nb]==NULL || !strcmp(GLOBAL_Z_t_name_[nb],"\0")){ E->M_Zn = M_handle_v_make(D->bitj,E->Z_nrows,D->A_ncols,NULL,NULL,E->Z_bmr_b,D->A_bmc_b);}
+  else{ E->M_Zn = M_handle_v_make(D->bitj,E->Z_nrows,D->A_ncols,GLOBAL_Z_t_name_[nb],NULL,E->Z_bmr_b,D->A_bmc_b);} M_mxget(E->M_Zn);
+  if (GLOBAL_Z_n_name_[nb]==NULL || !strcmp(GLOBAL_Z_n_name_[nb],"\0")){ E->M_Zt = M_handle_v_make(D->bitj,D->A_ncols,E->Z_nrows,NULL,NULL,D->A_bmc_b,E->Z_bmr_b);}
+  else /* load Z_n */{
+    if (0){}
+    else if (!strcmp(GLOBAL_Z_n_name_[nb],GLOBAL_A_n_name_[nb])){ /* old name: point to E->M_At */
+      if (verbose>-1){ printf(" %% dcc_single_load_M_At: nb %d: pointing E->M_Zt to E->M_At->wX\n",nb);}
+      E->M_Zt = M_handle_v_make(D->bitj,D->A_ncols,E->Z_nrows,NULL,E->M_At->wX,D->A_bmc_b,E->Z_bmr_b);
+      /* if old name */}
+    else if ( strcmp(GLOBAL_Z_n_name_[nb],GLOBAL_A_n_name_[nb])){ /* new name: load Z_n */
+      E->M_Zt = M_handle_v_make(D->bitj,D->A_ncols,E->Z_nrows,GLOBAL_Z_n_name_[nb],NULL,D->A_bmc_b,E->Z_bmr_b);
+      /* if new name */}
+    /* if load Z_n */}
+  M_mxget(E->M_Zt);
+  /* loading Y */
+  if (GLOBAL_Y_t_name_[nb]==NULL || !strcmp(GLOBAL_Y_t_name_[nb],"\0")){ bitj_tmp=D->bitj;D->Y_ncols=0;nrows_tmp=E->A_nrows;}
+  else{ binary_read_getsize(GLOBAL_Y_t_name_[nb],&bitj_tmp,&(D->Y_ncols),&nrows_tmp);}
+  if (bitj_tmp!=D->bitj || nrows_tmp!=E->A_nrows){ printf(" %% Warning! Y_: %s; improper bitj %d vs %d, nrows %d vs %d\n",GLOBAL_Y_t_name_[nb],bitj_tmp,D->bitj,nrows_tmp,E->A_nrows);}
+  if (GLOBAL_Y_t_name_[nb]==NULL || !strcmp(GLOBAL_Y_t_name_[nb],"\0")){ E->M_Yn = M_handle_v_make(D->bitj,E->A_nrows,D->Y_ncols,NULL,NULL,E->A_bmr_b,D->Y_bmc_b);}
+  else{ /* load Y_t */
+    if (0){}
+    else if (!strcmp(GLOBAL_Y_t_name_[nb],GLOBAL_A_t_name_[nb])){ /* old name: point to E->M_An */
+      if (verbose>-1){ printf(" %% dcc_single_load_M_At: nb %d: pointing E->M_Yn to E->M_An->wX\n",nb);}
+      E->M_Yn = M_handle_v_make(D->bitj,E->A_nrows,D->Y_ncols,NULL,E->M_An->wX,E->A_bmr_b,D->Y_bmc_b);
+      /* if old name */}
+    else if ( strcmp(GLOBAL_Y_t_name_[nb],GLOBAL_A_t_name_[nb])){ /* new name: load Y_t */
+      E->M_Yn = M_handle_v_make(D->bitj,E->A_nrows,D->Y_ncols,GLOBAL_Y_t_name_[nb],NULL,E->A_bmr_b,D->Y_bmc_b);
+      /* if new name */}
+    /* load Y_t */}
+  M_mxget(E->M_Yn);
+  if (GLOBAL_Y_n_name_[nb]==NULL || !strcmp(GLOBAL_Y_n_name_[nb],"\0")){ E->M_Yt = M_handle_v_make(D->bitj,D->Y_ncols,E->A_nrows,NULL,NULL,D->Y_bmc_b,E->A_bmr_b);}
+  else{ E->M_Yt = M_handle_v_make(D->bitj,D->Y_ncols,E->A_nrows,GLOBAL_Y_n_name_[nb],NULL,D->Y_bmc_b,E->A_bmr_b);} M_mxget(E->M_Yt);
+  /* loading W */
+  if (GLOBAL_W_t_name_[nb]==NULL || !strcmp(GLOBAL_W_t_name_[nb],"\0")){ bitj_tmp=D->bitj;ncols_tmp=D->Y_ncols;nrows_tmp=E->Z_nrows;}
+  else{ binary_read_getsize(GLOBAL_W_t_name_[nb],&bitj_tmp,&ncols_tmp,&nrows_tmp);}
+  if (bitj_tmp!=D->bitj || ncols_tmp!=D->Y_ncols || nrows_tmp!=E->Z_nrows){ printf(" %% Warning! W_: %s; improper bitj %d vs %d, ncols %d vs %d, nrows %d vs %d\n",GLOBAL_W_t_name_[nb],bitj_tmp,D->bitj,ncols_tmp,D->Y_ncols,nrows_tmp,E->Z_nrows);}
+  if (GLOBAL_W_t_name_[nb]==NULL || !strcmp(GLOBAL_W_t_name_[nb],"\0")){ E->M_Wn = M_handle_v_make(D->bitj,E->Z_nrows,D->Y_ncols,NULL,NULL,E->Z_bmr_b,D->Y_bmc_b);}
+  else{ /* load W_t */
+    if (0){}
+    else if (!strcmp(GLOBAL_W_t_name_[nb],GLOBAL_Z_t_name_[nb])){ /* old name: point to E->M_Zn */
+      if (verbose>-1){ printf(" %% dcc_single_load_M_At: nb %d: pointing E->M_Wn to E->M_Zn->wX\n",nb);}
+      E->M_Wn = M_handle_v_make(D->bitj,E->Z_nrows,D->Y_ncols,NULL,E->M_Zn->wX,E->Z_bmr_b,D->Y_bmc_b);
+      /* if old name */}
+    else if ( strcmp(GLOBAL_W_t_name_[nb],GLOBAL_Z_t_name_[nb])){ /* new name: load W_t */
+      E->M_Wn = M_handle_v_make(D->bitj,E->Z_nrows,D->Y_ncols,GLOBAL_W_t_name_[nb],NULL,E->Z_bmr_b,D->Y_bmc_b);
+      /* if new name */}
+    /* load W_t */}
+  M_mxget(E->M_Wn);
+  if (GLOBAL_W_n_name_[nb]==NULL || !strcmp(GLOBAL_W_n_name_[nb],"\0")){ E->M_Wt = M_handle_v_make(D->bitj,D->Y_ncols,E->Z_nrows,NULL,NULL,D->Y_bmc_b,E->Z_bmr_b);}
+  else{ /* load W_n */
+    if (0){}
+    else if (!strcmp(GLOBAL_W_n_name_[nb],GLOBAL_Y_n_name_[nb])){ /* old name: point to E->M_Yt */
+      if (verbose>-1){ printf(" %% dcc_single_load_M_At: nb %d: pointing E->M_Wt to E->M_Yt->wX\n",nb);}
+      E->M_Wt = M_handle_v_make(D->bitj,D->Y_ncols,E->Z_nrows,NULL,E->M_Yt->wX,D->Y_bmc_b,E->Z_bmr_b);
+      /* if old name */}
+    else if ( strcmp(GLOBAL_W_n_name_[nb],GLOBAL_Y_n_name_[nb])){ /* new name: load W_n */
+      E->M_Wt = M_handle_v_make(D->bitj,D->Y_ncols,E->Z_nrows,GLOBAL_W_n_name_[nb],NULL,D->Y_bmc_b,E->Z_bmr_b);
+      /* if new name */}    
+    /* load W_n */}
+  M_mxget(E->M_Wt);
+  /* loading T */
+  if (GLOBAL_T_t_name_[nb]==NULL || !strcmp(GLOBAL_T_t_name_[nb],"\0")){ bitj_tmp=D->bitj;D->T_ncols=1;nrows_tmp=E->A_nrows;}
+  else{ binary_read_getsize(GLOBAL_T_t_name_[nb],&bitj_tmp,&(D->T_ncols),&nrows_tmp);}
+  if (bitj_tmp!=D->bitj || nrows_tmp!=E->A_nrows){ printf(" %% Warning! T_: %s; improper bitj %d vs %d, nrows %d vs %d\n",GLOBAL_T_t_name_[nb],bitj_tmp,D->bitj,nrows_tmp,E->A_nrows);}
+  if (GLOBAL_T_t_name_[nb]==NULL || !strcmp(GLOBAL_T_t_name_[nb],"\0")){ 
+    bitj_tmp = BITJ; nrows_tmp = 1; ncols_tmp = E->A_nrows; nrows_tmp_extend = (bitj_tmp - (nrows_tmp % bitj_tmp)) % bitj_tmp; brows_tmp = bsize(nrows_tmp)/* (rup(nrows_tmp + nrows_tmp_extend,POPLENGTH))/BIT8 */;
+    bXra_tmp = wkspace_all0c(ncols_tmp*brows_tmp); for (nc=0;nc<ncols_tmp;nc++){ bXra_tmp[nc*brows_tmp] |=  (1 << 7);}
+    E->M_Tn = M_handle_v_make(D->bitj,E->A_nrows,D->T_ncols,NULL,bXra_tmp,E->A_bmr_b,D->T_bmc_b);}
+  else{ E->M_Tn = M_handle_v_make(D->bitj,E->A_nrows,D->T_ncols,GLOBAL_T_t_name_[nb],NULL,E->A_bmr_b,D->T_bmc_b);} M_mxget(E->M_Tn);
+  if (GLOBAL_T_n_name_[nb]==NULL || !strcmp(GLOBAL_T_n_name_[nb],"\0")){ 
+    bitj_tmp = BITJ; nrows_tmp = E->A_nrows; ncols_tmp = 1; nrows_tmp_extend = (bitj_tmp - (nrows_tmp % bitj_tmp)) % bitj_tmp; brows_tmp = bsize(nrows_tmp)/* (rup(nrows_tmp + nrows_tmp_extend,POPLENGTH))/BIT8 */;
+    bXra_tmp = wkspace_all0c(ncols_tmp*brows_tmp); for (nr=0;nr<nrows_tmp;nr++){ bset__on(bXra_tmp,nr);}
+    E->M_Tt = M_handle_v_make(D->bitj,D->T_ncols,E->A_nrows,NULL,bXra_tmp,D->T_bmc_b,E->A_bmr_b);}
+  else{ E->M_Tt = M_handle_v_make(D->bitj,D->T_ncols,E->A_nrows,GLOBAL_T_n_name_[nb],NULL,D->T_bmc_b,E->A_bmr_b);} M_mxget(E->M_Tt);
+  /* loading S */
+  if (GLOBAL_S_t_name_[nb]==NULL || !strcmp(GLOBAL_S_t_name_[nb],"\0")){ bitj_tmp=D->bitj;ncols_tmp=D->T_ncols;nrows_tmp=E->Z_nrows;}
+  else{ binary_read_getsize(GLOBAL_S_t_name_[nb],&bitj_tmp,&ncols_tmp,&nrows_tmp);}
+  if (bitj_tmp!=D->bitj || ncols_tmp!=D->T_ncols || nrows_tmp!=E->Z_nrows){ printf(" %% Warning! S_: %s; improper bitj %d vs %d, ncols %d vs %d, nrows %d vs %d\n",GLOBAL_S_t_name_[nb],bitj_tmp,D->bitj,ncols_tmp,D->T_ncols,nrows_tmp,E->Z_nrows);}
+  if (GLOBAL_S_t_name_[nb]==NULL || !strcmp(GLOBAL_S_t_name_[nb],"\0")){ 
+    bitj_tmp = BITJ; nrows_tmp = 1; ncols_tmp = E->Z_nrows; nrows_tmp_extend = (bitj_tmp - (nrows_tmp % bitj_tmp)) % bitj_tmp; brows_tmp = bsize(nrows_tmp)/* (rup(nrows_tmp + nrows_tmp_extend,POPLENGTH))/BIT8 */;
+    bXra_tmp = wkspace_all0c(ncols_tmp*brows_tmp); for (nc=0;nc<ncols_tmp;nc++){ bXra_tmp[nc*brows_tmp] |=  (1 << 7);}
+    E->M_Sn = M_handle_v_make(D->bitj,E->Z_nrows,D->T_ncols,NULL,bXra_tmp,E->Z_bmr_b,D->T_bmc_b);}
+  else{ E->M_Sn = M_handle_v_make(D->bitj,E->Z_nrows,D->T_ncols,GLOBAL_S_t_name_[nb],NULL,E->Z_bmr_b,D->T_bmc_b);} M_mxget(E->M_Sn);
+  if (GLOBAL_S_n_name_[nb]==NULL || !strcmp(GLOBAL_S_n_name_[nb],"\0")){ 
+    bitj_tmp = BITJ; nrows_tmp = E->Z_nrows; ncols_tmp = 1; nrows_tmp_extend = (bitj_tmp - (nrows_tmp % bitj_tmp)) % bitj_tmp; brows_tmp = bsize(nrows_tmp)/* (rup(nrows_tmp + nrows_tmp_extend,POPLENGTH))/BIT8 */;
+    bXra_tmp = wkspace_all0c(ncols_tmp*brows_tmp); for (nr=0;nr<nrows_tmp;nr++){ bset__on(bXra_tmp,nr);}
+    E->M_St = M_handle_v_make(D->bitj,D->T_ncols,E->Z_nrows,NULL,bXra_tmp,D->T_bmc_b,E->Z_bmr_b);}
+  else{ E->M_St = M_handle_v_make(D->bitj,D->T_ncols,E->Z_nrows,GLOBAL_S_n_name_[nb],NULL,D->T_bmc_b,E->Z_bmr_b);} M_mxget(E->M_St);
+  E->QR_TYnWtS_nrm = NULL; E->QR_TAnZtS_nrm = NULL; E->QR_TYnYtT_nrm = NULL; E->QR_TAnAtT_nrm = NULL; E->QR_index_global_mr_a=NULL; E->QR_index_global_mr_b=NULL;
+  if (verbose){ printf(" %% [finished dcc_single_load_M_An]\n");}
+}
+
+void dcc_single_load_M_An_bkp(struct dcc_single *E)
 {
   /* load from file */
   int verbose=0;
@@ -1015,7 +1185,7 @@ void dcc_load(struct dcc_ajdk **D_p,struct dcc_single ***E_p,struct dcc_double *
   if (verbose){ printf(" %% finished dcc_ajdk_load: "); wkspace_printf();}
   for (nb1=0;nb1<nbins;nb1++){ E = (*E_p)[nb1];
     if (verbose){ printf(" %% calling dcc_single_load_M_An for nb1 %d: \n",nb1);} 
-    dcc_single_load_M_An(E);
+    dcc_single_load_M_An(E,(*E_p)[0]);
     if (verbose){ printf(" %% finished dcc_single_load_M_An for nb1 %d: ",nb1); wkspace_printf();}
     /* for (nb1=0;nb1<nbins;nb1++){ } */}
   if (verbose){ printf(" %% calling dcc_X_nrows_total: \n");}
