@@ -21,6 +21,9 @@ end;%if nargin<2;
 
 if nargin<3; gamma = 0.0; end;
 
+if (0); 
+elseif (lrij> lcij); [cdrop,rdrop] = get_xdrop(lcij,lrij,gamma);
+elseif (lrij<=lcij); 
 verbose=0; 
 dbl1=1.000000-0.000001; %<-- same tolerance used by lakcluster. ;
 gamma_tmp_row=0;
@@ -53,3 +56,5 @@ if (verbose>0); disp(sprintf(' %% gamma_tmp_row %0.3f ammag_tmp_row %0.3f rdrop 
 end;%if lrij>2;
 
 if (verbose); disp(sprintf(' %% [finished get_xdrop] rdrop %d cdrop %d',rdrop,cdrop)); end;
+
+end;%elseif (lrij<=lcij); 
