@@ -23,7 +23,7 @@ tic;
 t_s = toc;
 for na=1:n_a;
 if (verbose);
-if (mod(na,10)==0); 
+if (mod(na,1024)==0); 
 t_a = toc; t_e = t_a*n_a/na; 
 disp(sprintf(' %% na %d/%d, time %0.2fs, estimated %0.2fs (%0.2fh)',na,n_a,t_a,t_e,t_e/3600)); 
 end;%if (mod(na,10)==0); 
