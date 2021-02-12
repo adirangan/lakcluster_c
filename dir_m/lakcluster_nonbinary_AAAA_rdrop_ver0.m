@@ -7,8 +7,8 @@ if nargin<2; gamma = 0.0; end;
 verbose=1;
 [n_r,n_c] = size(A_n_0in_);
 
-[rdrop_,cdrop_,lrij_,lcij_] = get_xdrop_(n_r,n_c,gamma);
-cdrop_ = zeros(size(cdrop_)); %<-- we do not drop any columns. ;
+[rdrop_,cdrop_,lrij_,lcij_] = get_xdrop_(n_r,max(n_r,n_c),gamma);
+cdrop_ = zeros(1,n_c); %<-- we do not drop any columns. ;
 r_ij_ = 1:n_r; c_ij_ = 1:n_c;
 n_a = length(rdrop_);
 A_n_ = A_n_0in_; %<-- copy will be destroyed. ;
