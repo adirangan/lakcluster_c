@@ -44,7 +44,7 @@ etAn_(c_ij_) = etAn_(c_ij_) - tmp_etxn_; etAn2_(c_ij_) = etAn2_(c_ij_) - tmp_etx
 QC_pos_ = zeros(1,n_c); QC_pos_(c_ij_) = QC_pre_(c_ij_) - (2*tmp_etwn_.*tmp_etxn_ + tmp_etxn_.^2 - tmp_etxn2_);
 QC_pre_ = QC_pos_;
 [~,tmp_c_ij_] = sort(QC_pre_(c_ij_));
-c_rmv_ = c_ij_(tmp_c_ij_(1:cdrop_(na))); c_rtn_ = c_ij_(tmp_c_ij_(cdrop_(na)+1:end));
+c_rmv_ = []; c_rtn_ = c_ij_; %c_rmv_ = c_ij_(tmp_c_ij_(1:cdrop_(na))); c_rtn_ = c_ij_(tmp_c_ij_(cdrop_(na)+1:end));
 tmp_w_n_ = A_n_(r_rtn_,c_rtn_); tmp_y_n_ = A_n_(r_rtn_,c_rmv_);
 tmp_x_n_ = A_n_(r_rmv_,c_rtn_); tmp_z_n_ = A_n_(r_rmv_,c_rmv_);
 tmp_ynyten_ = tmp_y_n_*(transpose(sum(tmp_y_n_,1)));
@@ -56,7 +56,7 @@ QR_pre_ = QR_pos_;
 etAn_(c_rmv_) = 0; etAn2_(c_rmv_) = 0;
 QC_pre_(c_rmv_) = 0;
 r_ij_(tmp_r_ij_(1:rdrop_(na))) = [];
-c_ij_(tmp_c_ij_(1:cdrop_(na))) = [];
+c_ij_ = c_ij_; %c_ij_(tmp_c_ij_(1:cdrop_(na))) = [];
 out_xdrop_(nx + (1:rdrop_(na)),:) = [r_rmv_(:)-1 , -ones(rdrop_(na),1)]; nx = nx+rdrop_(na);
 %out_xdrop_(nx + (1:cdrop_(na)),:) = [-ones(cdrop_(na),1) , c_rmv_(:)-1]; nx = nx+cdrop_(na);
 end;%for na=1:n_a;
