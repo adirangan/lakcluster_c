@@ -270,9 +270,9 @@ void dcc_lf_TAnZtS_ww(struct dcc_ajdk *D)
   int nbins = D->nbins; struct dcc_single **E_ = D->E_; struct dcc_double **F_ = D->F_;
   int nb1=0,nb2=0,nbx=0; struct dcc_single *E_nb1=NULL,*E_nb2=NULL; struct dcc_double *F=NULL;
   if (verbose){ printf(" %% [entering dcc_TAnZtS_ww]\n");}
-  dcc_TAnZtS_ww_stage_0(D);
-  dcc_TAnZtS_ww_stage_1(D);
-  dcc_TAnZtS_ww_stage_2(D);
+  GLOBAL_tic(5); dcc_TAnZtS_ww_stage_0(D); GLOBAL_toc(5,0+verbose," %% dcc_TAnZtS_ww_stage_0: ");
+  GLOBAL_tic(5); dcc_TAnZtS_ww_stage_1(D); GLOBAL_toc(5,0+verbose," %% dcc_TAnZtS_ww_stage_1: ");
+  GLOBAL_tic(5); dcc_TAnZtS_ww_stage_2(D); GLOBAL_toc(5,0+verbose," %% dcc_TAnZtS_ww_stage_2: ");
   if (verbose>2){  
     for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; F = F_[nbx]; E_nb1 = F->E_nb1; E_nb2 = F->E_nb2;
 	printf(" %% nb1 %d nb2 %d\n",nb1,nb2);

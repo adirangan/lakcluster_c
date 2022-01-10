@@ -325,6 +325,56 @@ void dcc_TAnZtS_ww_stage_1(struct dcc_ajdk *D)
   if (verbose){ printf(" %% [finished dcc_TAnZtS_ww_stage_1]\n");}
 }
 
+void dcc_TAnZtS_uu_stage_1(struct dcc_ajdk *D)
+{
+  int verbose=GLOBAL_verbose;
+  int nbins = D->nbins; struct dcc_single **E_ = D->E_; struct dcc_double **F_ = D->F_;
+  int nb1=0,nb2=0,nbx=0; struct dcc_single *E=NULL,*E_nb1=NULL,*E_nb2=NULL; struct dcc_double *F=NULL;
+  int n_spacing_A = SPACING_a;
+  struct L_handle *lf_tmp=NULL;
+  if (verbose){ printf(" %% [entering dcc_TAnZtS_uu_stage_1]\n");}
+  if (verbose){ printf(" %% calculating TAnZtS_uu_stage_1.\n");}
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  GLOBAL_tic(0);
+  for (nb1=0;nb1<nbins;nb1++){ E = E_[nb1];
+    if (E->Z_rbother && D->Y_cbother){ An_a0d1_ZtSn_excerpt(E->M_Wt,E->M_St,D->Y_ajdk,E->lf_WtSn,E->lf_a0d1_WtSn);}
+    if (E->Z_rbother && D->A_cbother){ An_a0d1_ZtSn_excerpt(E->M_Zt,E->M_St,D->A_ajdk,E->lf_ZtSn,E->lf_a0d1_ZtSn);}
+    if (E->A_rbother && D->Y_cbother){ An_a0d1_ZtSn_excerpt(E->M_Yt,E->M_Tt,D->Y_ajdk,E->lf_YtTn,E->lf_a0d1_YtTn);}
+    if (E->A_rbother && D->A_cbother){ An_a0d1_ZtSn_excerpt(E->M_At,E->M_Tt,D->A_ajdk,E->lf_AtTn,E->lf_a0d1_AtTn);}
+    /* for (nb1=0;nb1<nbins;nb1++){ } */}
+  GLOBAL_toc(0,verbose," %% a0d1_ZtSn a0d1_AtTn: ");
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  GLOBAL_tic(0); GLOBAL_ops_reset_all(); GLOBAL_ops_f_sum=0; GLOBAL_ops_b_sum=0;
+  GLOBAL_nf_cur=0; GLOBAL_nf_opn=0;
+  for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ nbx = nb1+nb2*nbins; E_nb1 = E_[nb1]; E_nb2 = E_[nb2]; F = F_[nbx];
+      lf_tmp = F->lf_Yn_a0d1_WtSn; lf_tmp->row_stride = F->E_nb1->A_nrows; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = D->T_ncols; lf_tmp->spacing_col = SPACING_a; L_zero(lf_tmp);
+      lf_tmp = F->lf_An_a0d1_ZtSn; lf_tmp->row_stride = F->E_nb1->A_nrows; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = D->T_ncols; lf_tmp->spacing_col = SPACING_a; L_zero(lf_tmp);
+      lf_tmp = F->lf_Yn_a0d1_YtTn; lf_tmp->row_stride = F->E_nb1->A_nrows; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = D->T_ncols; lf_tmp->spacing_col = SPACING_a; L_zero(lf_tmp);
+      lf_tmp = F->lf_An_a0d1_AtTn; lf_tmp->row_stride = F->E_nb1->A_nrows; lf_tmp->spacing_row = SPACING_a; lf_tmp->col_stride = D->T_ncols; lf_tmp->spacing_col = SPACING_a; L_zero(lf_tmp);
+      if (E_nb1->A_rbother && D->Y_cbother && E_nb2->Z_rbother && D->Y_cbother){
+	GLOBAL_pthread_tic();
+	wrap_An_ZtSn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yn,E_nb2->lf_a0d1_WtSn,E_nb2->M_St,&(F->lf_Yn_a0d1_WtSn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E_nb1->A_rbother && D->A_cbother && E_nb2->Z_rbother && D->A_cbother){
+	GLOBAL_pthread_tic();
+	wrap_An_ZtSn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->lf_a0d1_ZtSn,E_nb2->M_St,&(F->lf_An_a0d1_ZtSn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E_nb1->A_rbother && D->Y_cbother && E_nb2->A_rbother && D->Y_cbother){
+	GLOBAL_pthread_tic();
+	wrap_An_ZtSn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_Yn,E_nb2->lf_a0d1_YtTn,E_nb2->M_Tt,&(F->lf_Yn_a0d1_YtTn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      if (E_nb1->A_rbother && D->A_cbother && E_nb2->A_rbother && D->A_cbother){
+	GLOBAL_pthread_tic();
+	wrap_An_ZtSn_uu__run(&(GLOBAL_tint[GLOBAL_nf_cur]),GLOBAL_tvp[GLOBAL_nf_cur],&(GLOBAL_threads[GLOBAL_nf_cur]),n_spacing_A,n_spacing_A,E_nb1->M_An,E_nb2->lf_a0d1_AtTn,E_nb2->M_Tt,&(F->lf_An_a0d1_AtTn));
+	GLOBAL_pthread_toc(); /* if bother */}
+      /* for (nb1=0;nb1<nbins;nb1++){ for (nb2=0;nb2<nbins;nb2++){ }} */}}
+  GLOBAL_pthread_tuc();
+  GLOBAL_ops_addup_all(); GLOBAL_ops_printf_all(verbose," %% F->lf_Yn_a0d1_WtSn F->lf_An_a0d1_ZtSn F->lf_Yn_a0d1_YtTn F->lf_An_a0d1_AtTn: ");
+  GLOBAL_ops_toc(-1,0,verbose," %% total time: ");
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  if (verbose){ printf(" %% [finished dcc_TAnZtS_uu_stage_1]\n");}
+}
+
 /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
 void *get_dcc_TAnZtS_ww_stage_2(void *vp)

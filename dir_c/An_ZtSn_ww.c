@@ -114,6 +114,9 @@ int wrap_An_ZtSn_ww__run(int *tidx,void **vpra,pthread_t *thread_in,int spacing_
    */
   int verbose=0;
   unsigned long long int length_a=0,length_s=0,length=0,ip=0;
+  struct M_handle *tmp_M=NULL;
+  struct L_handle *tmp_L=NULL;
+  char tmpchar[FNAMESIZE];
   if (verbose){ printf(" %% [entering wrap_An_ZtSn_ww__run] tidx %d\n",*tidx);}
   if (verbose){ M_handle_printf(M_An,verbose," %% M_An: ");}
   if (verbose){ M_handle_printf(M_St,verbose," %% M_St: ");}
@@ -131,6 +134,16 @@ int wrap_An_ZtSn_ww__run(int *tidx,void **vpra,pthread_t *thread_in,int spacing_
   if (*output_An_ZtSn_ww_p==NULL){ if (verbose){ printf(" %% allocating output size %llu*%d\n",length,(int)sizeof(double));} *output_An_ZtSn_ww_p = L_handle_make(length);}
   if ((*output_An_ZtSn_ww_p)->length<length){ printf(" %% Warning! length %llu<%llu in wrap_An_ZtSn_ww__run\n",(*output_An_ZtSn_ww_p)->length,length);}
   memset((*output_An_ZtSn_ww_p)->lf,0,length*sizeof(double));
+  if (verbose>2){
+    tmp_M = M_An; sprintf(tmpchar,"M_An");
+    if (tmp_M!=NULL){ printf(" %% %s: nr_a %d nc_a %d rpop_b %d(%d) cpop_b %d(%d)\n",tmpchar,tmp_M->nrows,tmp_M->ncols,(int)tmp_M->rpop_b,(int)tmp_M->rpop_j,(int)tmp_M->cpop_b,(int)tmp_M->cpop_j);}
+    tmp_M = M_St; sprintf(tmpchar,"M_St");
+    if (tmp_M!=NULL){ printf(" %% %s: nr_a %d nc_a %d rpop_b %d(%d) cpop_b %d(%d)\n",tmpchar,tmp_M->nrows,tmp_M->ncols,(int)tmp_M->rpop_b,(int)tmp_M->rpop_j,(int)tmp_M->cpop_b,(int)tmp_M->cpop_j);}
+    tmp_M = M_ZtSn; sprintf(tmpchar,"M_ZtSn");
+    if (tmp_M!=NULL){ printf(" %% %s: nr_a %d nc_a %d rpop_b %d(%d) cpop_b %d(%d) (ncols_per_z %d)\n",tmpchar,tmp_M->nrows,tmp_M->ncols,(int)tmp_M->rpop_b,(int)tmp_M->rpop_j,(int)tmp_M->cpop_b,(int)tmp_M->cpop_j,(int)tmp_M->ncols_per_z);}
+    tmp_L = lf_ZtSn; sprintf(tmpchar,"lf_ZtSn");
+    if (tmp_L!=NULL){ printf(" %% %s: length %lld spacing_row %d row_stride %d spacing_col %d col_stride %d spacing_lyr %d lyr_stride %d\n",tmpchar,tmp_L->length,(int)tmp_L->spacing_row,(int)tmp_L->row_stride,(int)tmp_L->spacing_col,(int)tmp_L->col_stride,(int)tmp_L->spacing_lyr,(int)tmp_L->lyr_stride);}
+    /* if (verbose>2){ } */}
   ip=0; vpra[ip++] = tidx; vpra[ip++] = M_An; vpra[ip++] = lf_ZtSn; vpra[ip++] = M_ZtSn; vpra[ip++] = M_St; vpra[ip++] = *output_An_ZtSn_ww_p;
   switch (spacing_a){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (spacing_a){ } */}
   switch (spacing_s){ case SPACING_j: vpra[ip++] = &addressable_spacing_j; break; case SPACING_b: vpra[ip++] = &addressable_spacing_b; break; case SPACING_a: vpra[ip++] = &addressable_spacing_a; break; default: break; /* switch (spacing_s){ } */}
