@@ -204,12 +204,12 @@ bed_to_b16_flip_ver7( ...
 str_tmp = sprintf('%s_maf%.2d',str_output_prefix,floor(100*parameter.maf_cutoff));
 str_output_prefix_local = sprintf('%s_',str_tmp);
 dir_out = sprintf('%s/dir_%s',parameter.dir_trunk,str_tmp);
-if (verbose>0); disp(sprintf('%% str_output_prefix_local %s ;\n%% dir_out %s ;\n',str_output_prefix_local,dir_out)); end;
+if (verbose>0); disp(sprintf(' %% str_output_prefix_local %s ;\n %% dir_out %s ;\n',str_output_prefix_local,dir_out)); end;
 
 
-fn_An_full = sprintf('%s/%sA_full_n.b16',dir_out,str_output_prefix_local); An_full__ = binary_uncompress(fn_An_full);
-fn_At_full = sprintf('%s/%sA_full_t.b16',dir_out,str_output_prefix_local); At_full__ = binary_uncompress(fn_At_full);
-if (verbose>0); disp(sprintf(' %% An_full__ vs At_full__: %0.16f',fnorm(An_full__-transpose(At_full__)))); end;
+fn_A_full_n = sprintf('%s/%sA_full_n.b16',dir_out,str_output_prefix_local); A_full_n__ = binary_uncompress(fn_A_full_n);
+fn_A_full_t = sprintf('%s/%sA_full_t.b16',dir_out,str_output_prefix_local); A_full_t__ = binary_uncompress(fn_A_full_t);
+if (verbose>0); disp(sprintf(' %% A_full_n__ vs A_full_t__: %0.16f',fnorm(A_full_n__-transpose(A_full_t__)))); end;
 fn_famext = sprintf('%s/%sfam.ext',dir_out,str_output_prefix_local);
 [ ...
  n_patient_ext ...
@@ -270,7 +270,7 @@ tmp_bim_ext_al2 = bimext_al2_(1+nsnp_ext);
 tmp_bim_ext_alt = bimext_alt_{1+nsnp_ext};
 tmp_bim_cup_al1 = bim_cup_al1_{1+nsnp_cup};
 tmp_bim_cup_al2 = bim_cup_al2_{1+nsnp_cup};
-tmp_b16_full_ = An_full__(1+index_fam_ext_from_cap_,1+nsnp_ext)>0;
+tmp_b16_ext_ = A_full_n__(1+index_fam_ext_from_cap_,1+nsnp_ext)>0;
 tmp_dsg_cup_ = dsg_cup_ps__(1+index_fam_cup_from_cap_,1+nsnp_cup);
 tmp_b16_cup_ = zeros(n_patient_ext,1);
 tmp_flip = ( (tmp_bim_ext_al1=='A') | (tmp_bim_ext_al1=='T') );
@@ -286,12 +286,34 @@ if (~isempty(strfind(tmp_bim_ext_alt,'xor'))); tmp_b16_cup_ = tmp_dsg_cup_==1; e
 if (~isempty(strfind(tmp_bim_ext_alt,'and'))); tmp_b16_cup_ = tmp_dsg_cup_==0; end;
 n_flip = n_flip + 1;
 end;%if tmp_flip==1;
-tmp_error = fnorm(tmp_b16_cup_ - tmp_b16_full_);
+tmp_error = fnorm(tmp_b16_cup_ - tmp_b16_ext_);
 error_sum = error_sum + tmp_error;
 end;%for nsnp_ext=0:n_snp_ext-1;
 disp(sprintf(' %% n_keep %0.4d n_flip %0.4d error_sum: %0.16f',n_keep,n_flip,error_sum));
 disp(sprintf(' %% max ent: %0.6f vs ent_cutoff %0.6f',max(bimext_ent_),parameter.ent_cutoff));
 disp(sprintf(' %% min maf: %0.6f vs maf_cutoff %0.6f',min(bimext_maf_),parameter.maf_cutoff));
+%%%%%%%%;
+
+%%%%%%%%;
+figure(1);clf;figbig;fig80s;
+p_row = 2; p_col = 5; np=0;
+tmp_mds_cup__ = mds_pv__(1+index_fam_cup_from_cap_,1:2);
+for nx=1:4;
+fn_T_m2rx_full_n = sprintf('%s/%sT_m2r%d_full_n.b16',dir_out,str_output_prefix_local,nx); T_m2rx_full_n__ = binary_uncompress(fn_T_m2rx_full_n);
+fn_T_m2rx_full_t = sprintf('%s/%sT_m2r%d_full_t.b16',dir_out,str_output_prefix_local,nx); T_m2rx_full_t__ = binary_uncompress(fn_T_m2rx_full_t);
+if (verbose>0); disp(sprintf(' %% T_m2rx_full_n__ vs T_m2rx_full_t__: %0.16f',fnorm(T_m2rx_full_n__-transpose(T_m2rx_full_t__)))); end;
+for nr=0:nx-1;
+tmp_mds_ext__ = T_m2rx_full_n__(1+index_fam_ext_from_cap_,1+nr*2+[1:2]);
+tmp_mds_ext_sec_ = (tmp_mds_ext__>0)*[1;2];
+subplot(p_row,p_col,1+np); np=np+1;
+scatter(tmp_mds_cup__(:,1+0),tmp_mds_cup__(:,1+1),6,tmp_mds_ext_sec_,'filled'); 
+axis equal; axisnotick;
+title(sprintf('nr %d/%d',nr,nx));
+end;%for nr=0:nx-1;
+end;%for nx=1:4;
+%%%%%%%%;
+
+
 
 if (verbose); disp(sprintf(' %% [finished test_bed_to_b16_flip_ver7]')); end;
 

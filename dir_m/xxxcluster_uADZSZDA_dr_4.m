@@ -6,11 +6,11 @@ xxxcluster_uADZSZDA_dr_4( ...
  parameter ...
 ,str_prefix ...
 ,M_n_ ...
-,A_n_rind_ ...
-,A_n_cind ...
-,Z_n_rind_ ...
+,A_n_rij_ ...
+,A_n_cij ...
+,Z_n_rij_ ...
 ,T_n_ ...
-,T_n_cind ...
+,T_n_cij ...
 );
 % removing references to Z and S if empty. ;
 % test with: ;
@@ -26,20 +26,20 @@ na=0;
 if (nargin<1+na); parameter=[]; end; na=na+1;
 if (nargin<1+na); str_prefix=[]; end; na=na+1;
 if (nargin<1+na); M_n_=[]; end; na=na+1;
-if (nargin<1+na); A_n_rind_=[]; end; na=na+1;
-if (nargin<1+na); A_n_cind=[]; end; na=na+1;
-if (nargin<1+na); Z_n_rind_=[]; end; na=na+1;
+if (nargin<1+na); A_n_rij_=[]; end; na=na+1;
+if (nargin<1+na); A_n_cij=[]; end; na=na+1;
+if (nargin<1+na); Z_n_rij_=[]; end; na=na+1;
 if (nargin<1+na); T_n_=[]; end; na=na+1;
-if (nargin<1+na); T_n_cind=[]; end; na=na+1;
+if (nargin<1+na); T_n_cij=[]; end; na=na+1;
 
 if isempty(parameter); parameter = struct('type','parameter'); end;
 if isempty(str_prefix); str_prefix = 'test'; end;
 if isempty(M_n_); M_n_ = {randn(1024,1024)}; end;
-if isempty(A_n_rind_); A_n_rind_ = {[1+0*512+[0:511]]}; end;
-if isempty(A_n_cind); A_n_cind = [1:512]; end;
-if isempty(Z_n_rind_); Z_n_rind_ = {[1+1*512+[0:511]]}; end;
+if isempty(A_n_rij_); A_n_rij_ = {[1+0*512+[0:511]]}; end;
+if isempty(A_n_cij); A_n_cij = [1:512]; end;
+if isempty(Z_n_rij_); Z_n_rij_ = {[1+1*512+[0:511]]}; end;
 if isempty(T_n_); T_n_ = {ones(1024,1)}; end;
-if isempty(T_n_cind); T_n_cind = 1; end;
+if isempty(T_n_cij); T_n_cij = 1; end;
 
 if ~isfield(parameter,'tolerance_master'); parameter.tolerance_master = 10^(-9.5); end;
 if ~isfield(parameter,'flag_verbose'); parameter.flag_verbose = 0; end;
@@ -99,22 +99,22 @@ A_n_cols ...
 xxxcluster_uADZSZDA_check_1( ...
  shuffle_num ...
 ,M_n_ ...
-,A_n_rind_ ...
-,A_n_cind ...
-,Z_n_rind_ ...
+,A_n_rij_ ...
+,A_n_cij ...
+,Z_n_rij_ ...
 ,T_n_ ...
-,T_n_cind ...
+,T_n_cij ...
 );
 
 bitj = 16;
 
 Z_bother = 0;
 for nb1=0:nbins-1;
-if (length(Z_n_rind_{1+nb1})>0); Z_bother = 1; end;
+if (length(Z_n_rij_{1+nb1})>0); Z_bother = 1; end;
 end;%for nb1=0:nbins-1;
 if ~Z_bother; flag_reverse = 0; end;
 
-str_out_suffix = sprintf('%s_%s',str_prefix,xxxcluster_uADZSZDA_xfix_gen_ver1(str_lak_vs_dex,flag_reverse,A_n_rind_,Z_n_rind_,T_n_cind,GLOBAL_TEST_sparse,gamma,B_MLT,Ireq,shuffle_num));
+str_out_suffix = sprintf('%s_%s',str_prefix,xxxcluster_uADZSZDA_xfix_gen_ver1(str_lak_vs_dex,flag_reverse,A_n_rij_,Z_n_rij_,T_n_cij,GLOBAL_TEST_sparse,gamma,B_MLT,Ireq,shuffle_num));
 dir_0in = sprintf('%s/dir_%s',dir_trunk,str_prefix);
 dir_out = sprintf('%s/dir_%s',dir_0in,str_out_suffix); 
 disp(sprintf(' str_out_suffix: %s',str_out_suffix));
@@ -138,14 +138,14 @@ dir_out_plus_prefix = sprintf('%s/%s',dir_out,str_out_suffix);
 
 for nb1=0:nbins-1;
 mr_M = zeros(size(M_n_{1+nb1},1),1);
-mr_A_ori_{1+nb1} = mr_M; mr_A_ori_{1+nb1}(A_n_rind_{1+nb1})=1;
+mr_A_ori_{1+nb1} = mr_M; mr_A_ori_{1+nb1}(A_n_rij_{1+nb1})=1;
 tmpchar = sprintf('%s_mr_A_%d.b16',dir_out_plus_prefix,0+nb1); 
 if (flag_force_create | ~exist(tmpchar,'file'));
 disp(sprintf(' %% creating %s of size %d-x-%d',tmpchar,length(mr_A_ori_{1+nb1}),1)); 
 binary_compress(bitj,mr_A_ori_{1+nb1}(:)>0,tmpchar);
 end;% if exist;
 if Z_bother;
-mr_Z_ori_{1+nb1} = mr_M; mr_Z_ori_{1+nb1}(Z_n_rind_{1+nb1})=1;
+mr_Z_ori_{1+nb1} = mr_M; mr_Z_ori_{1+nb1}(Z_n_rij_{1+nb1})=1;
 tmpchar = sprintf('%s_mr_Z_%d.b16',dir_out_plus_prefix,0+nb1); 
 if (flag_force_create | ~exist(tmpchar,'file'));
 disp(sprintf(' %% creating %s of size %d-x-%d',tmpchar,length(mr_Z_ori_{1+nb1}),1)); 
@@ -156,7 +156,7 @@ end;%for nb1=0:nbins-1;
 
 if (shuffle_num>0); % performing covariate-respecting shuffle ;
 if Z_bother;
-[mr_A_prm_,mr_Z_prm_] = xxxcluster_uADZSZDA_shuffle_2(shuffle_num,M_n_,A_n_rind_,A_n_cind,Z_n_rind_,T_n_,T_n_cind);
+[mr_A_prm_,mr_Z_prm_] = xxxcluster_uADZSZDA_shuffle_2(shuffle_num,M_n_,A_n_rij_,A_n_cij,Z_n_rij_,T_n_,T_n_cij);
 for nb1=0:nbins-1;
 tmpchar = sprintf('%s_mr_A_%d.b16',dir_out_plus_prefix,0+nb1); binary_compress(bitj,mr_A_prm_{1+nb1}(:)>0,tmpchar);
 if Z_bother;
@@ -194,10 +194,10 @@ tmpchar = sprintf('%s_T_%d_t.b16',dir_0in_plus_prefix,0+nb1);
 if (flag_force_create | ~exist(tmpchar,'file')); disp(sprintf(' %% creating %s of size %d-x-%d',tmpchar,size(transpose(T_n_{1+nb1})))); binary_compress(bitj,transpose(T_n_{1+nb1}>0),tmpchar); else; disp(sprintf(' %% file %s already exists, not creating.',tmpchar)); end;
 end;%for nb1=0:nbins-1;
 
-% write A_n_cind and T_n_cind ;
-mc_A = zeros(A_n_cols,1); mc_A(A_n_cind)=1;
+% write A_n_cij and T_n_cij ;
+mc_A = zeros(A_n_cols,1); mc_A(A_n_cij)=1;
 tmpchar = sprintf('%s_mc_A.b16',dir_out_plus_prefix); binary_compress(bitj,mc_A(:)>0,tmpchar);
-mc_T = zeros(T_n_cols,1); mc_T(T_n_cind)=1;
+mc_T = zeros(T_n_cols,1); mc_T(T_n_cij)=1;
 tmpchar = sprintf('%s_mc_T.b16',dir_out_plus_prefix); binary_compress(bitj,mc_T(:)>0,tmpchar);
 
 fname_0in = sprintf('%s.in',dir_out_plus_prefix);

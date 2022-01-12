@@ -81,15 +81,15 @@ str_tmp = sprintf('%s_maf%.2d_crop',str_output_prefix,floor(100*maf_cutoff));
 end;%if (flag_crop==0);
 str_output_prefix_local = sprintf('%s_',str_tmp);
 dir_out = sprintf('%s/dir_%s',dir_trunk,str_tmp); if ~exist(dir_out,'dir'); mkdir(dir_out); end;
-if (verbose>0); disp(sprintf('%% str_output_prefix_local %s ;\n%% dir_out %s ;\n',str_output_prefix_local,dir_out)); end;
+if (verbose>0); disp(sprintf(' %% str_output_prefix_local %s ;\n %% dir_out %s ;\n',str_output_prefix_local,dir_out)); end;
 
 if (flag_crop);
 n_snp_crop_s_ = 1*1024 + [1:n_study]; %<-- reduce number of snps for each study. ;
 end;%if (flag_crop);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Loading data ;')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Loading data ;')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fn_fam_s_ = cell(n_study,1); fp_fam_s_ = cell(n_study,1); 
 fn_bim_s_ = cell(n_study,1); fp_bim_s_ = cell(n_study,1); 
@@ -107,11 +107,11 @@ n_and_s_ = cell(n_study,1); n_xor_s_ = cell(n_study,1); n_nor_s_ = cell(n_study,
 m_and_s_ = cell(n_study,1); m_xor_s_ = cell(n_study,1); m_nor_s_ = cell(n_study,1); m_mss_s_ = cell(n_study,1); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%;
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Reading fam ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Reading fam ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%;
 for ns=0:n_study-1;
-if (verbose>0); disp(sprintf('%% ns %d: Reading fam file %s/%s.fam (patients) ;',ns,study_trunk_s_{1+ns},study_name_s_{1+ns})); end;
+if (verbose>0); disp(sprintf(' %% ns %d: Reading fam file %s/%s.fam (patients) ;',ns,study_trunk_s_{1+ns},study_name_s_{1+ns})); end;
 fn_fam_s_{1+ns} = sprintf('%s/%s/%s.fam',dir_trunk,study_trunk_s_{1+ns},study_name_s_{1+ns});
 fp_fam_s_{1+ns} = fopen(fn_fam_s_{1+ns}); fam_s_{1+ns} = textscan(fp_fam_s_{1+ns},'%s %s %s %s %d %d'); fclose(fp_fam_s_{1+ns});
 n_patient_fam_s_(1+ns) = numel(fam_s_{1+ns}{1+0}); 
@@ -148,12 +148,12 @@ rindex_keep_s_{1+ns} = rij_keep_s_{1+ns}-1;
 end;%for ns=0:n_study-1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Reading bim ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Reading bim ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 n_snp_s_ = zeros(n_study,1);
 for ns=0:n_study-1;
-if (verbose>0); disp(sprintf('%% ns %d: Reading bim file %s/%s.bim (snp names) ;',ns,study_trunk_s_{1+ns},study_name_s_{1+ns})); end;
+if (verbose>0); disp(sprintf(' %% ns %d: Reading bim file %s/%s.bim (snp names) ;',ns,study_trunk_s_{1+ns},study_name_s_{1+ns})); end;
 fn_bim_s_{1+ns} = sprintf('%s/%s/%s.bim',dir_trunk,study_trunk_s_{1+ns},study_name_s_{1+ns});
 fp_bim_s_{1+ns} = fopen(fn_bim_s_{1+ns}); bim_s_{1+ns} = textscan(fp_bim_s_{1+ns},'%d %s %d %d %s %s'); fclose(fp_bim_s_{1+ns});
 n_snp_s_(1+ns) = numel(bim_s_{1+ns}{1+0});
@@ -167,8 +167,8 @@ if (verbose>0); disp(sprintf(' %% n_snp_s_(%d) --> chromosome distribution: [%d,
 end;%for ns=0:n_study-1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Calculating intersection (i.e., cap) of snps ;')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Calculating intersection (i.e., cap) of snps ;')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 snp_0id_s_ = cell(n_study,1); snp_pos_s_ = cell(n_study,1); 
 for ns=0:n_study-1; snp_0id_s_{1+ns} = bim_s_{1+ns}{1+1}; snp_pos_s_{1+ns} = bim_s_{1+ns}{1+3}; end;%for ns=0:n_study-1;
@@ -192,15 +192,15 @@ end;%for ns1=0:n_study-1;
 end;%if disp_flag;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%;
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% now checking to see if the snps in each study are unique or appear multiple times. ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% now checking to see if the snps in each study are unique or appear multiple times. ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%;
 for ns=0:n_study-1; 
 if (verbose>0); disp(sprintf('study %d: numel(unique(snp_0id_s_{1+ns}))-numel(unique(snp_0id_s_{1+ns})) = %d',1+ns,numel(unique(snp_0id_s_{1+ns}))-numel(snp_0id_s_{1+ns}))); end; 
 end;%for ns=0:n_study-1; 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%;
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% now checking to see if the snps in the intersection are consistent across studies. ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% now checking to see if the snps in the intersection are consistent across studies. ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%;
 snp_sg1_ls__ = zeros(n_snp_cap,n_study); snp_sg2_ls__ = zeros(n_snp_cap,n_study);
 for ns=0:n_study-1;
@@ -237,11 +237,11 @@ if (verbose>0); disp(sprintf(' %% number of sign flips per study: ')); disp(num2
 if (verbose>0); disp(sprintf(' %% number of sign keeps per study: ')); disp(num2str(sum(snp_sg1_ls__==+1))); end;
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Reading bed. ;')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Reading bed. ;')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for ns=0:n_study-1;
-if (verbose>0); disp(sprintf('%% ns %d: Reading bed file %s/%s.bed (binarized snp data) ;',ns,study_trunk_s_{1+ns},study_name_s_{1+ns})); end;
+if (verbose>0); disp(sprintf(' %% ns %d: Reading bed file %s/%s.bed (binarized snp data) ;',ns,study_trunk_s_{1+ns},study_name_s_{1+ns})); end;
 fn_bed_s_{1+ns} = sprintf('%s/%s/%s.bed',dir_trunk,study_trunk_s_{1+ns},study_name_s_{1+ns});
 fp_bed_s_{1+ns} = fopen(fn_bed_s_{1+ns}); 
 key1 = fread(fp_bed_s_{1+ns},1,'uint8'); key2 = fread(fp_bed_s_{1+ns},1,'uint8'); key3 = fread(fp_bed_s_{1+ns},1,'uint8'); assert(key1==108); assert(key2==27); assert(key3==1);
@@ -355,23 +355,23 @@ fclose(fp_bed_s_{1+ns});
 end;%for ns=0:n_study-1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Calculating relative-entropy (i.e., KL-divergence) for each snp within each study. ;')); end;
-if (verbose>0); disp(sprintf('%% If we assume that a snp has minor allele frequency q and major allele frequency p, ;')); end;
-if (verbose>0); disp(sprintf('%% then the distribution of (n_and,n_xor,n_nor) should be proportional to: ;')); end;
-if (verbose>0); disp(sprintf('%% (p*p, 2*p*q, q*q), respectively. ;')); end;
-if (verbose>0); disp(sprintf('%% If the true distribution is given by (frq_and,frq_xor,frq_nor) = (n_and,n_xor,n_nor)/n_patient_keep, ;')); end;
-if (verbose>0); disp(sprintf('%% then the relative entropy between the true distribution and the expected distribution is: ;')); end;
-if (verbose>0); disp(sprintf('%% I = frq_and*log(frq_and/p^2) + frq_xor*log(frq_xor/(2*p*q)) + frq_nor*log(frq_nor/q^2). ;')); end;
-if (verbose>0); disp(sprintf('%% The derivative of I with respect to p is: ;')); end;
-if (verbose>0); disp(sprintf('%% dI/dp = -2*frq_and/p - (q-p)*frq_xor/(p*q) + 2*frq_nor/q. ;')); end;
-if (verbose>0); disp(sprintf('%% Setting this to 0, we see that the optimal p and q are given by: ;')); end;
-if (verbose>0); disp(sprintf('%% 2*p*frq_nor - 2*q*frq_and = (q-p)*frq_xor, ;')); end;
-if (verbose>0); disp(sprintf('%% p*(2*frq_nor+2*frq_and+2*frq_xor) = 2*frq_and + frq_xor, ;')); end;
-if (verbose>0); disp(sprintf('%% or simply: ;')); end;
-if (verbose>0); disp(sprintf('%% p_opt = frq_and + 0.5*frq_xor, ')); end;
-if (verbose>0); disp(sprintf('%% q_opt = frq_nor + 0.5*frq_xor. ,')); end;
-if (verbose>0); disp(sprintf('%% I_opt = frq_and*log(frq_and/p_opt^2) + frq_xor*log(frq_xor/(2*p_opt*q_opt)) + frq_nor*log(frq_nor/q_opt^2). ;')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Calculating relative-entropy (i.e., KL-divergence) for each snp within each study. ;')); end;
+if (verbose>0); disp(sprintf(' %% If we assume that a snp has minor allele frequency q and major allele frequency p, ;')); end;
+if (verbose>0); disp(sprintf(' %% then the distribution of (n_and,n_xor,n_nor) should be proportional to: ;')); end;
+if (verbose>0); disp(sprintf(' %% (p*p, 2*p*q, q*q), respectively. ;')); end;
+if (verbose>0); disp(sprintf(' %% If the true distribution is given by (frq_and,frq_xor,frq_nor) = (n_and,n_xor,n_nor)/n_patient_keep, ;')); end;
+if (verbose>0); disp(sprintf(' %% then the relative entropy between the true distribution and the expected distribution is: ;')); end;
+if (verbose>0); disp(sprintf(' %% I = frq_and*log(frq_and/p^2) + frq_xor*log(frq_xor/(2*p*q)) + frq_nor*log(frq_nor/q^2). ;')); end;
+if (verbose>0); disp(sprintf(' %% The derivative of I with respect to p is: ;')); end;
+if (verbose>0); disp(sprintf(' %% dI/dp = -2*frq_and/p - (q-p)*frq_xor/(p*q) + 2*frq_nor/q. ;')); end;
+if (verbose>0); disp(sprintf(' %% Setting this to 0, we see that the optimal p and q are given by: ;')); end;
+if (verbose>0); disp(sprintf(' %% 2*p*frq_nor - 2*q*frq_and = (q-p)*frq_xor, ;')); end;
+if (verbose>0); disp(sprintf(' %% p*(2*frq_nor+2*frq_and+2*frq_xor) = 2*frq_and + frq_xor, ;')); end;
+if (verbose>0); disp(sprintf(' %% or simply: ;')); end;
+if (verbose>0); disp(sprintf(' %% p_opt = frq_and + 0.5*frq_xor, ')); end;
+if (verbose>0); disp(sprintf(' %% q_opt = frq_nor + 0.5*frq_xor. ,')); end;
+if (verbose>0); disp(sprintf(' %% I_opt = frq_and*log(frq_and/p_opt^2) + frq_xor*log(frq_xor/(2*p_opt*q_opt)) + frq_nor*log(frq_nor/q_opt^2). ;')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for ns=0:n_study-1;
 frq_and_ = n_and_s_{1+ns}/n_patient_keep_s_(1+ns); frq_xor_ = n_xor_s_{1+ns}/n_patient_keep_s_(1+ns); frq_nor_ = n_nor_s_{1+ns}/n_patient_keep_s_(1+ns);
@@ -391,9 +391,9 @@ if (verbose>0); disp(sprintf(' %% I_opt_s_ [%0.2f,%0.2f,%0.2f,%0.2f,%0.2f]',tmp)
 end;%for ns=0:n_study-1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Calculating p_opt_s_, q_opt_s_ and entropy I_opt_s_ for each snp across studies. ;')); end;
-if (verbose>0); disp(sprintf('%% Note that we must ''flip'' the and-vs-nor values for snp-study combinations that have snp_sg1_ls__(1+nsnp,1+ns)==-1. ;')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Calculating p_opt_s_, q_opt_s_ and entropy I_opt_s_ for each snp across studies. ;')); end;
+if (verbose>0); disp(sprintf(' %% Note that we must ''flip'' the and-vs-nor values for snp-study combinations that have snp_sg1_ls__(1+nsnp,1+ns)==-1. ;')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 n_and_tot_l_ = zeros(n_snp_cap,1); n_xor_tot_l_ = zeros(n_snp_cap,1); n_nor_tot_l_ = zeros(n_snp_cap,1); n_mss_tot_l_ = zeros(n_snp_cap,1); I_opt_max_l_ = zeros(n_snp_cap,1);
 for ns=0:n_study-1; 
@@ -426,9 +426,9 @@ tmp = [prctile(I_opt_tot_l_, 5) , prctile(I_opt_tot_l_,25) , prctile(I_opt_tot_l
 if (verbose>0); disp(sprintf(' %% I_opt_tot_l_ [%0.2f,%0.2f,%0.2f,%0.2f,%0.2f]',tmp)); end;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Calculating subset of col-intersection which satisfies cutoffs. ; ')); end;
-if (verbose>0); disp(sprintf('%% This calculation does not involve patients which are excluded via famex. ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Calculating subset of col-intersection which satisfies cutoffs. ; ')); end;
+if (verbose>0); disp(sprintf(' %% This calculation does not involve patients which are excluded via famex. ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ij_snp_cap_sub_ = find(I_opt_tot_l_ < ent_cutoff & I_opt_max_l_ < ent_cutoff & min(p_opt_tot_l_,q_opt_tot_l_) > maf_cutoff & frq_mss_tot_l_ < mss_cutoff); n_snp_cap_sub = numel(ij_snp_cap_sub_);
 if (verbose>0); disp(sprintf(' %% retaining %d/%d snps',n_snp_cap_sub,n_snp_cap)); end;
@@ -448,11 +448,11 @@ end;%for ns1=0:n_study-1;
 end;%if disp_flag;
 
 %%%%%%%%%%%%%%%%;
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Counting frequencies of each column (i.e., each retained snp across studies) ; ')); end;
-if (verbose>0); disp(sprintf('%% Note that this calculation involves fr2_and_tot_l_ and fr2_nor_tot_l_, ; ')); end;
-if (verbose>0); disp(sprintf('%% both of which have been ''flipped'' based on the modification of n_and_tot_l_ ; ')); end;
-if (verbose>0); disp(sprintf('%% and n_nor_tot_l_ using snp_sg1_ls__. ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Counting frequencies of each column (i.e., each retained snp across studies) ; ')); end;
+if (verbose>0); disp(sprintf(' %% Note that this calculation involves fr2_and_tot_l_ and fr2_nor_tot_l_, ; ')); end;
+if (verbose>0); disp(sprintf(' %% both of which have been ''flipped'' based on the modification of n_and_tot_l_ ; ')); end;
+if (verbose>0); disp(sprintf(' %% and n_nor_tot_l_ using snp_sg1_ls__. ; ')); end;
 %%%%%%%%%%%%%%%%;
 brk=3; col_fr2 = n_study+1; col_sort_frwd = n_study+2; col_srt_back = n_study+3;
 cij_array__ = zeros(3*n_snp_cap_sub,n_study+brk);
@@ -477,10 +477,10 @@ cij_nor_rpl_l_ = cij_array__(cij_nor,col_srt_back);
 clear tmp_r tmp_s ;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Calculating subset of rows which satisfies cutoffs. ; ')); end;
-if (verbose>0); disp(sprintf('%% This calculation does involve all the snps when calculating missing fraction, ;')); end;
-if (verbose>0); disp(sprintf('%% including those which have been excluded above. ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Calculating subset of rows which satisfies cutoffs. ; ')); end;
+if (verbose>0); disp(sprintf(' %% This calculation does involve all the snps when calculating missing fraction, ;')); end;
+if (verbose>0); disp(sprintf(' %% including those which have been excluded above. ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rij_cap_sp__ = cell(n_study,1);
 rindex_cap_sp__ = cell(n_study,1);
@@ -495,8 +495,8 @@ end;%for ns=0:n_study-1;
 clear rij_tmp_ ;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Grabbing mds_pv__ components ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Grabbing mds_pv__ components ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nrows_T_full=0; ncols_Tn = 1 + size(mds_pv__,2);
 for ns=0:n_study-1;
@@ -536,8 +536,8 @@ tmpchar = sprintf('%s/%sT_%.2d_t.b16',dir_out,str_output_prefix_local,1+ns);tuto
 end;%for ns=0:n_study-1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% creating mds_m2rx ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% creating mds_m2rx ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 T_m2rz_med_ = transpose(adi_median(transpose(T_full_(:,1:2)),1e-9,1));
 if (verbose>0); disp(sprintf('T_m2rz_med_: %0.6f,%0.6f',T_m2rz_med_)); end;
@@ -590,8 +590,8 @@ disp(' %% returning after mds'); return;
 end;%if flag_stop>2;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% defining ncols_An, nrows_An_s_ and nrows_An_full_ ;')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% defining ncols_An, nrows_An_s_ and nrows_An_full_ ;')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ncols_An = 3*n_snp_cap_sub; 
 ncols_An_extend = mod(bitj - mod(ncols_An,bitj),bitj); lcols_An = (ncols_An + ncols_An_extend)/bit8;
@@ -605,24 +605,24 @@ if (verbose>0); disp(sprintf(' %% nrows_An_full: %d',nrows_An_full)); end;
 nrows_An_csum_s_ = cumsum([0,nrows_An_s_]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Writing extended bim and fam files (i.e., bim.ext and fam.ext). ; ')); end;
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Bim: ; ')); end;
-if (verbose>0); disp(sprintf('%% This has the same structure as a typical bim file, ; ')); end;
-if (verbose>0); disp(sprintf('%%\t Chromosome code (either an integer, or ''X''/''Y''/''XY''/''MT''; ''0'' indicates unknown) or name ;')); end;
-if (verbose>0); disp(sprintf('%%\t Variant identifier ;')); end;
-if (verbose>0); disp(sprintf('%%\t Position in morgans or centimorgans (safe to use dummy value of ''0'') ;')); end;
-if (verbose>0); disp(sprintf('%%\t Base-pair coordinate (1-based; limited to 2^31-2) ;')); end;
-if (verbose>0); disp(sprintf('%%\t Allele 1 (corresponding to clear bits in .bed; usually minor) ;')); end;
-if (verbose>0); disp(sprintf('%%\t Allele 2 (corresponding to set bits in .bed; usually major) ;')); end;
-if (verbose>0); disp(sprintf('%% with five extra fields. ; ')); end;
-if (verbose>0); disp(sprintf('%% field 6+1: allele type. ; ')); end;
-if (verbose>0); disp(sprintf('%% field 6+2: total relative entropy across (nonexcluded) patients. ; ')); end;
-if (verbose>0); disp(sprintf('%% field 6+3: frequency of allele type (i.e., sparsity of column). ; ')); end;
-if (verbose>0); disp(sprintf('%% field 6+4: frequency of missing data for that snp. ; ')); end;
-if (verbose>0); disp(sprintf('%% field 6+5: minor-allele-frequency of that snp. ; ')); end;
-if (verbose>0); disp(sprintf('%% Moreover, the allele-ordering should be sorted in terms of column-sparsity. ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Writing extended bim and fam files (i.e., bim.ext and fam.ext). ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Bim: ; ')); end;
+if (verbose>0); disp(sprintf(' %% This has the same structure as a typical bim file, ; ')); end;
+if (verbose>0); disp(sprintf(' %%\t Chromosome code (either an integer, or ''X''/''Y''/''XY''/''MT''; ''0'' indicates unknown) or name ;')); end;
+if (verbose>0); disp(sprintf(' %%\t Variant identifier ;')); end;
+if (verbose>0); disp(sprintf(' %%\t Position in morgans or centimorgans (safe to use dummy value of ''0'') ;')); end;
+if (verbose>0); disp(sprintf(' %%\t Base-pair coordinate (1-based; limited to 2^31-2) ;')); end;
+if (verbose>0); disp(sprintf(' %%\t Allele 1 (corresponding to clear bits in .bed; usually minor) ;')); end;
+if (verbose>0); disp(sprintf(' %%\t Allele 2 (corresponding to set bits in .bed; usually major) ;')); end;
+if (verbose>0); disp(sprintf(' %% with five extra fields. ; ')); end;
+if (verbose>0); disp(sprintf(' %% field 6+1: allele type. ; ')); end;
+if (verbose>0); disp(sprintf(' %% field 6+2: total relative entropy across (nonexcluded) patients. ; ')); end;
+if (verbose>0); disp(sprintf(' %% field 6+3: frequency of allele type (i.e., sparsity of column). ; ')); end;
+if (verbose>0); disp(sprintf(' %% field 6+4: frequency of missing data for that snp. ; ')); end;
+if (verbose>0); disp(sprintf(' %% field 6+5: minor-allele-frequency of that snp. ; ')); end;
+if (verbose>0); disp(sprintf(' %% Moreover, the allele-ordering should be sorted in terms of column-sparsity. ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_bim_ext;
 tmp_bim = cell(6 + 5);
@@ -700,17 +700,17 @@ end;%for nc=0:ncols_An-1;
 fclose(fid);
 end;% if flag_bim_ext;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Fam: ; ')); end;
-if (verbose>0); disp(sprintf('%% This has the same structure as a typical fam file, ; ')); end;
-if (verbose>0); disp(sprintf('%%\t Family ID (''FID'') ;')); end;
-if (verbose>0); disp(sprintf('%%\t Within-family ID (''IID''; cannot be ''0'') ;')); end;
-if (verbose>0); disp(sprintf('%%\t Within-family ID of father (''0'' if father isn''t in dataset) ;')); end;
-if (verbose>0); disp(sprintf('%%\t Within-family ID of mother (''0'' if mother isn''t in dataset) ;')); end;
-if (verbose>0); disp(sprintf('%%\t Sex code (''1'' = male, ''2'' = female, ''0'' = unknown) ;')); end;
-if (verbose>0); disp(sprintf('%%\t Phenotype value (''1'' = control, ''2'' = case, ''-9''/''0''/non-numeric = missing data if case/control) ;')); end;
-if (verbose>0); disp(sprintf('%% with one extra field. ; ')); end;
-if (verbose>0); disp(sprintf('%% field 6+1: directory and filename from which fam file was drawn . ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Fam: ; ')); end;
+if (verbose>0); disp(sprintf(' %% This has the same structure as a typical fam file, ; ')); end;
+if (verbose>0); disp(sprintf(' %%\t Family ID (''FID'') ;')); end;
+if (verbose>0); disp(sprintf(' %%\t Within-family ID (''IID''; cannot be ''0'') ;')); end;
+if (verbose>0); disp(sprintf(' %%\t Within-family ID of father (''0'' if father isn''t in dataset) ;')); end;
+if (verbose>0); disp(sprintf(' %%\t Within-family ID of mother (''0'' if mother isn''t in dataset) ;')); end;
+if (verbose>0); disp(sprintf(' %%\t Sex code (''1'' = male, ''2'' = female, ''0'' = unknown) ;')); end;
+if (verbose>0); disp(sprintf(' %%\t Phenotype value (''1'' = control, ''2'' = case, ''-9''/''0''/non-numeric = missing data if case/control) ;')); end;
+if (verbose>0); disp(sprintf(' %% with one extra field. ; ')); end;
+if (verbose>0); disp(sprintf(' %% field 6+1: directory and filename from which fam file was drawn . ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_fam_ext;
 tmp_fam = cell(6 + 1);
@@ -774,8 +774,8 @@ disp(' %% returning after bim.ext and fam.ext'); return;
 end;%if flag_stop>1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Writing mc and mr masks ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Writing mc and mr masks ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 mc_A = ones(ncols_An,1);
 tmpchar = sprintf('%s/%smc_A.b16',dir_out,str_output_prefix_local); tutorial_binary_compress(bitj,mc_A(:)>0,tmpchar); 
@@ -799,8 +799,8 @@ disp(' %% returning after masks'); return;
 end;%if flag_stop>1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Initializing An_ and At_ ;')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Initializing An_ and At_ ;')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear A_n_ A_n_full A_t_ A_t_full;
 An_full = zeros(lrows_An_full,ncols_An,'uint8');
@@ -811,8 +811,8 @@ At_{1+ns} = zeros(lcols_An,nrows_An_s_(1+ns),'uint8');
 end;%for ns=0:n_study-1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% Writing An_ and At_ ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% Writing An_ and At_ ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for ns=0:n_study-1;
 if (verbose>0); disp(sprintf(' %% ns %d: %s/%s',ns,study_trunk_s_{1+ns},study_name_s_{1+ns})); end;
@@ -924,8 +924,8 @@ end;%if flag_ver==0;
 end;%for ns=0:n_study-1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% ; ')); end;
-if (verbose>0); disp(sprintf('%% writing A_n.b16 and A_t.b16 ; ')); end;
+if (verbose>0); disp(sprintf(' %% ; ')); end;
+if (verbose>0); disp(sprintf(' %% writing A_n.b16 and A_t.b16 ; ')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tic;
 tmpAnchar = sprintf('%s/%sA_full_n.b16',dir_out,str_output_prefix_local);
@@ -963,7 +963,7 @@ t_tmp = toc; if (verbose>0); disp(sprintf(' %% b16: time %0.2f seconds',t_tmp));
 flag_check = flag_crop;
 if flag_check;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (verbose>0); disp(sprintf('%% checking .b16 files for consistency ;')); end;
+if (verbose>0); disp(sprintf(' %% checking .b16 files for consistency ;')); end;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tmpAnchar = sprintf('%s/%sA_full_n.b16',dir_out,str_output_prefix_local);
 Bn_full = tutorial_binary_uncompress(tmpAnchar,1:nrows_An_full,1:ncols_An);

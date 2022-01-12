@@ -20,3 +20,5 @@ git commit -m "updating dir_lakcluster_c_dev for jeremy elman " ;
 git push ;
 git pull ;
 cd /data/rangan/dir_bcc/dir_lakcluster_c_dev ;
+
+#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
