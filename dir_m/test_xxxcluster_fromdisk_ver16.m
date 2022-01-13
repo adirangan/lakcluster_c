@@ -1,6 +1,17 @@
 verbose=1;
-if (verbose); disp(sprintf(' %% [entering test_bed_to_b16_flip_ver7]')); end;
-rng(0);
+if (verbose); disp(sprintf(' %% [entering test_xxxcluster_fromdisk_ver16]')); end;
+rng(0); nf=0;
+
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% First we generate a very simple example of dosage-data ;')); end;
+if (verbose); disp(sprintf(' %% which exhibits a case-specific bicluster bcA, ;')); end;
+if (verbose); disp(sprintf(' %% as well as a disjoint (larger) non-specific bicluster bcB. ;')); end;
+r_fraction_bcA = 0.125;
+r_fraction_bcB = 0.250;
+c_fraction_bcA = 0.0625;
+c_fraction_bcB = 0.1250;
+maf_lob = 0.25;
+maf_upb = 0.75;
 
 %%%%%%%%;
 n_snp_cup = 1024*8;
@@ -20,6 +31,12 @@ bim_cup_bpc_(1+nsnp_cup) = 1+nsnp_cup;
 bim_cup_al1_{1+nsnp_cup} = sprintf('%s',tmp_al1_{1+mod(nsnp_cup,4)});
 bim_cup_al2_{1+nsnp_cup} = sprintf('%s',tmp_al2_{1+mod(nsnp_cup,4)});
 end;%for nsnp_cup=0:n_snp_cup-1;
+cij_ = transpose(1:n_snp_cup);
+cij_bcA_ = cij_(randperm(n_snp_cup,floor(n_snp_cup*c_fraction_bcA)));
+n_snp_bcA = numel(cij_bcA_);
+cij_tmp_ = setdiff(cij_,cij_bcA_);
+cij_bcB_ = cij_tmp_(randperm(numel(cij_tmp_),floor(n_snp_cup*c_fraction_bcB)));
+n_snp_bcB = numel(cij_bcB_);
 %%%%%%%%;
 n_patient_cup = 1024*4;
 fam_cup_fid_ = cell(n_patient_cup,1);
@@ -29,25 +46,56 @@ fam_cup_xid_ = cell(n_patient_cup,1);
 fam_cup_sex_ = zeros(n_patient_cup,1);
 fam_cup_dvx_ = zeros(n_patient_cup,1);
 fam_cup_fidandiid_ = cell(n_patient_cup,1);
-tmp_sex_ = [1,2,1,2];
-tmp_dvx_ = [1,1,2,2];
+tmp_sex_ = [1,2,1,2]; %<-- 1==male, 2==fema, ignored. ;
+tmp_dvx_ = [1,1,2,2]; %<-- 1==ctrl, 2==case, not ignored. ;
 for npatient_cup=0:n_patient_cup-1;
 fam_cup_fid_{1+npatient_cup} = sprintf('fid%.4d',1+npatient_cup);
 fam_cup_iid_{1+npatient_cup} = sprintf('iid%.4d',1+npatient_cup);
 fam_cup_yid_{1+npatient_cup} = sprintf('yid%.4d',1+npatient_cup);
 fam_cup_xid_{1+npatient_cup} = sprintf('xid%.4d',1+npatient_cup);
 fam_cup_sex_(1+npatient_cup) = tmp_sex_(1+mod(npatient_cup,4));
-fam_cup_dvx_(1+npatient_cup) = tmp_dvx_(1+mod(npatient_cup,4));
+fam_cup_dvx_(1+npatient_cup) = tmp_dvx_(1+floor(4*npatient_cup/n_patient_cup)); %<-- first half of patients are cases. ;
 end;%for npatient_cup=0:n_patient_cup-1;
 for npatient_cup=0:n_patient_cup-1;
 fam_cup_fidandiid_{1+npatient_cup} = sprintf('%s&%s',fam_cup_fid_{1+npatient_cup},fam_cup_iid_{1+npatient_cup});
 end;%for npatient_cup=0:n_patient_cup-1;
+rij_case_ = find(fam_cup_dvx_==2); rij_ctrl_ = find(fam_cup_dvx_==1); 
+n_patient_case = numel(rij_case_); n_patient_ctrl = numel(rij_ctrl_);
+rij_case_bcA_ = rij_case_(randperm(n_patient_case,floor(r_fraction_bcA*n_patient_case)));
+rij_ctrl_bcA_ = [];
+n_patient_case_bcA = numel(rij_case_bcA_);
+n_patient_ctrl_bcA = numel(rij_ctrl_bcA_);
+rij_case_tmp_ = setdiff(rij_case_,rij_case_bcA_);
+rij_ctrl_tmp_ = setdiff(rij_ctrl_,rij_ctrl_bcA_);
+rij_case_bcB_ = rij_case_tmp_(randperm(numel(rij_case_tmp_),floor(r_fraction_bcB*n_patient_case)));
+rij_ctrl_bcB_ = rij_ctrl_tmp_(randperm(numel(rij_ctrl_tmp_),floor(r_fraction_bcB*n_patient_ctrl)));
+n_patient_case_bcB = numel(rij_case_bcB_);
+n_patient_ctrl_bcB = numel(rij_ctrl_bcB_);
 %%%%%%%%;
-frq_s_ = linspace(0,1,n_snp_cup);
+frq_s_ = linspace(maf_lob,maf_upb,n_snp_cup);
 ds1_cup_ps__ = zeros(n_patient_cup,n_snp_cup);
 ds1_cup_ps__ = rand(n_patient_cup,n_snp_cup)<repmat(frq_s_,[n_patient_cup,1]);
 ds2_cup_ps__ = zeros(n_patient_cup,n_snp_cup);
 ds2_cup_ps__ = rand(n_patient_cup,n_snp_cup)<repmat(frq_s_,[n_patient_cup,1]);
+%%%%;
+% now correlate diplotypes within bcA. ;
+%%%%;
+ds1_cup_ps__(rij_case_bcA_,cij_bcA_) = repmat(transpose(linspace(maf_lob,maf_upb,n_patient_case_bcA)),[1,n_snp_bcA]) < repmat(frq_s_(cij_bcA_),[n_patient_case_bcA,1]);
+ds1_cup_ps__(rij_case_bcA_,cij_bcA_) = ds1_cup_ps__(rij_case_bcA_(randperm(n_patient_case_bcA)),cij_bcA_);
+ds2_cup_ps__(rij_case_bcA_,cij_bcA_) = repmat(transpose(linspace(maf_lob,maf_upb,n_patient_case_bcA)),[1,n_snp_bcA]) < repmat(frq_s_(cij_bcA_),[n_patient_case_bcA,1]);
+ds2_cup_ps__(rij_case_bcA_,cij_bcA_) = ds2_cup_ps__(rij_case_bcA_(randperm(n_patient_case_bcA)),cij_bcA_);
+%%%%;
+% now correlate diplotypes within bcB. ;
+%%%%;
+ds1_cup_ps__(rij_case_bcB_,cij_bcB_) = repmat(transpose(linspace(maf_lob,maf_upb,n_patient_case_bcB)),[1,n_snp_bcB]) < repmat(frq_s_(cij_bcB_),[n_patient_case_bcB,1]);
+ds1_cup_ps__(rij_case_bcB_,cij_bcB_) = ds1_cup_ps__(rij_case_bcB_(randperm(n_patient_case_bcB)),cij_bcB_);
+ds2_cup_ps__(rij_case_bcB_,cij_bcB_) = repmat(transpose(linspace(maf_lob,maf_upb,n_patient_case_bcB)),[1,n_snp_bcB]) < repmat(frq_s_(cij_bcB_),[n_patient_case_bcB,1]);
+ds2_cup_ps__(rij_case_bcB_,cij_bcB_) = ds2_cup_ps__(rij_case_bcB_(randperm(n_patient_case_bcB)),cij_bcB_);
+ds1_cup_ps__(rij_ctrl_bcB_,cij_bcB_) = repmat(transpose(linspace(maf_lob,maf_upb,n_patient_ctrl_bcB)),[1,n_snp_bcB]) < repmat(frq_s_(cij_bcB_),[n_patient_ctrl_bcB,1]);
+ds1_cup_ps__(rij_ctrl_bcB_,cij_bcB_) = ds1_cup_ps__(rij_ctrl_bcB_(randperm(n_patient_ctrl_bcB)),cij_bcB_);
+ds2_cup_ps__(rij_ctrl_bcB_,cij_bcB_) = repmat(transpose(linspace(maf_lob,maf_upb,n_patient_ctrl_bcB)),[1,n_snp_bcB]) < repmat(frq_s_(cij_bcB_),[n_patient_ctrl_bcB,1]);
+ds2_cup_ps__(rij_ctrl_bcB_,cij_bcB_) = ds2_cup_ps__(rij_ctrl_bcB_(randperm(n_patient_ctrl_bcB)),cij_bcB_);
+%%%%;
 dsg_cup_ps__ = ds1_cup_ps__ + ds2_cup_ps__;
 dsg_cup_frq_mss_ = mean(dsg_cup_ps__>=3,1); tmp_z_ = 1 - dsg_cup_frq_mss_;
 dsg_cup_frq_nor_ = mean(dsg_cup_ps__==0,1)./tmp_z_;
@@ -61,47 +109,46 @@ tmp_nor_ = dsg_cup_frq_nor_.*log(dsg_cup_frq_nor_./(dsg_cup_q_opt_.^2)); tmp_nor
 dsg_cup_I_opt_ = tmp_and_ + tmp_xor_ + tmp_nor_ ;
 %%%%%%%%;
 
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% Now we visualize the dosage-data for the cases (top) and ctrls (bottom). ;'));
+rij_case_prm_ = [ ... 
+; rij_case_bcA_ ...
+; rij_case_bcB_ ;
+; setdiff(rij_case_,union(rij_case_bcA_,rij_case_bcB_)) ...
+];
+rij_ctrl_prm_ = [ ... 
+; rij_ctrl_bcA_ ...
+; rij_ctrl_bcB_ ;
+; setdiff(rij_ctrl_,union(rij_ctrl_bcA_,rij_ctrl_bcB_)) ...
+];
+rij_prm_ = [ rij_case_prm_ ; rij_ctrl_prm_ ];
+cij_prm_ = [ ...
+; cij_bcA_ ...
+; cij_bcB_ ...
+; setdiff(cij_,union(cij_bcA_,cij_bcB_)) ...
+];
+figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,512,1024]); fig80s;
+subplot(2,1,1); imagesc(dsg_cup_ps__(rij_case_prm_,cij_prm_)); axisnotick; ylabel('case');
+subplot(2,1,2); imagesc(dsg_cup_ps__(rij_ctrl_prm_,cij_prm_)); axisnotick; ylabel('ctrl');
+
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% Now we convert the dosage-data to b16 data. ;')); end;
+if (verbose); disp(sprintf(' %% We put everything into a single study. ;')); end;
 %%%%%%%%;
-dir_trunk = sprintf('%s/dir_test_bed_to_b16_flip_ver7',pwd);
+dir_trunk = sprintf('%s/dir_test_xxxcluster_fromdisk_ver16',pwd);
 if (~exist(dir_trunk,'dir')); disp(sprintf(' %% mkdir %s',dir_trunk)); mkdir(dir_trunk); end;
-n_study = 3;
-study_trunk_s_ = cell(n_study,1);
-study_name_s_ = cell(n_study,1);
-for nstudy=0:n_study-1;
+n_study = 1; nstudy = 0;
 study_name = sprintf('study%.2d',nstudy);
 study_trunk = sprintf('dir_%s',study_name);
-study_name_s_{1+nstudy} = study_name;
-study_trunk_s_{1+nstudy} = study_trunk;
 tmp_dir = sprintf('%s/%s',dir_trunk,study_trunk);
 if (~exist(tmp_dir,'dir')); disp(sprintf(' %% mkdir %s',tmp_dir)); mkdir(tmp_dir); end;
-end;%for nstudy=0:n_study-1;
+n_snp = n_snp_cup;
+index_nsnp_from_nstudy_ = 0:n_snp-1;
+n_patient = n_patient_cup;
+index_npatient_from_nstudy_ = 0:n_patient-1;
 %%%%%%%%;
-n_snp_s_ = zeros(n_study,1);
-index_nsnp_from_nstudy__ = cell(n_study,1);
-for nstudy=0:n_study-1;
-n_snp = ceil( 0.5^(1/n_study) * n_snp_cup);
-index_nsnp_from_nstudy_ = randperm(n_snp_cup,n_snp) - 1;
-index_nsnp_from_nstudy__{1+nstudy} = index_nsnp_from_nstudy_;
-n_snp_s_(1+nstudy) = n_snp;
-end;%for nstudy=0:n_study-1;
-%%%%%%%%;
-n_patient_s_ = zeros(n_study,1);
-index_npatient_from_nstudy__ = cell(n_study,1);
-n_patient_sum=0;
-for nstudy=0:n_study-1;
-n_patient = floor(n_patient_cup/n_study);
-index_npatient_from_nstudy_ = n_patient_sum + [0:n_patient-1];
-index_npatient_from_nstudy__{1+nstudy} = index_npatient_from_nstudy_;
-n_patient_sum = n_patient_sum + n_patient;
-n_patient_s_(1+nstudy) = n_patient;
-end;%for nstudy=0:n_study-1;
-%%%%%%%%;
-fn_fam_s_ = cell(n_study,1);
-for nstudy=0:n_study-1;
-fn_fam = sprintf('%s/%s/%s.fam',dir_trunk,study_trunk_s_{1+nstudy},study_name_s_{1+nstudy});
+fn_fam = sprintf('%s/%s/%s.fam',dir_trunk,study_trunk,study_name);
 fid = fopen(fn_fam,'w');
-n_patient = n_patient_s_(1+nstudy);
-index_npatient_from_nstudy_ = index_npatient_from_nstudy__{1+nstudy};
 for npatient=0:n_patient-1;
 np = index_npatient_from_nstudy_(1+npatient);
 fprintf( ...
@@ -116,15 +163,9 @@ fprintf( ...
 );
 end;%for npatient=0:n_patient-1;
 fclose(fid);
-fn_fam_s_{1+nstudy} = fn_fam;
-end;%for nstudy=0:n_study-1;
 %%%%%%%%;
-fn_bim_s_ = cell(n_study,1);
-for nstudy=0:n_study-1;
-fn_bim = sprintf('%s/%s/%s.bim',dir_trunk,study_trunk_s_{1+nstudy},study_name_s_{1+nstudy});
+fn_bim = sprintf('%s/%s/%s.bim',dir_trunk,study_trunk,study_name);
 fid = fopen(fn_bim,'w');
-n_snp = n_snp_s_(1+nstudy);
-index_nsnp_from_nstudy_ = index_nsnp_from_nstudy__{1+nstudy};
 for nsnp=0:n_snp-1;
 ns = index_nsnp_from_nstudy_(1+nsnp);
 fprintf( ...
@@ -139,17 +180,9 @@ fprintf( ...
 );
 end;%for nsnp=0:n_snp-1;
 fclose(fid);
-fn_bim_s_{1+nstudy} = fn_bim;
-end;%for nstudy=0:n_study-1;
 %%%%%%%%;
-fn_bed_s_ = cell(n_study,1);
-for nstudy=0:n_study-1;
-fn_bed = sprintf('%s/%s/%s.bed',dir_trunk,study_trunk_s_{1+nstudy},study_name_s_{1+nstudy});
+fn_bed = sprintf('%s/%s/%s.bed',dir_trunk,study_trunk,study_name);
 fid = fopen(fn_bed,'w');
-n_snp = n_snp_s_(1+nstudy);
-index_nsnp_from_nstudy_ = index_nsnp_from_nstudy__{1+nstudy};
-n_patient = n_patient_s_(1+nstudy);
-index_npatient_from_nstudy_ = index_npatient_from_nstudy__{1+nstudy};
 tmp_dsg_ps__ = dsg_cup_ps__(1+index_npatient_from_nstudy_,1+index_nsnp_from_nstudy_);
 [tmp_bed_ps__,n_patient_bed] = dsg_to_bed_0(n_patient,n_snp,tmp_dsg_ps__);
 key1 = uint8(108); key2 = uint8(27); key3 = uint8(1);
@@ -167,8 +200,7 @@ for npatient_cup=0:n_patient_cup-1;
 mds_fidandiid_p_{1+npatient_cup} = sprintf('%s&%s',fam_cup_fid_{1+npatient_cup},fam_cup_iid_{1+npatient_cup});
 end;%for npatient_cup=0:n_patient_cup-1;
 %%%%%%%%;
-n_snp_cap = numel(intersectall(index_nsnp_from_nstudy__));
-n_famex = min(128,n_patient_cup/4);
+n_famex = 0;
 index_npatient_cup_from_nfamex_ = randperm(n_patient_cup,n_famex)-1;
 famex_fidandiid_p_ = cell(n_famex,1);
 for nfamex=0:n_famex-1;
@@ -189,8 +221,8 @@ parameter.maf_cutoff = 0.010;
 bed_to_b16_flip_ver7( ...
  parameter ...
 ,n_study ...
-,study_trunk_s_ ...
-,study_name_s_ ...
+,{study_trunk} ...
+,{study_name} ...
 ,n_mds_p ...
 ,n_mds_v ...
 ,mds_pv__ ...
@@ -204,12 +236,12 @@ str_output_prefix_local = sprintf('%s_',str_tmp);
 dir_out = sprintf('%s/dir_%s',parameter.dir_trunk,str_tmp);
 if (verbose>0); disp(sprintf(' %% str_output_prefix_local %s ;\n %% dir_out %s ;\n',str_output_prefix_local,dir_out)); end;
 
-fn_A_full_n = sprintf('%s/%sA_full_n.b16',dir_out,str_output_prefix_local); A_full_n__ = binary_uncompress(fn_A_full_n);
-fn_A_full_t = sprintf('%s/%sA_full_t.b16',dir_out,str_output_prefix_local); A_full_t__ = binary_uncompress(fn_A_full_t);
-if (verbose>0); disp(sprintf(' %% A_full_n__ vs A_full_t__: %0.16f',fnorm(A_full_n__-transpose(A_full_t__)))); end;
-fn_famext = sprintf('%s/%sfam.ext',dir_out,str_output_prefix_local);
+fname_b16 = sprintf('%s/%s_maf01_A_full_n.b16',dir_out,str_output_prefix);
+A_full_n_ = binary_uncompress(fname_b16);
+%%%%%%%%;
+fname_famext = sprintf('%s/%s_maf01_fam.ext',dir_out,str_output_prefix);
 [ ...
- n_patient_ext ...
+ n_patient_famext ...
 ,famext_fid_ ...
 ,famext_iid_ ...
 ,famext_yid_ ...
@@ -219,14 +251,17 @@ fn_famext = sprintf('%s/%sfam.ext',dir_out,str_output_prefix_local);
 ,famext_dir_ ...
 ,famext_fidandiid_ ...
 ,famext_ ...
-] = ...
+  ] = ...
 load_famext_ver1( ...
-fn_famext ...
+ fname_famext ...
 );
+[~,~,ij_fam_ext_from_cap_] = intersect(fam_cup_fid_,famext_fid_,'stable');
+disp(sprintf(' %% famext_fid_ vs fam_cup_fid_: %0.16f',fnorm(ij_fam_ext_from_cap_-transpose(1:n_patient))));
 %%%%%%%%;
-fn_bimext = sprintf('%s/%sbim.ext',dir_out,str_output_prefix_local);
+
+fname_bimext = sprintf('%s/%s_maf01_bim.ext',dir_out,str_output_prefix);
 [ ...
- n_snp_ext ...
+ n_snp_bimext ...
 ,bimext_khr_ ...
 ,bimext_vid_ ...
 ,bimext_gdi_ ...
@@ -242,12 +277,8 @@ fn_bimext = sprintf('%s/%sbim.ext',dir_out,str_output_prefix_local);
 ,bimext_ ...
 ] = ...
 load_bimext_ver1( ...
-fn_bimext ...
+fname_bimext ...
 );
-%%%%%%%%;
-[fam_fidandiid_cap_,index_fam_cup_from_cap_,index_fam_ext_from_cap_] = intersect(fam_cup_fidandiid_,famext_fidandiid_,'stable');
-index_fam_cup_from_cap_ = index_fam_cup_from_cap_ - 1;
-index_fam_ext_from_cap_ = index_fam_ext_from_cap_ - 1;
 [u_bimext_vid_,index_bim_ext_from_u_,index_bim_u_from_ext_] = unique(bimext_vid_,'stable');
 index_bim_ext_from_u_ = index_bim_ext_from_u_ - 1;
 index_bim_u_from_ext_ = index_bim_u_from_ext_ - 1;
@@ -258,63 +289,12 @@ index_bim_u_from_cap_ = index_bim_u_from_cap_ - 1;
 index_bim_cap_from_u_ = index_bim_cap_from_u_ - 1;
 index_bim_ext_from_cap_ = index_bim_ext_from_u_(1+index_bim_u_from_cap_);
 index_bim_cup_from_ext_ = index_bim_cup_from_cap_(1+index_bim_cap_from_u_(1+index_bim_u_from_ext_));
-error_sum=0; n_keep=0; n_flip=0;
-for nsnp_ext=0:n_snp_ext-1;
-nsnp_cup = index_bim_cup_from_ext_(1+nsnp_ext);
-assert(strcmp(bim_cup_vid_(1+nsnp_cup),bimext_vid_(1+nsnp_ext)));
-tmp_bim_ext_al1 = bimext_al1_(1+nsnp_ext);
-tmp_bim_ext_al2 = bimext_al2_(1+nsnp_ext);
-tmp_bim_ext_alt = bimext_alt_{1+nsnp_ext};
-tmp_bim_cup_al1 = bim_cup_al1_{1+nsnp_cup};
-tmp_bim_cup_al2 = bim_cup_al2_{1+nsnp_cup};
-tmp_b16_ext_ = A_full_n__(1+index_fam_ext_from_cap_,1+nsnp_ext)>0;
-tmp_dsg_cup_ = dsg_cup_ps__(1+index_fam_cup_from_cap_,1+nsnp_cup);
-tmp_b16_cup_ = zeros(n_patient_ext,1);
-tmp_flip = ( (tmp_bim_ext_al1=='A') | (tmp_bim_ext_al1=='T') );
-if tmp_flip==0;
-if (~isempty(strfind(tmp_bim_ext_alt,'nor'))); tmp_b16_cup_ = tmp_dsg_cup_==0; end;
-if (~isempty(strfind(tmp_bim_ext_alt,'xor'))); tmp_b16_cup_ = tmp_dsg_cup_==1; end;
-if (~isempty(strfind(tmp_bim_ext_alt,'and'))); tmp_b16_cup_ = tmp_dsg_cup_==2; end;
-n_keep = n_keep + 1;
-end;%if tmp_flip==0;
-if tmp_flip==1;
-if (~isempty(strfind(tmp_bim_ext_alt,'nor'))); tmp_b16_cup_ = tmp_dsg_cup_==2; end;
-if (~isempty(strfind(tmp_bim_ext_alt,'xor'))); tmp_b16_cup_ = tmp_dsg_cup_==1; end;
-if (~isempty(strfind(tmp_bim_ext_alt,'and'))); tmp_b16_cup_ = tmp_dsg_cup_==0; end;
-n_flip = n_flip + 1;
-end;%if tmp_flip==1;
-tmp_error = fnorm(tmp_b16_cup_ - tmp_b16_ext_);
-error_sum = error_sum + tmp_error;
-end;%for nsnp_ext=0:n_snp_ext-1;
-disp(sprintf(' %% n_keep %0.4d n_flip %0.4d error_sum: %0.16f',n_keep,n_flip,error_sum));
-disp(sprintf(' %% max ent: %0.6f vs ent_cutoff %0.6f',max(bimext_ent_),parameter.ent_cutoff));
-disp(sprintf(' %% min maf: %0.6f vs maf_cutoff %0.6f',min(bimext_maf_),parameter.maf_cutoff));
-%%%%%%%%;
+index_bim_cup_from_ext__ = sparse(1+index_bim_cup_from_ext_,1:n_snp_bimext,1,n_snp_cup,n_snp_bimext);
+[~,rij_prm_inv_] = sort(rij_prm_,'ascend');
+[~,cij_prm_inv_] = sort(cij_prm_,'ascend');
+cij_prm_inv_from_ext_ = transpose(cij_prm_inv_) * index_bim_cup_from_ext__;
+[~,cij_ext_] = sort(cij_prm_inv_from_ext_,'ascend');
 
-%%%%%%%%;
-figure(1);clf;figbig;fig80s;
-p_row = 2; p_col = 5; np=0;
-tmp_mds_cup__ = mds_pv__(1+index_fam_cup_from_cap_,1:2);
-for nx=1:4;
-fn_T_m2rx_full_n = sprintf('%s/%sT_m2r%d_full_n.b16',dir_out,str_output_prefix_local,nx); T_m2rx_full_n__ = binary_uncompress(fn_T_m2rx_full_n);
-fn_T_m2rx_full_t = sprintf('%s/%sT_m2r%d_full_t.b16',dir_out,str_output_prefix_local,nx); T_m2rx_full_t__ = binary_uncompress(fn_T_m2rx_full_t);
-if (verbose>0); disp(sprintf(' %% T_m2rx_full_n__ vs T_m2rx_full_t__: %0.16f',fnorm(T_m2rx_full_n__-transpose(T_m2rx_full_t__)))); end;
-for nr=0:nx-1;
-tmp_mds_ext__ = T_m2rx_full_n__(1+index_fam_ext_from_cap_,1+nr*2+[1:2]);
-tmp_mds_ext_sec_ = (tmp_mds_ext__>0)*[1;2];
-subplot(p_row,p_col,1+np); np=np+1;
-scatter(tmp_mds_cup__(:,1+0),tmp_mds_cup__(:,1+1),6,tmp_mds_ext_sec_,'filled'); 
-axis equal; axisnotick;
-title(sprintf('nr %d/%d',nr,nx));
-end;%for nr=0:nx-1;
-end;%for nx=1:4;
-%%%%%%%%;
-
-if (verbose); disp(sprintf(' %% [finished test_bed_to_b16_flip_ver7]')); end;
-
-
-
-
-
-
-
+figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,512,1024]); fig80s;
+subplot(2,1,1); imagesc(A_full_n_(rij_case_prm_,cij_ext_(1:4000))); axisnotick; ylabel('case');
+subplot(2,1,2); imagesc(A_full_n_(rij_ctrl_prm_,cij_ext_(1:4000))); axisnotick; ylabel('ctrl');
