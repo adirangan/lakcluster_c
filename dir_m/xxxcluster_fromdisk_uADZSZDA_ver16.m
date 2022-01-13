@@ -4,8 +4,10 @@ function ...
 ] = ...
 xxxcluster_fromdisk_uADZSZDA_ver16( ...
  parameter ...
-)
-% Assumes that we never shuffle a scrambled data-set. ;
+);
+% Note: This is not set up to shuffle a scrambled data-set. ;
+% shuffling is used on the original data-set to sample from the (label-shuffled) null-hypothesis. ;
+% scrambing is used on the original data-set after finding/delineating a bicluster. ;
 
 na=0;
 if (nargin<1+na); parameter=[]; end; na=na+1;
@@ -40,8 +42,8 @@ if ~isfield(parameter,'slurm_walltime'); parameter.slurm_walltime = 0; end;
 if ~isfield(parameter,'slurm_nnodes'); parameter.slurm_nnodes = 1; end;
 if ~isfield(parameter,'slurm_tpn'); parameter.slurm_tpn = 15; end;
 if ~isfield(parameter,'slurm_memdecl'); parameter.slurm_memdecl = 32; end;
-if ~isfield(parameter,'row_factor'); parameter.row_factor = 1.0; end;
-if ~isfield(parameter,'col_factor'); parameter.col_factor = 1.0; end;
+if ~isfield(parameter,'row_reduction_factor'); parameter.row_reduction_factor = 1.0; end;
+if ~isfield(parameter,'col_reduction_factor'); parameter.col_reduction_factor = 1.0; end;
 if ~isfield(parameter,'flag_verbose'); parameter.flag_verbose = 0; end;
 dir_trunk = parameter.dir_trunk;
 dir_code = parameter.dir_code;
@@ -72,8 +74,8 @@ slurm_walltime = parameter.slurm_walltime;
 slurm_nnodes = parameter.slurm_nnodes;
 slurm_tpn = parameter.slurm_tpn;
 slurm_memdecl = parameter.slurm_memdecl;
-row_factor = parameter.row_factor;
-col_factor = parameter.col_factor;
+row_reduction_factor = parameter.row_reduction_factor;
+col_reduction_factor = parameter.col_reduction_factor;
 flag_verbose = parameter.flag_verbose;
 %%%%%%%%;
 %{
@@ -106,8 +108,8 @@ parameter.slurm_walltime = slurm_walltime;
 parameter.slurm_nnodes = slurm_nnodes;
 parameter.slurm_tpn = slurm_tpn;
 parameter.slurm_memdecl = slurm_memdecl;
-parameter.row_factor = row_factor;
-parameter.col_factor = col_factor;
+parameter.row_reduction_factor = row_reduction_factor;
+parameter.col_reduction_factor = col_reduction_factor;
 parameter.flag_verbose = flag_verbose;
  %}
 
@@ -282,7 +284,7 @@ Z_n_rows_used=0;
 mr_A_use_ = mr_A_ori_; mr_Z_use_ = mr_Z_ori_;
 if (nshuffle>0); mr_A_use_ = mr_A_prm_; mr_Z_use_ = mr_Z_prm_; end;%if (nshuffle>0); 
 for nb=0:n_bin-1;
-if (row_factor<1); mr_A_use_{1+nb} = mr_A_use_{1+nb}.*(rand(size(mr_A_use_{1+nb}))<row_factor); mr_Z_use_{1+nb} = mr_Z_use_{1+nb}.*(rand(size(mr_Z_use_{1+nb}))<row_factor); end;%if (row_factor<1);
+if (row_reduction_factor<1); mr_A_use_{1+nb} = mr_A_use_{1+nb}.*(rand(size(mr_A_use_{1+nb}))<row_reduction_factor); mr_Z_use_{1+nb} = mr_Z_use_{1+nb}.*(rand(size(mr_Z_use_{1+nb}))<row_reduction_factor); end;%if (row_reduction_factor<1);
 disp(sprintf('nb %.2d : mr_A_ori_ npats %.5d ncase %.4d, mr_A_use_ npats %.5d ncase %.4d, overlap %.4d',nb,numel(mr_A_ori_{1+nb}),sum(mr_A_ori_{1+nb}),numel(mr_A_use_{1+nb}),sum(mr_A_use_{1+nb}),sum(mr_A_ori_{1+nb}.*mr_A_use_{1+nb})));
 disp(sprintf('nb %.2d : mr_Z_ori_ npats %.5d nctrl %.4d, mr_Z_use_ npats %.5d nctrl %.4d, overlap %.4d',nb,numel(mr_Z_ori_{1+nb}),sum(mr_Z_ori_{1+nb}),numel(mr_Z_use_{1+nb}),sum(mr_Z_use_{1+nb}),sum(mr_Z_ori_{1+nb}.*mr_Z_use_{1+nb})));
 if (n_bin==1); str_tmp = sprintf('%s_mr_A_full.b16',dir_out_plus_prefix); else; str_tmp = sprintf('%s_mr_A_%0.2d.b16',dir_out_plus_prefix,1+nb); end;
@@ -299,10 +301,10 @@ fname_bim = sprintf('%s/%s_bim.ex2',dir_0in,str_prefix);
 mc_A_bim = mc_from_bim_ext_ver5(fname_bim,maf_lo_threshold,maf_hi_threshold);
 mc_A_use = mc_A_use .* mc_A_bim;
 disp(sprintf(' %% maf_lo_threshold %0.2f maf_hi_threshold %0.2f, retaining %d mc values, but setting %d mc values to 0',maf_lo_threshold,maf_hi_threshold,sum(mc_A_use),sum(~mc_A_use)));
-if (col_factor<1);
-mc_A_use = mc_A_use.*(rand(size(mc_A_use))<col_factor); 
-disp(sprintf(' %% col_factor %0.2f, retaining %d mc values, but setting %d mc values to 0',col_factor,sum(mc_A_use),sum(~mc_A_use)));
-end;%if (col_factor<1);
+if (col_reduction_factor<1);
+mc_A_use = mc_A_use.*(rand(size(mc_A_use))<col_reduction_factor); 
+disp(sprintf(' %% col_reduction_factor %0.2f, retaining %d mc values, but setting %d mc values to 0',col_reduction_factor,sum(mc_A_use),sum(~mc_A_use)));
+end;%if (col_reduction_factor<1);
 fname_mc_A = sprintf('%s_mc_A.b16',dir_out_plus_prefix);
 disp(sprintf(' %% creating %s',fname_mc_A));
 str_tmp_out = fname_mc_A; binary_compress(bitj,mc_A_use(:)>0,str_tmp_out); 
