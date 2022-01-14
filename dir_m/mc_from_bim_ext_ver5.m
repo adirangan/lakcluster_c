@@ -30,6 +30,7 @@ disp(sprintf(' %% field 6+3: frequency of allele type (i.e., sparsity of column)
 disp(sprintf(' %% field 6+4: frequency of missing data for that snp. ; '));
 disp(sprintf(' %% field 6+5: minor-allele-frequency of that snp. ; '));
 disp(sprintf(' %% Moreover, the allele-ordering should be sorted in terms of column-sparsity. ; '));
+end;%if verbose;
 
 [ ...
  n_snp ...

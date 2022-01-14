@@ -123,7 +123,7 @@ bitj = 16;
 if (n_bin==1); Ireq = 0; end;
 
 parameter_s0000 = parameter; parameter_s0000.nshuffle = 0;
-str_xfix_s0000 = xxxcluster_fromdisk_uADZSZDA_xfix_gen_ver16(parameter_s0000);
+[parameter_s0000,str_xfix_s0000] = xxxcluster_fromdisk_uADZSZDA_xfix_gen_ver16(parameter_s0000);
 str_name_s0000 = sprintf('%s_%s',str_prefix,str_xfix_s0000);
 str_suffix = sprintf('%s','analyze');
 disp(sprintf(' %% str_name_s0000: %s',str_name_s0000));
@@ -138,7 +138,7 @@ str_timing_s0000 = sprintf('%s/timing.m',dir_out_s0000);
 flag_exist_timing = 0;
 if (exist(str_timing_s0000,'file')); run(str_timing_s0000); elrt_s0000 = elrt; flag_exist_timing = 1; end;
 
-str_xfix_sxxxx = xxxcluster_fromdisk_uADZSZDA_xfix_gen_ver16(parameter);
+[parameter,str_xfix_sxxxx] = xxxcluster_fromdisk_uADZSZDA_xfix_gen_ver16(parameter);
 str_name_sxxxx = sprintf('%s_%s',str_prefix,str_xfix_sxxxx);
 str_suffix = sprintf('%s','analyze');
 disp(sprintf(' %% str_name_sxxxx: %s',str_name_sxxxx));
@@ -161,6 +161,12 @@ if (flag_rerun | ~flag_exist_all);
 disp(sprintf(' %% could not find one of: \n %% %s\n %% %s\n %% %s, rerunning.',str_timing,str_trace,str_xdrop)); 
 flag_found = 0; 
 end;%if (flag_rerun | ~flag_exist_all);
+
+parameter.dir_0in = dir_0in;
+parameter.str_name_s0000 = str_name_s0000;
+parameter.dir_out_s0000 = dir_out_s0000;
+parameter.dir_out_trace = dir_out_trace;
+parameter.str_timing_s0000 = str_timing_s0000;
 
 if ~flag_found
 
@@ -212,8 +218,8 @@ A_n_rows_(1+nb) = sum(mr_A_ori_{1+nb});
 Z_n_rows_(1+nb) = sum(mr_Z_ori_{1+nb});
 end;%for nb=0:n_bin-1;
 M_n_cols = numel(mc_A_pre);
-disp(sprintf(' %% n_bin %d; total vs cases vs controls',n_bin));
-disp(num2str([M_n_rows_ , A_n_rows_ , Z_n_rows_]));
+disp(sprintf(' %% n_bin %d; total vs cases vs controls: ',n_bin));
+disp(sprintf(' %% %s',num2str([M_n_rows_ , A_n_rows_ , Z_n_rows_])));
 
 flag_T = 0;
 
@@ -240,7 +246,7 @@ end;%for nb=0:n_bin-1;
 mc_T_crop = ones(T_n_crop_cols,1);
 str_tmp = sprintf('%s_mc_T_crop.b16',dir_out_plus_prefix); 
 disp(sprintf(' %% writing %s = (%d,%d)',str_tmp,size(mc_T_crop))); binary_compress(bitj,mc_T_crop(:)>0,str_tmp);
-disp(sprintf('mc_T_crop:'));disp(num2str(transpose(mc_T_crop)));
+disp(sprintf(' %% mc_T_crop: %s',num2str(transpose(mc_T_crop))));
 T_n_crop_cij = 1:T_n_crop_cols;
 end;%if (n_mds_repl<1 | numel(ij_mds_use_)~=2);
 
@@ -265,13 +271,13 @@ end;%for nb=0:n_bin-1;
 mc_T = ones(T_n_cols,1);
 str_tmp = sprintf('%s_mc_T_%s.b16',dir_out_plus_prefix,mds_str); 
 disp(sprintf(' %% writing %s = (%d,%d)',str_tmp,size(mc_T))); binary_compress(bitj,mc_T(:)>0,str_tmp);
-disp(sprintf('mc_T:'));disp(num2str(transpose(mc_T)));
+disp(sprintf(' %% mc_T: %s',num2str(transpose(mc_T))));
 T_n_cij = 1:T_n_cols;
 end;%if (n_mds_repl>= | numel(ij_mds_use_)==2);
 
 % checking consistency ;
-if (flag_T==0); flag_error = xxxcluster_fromdisk_uADZSZDA_check_ver2(M_n_rows_,M_n_cols,A_n_rij_,A_n_cij,Z_n_rij_,T_n_crop_cols,T_n_crop_,T_n_crop_cij); end;
-if (flag_T==1); flag_error = xxxcluster_fromdisk_uADZSZDA_check_ver2(M_n_rows_,M_n_cols,A_n_rij_,A_n_cij,Z_n_rij_,T_n_cols,T_n_,T_n_cij); end;
+if (flag_T==0); flag_error = xxxcluster_fromdisk_uADZSZDA_check_2(M_n_rows_,M_n_cols,A_n_rij_,A_n_cij,Z_n_rij_,T_n_crop_cols,T_n_crop_,T_n_crop_cij); end;
+if (flag_T==1); flag_error = xxxcluster_fromdisk_uADZSZDA_check_2(M_n_rows_,M_n_cols,A_n_rij_,A_n_cij,Z_n_rij_,T_n_cols,T_n_,T_n_cij); end;
 if (flag_error); disp(sprintf(' %% Warning, incorrect dimensions in xxxcluster_fromdisk_uADZSZDA_ver16')); return; end;
 
 % performing covariate-respecting shuffle ;
@@ -285,8 +291,8 @@ mr_A_use_ = mr_A_ori_; mr_Z_use_ = mr_Z_ori_;
 if (nshuffle>0); mr_A_use_ = mr_A_prm_; mr_Z_use_ = mr_Z_prm_; end;%if (nshuffle>0); 
 for nb=0:n_bin-1;
 if (row_reduction_factor<1); mr_A_use_{1+nb} = mr_A_use_{1+nb}.*(rand(size(mr_A_use_{1+nb}))<row_reduction_factor); mr_Z_use_{1+nb} = mr_Z_use_{1+nb}.*(rand(size(mr_Z_use_{1+nb}))<row_reduction_factor); end;%if (row_reduction_factor<1);
-disp(sprintf('nb %.2d : mr_A_ori_ npats %.5d ncase %.4d, mr_A_use_ npats %.5d ncase %.4d, overlap %.4d',nb,numel(mr_A_ori_{1+nb}),sum(mr_A_ori_{1+nb}),numel(mr_A_use_{1+nb}),sum(mr_A_use_{1+nb}),sum(mr_A_ori_{1+nb}.*mr_A_use_{1+nb})));
-disp(sprintf('nb %.2d : mr_Z_ori_ npats %.5d nctrl %.4d, mr_Z_use_ npats %.5d nctrl %.4d, overlap %.4d',nb,numel(mr_Z_ori_{1+nb}),sum(mr_Z_ori_{1+nb}),numel(mr_Z_use_{1+nb}),sum(mr_Z_use_{1+nb}),sum(mr_Z_ori_{1+nb}.*mr_Z_use_{1+nb})));
+disp(sprintf(' %% nb %.2d : mr_A_ori_ npats %.5d ncase %.4d, mr_A_use_ npats %.5d ncase %.4d, overlap %.4d',nb,numel(mr_A_ori_{1+nb}),sum(mr_A_ori_{1+nb}),numel(mr_A_use_{1+nb}),sum(mr_A_use_{1+nb}),sum(mr_A_ori_{1+nb}.*mr_A_use_{1+nb})));
+disp(sprintf(' %% nb %.2d : mr_Z_ori_ npats %.5d nctrl %.4d, mr_Z_use_ npats %.5d nctrl %.4d, overlap %.4d',nb,numel(mr_Z_ori_{1+nb}),sum(mr_Z_ori_{1+nb}),numel(mr_Z_use_{1+nb}),sum(mr_Z_use_{1+nb}),sum(mr_Z_ori_{1+nb}.*mr_Z_use_{1+nb})));
 if (n_bin==1); str_tmp = sprintf('%s_mr_A_full.b16',dir_out_plus_prefix); else; str_tmp = sprintf('%s_mr_A_%0.2d.b16',dir_out_plus_prefix,1+nb); end;
 binary_compress(bitj,mr_A_use_{1+nb}(:)>0,str_tmp);
 if (n_bin==1); str_tmp = sprintf('%s_mr_Z_full.b16',dir_out_plus_prefix); else; str_tmp = sprintf('%s_mr_Z_%0.2d.b16',dir_out_plus_prefix,1+nb); end;
@@ -297,7 +303,7 @@ end;%for nb=0:n_bin-1;
 
 % writing col-mask ;
 mc_A_use = mc_A_pre;
-fname_bim = sprintf('%s/%s_bim.ex2',dir_0in,str_prefix);
+fname_bim = sprintf('%s/%s_bim.ext',dir_0in,str_prefix);
 mc_A_bim = mc_from_bim_ext_ver5(fname_bim,maf_lo_threshold,maf_hi_threshold);
 mc_A_use = mc_A_use .* mc_A_bim;
 disp(sprintf(' %% maf_lo_threshold %0.2f maf_hi_threshold %0.2f, retaining %d mc values, but setting %d mc values to 0',maf_lo_threshold,maf_hi_threshold,sum(mc_A_use),sum(~mc_A_use)));
@@ -308,7 +314,7 @@ end;%if (col_reduction_factor<1);
 fname_mc_A = sprintf('%s_mc_A.b16',dir_out_plus_prefix);
 disp(sprintf(' %% creating %s',fname_mc_A));
 str_tmp_out = fname_mc_A; binary_compress(bitj,mc_A_use(:)>0,str_tmp_out); 
-disp(sprintf('mc_A nsnps %.9d/%.9d',sum(mc_A_use(:)>0),numel(mc_A_use)));
+disp(sprintf(' %% mc_A nsnps %.9d/%.9d',sum(mc_A_use(:)>0),numel(mc_A_use)));
 A_n_cols_used = sum(mc_A_use(:)>0);
 
 disp(sprintf(' %% A_n_rows_used %d Z_n_rows_used %d A_n_cols_used %d',A_n_rows_used,Z_n_rows_used,A_n_cols_used));
