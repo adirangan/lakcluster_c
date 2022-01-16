@@ -2,13 +2,12 @@ verbose=1;
 if (verbose); disp(sprintf(' %% [entering test_xxxcluster_fromdisk_ver16]')); end;
 rng(0); nf=0;
 
-if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% ;')); end;
 if (verbose); disp(sprintf(' %% First we generate a very simple example of dosage-data ;')); end;
-if (verbose); disp(sprintf(' %% which exhibits the following biclusters: ')); end;
+if (verbose); disp(sprintf(' %% which exhibits the following biclusters: ;')); end;
 if (verbose); disp(sprintf(' %% bcA: a case-specific bicluster which is balanced in mds-space (which we want to find) ;')); end;
 if (verbose); disp(sprintf(' %% bcB: a non-specific bicluster spanning the cases and controls (which we want to ignore) ;')); end;
 if (verbose); disp(sprintf(' %% bcC: a case-specific bicluster which is localized in mds-space (which we want to ignore) ;')); end;
-%if (verbose); disp(sprintf(' %% Each of the 3 biclusters is disjoint. ;')); end;
 str_lak_vs_dex = 'dex';
 r_fraction_bcA = 0.125;
 r_fraction_bcB = 0.250;
@@ -18,7 +17,7 @@ c_fraction_bcB = 0.1250;
 c_fraction_bcC = 0.0625;
 maf_lob = 0.45;
 maf_upb = 0.55;
-flag_force_create = 1;
+flag_force_create = 0;
 
 %%%%%%%%;
 n_snp_cup = 1024*8;
@@ -218,12 +217,6 @@ tmp_xor_ = dsg_cup_frq_xor_.*log(dsg_cup_frq_xor_./(2*dsg_cup_p_opt_.*dsg_cup_q_
 tmp_nor_ = dsg_cup_frq_nor_.*log(dsg_cup_frq_nor_./(dsg_cup_q_opt_.^2)); tmp_nor_(find(~isfinite(tmp_nor_)))=0;
 dsg_cup_I_opt_ = tmp_and_ + tmp_xor_ + tmp_nor_ ;
 %%%%%%%%;
-
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we visualize the dosage-data for the cases (top) and ctrls (bottom). ;')); end;
-if (verbose); disp(sprintf(' %% The first two mds-components are shon on the left. ')); end;
-if (verbose); disp(sprintf(' %% Note that, while bcA and bcB are mds-balanced, ')); end;
-if (verbose); disp(sprintf(' %% bcC is biased with respect to the mds-components. ')); end;
 rij_case_prm_ = [ ... 
 ; setdiff(rij_case_bcA_,unionall({rij_case_bcB_,rij_case_bcC_})) ...
 ; setdiff(rij_case_bcB_,unionall({rij_case_bcC_})) ...
@@ -243,20 +236,25 @@ cij_prm_ = [ ...
 ; setdiff(cij_bcC_,unionall({})) ...
 ; setdiff(cij_,unionall({cij_bcA_,cij_bcB_,cij_bcC_})) ...
 ];
-%%%%;
+%%%%%%%%;
 mr_bcA_ = zeros(n_patient_cup,1); mr_bcA_(union(rij_case_bcA_,rij_ctrl_bcA_)) = 1;
 mr_bcB_ = zeros(n_patient_cup,1); mr_bcB_(union(rij_case_bcB_,rij_ctrl_bcB_)) = 1;
 mr_bcC_ = zeros(n_patient_cup,1); mr_bcC_(union(rij_case_bcC_,rij_ctrl_bcC_)) = 1;
 mc_cup_bcA_ = zeros(n_snp_cup,1); mc_cup_bcA_(cij_bcA_) = 1;
 mc_cup_bcB_ = zeros(n_snp_cup,1); mc_cup_bcB_(cij_bcB_) = 1;
 mc_cup_bcC_ = zeros(n_snp_cup,1); mc_cup_bcC_(cij_bcC_) = 1;
-%%%%;
+%%%%%%%;
+
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% Now we visualize the dosage-data (magenta and cyan) for the cases (top) and ctrls (bottom). ;')); end;
+if (verbose); disp(sprintf(' %% The first two mds-components are shown on the far left column (green and yellow). ;')); end;
+if (verbose); disp(sprintf(' %% Adjacent are the row-masks associated with biclusters bcA, bcB and bcC (grey). ;')); end;
+if (verbose); disp(sprintf(' %% Atop lie the column-masks associated with biclusters bcA, bcB and bcC (grey). ;')); end;
+if (verbose); disp(sprintf(' %% Note that bcA and bcB are both ''global'' (i.e., mds-balanced), ;')); end;
+if (verbose); disp(sprintf(' %% while bcC is ''local'' (i.e., biased with respect to the mds-components). ;')); end;
+if (verbose); disp(sprintf(' %% Note also that bcA and bcC are both ''case-specific'', ;')); end;
+if (verbose); disp(sprintf(' %% while bcB is ''non-specific'' (i.e., extends across cases and ctrls). ;')); end;
 figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,512,1024]); 
-[ ...
- uAZm__ ...
-,lim_use_ ...
-,c_use__ ...
-] = ...
 imagesc_uAZm_1( ...
  mds_pv__(rij_prm_,:) ...
 ,dsg_cup_ps__(rij_case_prm_,cij_prm_) ...
@@ -266,8 +264,13 @@ imagesc_uAZm_1( ...
 );
 
 if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we convert the dosage-data to b16 data. ;')); end;
-if (verbose); disp(sprintf(' %% We put everything into a single study. ;')); end;
+if (verbose); disp(sprintf(' %% Now we convert the dosage-data to b16-data. ;')); end;
+if (verbose); disp(sprintf(' %% This encodes each dosage value as a 3-bit binary array. ;')); end;
+if (verbose); disp(sprintf(' %% dosage ''0'' is encoded as [ 1 0 0 ]. ;')); end;
+if (verbose); disp(sprintf(' %% dosage ''1'' is encoded as [ 0 1 0 ]. ;')); end;
+if (verbose); disp(sprintf(' %% dosage ''2'' is encoded as [ 0 0 1 ]. ;')); end;
+if (verbose); disp(sprintf(' %% For simplicity, we put everything into a single study directory. ;')); end;
+if (verbose); disp(sprintf(' %% (although the dosage-data could instead be split across multiple files). ;')); end;
 %%%%%%%%;
 dir_trunk = sprintf('%s/dir_test_xxxcluster_fromdisk_ver16',pwd);
 if (~exist(dir_trunk,'dir')); disp(sprintf(' %% mkdir %s',dir_trunk)); mkdir(dir_trunk); end;
@@ -337,6 +340,21 @@ npatient_cup = index_npatient_cup_from_nfamex_(1+nfamex);
 famex_fidandiid_p_{1+nfamex} = sprintf('%s&%s',fam_cup_fid_{1+npatient_cup},fam_cup_iid_{1+npatient_cup});
 end;%for nfamex=0:n_famex-1;
 %%%%%%%%;
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% When converting the bed, bim and fam data into a b16 array, ;')); end;
+if (verbose); disp(sprintf(' %% we must specify a few parameters. ;')); end;
+if (verbose); disp(sprintf(' %% Some of the more important parameter are: ;')); end;
+if (verbose); disp(sprintf(' %% maf_cutoff: scalar double: this is the minor-allele-frequency (maf) cutoff for snps. ;')); end;
+if (verbose); disp(sprintf(' %%\t Only snps with a striclty higher maf will be considered. ;')); end;
+if (verbose); disp(sprintf(' %% ent_cutoff: scalar double: this is the entropy-cutoff for snps. ;')); end;
+if (verbose); disp(sprintf(' %%\t We typically expect the dosage-data for any particular snp ;')); end;
+if (verbose); disp(sprintf(' %%\t to have a frequency of 0, 1 and 2 values ;')); end;
+if (verbose); disp(sprintf(' %%\t (i.e., ''aa'', ''Aa'' and ''AA'' values) ;')); end;
+if (verbose); disp(sprintf(' %%\t which is close to pp, 2pq and qq, respectively, ;')); end;
+if (verbose); disp(sprintf(' %%\t where p is the associated minor-allele-frequency (maf). ;')); end;
+if (verbose); disp(sprintf(' %%\t The entropy (I_opt) measures the deviation from this expectation, ;')); end;
+if (verbose); disp(sprintf(' %%\t with higher values indicating a greater deviation. ;')); end;
+if (verbose); disp(sprintf(' %%\t Only snps with a strictly lower I_opt will be considered.  ;')); end;
 str_output_prefix = 'test';
 parameter = struct('type','parameter');
 parameter.verbose = 1;
@@ -367,6 +385,9 @@ str_output_prefix_local = sprintf('%s_',str_output_prefix_plus_maf);
 dir_out = sprintf('%s/dir_%s',parameter.dir_trunk,str_output_prefix_plus_maf);
 if (verbose>0); disp(sprintf(' %% str_output_prefix_local %s ;\n %% dir_out %s ;\n',str_output_prefix_local,dir_out)); end;
 
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% Now for illustration we uncompress the b16 file. ;')); end;
+if (verbose); disp(sprintf(' %% This is definitely not recommended for larger data-sets. ;')); end;
 fname_b16 = sprintf('%s/%s_A_full_n.b16',dir_out,str_output_prefix_plus_maf);
 A_full_n_ = binary_uncompress(fname_b16);
 %%%%%%%%;
@@ -389,7 +410,6 @@ load_famext_ver1( ...
 [~,~,ij_fam_ext_from_cap_] = intersect(fam_cup_fid_,famext_fid_,'stable');
 disp(sprintf(' %% famext_fid_ vs fam_cup_fid_: %0.16f',fnorm(ij_fam_ext_from_cap_-transpose(1:n_patient))));
 %%%%%%%%;
-
 fname_bimext = sprintf('%s/%s_bim.ext',dir_out,str_output_prefix_plus_maf);
 [ ...
  n_snp_bimext ...
@@ -425,12 +445,6 @@ ij_bim_cup_from_ext__ = sparse(1+index_bim_cup_from_ext_,1:n_snp_bimext,1,n_snp_
 cij_prm_inv_from_ext_ = transpose(cij_prm_inv_) * ij_bim_cup_from_ext__;
 [~,cij_ext_] = sort(cij_prm_inv_from_ext_,'ascend');
 %%%%;
-mr_bcx_ = zeros(n_patient,1);
-mr_bcx_(rij_case_bcA_) = 3;
-mr_bcx_(rij_case_bcB_) = 2;
-mr_bcx_(rij_ctrl_bcB_) = 2;
-mr_bcx_(rij_case_bcC_) = 1;
-%%%%;
 mc_cup_bcA_ = zeros(n_snp_cup,1);
 mc_cup_bcA_(cij_bcA_) = 1;
 mc_cup_bcA_from_ext_ = transpose(mc_cup_bcA_) * ij_bim_cup_from_ext__;
@@ -463,6 +477,12 @@ cij_ex2_ = ...
 ; setdiff(transpose(1:n_snp_bimext),find(mc_ext_bcA_ + mc_ext_bcB_ + mc_ext_bcC_)) ...
 ];
 %%%%;
+mr_bcx_ = zeros(n_patient,1);
+mr_bcx_(rij_case_bcC_) = 1;
+mr_bcx_(rij_case_bcB_) = 2;
+mr_bcx_(rij_ctrl_bcB_) = 2;
+mr_bcx_(rij_case_bcA_) = 3;
+%%%%;
 mc_bcx_ = zeros(n_snp_bimext,1);
 mc_bcx_(find(mc_ext_bcA_))=3;
 mc_bcx_(find(mc_bcB_))=2;
@@ -473,42 +493,33 @@ n_snp_ext_bcB = numel(find(mc_bcx_==2));
 n_snp_ext_bcC = numel(find(mc_bcx_==1));
 %%%%;
 if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we visualize the b16-data for the cases (top) and ctrls (bottom). ;')); end;
-if (verbose); disp(sprintf(' %% Column-1 orders the b16 data by snp-index, Column-2 by allele-frequency. ')); end;
-if (verbose); disp(sprintf(' %% the column-indices corresponding to bcA are shown first, followed by bcB and bcC. ')); end;
-if (verbose); disp(sprintf(' %% Column-3 shows the signal-strength of each bicluster in the cases alone. ')); end;
-if (verbose); disp(sprintf(' %% Column-4 shows the case-vs-ctrl signal-strength of each bicluster. ')); end;
-if (verbose); disp(sprintf(' %% Note that bcA is case-specific, while bcB extends across the cases and ctrls. ')); end;
-if (verbose); disp(sprintf(' %% bcC is also case-specific, but is biased with respect to the mds-components. ')); end;
+if (verbose); disp(sprintf(' %% Now we visualize the b16-data (magenta and cyan) for the cases (top) and ctrls (bottom). ;')); end;
 %%%%;
 figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,1024*2,1024]); fig80s;
-p_row = 2; p_col = 4;
-subplot(p_row,p_col,1 + 0*p_col); imagesc(A_full_n_(rij_case_prm_,cij_ext_(1:n_snp_bcx))); axisnotick; ylabel('case'); title('ext');
-subplot(p_row,p_col,1 + 1*p_col); imagesc(A_full_n_(rij_ctrl_prm_,cij_ext_(1:n_snp_bcx))); axisnotick; ylabel('ctrl'); title('ext');
-subplot(p_row,p_col,2 + 0*p_col); imagesc(A_full_n_(rij_case_prm_,cij_ex2_(1:n_snp_bcx))); axisnotick; ylabel('case'); title('ex2');
-subplot(p_row,p_col,2 + 1*p_col); imagesc(A_full_n_(rij_ctrl_prm_,cij_ex2_(1:n_snp_bcx))); axisnotick; ylabel('ctrl'); title('ex2');
-subplot(p_row,p_col,3 + 0*p_col); hold on;
-plot( 1:n_snp_bimext, mean(A_full_n_(rij_case_bcA_,cij_ext_),1) - mean(A_full_n_(rij_case_bcA_cmp_,cij_ext_),1) , 'k.' );
-plot(n_snp_ext_bcA*[1,1],[-1,+1],'k-','LineWidth',3 );
-plot((n_snp_ext_bcA+n_snp_ext_bcB)*[1,1],[-1,+1],'k-','LineWidth',3 );
-xlim([1,n_snp_bcx]); ylim([-0.5,+0.5]); ylabel('signal strength'); title('bcA case');
-subplot(p_row,p_col,3 + 1*p_col); hold on;
-plot( 1:n_snp_bimext, mean(A_full_n_(rij_case_bcB_,cij_ext_),1) - mean(A_full_n_(rij_case_bcB_cmp_,cij_ext_),1) , 'k.' );
-plot(n_snp_ext_bcA*[1,1],[-1,+1],'k-','LineWidth',3 );
-plot((n_snp_ext_bcA+n_snp_ext_bcB)*[1,1],[-1,+1],'k-','LineWidth',3 );
-xlim([1,n_snp_bcx]); ylim([-0.5,+0.5]); ylabel('signal strength'); title('bcB case');
-subplot(p_row,p_col,4 + 0*p_col); hold on;
-plot( 1:n_snp_bimext, mean(A_full_n_(rij_case_bcA_,cij_ext_),1) - mean(A_full_n_(rij_ctrl_,cij_ext_),1) , 'k.' );
-plot(n_snp_ext_bcA*[1,1],[-1,+1],'k-','LineWidth',3 );
-plot((n_snp_ext_bcA+n_snp_ext_bcB)*[1,1],[-1,+1],'k-','LineWidth',3 );
-xlim([1,n_snp_bcx]); ylim([-0.5,+0.5]); ylabel('signal strength'); title('bcA case-vs-ctrl');
-subplot(p_row,p_col,4 + 1*p_col); hold on;
-plot( 1:n_snp_bimext, mean(A_full_n_(rij_case_bcB_,cij_ext_),1) - mean(A_full_n_(rij_ctrl_bcB_,cij_ext_),1) , 'k.' );
-plot(n_snp_ext_bcA*[1,1],[-1,+1],'k-','LineWidth',3 );
-plot((n_snp_ext_bcA+n_snp_ext_bcB)*[1,1],[-1,+1],'k-','LineWidth',3 );
-xlim([1,n_snp_bcx]); ylim([-0.5,+0.5]); ylabel('signal strength'); title('bcB case-vs-ctrl');
+imagesc_uAZm_1( ...
+ mds_pv__(rij_prm_,:) ...
+,A_full_n_(rij_case_prm_,cij_ex2_) ...
+,A_full_n_(rij_ctrl_prm_,cij_ex2_) ...
+,[ mr_bcA_(rij_prm_) , mr_bcB_(rij_prm_) , mr_bcC_(rij_prm_) ] ...
+,[ mc_ext_bcA_(cij_ex2_) , mc_ext_bcB_(cij_ex2_) , mc_ext_bcC_(cij_ex2_) ] ...
+);
 %%%%;
 
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% Now we run the basic biclustering method on the b16-data. ;')); end;
+if (verbose); disp(sprintf(' %% This should take approximately 10 seconds for differentially-expressed biclustering. ;')); end;
+if (verbose); disp(sprintf(' %% Some of the important parameters are: ;')); end;
+if (verbose); disp(sprintf(' %% n_mds: scalar integer: number of mds-components to correct for. ;')); end;
+if (verbose); disp(sprintf(' %%\t Note that the mds-components will be binarized into orthants. ;')); end;
+if (verbose); disp(sprintf(' %% n_mds_repl: scalar integer: number of times to replicate the mds-components. ;')); end;
+if (verbose); disp(sprintf(' %%\t This specifically refers to rotation+replication across orthants. ;')); end;
+if (verbose); disp(sprintf(' %%\t Larger numbers are better, but 1 or 2 is usually sufficient. ;')); end;
+if (verbose); disp(sprintf(' %% ij_mds_use_: integer array of size n_mds: 1-based indices of mds-components to correct for. ;')); end;
+if (verbose); disp(sprintf(' %% gamma: scalar double: fraction of rows or columns eliminated at each iteration of the bicluster algorithm. ;')); end;
+if (verbose); disp(sprintf(' %%\t Smaller numbers are more accurate, but larger numbers require less computation time. ;')); end;
+if (verbose); disp(sprintf(' %%\t Empirically, gamma = 0.01 or 0.05 is usually sufficient. ;')); end;
+if (verbose); disp(sprintf(' %% flag_force_create: scalar integer: set to 1 to force recreation of all temporary files. ;')); end;
+if (verbose); disp(sprintf(' %%\t if set to 0 will load temporary files from disk. ;')); end;
 n_mds_0in = 2; n_mds_repl = 1; ij_mds_use_ = [1:2];
 gamma = 0.05;
 dir_code = sprintf('%s/..',pwd);
@@ -528,19 +539,8 @@ xxxcluster_fromdisk_uADZSZDA_ver16( ...
  parameter ...
 );
 
-parameter.str_trace_s0000 = sprintf('%s/out_trace_s0000.txt',parameter.dir_out_trace);
-[ ...
- niter_ ...
-,r_rem_ ...
-,c_rem_ ...
-,QR_ ...
-,QC_ ...
-,I_rem_ ...
-,trace_ ...
-] = ...
-load_trace_ver0( ...
-parameter.str_trace_s0000 ...
-);
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% Now we load the results of this single biclustering run. ;')); end;
 parameter.str_out_xdrop_a_s0000 = sprintf('%s/out_xdrop_a.txt',parameter.dir_out_s0000);
 [ ...
  rindex_ ...
@@ -550,6 +550,13 @@ parameter.str_out_xdrop_a_s0000 = sprintf('%s/out_xdrop_a.txt',parameter.dir_out
 load_out_xdrop_ver0( ...
 parameter.str_out_xdrop_a_s0000 ...
 );
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% Now we display the results of this single biclustering run. ;')); end;
+if (verbose); disp(sprintf(' %% The rows and cols are ordered by the biclustering-algorithm. ;')); end;
+if (verbose); disp(sprintf(' %% Those rows and cols eliminated first are shown towards the bottom-right. ;')); end;
+if (verbose); disp(sprintf(' %% Those rows and cols retained longest are shown towards the top-left. ;')); end;
+if (verbose); disp(sprintf(' %% Note that most of bcA is retained until the end. ;')); end;
+if (verbose); disp(sprintf(' %% That is to say, the biclustering-algorithm successfully focused on bcA. ;')); end;
 figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,1024*2,1024]); fig80s;
 tmp_rij_prm_ = [1+flip(rindex_);rij_ctrl_prm_];
 tmp_cij_prm_ = [1+flip(cindex_)];
@@ -561,20 +568,100 @@ imagesc_uAZm_1( ...
 ,[ mc_ext_bcA_(tmp_cij_prm_) , mc_ext_bcB_(tmp_cij_prm_) , mc_ext_bcC_(tmp_cij_prm_) ] ...
 );
 
-figure(1+nf);nf=nf+1;clf;figmed;
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% Now we run a permutation-test. ;')); end;
+if (verbose); disp(sprintf(' %% This involves rerunning the biclustering-algorithm on ;')); end;
+if (verbose); disp(sprintf(' %% several label-permuted data-sets. ;')); end;
+if (verbose); disp(sprintf(' %% The parameter nshuffle indicates the (0-based) shuffle-index. ')); end;
+if (verbose); disp(sprintf(' %% When nshuffle==0 we do not shuffle, and process the original data-set. ;')); end;
+if (verbose); disp(sprintf(' %% This was already done above (as nshuffle==0 by default). ;')); end;
+if (verbose); disp(sprintf(' %% Each run should take as long as the original. ;')); end;
+n_shuffle = 32;
+for nshuffle=1:n_shuffle;
+n_mds_0in = 2; n_mds_repl = 1; ij_mds_use_ = [1:2];
+gamma = 0.05;
+dir_code = sprintf('%s/..',pwd);
+str_prefix = str_output_prefix_plus_maf;
+parameter.str_lak_vs_dex = str_lak_vs_dex;
+parameter.str_prefix = str_prefix;
+parameter.dir_code = dir_code;
+parameter.gamma = gamma;
+parameter.n_mds = n_mds_0in;
+parameter.n_mds_repl = n_mds_repl;
+parameter.ij_mds_use_ = ij_mds_use_;
+parameter.flag_force_create = flag_force_create;
+parameter.nshuffle = nshuffle;
+[ ...
+ parameter ...
+] = ...
+xxxcluster_fromdisk_uADZSZDA_ver16( ...
+ parameter ...
+);
+end;%for nshuffle=1:n_shuffle;
+
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% Now we load the traces from each run. ;')); end;
+if (verbose); disp(sprintf(' %% Each trace records the (reweighted) mean-squared-correlation of the remaining array (across iterations).')); end;
+trace__ = load_trace__ver0(parameter.dir_out_trace);
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% Now we display the original trace (red) against the label-shuffled traces (black). ;')); end;
+if (verbose); disp(sprintf(' %% The horizontal indicates iteration, and the vertical indicates z-score. ;')); end;
+if (verbose); disp(sprintf(' %% The maximum negative-log-p-value for the original trace is circled (red).')); end;
+figure(1+nf);nf=nf+1;clf;figsml;
+linewidth_sml = 0.5;
+linewidth_big = 3;
+markersize_big = 16;
+[tmp_nlpR,ij_nlpR] = max(trace__.nlpR_s0000_);
+hold on;
+plot(trace__.niter_s0000_,trace__.ZR_is__,'k-','LineWidth',linewidth_sml);
+plot(trace__.niter_s0000_,trace__.ZR_s0000_,'r-','LineWidth',linewidth_big);
+plot(trace__.niter_s0000_(ij_nlpR),trace__.ZR_s0000_(ij_nlpR),'ko','MarkerFaceColor','r','MarkerSize',markersize_big);
+hold off;
+xlim([min(trace__.niter_s0000_),max(trace__.niter_s0000_)]); xlabel('iteration');
+ylabel('negative-log-p');
+
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% We use this maximum negative-log-p-value to define a ''dominant bicluster''. ;')); end;
+if (verbose); disp(sprintf(' %% We extract this dominant bicluster (i.e., using the rows and cols at that iteration), ;')); end;
+if (verbose); disp(sprintf(' %% and then measure the principal-components of that bicluster. ;')); end;
+if (verbose); disp(sprintf(' %% By projecting each of the patients onto those principal-components, ;')); end;
+if (verbose); disp(sprintf(' %% we can visualize the effect of the biclustering. ;')); end;
+if (verbose); disp(sprintf(' %% A scatterplot of these patient-projections is shown below (right). ;')); end;
+if (verbose); disp(sprintf(' %% Each patient is colored with a (r,g,b) triplet indicating its membership in (bcA,bcB,bcC). ;')); end;
+if (verbose); disp(sprintf(' %% Thus, patients in bcA will be: ')); end;
+if (verbose); disp(sprintf(' %%\t red if they are only in bcA, ')); end;
+if (verbose); disp(sprintf(' %%\t yellow if they are in bcA+bcB, ')); end;
+if (verbose); disp(sprintf(' %%\t magenta if they are in bcA+bcC, ')); end;
+if (verbose); disp(sprintf(' %%\t white if they are in bcA+bcB+bcC. ')); end;
+if (verbose); disp(sprintf(' %% Similarly, patients in bcB will be mostly green, ;')); end;
+if (verbose); disp(sprintf(' %% while patients in bcC will be mostly blue. ;')); end;
+if (verbose); disp(sprintf(' %% Note that the bicluster-informed projection singles out bcA, ;')); end;
+if (verbose); disp(sprintf(' %% while an uninformed projection (using the principal-components of the full data-set) ;')); end;
+if (verbose); disp(sprintf(' %% does not single out bcA, but instead is confounded by the nonspecific bicluster bcB. ;')); end;
+figure(1+nf);nf=nf+1;clf;figmed;fig80s;
+mr_ABC__ = zeros(n_patient,3);
+mr_ABC__(rij_case_bcA_,1+0) = 1;
+mr_ABC__(rij_case_bcB_,1+1) = 1;
+mr_ABC__(rij_ctrl_bcB_,1+1) = 1;
+mr_ABC__(rij_case_bcC_,1+2) = 1;
+markersize_sml = 4;
+markersize_med = 8;
+markersize_big = 16;
 %%%%;
 [tmp_U_,tmp_S_,tmp_V_] = svds(A_full_n_(tmp_rij_,tmp_cij_),2);
 tmp_AVn_ = A_full_n_(:,tmp_cij_)*tmp_V_;
 subplot(1,2,1);
-scatter(tmp_AVn_(:,1),tmp_AVn_(:,2),16,mr_bcx_,'filled');
+scatter(tmp_AVn_(:,1),tmp_AVn_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
 axisnotick; title('full data-set'); xlabel('PC1'); ylabel('PC2');
 %%%%;
-n_r_tmp = 512;
-n_c_tmp = 2048;
+n_r_tmp = trace__.r_rem_s0000_(ij_nlpR);
+n_c_tmp = trace__.c_rem_s0000_(ij_nlpR);
 tmp_rij_ = 1+flip(rindex_);
 tmp_cij_ = 1+flip(cindex_);
 [tmp_U_,tmp_S_,tmp_V_] = svds(A_full_n_(tmp_rij_(1:n_r_tmp),tmp_cij_(1:n_c_tmp)),2);
 tmp_AVn_ = A_full_n_(:,tmp_cij_(1:n_c_tmp))*tmp_V_;
 subplot(1,2,2);
-scatter(tmp_AVn_(:,1),tmp_AVn_(:,2),16,mr_bcx_,'filled');
+scatter(tmp_AVn_(:,1),tmp_AVn_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
 axisnotick; title('bicluster informed'); xlabel('PC1'); ylabel('PC2');
+
+
