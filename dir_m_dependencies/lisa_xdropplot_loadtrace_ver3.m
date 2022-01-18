@@ -1,0 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ;
+% run lisa_xdropplot_initialize first. ;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ;
+lisa_setnames_ver2 ;
+lisa_xdropextract_ver2 ;
+lisa_loadmdsfambim_ver2 ;
+lisa_mxcheck_ver2 ;
+lisa_studyindex_ver2 ;
+lisa_traceextract_ver2 ;
+lisa_BDextract_ver2 ;

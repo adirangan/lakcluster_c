@@ -1,0 +1,37 @@
+function test_loader_helper_tsne_50(dir_trunk,E_xxxx_,prefix,CLabel_sub_,perplexity);
+
+if (nargin<5); perplexity = 30; end;
+if perplexity~=30; 
+fname_jpg_base = sprintf('%s/dir_jpg/%stsne50_p%d',dir_trunk,prefix,perplexity); 
+fname_mat_base = sprintf('%s/dir_mat/%stsne50_p%d',dir_trunk,prefix,perplexity); 
+end;%if perplexity~=30; 
+if perplexity==30; 
+fname_jpg_base = sprintf('%s/dir_jpg/%stsne50',dir_trunk,prefix); 
+fname_mat_base = sprintf('%s/dir_mat/%stsne50',dir_trunk,prefix); 
+end;%if perplexity==30; 
+fname_jpg = sprintf('%s.jpg',fname_jpg_base);
+fname_eps = sprintf('%s.eps',fname_jpg_base);
+fname_mat = sprintf('%s.mat',fname_mat_base);
+if ( exist(fname_mat,'file'));
+disp(sprintf(' %% %s found, not creating',fname_mat));
+end;%if ( exist(fname_mat,'file'));
+if (~exist(fname_mat,'file')); 
+disp(sprintf(' %% %s not found, creating',fname_mat));
+for nr=1:1;
+tmp_tsne_{nr} = fast_tsne_dr_0(E_xxxx_,struct('rand_seed',42-1+nr,'theta',0.5,'perplexity',perplexity));
+end;%for nr=1:12;
+save(fname_mat,'tmp_tsne_');
+end;% if (~exist(fname_mat,'file')); 
+load(fname_mat,'tmp_tsne_');
+figure(1);clf;
+for nr=1:1;
+subplot(1,1,nr);
+scatter(tmp_tsne_{nr}(:,1),tmp_tsne_{nr}(:,2),5,CLabel_sub_,'filled');
+colormap('lines'); set(gca,'XTick',[],'YTick',[]);
+title(sprintf('%s p%d nr%d',prefix,perplexity,nr),'Interpreter','none');
+end;%for nr=1:1;
+figbig;
+disp(sprintf(' %% writing %s',fname_jpg));
+print('-djpeg',fname_jpg);
+print('-depsc',fname_eps);
+

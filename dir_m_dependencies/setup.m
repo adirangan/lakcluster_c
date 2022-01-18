@@ -1,0 +1,14 @@
+%addpath('/data/rangan/dir_cryoem/chebfun');
+addpath('/data/rangan/dir_bcc/dir_isosplit5/matlab');
+addpath('/data/rangan/dir_bcc/dir_hdbscan/Jorsorokin-HDBSCAN-29757bf/source/');
+addpath('/data/rangan/dir_bcc/dir_hdbscan/Jorsorokin-HDBSCAN-29757bf/source/functions/');
+addpath('/data/rangan/dir_bcc/dir_dpclust/');
+addpath('/data/rangan/dir_bcc/dir_umap/');
+addpath('/data/rangan/dir_bcc/dir_umap/umap/');
+addpath('/data/rangan/dir_bcc/dir_umap/util/');
+addpath('/data/rangan/dir_FIt-SNE/');
+addpath('/data/rangan/dir_bcc/dir_lakcluster_c_dev/dir_m');
+%if (strfind(path,'/data/rangan/dir_bcc/dir_PGC_20180304/dir_m')); rmpath('/data/rangan/dir_bcc/dir_PGC_20180304/dir_m'); end;
+addpath('/data/rangan/dir_bcc/dir_PGC_20190328/dir_m');
+set(groot,'defaultFigureCreateFcn',@(fig,~)addToolbarExplorationButtons(fig));
+set(groot,'defaultAxesCreateFcn',@(ax,~)set(ax.Toolbar,'Visible','off'));

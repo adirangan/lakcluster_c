@@ -1,0 +1,36 @@
+function ...
+[ ...
+ label_enum_ ...
+,n_u_label ...
+,u_label_ ...
+,index_nu_from_nall_ ...
+,n_u_label_ ...
+,index_nall_from_nu__ ...
+] = ...
+label_str_to_enum_1( ...
+ label_str_ ...
+);
+% converts string labels to numeric labels, ;
+% does not assume that the strings are themselves number. ;
+% e.g., strings such as 'AA', 'ABBA0', etc. are allowed. ;
+% these strings will be enumerated based on dictionary order. ;
+% label_enum_ is 1-based, while index_nu_from_nall_ is 0-based. ;
+n_all = numel(label_str_);
+u_label_ = unique(label_str_);
+n_u_label = length(u_label_);
+n_u_label_ = zeros(n_u_label,1);
+for nu_label = 0:n_u_label-1;
+n_u_label_(1+nu_label) = length(find(strcmp(label_str_,u_label_(1+nu_label))));
+end;%for nu_label = 0:n_u_label-1;
+label_enum_ = zeros(n_all,1);
+index_nu_from_nall_ = zeros(n_all,1);
+index_nall_from_nu__ = cell(n_u_label,1);
+for nu_label=0:n_u_label-1;
+tmp_index_ = efind(strcmp(label_str_,u_label_(1+nu_label)));
+index_nall_from_nu__{1+nu_label} = tmp_index_;
+if (~isempty(tmp_index_));
+index_nu_from_nall_(1+tmp_index_) = nu_label;
+label_enum_(1+tmp_index_) = 1+nu_label;
+end;%if (~isempty(tmp_index_));
+end;%for nu_label=0:n_u_label-;
+

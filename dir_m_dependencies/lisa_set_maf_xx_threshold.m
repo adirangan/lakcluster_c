@@ -1,0 +1,10 @@
+function [maf_lo_threshold,maf_hi_threshold] = lisa_set_maf_xx_threshold(n_maf);
+% coding for maf threshold. ;
+if 0;
+elseif n_maf==1; maf_lo_threshold = 0.01; maf_hi_threshold = 0.50; % all (since we thresholded maf at 0.01 to start with) ;
+elseif n_maf==2; maf_lo_threshold = 0.01; maf_hi_threshold = 0.05; % extreme snps (differential expression only, no loop-counting later on) ;
+elseif n_maf==3; maf_lo_threshold = 0.01; maf_hi_threshold = 0.10; % extreme snps (differential expression only, no loop-counting later on) ;
+elseif n_maf==4; maf_lo_threshold = 0.10; maf_hi_threshold = 0.50; % more balanced snps (differential expression to start, as well as loop-counting later on) ;
+elseif n_maf==5; maf_lo_threshold = 0.25; maf_hi_threshold = 0.50; % more balanced snps (differential expression to start, as well as loop-counting later on) ;
+elseif n_maf==6; maf_lo_threshold = 0.05; maf_hi_threshold = 0.50; % some balanced snps (differential expression to start, as well as loop-counting later on) ;
+ else disp(sprintf(' %% Warning! n_maf %d undefined in lisa_set_maf_xx_threshold.m',n_maf)); end;

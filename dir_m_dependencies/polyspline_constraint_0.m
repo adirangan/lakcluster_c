@@ -1,0 +1,50 @@
+function C__ = polyspline_constraint_0(n_patch,x_edge_,n_degree);
+% Builds constraint matrix for spline with n_patch components. ;
+% The degree of each component is n_degree (watch out for conditioning). ;
+% x_edge_ of size 1+n_patch should contain the (sorted) patch boundaries. ;
+% Constraints encode value- and derivative-matching on interior boundaries, ;
+% and zero concavity at exterior boundaries. ;
+% Note that the polynomial coefficients are stored in matlab order ;
+% (i.e., highest power comes first). ;
+
+assert(numel(x_edge_)==1+n_patch);
+
+d0__ = eye(1+n_degree,1+n_degree); %<-- direct evaluation. ;
+d1__ = zeros(1+n_degree,1+n_degree); %<-- first derivative. ;
+for ndegree=0:n_degree-1;
+d1__(1+ndegree+1,1+ndegree+0) = n_degree-ndegree;
+end;%for ndegree=0:n_degree-1;
+d2__ = d1__*d1__;
+
+C__ = zeros(2+2*(n_patch-1),n_patch*(1+n_degree));
+
+nr=0; nc=0;
+for npatch=0:n_patch-1+1;
+x_edge = x_edge_(1+npatch);
+x_edge_power_ = x_edge.^[n_degree:-1:0];
+%%%%;
+if npatch==0; %<-- leftmost boundary. ;
+c_ = x_edge_power_*d2__;
+C__(1+nr,1+nc+[0:n_degree]) = +c_;
+nr=nr+1;
+end;%if npatch==0;
+%%%%;
+if (npatch> 0) & (npatch< n_patch-1+1); %<-- interior boundary. ;
+c_ = x_edge_power_*d0__;
+C__(1+nr,1+nc+0*(1+n_degree)+[0:n_degree]) = +c_;
+C__(1+nr,1+nc+1*(1+n_degree)+[0:n_degree]) = -c_;
+nr=nr+1;
+c_ = x_edge_power_*d1__;
+C__(1+nr,1+nc+0*(1+n_degree)+[0:n_degree]) = +c_;
+C__(1+nr,1+nc+1*(1+n_degree)+[0:n_degree]) = -c_;
+nr=nr+1;
+nc=nc+(1+n_degree);
+end;%if (npatch> 0) & (npatch< n_patch-1+1); %<-- interior boundary. ;
+%%%%;
+if npatch==n_patch-1+1; %<-- rightmost boundary. ;
+c_ = x_edge_power_*d2__;
+C__(1+nr,1+nc+[0:n_degree]) = +c_;
+nr=nr+1;
+end;%if npatch==n_patch-1+1;
+%%%%;
+end;%for npatch=0:n_patch-1+1;

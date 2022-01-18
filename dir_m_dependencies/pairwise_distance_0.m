@@ -1,0 +1,12 @@
+function output_ = pairwise_distance_0(input_,str_margin);
+% calculates the pairwise distances between rows or columns of input_. ;
+if nargin<2; str_margin = 'row'; end;
+[n_r,n_c] = size(input_);
+if ~isempty(strfind(str_margin,'row'));
+l2_ = sum(input_.^2,2);
+ab_ = input_*ctranspose(input_);
+output_ = sqrt( max( 0 , repmat(l2_,1,n_r) + repmat(transpose(l2_),n_r,1) - ctranspose(ab_) - ab_ ) ) ;
+end;%if ~isempty(strfind(str_margin,'row'));
+if ~isempty(strfind(str_margin,'col'));
+output_ = pairwise_distance_0(transpose(input_),'row');
+end;%if ~isempty(strfind(str_margin,'col'));

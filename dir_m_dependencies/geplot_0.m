@@ -1,0 +1,34 @@
+function n_l = geplot_0(s_,p_,x_offset,y_offset,fontsize,x_width,llim,c_);
+% plot gene-enrichment data ;
+% s_ is an array of pathway names (string). ;
+% p_ is an array of p-values (double). ;
+% x_offset and y_offset are the locations for the plot. ;
+% fontsize = fontsize ;
+% x_width = width of colorbars in background. ;
+% llim = limits for -log10(p_). ;
+% c_ = colormap. ;
+
+n_c = size(c_,1);
+textheight = 0.0045*fontsize;
+n_s = length(p_); n_l = 0;
+for ns=1:n_s;
+lp = min(1,(-log10(p_(ns)) - min(llim))/(max(llim)-min(llim)));
+if lp>0;
+hold on;
+x_ = x_offset + x_width*lp*[0;1;1;0;0];
+y_ = y_offset - textheight/2 - textheight*n_l + textheight*0.95*[0;0;1;1;0];
+nc = max(1,min(n_c,floor(n_c*lp)));
+p = patch(x_,y_,c_(nc,:),'EdgeColor','none');
+x_ = x_offset + x_width*lp + x_width*(1-lp)*[0;1;1;0;0];
+y_ = y_offset - textheight/2 - textheight*n_l + textheight*0.95*[0;0;1;1;0];
+nc = max(1,min(n_c,floor(n_c*lp)));
+p = patch(x_,y_,0.5*[1,1,1] + 0.5*c_(nc,:),'EdgeColor','none');
+%text(x_offset,y_offset - textheight*n_l,s_{ns},'FontSize',fontsize,'Interpreter','none','color',1-c_(nc,:));
+tmp_str = s_{ns};
+tmp_str(find(tmp_str=='_'))=' ';
+text(x_offset,y_offset - textheight*n_l,tmp_str,'FontSize',fontsize,'Interpreter','none','color',[0,0,0]);
+hold off;
+n_l = n_l+1;
+end;%if lp>0;
+end;%for ns=1:n_s;
+

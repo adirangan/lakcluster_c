@@ -1,0 +1,10 @@
+function output = c_MDA_read_r8(fname);
+fp = fopen(fname);
+n_d = fread(fp,1,'int32');
+d_ = fread(fp,n_d,'int32');
+n_A = 1;
+for na=1:n_d; n_A = n_A*d_(na); end;
+A = fread(fp,n_A,'double');
+A = reshape(A,transpose(d_));
+output = A;
+fclose(fp);

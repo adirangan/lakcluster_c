@@ -1,0 +1,30 @@
+function T = linear_discriminator_tpfp_0(A_,B_);
+% finds discriminator T for which true-positives match false-positives. ;
+
+if median(B_) < median(A_) ; 
+T = - linear_discriminator_tpfp_0(-A_,-B_);
+end;%if median(B_) < median(A_) ; 
+
+if median(B_) >= median(A_) ; 
+T = 0;
+n_A = numel(A_);
+n_B = numel(B_);
+n_X = n_A + n_B;
+is_A_ = zeros(n_X,1); is_A_(1:n_A)  = 1;
+is_B_ = zeros(n_X,1); is_B_(n_A + (1:n_B)) = 1;
+X_ = zeros(n_X,1); X_(1:n_A) = A_; X_(n_A + (1:n_B)) = B_;
+[Y_,tmp_ij] = sort(X_,'ascend');
+is_A_srt_ = is_A_(tmp_ij);
+is_B_srt_ = is_B_(tmp_ij);
+is_A_srt_csumr_ = cumsum(is_A_srt_,'reverse');
+is_B_srt_csumf_ = cumsum(is_B_srt_,'forward');
+indicator_ = sign( is_B_srt_csumf_ - is_A_srt_csumr_ ) ;
+ij_indicator_0_ = find(indicator_==0);
+if (numel(ij_indicator_0_)>0);
+T = median(Y_(ij_indicator_0_));
+end;%if (numel(ij_indicator_0_)>0);
+if (numel(ij_indicator_0_)==0);
+ij_indicator_switch = round(median(find(diff(indicator_)>0)));
+T = 0.5*(Y_(ij_indicator_switch) + Y_(1+ij_indicator_switch));
+end;%if (numel(ij_indicator_0_)==0);
+end;%if median(B_) >= median(A_) ; 

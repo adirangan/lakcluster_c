@@ -1,0 +1,19 @@
+function output = erfcln(input);
+% approximates log(erfc(input)). ;
+% This is quite accurate (errors < 1e-6) ;
+% when the input is > 3 or so. ;
+
+output = zeros(size(input));
+tmp_ij_ = find(input<=10);
+output(tmp_ij_) = log(erfc(input(tmp_ij_)));
+tmp_ij_ = find(input>=10);
+x1_ = input(tmp_ij_);
+x2_ = x1_.*x1_;
+erffln_ = -x2_ + log(x1_) - 0.5*log(pi) ...
+  - log( x2_ + 0.5 ...
+	 ./ (1 + 1 ...
+	     ./ (x2_ + 1.5 ...
+		 ./ ( 1 + 2.0 ...
+		      ./ ( x2_ + 2.5 ...
+			   ) ) ) ) ) ;
+output(tmp_ij_) = erffln_;

@@ -1,0 +1,194 @@
+function [C_,D_,niteration] = svd_impute_pad(B_,ij_missed_,n_rank,f_scale_,str_prefix,rseed,n_iteration,tolerance);
+% Assuming simple svd-based imputation. ;
+% initializes based on median of each column. ;
+% C_ is imputed, D_ is imputed and padded. ;
+
+if nargin<1;
+n_r = 128*4; n_c = 10*n_r+1; n_k = floor(n_r/4); s_ = transpose(exp(-linspace(0,1,n_k)/0.0625));
+A_ = randn(n_r,n_c);
+[tmp_U_,tmp_S_,tmp_V_] = svds(A_,n_k); tmp_S_ = diag(diag(tmp_S_).*s_);
+A_ = tmp_U_*tmp_S_*transpose(tmp_V_);
+ij_missed_ = randperm(numel(A_)); ij_missed_ = ij_missed_(1:floor(numel(A_)/6));
+ij_filled_ = setdiff(1:numel(A_),ij_missed_);
+B_ = A_; B_(ij_missed_) = 0;
+[C_,D_,niteration] = svd_impute_pad(B_,ij_missed_,4);
+figure(1);clf;
+colormap(colormap_pm());
+l_ = mean(A_(:)) + 1.5*std(A_(:))*[-1,+1];
+subplot(2,3,1); imagesc(A_,l_); set(gca,'XTick',[],'YTick',[]); title('original');
+subplot(2,3,4); imagesc(B_,l_); set(gca,'XTick',[],'YTick',[]); title('perforated');
+subplot(2,3,2); imagesc(C_,l_); set(gca,'XTick',[],'YTick',[]); title('imputed');
+tmp_C_ = C_; tmp_C_(ij_filled_)=0;
+subplot(2,3,5); imagesc(tmp_C_,l_); set(gca,'XTick',[],'YTick',[]); title('imputed (missing only)');
+subplot(2,3,3); imagesc(D_,l_); set(gca,'XTick',[],'YTick',[]); title('padded');
+tmp_D_ = D_; tmp_D_(ij_filled_)=0;
+subplot(2,3,6); imagesc(tmp_D_,l_); set(gca,'XTick',[],'YTick',[]); title('padded (missing only)');
+figbig;
+figure(2);clf;
+hold on;
+plot(1:n_k,svds(A_,n_k),'ko-');
+plot(1:n_k,svds(B_,n_k),'bo-');
+plot(1:n_k,svds(C_,n_k),'go-');
+plot(1:n_k,svds(D_,n_k),'ro-');
+legend({'original','perforated','imputed','padded'},'Location','NorthEast');
+disp('returning'); return;
+end;%if nargin<1;
+
+na=2;
+if nargin<na; ij_missed_ = find(B_==0); end; na=na+1;
+if nargin<na; n_rank = 1; end; na=na+1;
+if nargin<na; f_scale_ = [0,2.^linspace(-3,+3,21)]; end; na=na+1;
+if nargin<na; str_prefix = 'test'; end; na=na+1;
+if nargin<na; rseed = 1; end; na=na+1;
+if nargin<na; n_iteration = 256; end; na=na+1;
+if nargin<na; tolerance = 1e-6; end; na=na+1;
+
+rng(rseed);
+
+verbose_flag=1;
+
+if (verbose_flag); disp(sprintf(' %% [entering svd_impute_pad] str_prefix %s',str_prefix)); end;
+
+ij_filled_ = setdiff(1:numel(B_),ij_missed_);
+e_ = zeros(n_iteration,1);
+[n_r,n_c] = size(B_); n_k = min(n_r,n_c);
+C_ = impute_randperm(B_,ij_missed_);
+sC_median_ = svd(impute_median(B_,ij_missed_));
+sC_randperm_ = svd(impute_randperm(B_,ij_missed_));
+
+if (verbose_flag); disp(sprintf(' %% initial imputation')); end;
+%%%%%%%%;
+% svd imputation. ;
+%%%%%%%%;
+continue_flag=1;
+niteration=0;
+while continue_flag;
+niteration = niteration+1;
+if (verbose_flag); if (mod(niteration,10)==0); disp(sprintf(' %% niteration %d/%d',niteration,n_iteration)); end; end;
+[tmp_U_,tmp_S_,tmp_V_] = svds(C_,min(min(size(C_)),n_rank));
+tmp_B_ = tmp_U_*tmp_S_*transpose(tmp_V_);
+tmp_val_ = C_(ij_missed_);
+C_(ij_missed_) = tmp_B_(ij_missed_);
+e_(niteration) = fnorm(C_(ij_missed_)-tmp_val_)./fnorm(C_(ij_missed_));
+if e_(niteration) < tolerance; continue_flag=0; end;
+if niteration>=n_iteration; continue_flag=0; end;
+end;%for niteration=1:n_iteration;
+
+if (verbose_flag);
+figure;clf;
+subplot(1,2,1);
+plot(1:niteration,e_(1:niteration),'k.-');
+xlabel('iteration');ylabel('error');title('error in svd imputation');
+subplot(1,2,2);
+plot(1:niteration,log10(e_(1:niteration)),'k.-');
+xlabel('iteration');ylabel('log10(error)');title('log10(error) in svd imputation');
+disp(sprintf(' %% writing %s_FIGA.jpg',str_prefix));
+print('-djpeg',sprintf('%s_FIGA.jpg',str_prefix));
+print('-depsc',sprintf('%s_FIGA.eps',str_prefix));
+end;%if (verbose_flag);
+
+sC_impute_ = svd(C_);
+
+if (verbose_flag); disp(sprintf(' %% padding with noise')); end;
+%f_scale_ = [0,2.^linspace(0,+3,15)];
+%%%%%%%%;
+% pad with noise. ;
+%%%%%%%%;
+[tmp_U_,tmp_S_,tmp_V_] = svd(C_);
+[tmp_Q_,~] = qr(randn(size(C_,1)-n_rank));
+tmp_Q_ = orth(tmp_U_(:,n_rank+1:end)*tmp_Q_);
+tmp_Q_ = tmp_Q_*transpose(tmp_Q_);
+
+[tmp_M_,~] = qr(randn(size(C_,1)));
+tmp_B_ = (tmp_Q_*(tmp_U_(:,n_rank+1:end))*tmp_S_(n_rank+1:end,n_rank+1:end))*transpose(tmp_V_(:,n_rank+1:end));
+%tmp_B_ = tmp_U_(:,1:n_rank)*tmp_S_(1:n_rank,1:n_rank)*transpose(tmp_V_(:,1:n_rank)) + (tmp_Q_*(tmp_U_(:,nrank+1:end))*tmp_S_(nrank+1:end,nrank+1:end))*transpose(tmp_V_(:,nrank+1:end));
+f_filled = numel(ij_filled_)/numel(C_);
+n_f = length(f_scale_);
+s_ = zeros(n_k,n_f);
+for nf=1:n_f;
+if (verbose_flag); if (mod(nf,5)==0); disp(sprintf(' %% nf %d/%d',nf,n_f)); end; end;
+D_ = C_; D_(ij_missed_) = D_(ij_missed_) + f_scale_(nf)*tmp_B_(ij_missed_);
+sE_randperm_(:,nf) = svd(impute_randperm(tmp_M_*D_,ij_missed_));
+sE_median_(:,nf) = svd(impute_median(tmp_M_*D_,ij_missed_));
+end;%for nf=1:n_f;
+%%%%%%%%;
+sEC_randperm_all_ = zeros(n_f,1);
+sEC_randperm_sub_ = zeros(n_f,1);
+sEC_median_all_ = zeros(n_f,1);
+sEC_median_sub_ = zeros(n_f,1);
+for nf=1:n_f;
+sEC_randperm_all_(nf) = fnorm(sE_randperm_(:,nf) - sC_randperm_).^2;
+sEC_randperm_sub_(nf) = fnorm(sE_randperm_(1:n_rank,nf) - sC_randperm_(1:n_rank)).^2;
+sEC_median_all_(nf) = fnorm(sE_median_(:,nf) - sC_median_).^2;
+sEC_median_sub_(nf) = fnorm(sE_median_(1:n_rank,nf) - sC_median_(1:n_rank)).^2;
+end;%for nf=1:n_f;
+
+if (verbose_flag);
+figure;clf; 
+subplot(2,3,1);hold on;
+c_ = colormap(colormap_beach()); n_c = size(c_,1);
+for nf=1:n_f;
+nb = max(1,min(n_c,floor(n_c*nf/n_f)));
+plot(1:n_k,sE_randperm_(:,nf),'o','Color',c_(nb,:))
+end;%for nf=1:n_f;
+plot(1:n_k,sC_randperm_,'ko','MarkerFaceColor','k');
+hold off;
+xlabel('rank'); ylabel('s');
+title('randperm');
+subplot(2,3,2);hold on;
+c_ = colormap(colormap_beach()); n_c = size(c_,1);
+for nf=1:n_f;
+nb = max(1,min(n_c,floor(n_c*nf/n_f)));
+plot(log(1:n_k),log(sE_randperm_(:,nf)),'o','Color',c_(nb,:))
+end;%for nf=1:n_f;
+plot(log(1:n_k),log(sC_randperm_),'ko','MarkerFaceColor','k');
+hold off;
+xlabel('log rank'); ylabel('log s');
+title('randperm');
+subplot(2,3,3);
+hold on;
+plot(f_scale_,log(sEC_randperm_all_),'bo-');
+plot(f_scale_,log(sEC_randperm_sub_),'ro-');
+hold off;
+xlabel('padding factor'); ylabel('log(2-norm error)');
+title('randperm');
+%%%%%%%%;
+subplot(2,3,4);hold on;
+c_ = colormap(colormap_beach()); n_c = size(c_,1);
+for nf=1:n_f;
+nb = max(1,min(n_c,floor(n_c*nf/n_f)));
+plot(1:n_k,sE_median_(:,nf),'s','Color',c_(nb,:))
+end;%for nf=1:n_f;
+plot(1:n_k,sC_median_,'ko','MarkerFaceColor','k');
+hold off;
+xlabel('rank'); ylabel('s');
+title('median');
+subplot(2,3,5);hold on;
+c_ = colormap(colormap_beach()); n_c = size(c_,1);
+for nf=1:n_f;
+nb = max(1,min(n_c,floor(n_c*nf/n_f)));
+plot(log(1:n_k),log(sE_median_(:,nf)),'s','Color',c_(nb,:))
+end;%for nf=1:n_f;
+plot(log(1:n_k),log(sC_median_),'ks','MarkerFaceColor','k');
+hold off;
+xlabel('log rank'); ylabel('log s');
+title('median');
+subplot(2,3,6);
+hold on;
+plot(f_scale_,log(sEC_median_all_),'bs-');
+plot(f_scale_,log(sEC_median_sub_),'rs-');
+hold off;
+xlabel('padding factor'); ylabel('log(2-norm error)');
+title('median');
+figbig;
+disp(sprintf(' %% writing %s_FIGB.jpg',str_prefix));
+print('-djpeg',sprintf('%s_FIGB.jpg',str_prefix));
+print('-depsc',sprintf('%s_FIGB.eps',str_prefix));
+end;%if (verbose_flag);
+
+[~,tmp_ij] = min(sEC_randperm_all_);
+f_scale = f_scale_(tmp_ij);
+if (verbose_flag); disp(sprintf(' %% choosing noise-factor f=%0.2f',f_scale)); end;
+D_ = C_; D_(ij_missed_) = D_(ij_missed_) + f_scale*tmp_B_(ij_missed_);
+
+if (verbose_flag); disp(sprintf(' %% [finished svd_impute_pad] str_prefix %s',str_prefix)); end;

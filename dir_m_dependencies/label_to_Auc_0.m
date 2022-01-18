@@ -1,0 +1,15 @@
+function label_Auc = label_to_Auc_0(input_label_,B_label_,pi_);
+M = numel(B_label_);
+input_label_u_ = unique(input_label_); n_u = length(input_label_u_);
+if (n_u==1); label_Auc = 0.5; end;
+if (n_u>1);
+cap_ = zeros(n_u,1);
+for nu=1:n_u;
+tmp_ij_ = find(input_label_==input_label_u_(nu));
+cap_(nu) = length(intersect(tmp_ij_,pi_))/length(tmp_ij_);
+end;%for nu=1:n_u;
+[~,nu_max] = max(cap_);
+tmp_ij_ = find(input_label_==input_label_u_(nu_max));
+tmp_Bn_ = B_label_(tmp_ij_); tmp_Bc_ = B_label_(setdiff([1:M],tmp_ij_));
+label_Auc = auc_0(tmp_Bc_,tmp_Bn_);
+end;%if (n_u>1); 

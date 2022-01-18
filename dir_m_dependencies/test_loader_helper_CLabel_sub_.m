@@ -1,0 +1,17 @@
+function [n_u,CLabel_sub_] = test_loader_helper_CLabel_sub_(dir_trunk);
+fname = sprintf('%s/dir_mat/str_CLabel_sub_.nsv',dir_trunk);
+fp=fopen(fname); str_CLabel_sub_ = textscan(fp,'%s\n'); str_CLabel_sub_ = str_CLabel_sub_{1}; fclose(fp);
+n_u = numel(str_CLabel_sub_);
+u_CLabel_ = unique(str_CLabel_sub_);
+n_CLabel = length(u_CLabel_);
+n_CLabel_ = zeros(n_CLabel,1);
+for nCLabel = 1:n_CLabel;
+n_CLabel_(nCLabel) = length(find(strcmp(str_CLabel_sub_,u_CLabel_(nCLabel))));
+end;%for nCLabel = 1:n_CLabel;
+CLabel_sub_ = zeros(n_u,1);
+for nCLabel=1:n_CLabel;
+tmp_ij_ = find(strcmp(str_CLabel_sub_,u_CLabel_(nCLabel)));
+if (~isempty(str2num(u_CLabel_{nCLabel})));
+CLabel_sub_(tmp_ij_) = str2num(u_CLabel_{nCLabel});
+end;%if (~isempty(str2num(u_CLabel_{nCLabel})));
+end;%for nCLabel=1:n_CLabel;

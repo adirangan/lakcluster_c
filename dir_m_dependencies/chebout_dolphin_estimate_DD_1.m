@@ -1,0 +1,11 @@
+function [DDinv_vvt__,detDDinv_t_] = chebout_dolphin_estimate_DD_1(dt_,BB__,CC__,eig_tolerance);
+if (nargin<4); eig_tolerance = 1e-6; end;
+n_var = size(BB__,1);
+DDinv_vvt__ = zeros(n_var^2,numel(dt_));
+detDDinv_t_ = zeros(numel(dt_),1);
+for ndt=0:numel(dt_)-1;
+dt = dt_(1+ndt);
+[DDinv__,detDDinv] = dolphin_estimate_DD_1(dt,BB__,CC__,eig_tolerance);
+DDinv_vvt__(:,1+ndt) = reshape(DDinv__,[1,n_var^2]);
+detDDinv_t_(1+ndt) = detDDinv;
+end;%for ndt=0:numel(dt_)-1;

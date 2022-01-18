@@ -1,0 +1,9 @@
+function output_ = gumbel_pdf(input_,g_,tol);
+if nargin<3; tol = 1e-6; end;
+if nargin<2; g_ = [0;1]; end;
+mu = g_(1+0);
+beta = tol + g_(1+1)^2;
+z_ = zeros(size(input_));
+z_ = (input_ - mu)/beta;
+output_ = zeros(size(input_));
+output_(:) = exp(-(z_(:) + exp(-z_(:))))/beta;

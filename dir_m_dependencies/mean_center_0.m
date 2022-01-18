@@ -1,0 +1,16 @@
+function output_ = mean_center_0(input_,str_margin);
+% applies mean centering to input_;
+if nargin<2; str_margin = 'row'; end;
+[n_r,n_c] = size(input_);
+output_ = input_;
+if ~isempty(strfind(str_margin,'row'));
+for nc=1:n_c;
+tmp_ = output_(:,nc);
+tmp = mean(tmp_);
+if ~isfinite(tmp); tmp = 0; end;
+output_(:,nc) = tmp_ - tmp;
+end;%for nc=1:n_c;
+end;%if ~isempty(strfind(str_margin,'row'));
+if ~isempty(strfind(str_margin,'col'));
+output_ = transpose(mean_center_0(transpose(input_),'row'));
+end;%if ~isempty(strfind(str_margin,'col'));
