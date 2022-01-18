@@ -485,7 +485,7 @@ mr_bcx_(rij_case_bcA_) = 3;
 %%%%;
 mc_bcx_ = zeros(n_snp_bimext,1);
 mc_bcx_(find(mc_ext_bcA_))=3;
-mc_bcx_(find(mc_bcB_))=2;
+mc_bcx_(find(mc_ext_bcB_))=2;
 mc_bcx_(find(mc_ext_bcC_))=1;
 n_snp_bcx = numel(find(mc_bcx_));
 n_snp_ext_bcA = numel(find(mc_bcx_==3));
