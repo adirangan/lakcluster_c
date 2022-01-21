@@ -285,6 +285,7 @@ n_patient = n_patient_cup;
 index_npatient_from_nstudy_ = 0:n_patient-1;
 %%%%%%%%;
 fn_fam = sprintf('%s/%s/%s.fam',dir_trunk,study_trunk,study_name);
+if (flag_force_create | ~exist(fn_fam,'file'));
 fid = fopen(fn_fam,'w');
 for npatient=0:n_patient-1;
 np = index_npatient_from_nstudy_(1+npatient);
@@ -300,8 +301,10 @@ fprintf( ...
 );
 end;%for npatient=0:n_patient-1;
 fclose(fid);
+end;%if (flag_force_create | ~exist(fn_fam,'file'));
 %%%%%%%%;
 fn_bim = sprintf('%s/%s/%s.bim',dir_trunk,study_trunk,study_name);
+if (flag_force_create | ~exist(fn_bim,'file'));
 fid = fopen(fn_bim,'w');
 for nsnp=0:n_snp-1;
 ns = index_nsnp_from_nstudy_(1+nsnp);
@@ -317,8 +320,10 @@ fprintf( ...
 );
 end;%for nsnp=0:n_snp-1;
 fclose(fid);
+end;%if (flag_force_create | ~exist(fn_bim,'file'));
 %%%%%%%%;
 fn_bed = sprintf('%s/%s/%s.bed',dir_trunk,study_trunk,study_name);
+if (flag_force_create | ~exist(fn_bed,'file'));
 fid = fopen(fn_bed,'w');
 tmp_dsg_ps__ = dsg_cup_ps__(1+index_npatient_from_nstudy_,1+index_nsnp_from_nstudy_);
 [tmp_bed_ps__,n_patient_bed] = dsg_to_bed_0(n_patient,n_snp,tmp_dsg_ps__);
@@ -326,6 +331,7 @@ key1 = uint8(108); key2 = uint8(27); key3 = uint8(1);
 fwrite(fid,key1,'uint8'); fwrite(fid,key2,'uint8'); fwrite(fid,key3,'uint8');
 fwrite(fid,tmp_bed_ps__,'uint8');
 fclose(fid);
+end;%if (flag_force_create | ~exist(fn_bed,'file'));
 %%%%%%%%;
 mds_fidandiid_p_ = cell(n_mds_p,1);
 for npatient_cup=0:n_patient_cup-1;
@@ -363,6 +369,7 @@ parameter.dir_trunk = dir_trunk;
 parameter.ent_cutoff = 0.001; %<-- this is a typical entropy-cutoff. ;
 parameter.ent_cutoff = prctile(dsg_cup_I_opt_,99); %<-- for this example we will make sure to include most of the snps. ;
 parameter.maf_cutoff = 0.010;
+parameter.flag_force_create = flag_force_create;
 [ ...
  parameter ...
 ] = ...
@@ -543,13 +550,14 @@ if (verbose); disp(sprintf(' %% ')); end;
 if (verbose); disp(sprintf(' %% Now we load the results of this single biclustering run. ;')); end;
 parameter.str_out_xdrop_a_s0000 = sprintf('%s/out_xdrop_a.txt',parameter.dir_out_s0000);
 [ ...
- rindex_ ...
-,cindex_ ...
-,out_xdrop_ ...
+ xdrop_ ...
 ] = ...
 load_out_xdrop_ver0( ...
 parameter.str_out_xdrop_a_s0000 ...
 );
+index_rdrop_ = xdrop_.index_rdrop_;
+index_cdrop_ = xdrop_.index_cdrop_;
+
 if (verbose); disp(sprintf(' %% ')); end;
 if (verbose); disp(sprintf(' %% Now we display the results of this single biclustering run. ;')); end;
 if (verbose); disp(sprintf(' %% The rows and cols are ordered by the biclustering-algorithm. ;')); end;
@@ -558,12 +566,12 @@ if (verbose); disp(sprintf(' %% Those rows and cols retained longest are shown t
 if (verbose); disp(sprintf(' %% Note that most of bcA is retained until the end. ;')); end;
 if (verbose); disp(sprintf(' %% That is to say, the biclustering-algorithm successfully focused on bcA. ;')); end;
 figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,1024*2,1024]); fig80s;
-tmp_rij_prm_ = [1+flip(rindex_);rij_ctrl_prm_];
-tmp_cij_prm_ = [1+flip(cindex_)];
+tmp_rij_prm_ = [xdrop_.ij_rkeep_;rij_ctrl_prm_];
+tmp_cij_prm_ = [xdrop_.ij_ckeep_];
 imagesc_uAZm_1( ...
  mds_pv__(tmp_rij_prm_,:) ...
-,A_full_n_(1+flip(rindex_),1+flip(cindex_)) ...
-,A_full_n_(rij_ctrl_prm_,1+flip(cindex_)) ...
+,A_full_n_(xdrop_.ij_rkeep_,xdrop_.ij_ckeep_) ...
+,A_full_n_(rij_ctrl_prm_,xdrop_.ij_ckeep_) ...
 ,[ mr_bcA_(tmp_rij_prm_) , mr_bcB_(tmp_rij_prm_) , mr_bcC_(tmp_rij_prm_) ] ...
 ,[ mc_ext_bcA_(tmp_cij_prm_) , mc_ext_bcB_(tmp_cij_prm_) , mc_ext_bcC_(tmp_cij_prm_) ] ...
 );
@@ -602,7 +610,7 @@ end;%for nshuffle=1:n_shuffle;
 if (verbose); disp(sprintf(' %% ')); end;
 if (verbose); disp(sprintf(' %% Now we load the traces from each run. ;')); end;
 if (verbose); disp(sprintf(' %% Each trace records the (reweighted) mean-squared-correlation of the remaining array (across iterations).')); end;
-trace__ = load_trace__ver0(parameter.dir_out_trace);
+trace__ = load_trace__from_dir_ver0(parameter.dir_out_trace);
 if (verbose); disp(sprintf(' %% ')); end;
 if (verbose); disp(sprintf(' %% Now we display the original trace (red) against the label-shuffled traces (black). ;')); end;
 if (verbose); disp(sprintf(' %% The horizontal indicates iteration, and the vertical indicates z-score. ;')); end;
@@ -647,8 +655,8 @@ mr_ABC__(rij_case_bcC_,1+2) = 1;
 markersize_sml = 4;
 markersize_med = 8;
 markersize_big = 16;
-tmp_rij_ = 1+flip(rindex_);
-tmp_cij_ = 1+flip(cindex_);
+tmp_rij_ = xdrop_.ij_rkeep_;
+tmp_cij_ = xdrop_.ij_ckeep_;
 %%%%;
 [tmp_U_,tmp_S_,tmp_V_] = svds(A_full_n_(tmp_rij_,tmp_cij_),2);
 tmp_AVn_ = A_full_n_(:,tmp_cij_)*tmp_V_;
@@ -663,5 +671,12 @@ tmp_AVn_ = A_full_n_(:,tmp_cij_(1:n_c_tmp))*tmp_V_;
 subplot(1,2,2);
 scatter(tmp_AVn_(:,1),tmp_AVn_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
 axisnotick; title('bicluster informed'); xlabel('PC1'); ylabel('PC2');
+
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% The illustration above used matlab to calculate principal-components (using the svd). ;')); end;
+if (verbose); disp(sprintf(' %% Here we do something similar using our ''pca_driver'' code. ;')); end;
+mx__ = load_mx__from_parameter_ver0(parameter);
+
+
 
 

@@ -1,0 +1,12 @@
+function xxxcluster_fromdisk_uADZSZDA_excerpt_0(fp,str_0,n_bin,d_1,str_1,str_2);
+fprintf(fp,str_0);
+for nb=0:n_bin-1; 
+if (n_bin==1); 
+fprintf(fp,'%s%sfull%s',d_1,str_1,str_2); 
+end; %if (n_bin==1); 
+if (n_bin>1); 
+fprintf(fp,'%s%s%0.2d%s',d_1,str_1,1+nb,str_2); 
+end; %if (n_bin>1); 
+if nb<n_bin-1; fprintf(fp,','); else fprintf(fp,';'); end; 
+end; %for nb=0:n_bin-1; 
+fprintf(fp,'\n');
