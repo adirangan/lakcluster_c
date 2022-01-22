@@ -78,10 +78,12 @@ if (mx__.flag_verbose>-1); disp(sprintf(' %% %s masks: mc_A %d',mx__.str_mr_0in,
  else;
 mx__.mc_A_ = mx__.mc_A_default_;
 end;%if length(mx__.str_mc_0in)>0;
-%%%%%%%%
+%%%%%%%%;
 if (mx__.flag_reverse==0); mx__.mr_D_ = mx__.mr_A_full_; mx__.mr_X_ = mx__.mr_Z_full_; end;%if (mx__.flag_reverse==0);
 if (mx__.flag_reverse==1); mx__.mr_D_ = mx__.mr_Z_full_; mx__.mr_X_ = mx__.mr_A_full_; end;%if (mx__.flag_reverse==1);
-
+%%%%%%%%;
+tmp_fname = sprintf('%s/%s_mc_T.b16',mx__.dir_0in,mx__.str_prefix);
+mx__.mc_T_default_ = (binary_uncompress(tmp_fname)>0);
 
 
  

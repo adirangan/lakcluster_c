@@ -1,7 +1,14 @@
 verbose=1;
-if (verbose); disp(sprintf(' %% [entering test_xxxcluster_fromdisk_ver16]')); end;
+if (verbose); disp(sprintf(' %% [entering test_stripped_xxxcluster_fromdisk_ver16]')); end;
 setup_0;
 rng(0); nf=0;
+
+if (verbose); disp(sprintf(' %% ;')); end;
+if (verbose); disp(sprintf(' %% This runs a stripped-down version of test_xxxcluster_fromdisk_ver16. ;')); end;
+if (verbose); disp(sprintf(' %% The main difference is that the data is never loaded as doubles. ;')); end;
+if (verbose); disp(sprintf(' %% This saves quite a bit of memory. ;')); end;
+if (verbose); disp(sprintf(' %% ;')); end;
+if (verbose); disp(sprintf(' %% Consequently, you should be able to insert your own bed, bim and fam-files into this pipeline. ;')); end;
 
 if (verbose); disp(sprintf(' %% ;')); end;
 if (verbose); disp(sprintf(' %% First we generate a very simple example of dosage-data ;')); end;
@@ -272,6 +279,14 @@ if (verbose); disp(sprintf(' %% dosage ''1'' is encoded as [ 0 1 0 ]. ;')); end;
 if (verbose); disp(sprintf(' %% dosage ''2'' is encoded as [ 0 0 1 ]. ;')); end;
 if (verbose); disp(sprintf(' %% For simplicity, we put everything into a single study directory. ;')); end;
 if (verbose); disp(sprintf(' %% (although the dosage-data could instead be split across multiple files). ;')); end;
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% This is where you can put in your own bed, bim and fam-files. ;')); end;
+if (verbose); disp(sprintf(' %% To do so you need to change the paths to these files below. ;')); end;
+if (verbose); disp(sprintf(' %% This involves changing: ;')); end;
+if (verbose); disp(sprintf(' %% study_trunk: the path to the directory where the study files are contained. ;')); end;
+if (verbose); disp(sprintf(' %% study_name: the prefix for the study files. ;')); end;
+if (verbose); disp(sprintf(' %%\t Assumes that the bed, bim and fam-files ;')); end;
+if (verbose); disp(sprintf(' %%\t  each start with the study_name as a prefix. ;')); end;
 %%%%%%%%;
 dir_trunk = sprintf('%s/dir_test_xxxcluster_fromdisk_ver16',pwd);
 if (~exist(dir_trunk,'dir')); disp(sprintf(' %% mkdir %s',dir_trunk)); mkdir(dir_trunk); end;
@@ -339,6 +354,9 @@ for npatient_cup=0:n_patient_cup-1;
 mds_fidandiid_p_{1+npatient_cup} = sprintf('%s&%s',fam_cup_fid_{1+npatient_cup},fam_cup_iid_{1+npatient_cup});
 end;%for npatient_cup=0:n_patient_cup-1;
 %%%%%%%%;
+if (verbose); disp(sprintf(' %% ')); end;
+if (verbose); disp(sprintf(' %% You can also set certain people to be excluded (similar to a famex file). ;')); end;
+if (verbose); disp(sprintf(' %% For now we skip this step. ;')); end;
 n_famex = 0;
 index_npatient_cup_from_nfamex_ = randperm(n_patient_cup,n_famex)-1;
 famex_fidandiid_p_ = cell(n_famex,1);
@@ -394,10 +412,11 @@ dir_out = sprintf('%s/dir_%s',parameter.dir_trunk,str_output_prefix_plus_maf);
 if (verbose>0); disp(sprintf(' %% str_output_prefix_local %s ;\n %% dir_out %s ;\n',str_output_prefix_local,dir_out)); end;
 
 if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now for illustration we uncompress the b16 file. ;')); end;
-if (verbose); disp(sprintf(' %% This is definitely not recommended for larger data-sets. ;')); end;
+if (verbose); disp(sprintf(' %% Now we do not uncompress the b16 file. ;')); end;
+if (verbose); disp(sprintf(' %% This step is too slow for larger data-sets. ;')); end;
+if (verbose); disp(sprintf(' %% We can still load the fam.ext and bim.ext files. ;')); end;
 fname_b16 = sprintf('%s/%s_A_full_n.b16',dir_out,str_output_prefix_plus_maf);
-A_full_n_ = binary_uncompress(fname_b16);
+%A_full_n_ = binary_uncompress(fname_b16);
 %%%%%%%%;
 fname_famext = sprintf('%s/%s_fam.ext',dir_out,str_output_prefix_plus_maf);
 [ ...
@@ -501,8 +520,9 @@ n_snp_ext_bcB = numel(find(mc_bcx_==2));
 n_snp_ext_bcC = numel(find(mc_bcx_==1));
 %%%%;
 if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we visualize the b16-data (magenta and cyan) for the cases (top) and ctrls (bottom). ;')); end;
+if (verbose); disp(sprintf(' %% We do not visualize the b16-data. ;')); end;
 %%%%;
+%{
 figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,1024*2,1024]); fig80s;
 imagesc_uAZm_1( ...
  mds_pv__(rij_prm_,:) ...
@@ -511,6 +531,7 @@ imagesc_uAZm_1( ...
 ,[ mr_bcA_(rij_prm_) , mr_bcB_(rij_prm_) , mr_bcC_(rij_prm_) ] ...
 ,[ mc_ext_bcA_(cij_ex2_) , mc_ext_bcB_(cij_ex2_) , mc_ext_bcC_(cij_ex2_) ] ...
 );
+ %}
 %%%%;
 
 if (verbose); disp(sprintf(' %% ')); end;
@@ -559,6 +580,7 @@ parameter.str_out_xdrop_a_s0000 ...
 index_rdrop_ = xdrop_.index_rdrop_;
 index_cdrop_ = xdrop_.index_cdrop_;
 
+%{
 if (verbose); disp(sprintf(' %% ')); end;
 if (verbose); disp(sprintf(' %% Now we display the results of this single biclustering run. ;')); end;
 if (verbose); disp(sprintf(' %% The rows and cols are ordered by the biclustering-algorithm. ;')); end;
@@ -576,6 +598,7 @@ imagesc_uAZm_1( ...
 ,[ mr_bcA_(tmp_rij_prm_) , mr_bcB_(tmp_rij_prm_) , mr_bcC_(tmp_rij_prm_) ] ...
 ,[ mc_ext_bcA_(tmp_cij_prm_) , mc_ext_bcB_(tmp_cij_prm_) , mc_ext_bcC_(tmp_cij_prm_) ] ...
 );
+ %}
 
 if (verbose); disp(sprintf(' %% ')); end;
 if (verbose); disp(sprintf(' %% Now we run a permutation-test. ;')); end;
@@ -648,11 +671,12 @@ if (verbose); disp(sprintf(' %% Note that the bicluster-informed projection sing
 if (verbose); disp(sprintf(' %% while an uninformed projection (using the principal-components of the full data-set) ;')); end;
 if (verbose); disp(sprintf(' %% does not single out bcA, but instead is confounded by the nonspecific bicluster bcB, ;')); end;
 if (verbose); disp(sprintf(' %% as well as the mds-biased bicluster bcC (c.f. principal-components 1 and 2, respectively). ;')); end;
-if (verbose); disp(sprintf(' %% The top two subplots use matlab to calculate principal-components (using the svd). ;')); end;
-if (verbose); disp(sprintf(' %% The bottom two subplots use our ''pca_driver'' code. ;')); end;
-if (verbose); disp(sprintf(' %% These results are not exactly the same since our driver does not operate at double precision. ;')); end;
-figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,1024,1024]);fig80s;
-p_row = 2; p_col = 2; np=0;
+if (verbose); disp(sprintf(' %% We use our ''pca_driver'' code to calculate the principal-components (using power iteration). ;')); end;
+figure(1+nf);nf=nf+1;clf;
+%set(gcf,'Position',1+[0,0,1024,1024]);fig80s;
+%p_row = 2; p_col = 2; np=0;
+figmed;fig80s;
+p_row = 1; p_col = 2; np=0;
 mr_ABC__ = zeros(n_patient,3);
 mr_ABC__(rij_case_bcA_,1+0) = 1;
 mr_ABC__(rij_case_bcB_,1+1) = 1;
@@ -664,24 +688,24 @@ markersize_big = 16;
 xdrop_ij_rkeep_ = xdrop_.ij_rkeep_;
 xdrop_ij_ckeep_ = xdrop_.ij_ckeep_;
 %%%%;
-A_p_ = mean(A_full_n_>0,1);
+%A_p_ = mean(A_full_n_>0,1);
 [A_p_c_,A_p_0_,AZ_rsum_] = load_A_p_c_from_dir_0(parameter.dir_out_s0000);
 alpha_c_ = A_p_c_ - (1-A_p_c_);
 D_c_ = sqrt(1./max(0.01,4.0*A_p_c_.*(1-A_p_c_)));
-A_full_normalized_n_ = bsxfun(@times,bsxfun(@minus,A_full_n_,transpose(alpha_c_)),transpose(sqrt(D_c_)));
-[tmp_U_,tmp_S_,tmp_V_] = svds(A_full_normalized_n_(xdrop_ij_rkeep_,xdrop_ij_ckeep_),2);
-AZnV_ni0_ = A_full_normalized_n_(:,xdrop_ij_ckeep_)*tmp_V_;
-subplot(p_row,p_col,1+np);np=np+1;
-scatter(AZnV_ni0_(:,1),AZnV_ni0_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
-axisnotick; title('full data-set (matlab)'); xlabel('PC1'); ylabel('PC2');
+%A_full_normalized_n_ = bsxfun(@times,bsxfun(@minus,A_full_n_,transpose(alpha_c_)),transpose(sqrt(D_c_)));
+%[tmp_U_,tmp_S_,tmp_V_] = svds(A_full_normalized_n_(xdrop_ij_rkeep_,xdrop_ij_ckeep_),2);
+%AZnV_ni0_ = A_full_normalized_n_(:,xdrop_ij_ckeep_)*tmp_V_;
+%subplot(p_row,p_col,1+np);np=np+1;
+%scatter(AZnV_ni0_(:,1),AZnV_ni0_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
+%axisnotick; title('full data-set (matlab)'); xlabel('PC1'); ylabel('PC2');
 %%%%;
-n_r_tmp = trace__.r_rem_s0000_(ij_nlpR);
-n_c_tmp = trace__.c_rem_s0000_(ij_nlpR);
-[tmp_U_,tmp_S_,tmp_V_] = svds(A_full_normalized_n_(xdrop_ij_rkeep_(1:n_r_tmp),xdrop_ij_ckeep_(1:n_c_tmp)),2);
-AZnV_nix_ = A_full_normalized_n_(:,xdrop_ij_ckeep_(1:n_c_tmp))*tmp_V_;
-subplot(p_row,p_col,1+np);np=np+1;
-scatter(AZnV_nix_(:,1),AZnV_nix_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
-axisnotick; title('bicluster informed (matlab)'); xlabel('PC1'); ylabel('PC2');
+%n_r_tmp = trace__.r_rem_s0000_(ij_nlpR);
+%n_c_tmp = trace__.c_rem_s0000_(ij_nlpR);
+%[tmp_U_,tmp_S_,tmp_V_] = svds(A_full_normalized_n_(xdrop_ij_rkeep_(1:n_r_tmp),xdrop_ij_ckeep_(1:n_c_tmp)),2);
+%AZnV_nix_ = A_full_normalized_n_(:,xdrop_ij_ckeep_(1:n_c_tmp))*tmp_V_;
+%subplot(p_row,p_col,1+np);np=np+1;
+%scatter(AZnV_nix_(:,1),AZnV_nix_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
+%axisnotick; title('bicluster informed (matlab)'); xlabel('PC1'); ylabel('PC2');
 mx__ = load_mx__from_parameter_ver0(parameter);
 %%%%%%%%;
 ni=0;
