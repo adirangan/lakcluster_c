@@ -1,21 +1,34 @@
-verbose=1;
-if (verbose); disp(sprintf(' %% [entering test_stripped_xxxcluster_fromdisk_ver16]')); end;
+function ...
+test_stripped_xxxcluster_fromdisk_ver16( ...
+ global_parameter ...
+);
+
+na=0;
+if (nargin<1+na); global_parameter=[]; end; na=na+1;
+if isempty(global_parameter); global_parameter=struct('type','parameter'); end;
+if ~isfield(global_parameter,'flag_verbose'); global_parameter.flag_verbose = 1; end;
+flag_verbose = global_parameter.flag_verbose;
+if ~isfield(global_parameter,'flag_force_create'); global_parameter.flag_force_create = 0; end;
+flag_force_create = global_parameter.flag_force_create;
+
+flag_disp = flag_verbose;
+if (flag_verbose); disp(sprintf(' %% [entering test_stripped_xxxcluster_fromdisk_ver16]')); end;
 setup_0;
 rng(0); nf=0;
 
-if (verbose); disp(sprintf(' %% ;')); end;
-if (verbose); disp(sprintf(' %% This runs a stripped-down version of test_xxxcluster_fromdisk_ver16. ;')); end;
-if (verbose); disp(sprintf(' %% The main difference is that the data is never loaded as doubles. ;')); end;
-if (verbose); disp(sprintf(' %% This saves quite a bit of memory. ;')); end;
-if (verbose); disp(sprintf(' %% ;')); end;
-if (verbose); disp(sprintf(' %% Consequently, you should be able to insert your own bed, bim and fam-files into this pipeline. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ;')); end;
+if (flag_verbose); disp(sprintf(' %% This runs a stripped-down version of test_xxxcluster_fromdisk_ver16. ;')); end;
+if (flag_verbose); disp(sprintf(' %% The main difference is that the data is never loaded as doubles. ;')); end;
+if (flag_verbose); disp(sprintf(' %% This saves quite a bit of memory. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ;')); end;
+if (flag_verbose); disp(sprintf(' %% Consequently, you should be able to insert your own bed, bim and fam-files into this pipeline. ;')); end;
 
-if (verbose); disp(sprintf(' %% ;')); end;
-if (verbose); disp(sprintf(' %% First we generate a very simple example of dosage-data ;')); end;
-if (verbose); disp(sprintf(' %% which exhibits the following biclusters: ;')); end;
-if (verbose); disp(sprintf(' %% bcA: a case-specific bicluster which is balanced in mds-space (which we want to find) ;')); end;
-if (verbose); disp(sprintf(' %% bcB: a non-specific bicluster spanning the cases and controls (which we want to ignore) ;')); end;
-if (verbose); disp(sprintf(' %% bcC: a case-specific bicluster which is localized in mds-space (which we want to ignore) ;')); end;
+if (flag_verbose); disp(sprintf(' %% ;')); end;
+if (flag_verbose); disp(sprintf(' %% First we generate a very simple example of dosage-data ;')); end;
+if (flag_verbose); disp(sprintf(' %% which exhibits the following biclusters: ;')); end;
+if (flag_verbose); disp(sprintf(' %% bcA: a case-specific bicluster which is balanced in mds-space (which we want to find) ;')); end;
+if (flag_verbose); disp(sprintf(' %% bcB: a non-specific bicluster spanning the cases and controls (which we want to ignore) ;')); end;
+if (flag_verbose); disp(sprintf(' %% bcC: a case-specific bicluster which is localized in mds-space (which we want to ignore) ;')); end;
 str_lak_vs_dex = 'dex';
 r_fraction_bcA = 0.125;
 r_fraction_bcB = 0.250;
@@ -25,7 +38,6 @@ c_fraction_bcB = 0.1250;
 c_fraction_bcC = 0.0625;
 maf_lob = 0.45;
 maf_upb = 0.55;
-flag_force_create = 0;
 
 %%%%%%%%;
 n_snp_cup = 1024*8;
@@ -253,15 +265,16 @@ mc_cup_bcB_ = zeros(n_snp_cup,1); mc_cup_bcB_(cij_bcB_) = 1;
 mc_cup_bcC_ = zeros(n_snp_cup,1); mc_cup_bcC_(cij_bcC_) = 1;
 %%%%%%%;
 
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we visualize the dosage-data (magenta and cyan) for the cases (top) and ctrls (bottom). ;')); end;
-if (verbose); disp(sprintf(' %% The first two mds-components are shown on the far left column (green and yellow). ;')); end;
-if (verbose); disp(sprintf(' %% Adjacent are the row-masks associated with biclusters bcA, bcB and bcC (grey). ;')); end;
-if (verbose); disp(sprintf(' %% Atop lie the column-masks associated with biclusters bcA, bcB and bcC (grey). ;')); end;
-if (verbose); disp(sprintf(' %% Note that bcA and bcB are both ''global'' (i.e., mds-balanced), ;')); end;
-if (verbose); disp(sprintf(' %% while bcC is ''local'' (i.e., biased with respect to the mds-components). ;')); end;
-if (verbose); disp(sprintf(' %% Note also that bcA and bcC are both ''case-specific'', ;')); end;
-if (verbose); disp(sprintf(' %% while bcB is ''non-specific'' (i.e., extends across cases and ctrls). ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% Now we visualize the dosage-data (magenta and cyan) for the cases (top) and ctrls (bottom). ;')); end;
+if (flag_verbose); disp(sprintf(' %% The first two mds-components are shown on the far left column (green and yellow). ;')); end;
+if (flag_verbose); disp(sprintf(' %% Adjacent are the row-masks associated with biclusters bcA, bcB and bcC (grey). ;')); end;
+if (flag_verbose); disp(sprintf(' %% Atop lie the column-masks associated with biclusters bcA, bcB and bcC (grey). ;')); end;
+if (flag_verbose); disp(sprintf(' %% Note that bcA and bcB are both ''global'' (i.e., mds-balanced), ;')); end;
+if (flag_verbose); disp(sprintf(' %% while bcC is ''local'' (i.e., biased with respect to the mds-components). ;')); end;
+if (flag_verbose); disp(sprintf(' %% Note also that bcA and bcC are both ''case-specific'', ;')); end;
+if (flag_verbose); disp(sprintf(' %% while bcB is ''non-specific'' (i.e., extends across cases and ctrls). ;')); end;
+if flag_disp;
 figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,512,1024]); 
 imagesc_uAZm_1( ...
  mds_pv__(rij_prm_,:) ...
@@ -270,33 +283,34 @@ imagesc_uAZm_1( ...
 ,[ mr_bcA_(rij_prm_) , mr_bcB_(rij_prm_) , mr_bcC_(rij_prm_) ] ...
 ,[ mc_cup_bcA_(cij_prm_) , mc_cup_bcB_(cij_prm_) , mc_cup_bcC_(cij_prm_) ] ...
 );
+end;%if flag_disp;
 
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we convert the dosage-data to b16-data. ;')); end;
-if (verbose); disp(sprintf(' %% This encodes each dosage value as a 3-bit binary array. ;')); end;
-if (verbose); disp(sprintf(' %% dosage ''0'' is encoded as [ 1 0 0 ]. ;')); end;
-if (verbose); disp(sprintf(' %% dosage ''1'' is encoded as [ 0 1 0 ]. ;')); end;
-if (verbose); disp(sprintf(' %% dosage ''2'' is encoded as [ 0 0 1 ]. ;')); end;
-if (verbose); disp(sprintf(' %% For simplicity, we put everything into a single study directory. ;')); end;
-if (verbose); disp(sprintf(' %% (although the dosage-data could instead be split across multiple files). ;')); end;
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% This is where you can put in your own bed, bim and fam-files. ;')); end;
-if (verbose); disp(sprintf(' %% To do so you need to change the paths to these files below. ;')); end;
-if (verbose); disp(sprintf(' %% This involves changing: ;')); end;
-if (verbose); disp(sprintf(' %% study_trunk: the path to the directory where the study files are contained. ;')); end;
-if (verbose); disp(sprintf(' %% study_name: the prefix for the study files. ;')); end;
-if (verbose); disp(sprintf(' %%\t Assumes that the bed, bim and fam-files ;')); end;
-if (verbose); disp(sprintf(' %%\t  each start with the study_name as a prefix. ;')); end;
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% If you do indeed insert your own bed, bim and fam-files, ;')); end;
-if (verbose); disp(sprintf(' %% you likely have your own mds-components you wish to correct for. ;')); end;
-if (verbose); disp(sprintf(' %% To input your own mds-components you need to change both: ;')); end;
-if (verbose); disp(sprintf(' %%\t n_mds_p: integer number of patients in mds_pv__ ;')); end;
-if (verbose); disp(sprintf(' %%\t n_mds_v: integer number of variables in mds_pv__ ;')); end;
-if (verbose); disp(sprintf(' %%\t mds_pv__: a double-array of size (n_mds_p,n_mds_v) storing the mds-components ;')); end;
-if (verbose); disp(sprintf(' %%\t mds_fidandiid_p_: a cell array of size n_mds_p storing strings which are ;')); end;
-if (verbose); disp(sprintf(' %%\t\t the concatenation of fid, ''&'', and iid for each of the n_mds_p patients. ;')); end;
-if (verbose); disp(sprintf(' %% Note that n_mds_v can be zero, and mds_pv__ can be an array of size (n_mds_p,0). ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% Now we convert the dosage-data to b16-data. ;')); end;
+if (flag_verbose); disp(sprintf(' %% This encodes each dosage value as a 3-bit binary array. ;')); end;
+if (flag_verbose); disp(sprintf(' %% dosage ''0'' is encoded as [ 1 0 0 ]. ;')); end;
+if (flag_verbose); disp(sprintf(' %% dosage ''1'' is encoded as [ 0 1 0 ]. ;')); end;
+if (flag_verbose); disp(sprintf(' %% dosage ''2'' is encoded as [ 0 0 1 ]. ;')); end;
+if (flag_verbose); disp(sprintf(' %% For simplicity, we put everything into a single study directory. ;')); end;
+if (flag_verbose); disp(sprintf(' %% (although the dosage-data could instead be split across multiple files). ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% This is where you can put in your own bed, bim and fam-files. ;')); end;
+if (flag_verbose); disp(sprintf(' %% To do so you need to change the paths to these files below. ;')); end;
+if (flag_verbose); disp(sprintf(' %% This involves changing: ;')); end;
+if (flag_verbose); disp(sprintf(' %% study_trunk: the path to the directory where the study files are contained. ;')); end;
+if (flag_verbose); disp(sprintf(' %% study_name: the prefix for the study files. ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t Assumes that the bed, bim and fam-files ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t  each start with the study_name as a prefix. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% If you do indeed insert your own bed, bim and fam-files, ;')); end;
+if (flag_verbose); disp(sprintf(' %% you likely have your own mds-components you wish to correct for. ;')); end;
+if (flag_verbose); disp(sprintf(' %% To input your own mds-components you need to change both: ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t n_mds_p: integer number of patients in mds_pv__ ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t n_mds_v: integer number of variables in mds_pv__ ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t mds_pv__: a double-array of size (n_mds_p,n_mds_v) storing the mds-components ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t mds_fidandiid_p_: a cell array of size n_mds_p storing strings which are ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t\t the concatenation of fid, ''&'', and iid for each of the n_mds_p patients. ;')); end;
+if (flag_verbose); disp(sprintf(' %% Note that n_mds_v can be zero, and mds_pv__ can be an array of size (n_mds_p,0). ;')); end;
 %%%%%%%%;
 dir_trunk = sprintf('%s/dir_test_xxxcluster_fromdisk_ver16',pwd);
 if (~exist(dir_trunk,'dir')); disp(sprintf(' %% mkdir %s',dir_trunk)); mkdir(dir_trunk); end;
@@ -309,6 +323,15 @@ n_snp = n_snp_cup;
 index_nsnp_from_nstudy_ = 0:n_snp-1;
 n_patient = n_patient_cup;
 index_npatient_from_nstudy_ = 0:n_patient-1;
+%%%%%%%%;
+fn_mds = sprintf('%s/%s/%s_mds_csv.txt',dir_trunk,study_trunk,study_name);
+if (flag_force_create | ~exist(fn_mds,'file'));
+writematrix(mds_pv__,fn_mds,'filetype','text','delimiter',',');
+end;%if (flag_force_create | ~exist(fn_mds,'file'));
+fn_mds = sprintf('%s/%s/%s_mds_tsv.txt',dir_trunk,study_trunk,study_name);
+if (flag_force_create | ~exist(fn_mds,'file'));
+writematrix(mds_pv__,fn_mds,'filetype','text','delimiter','\t');
+end;%if (flag_force_create | ~exist(fn_mds,'file'));
 %%%%%%%%;
 fn_fam = sprintf('%s/%s/%s.fam',dir_trunk,study_trunk,study_name);
 if (flag_force_create | ~exist(fn_fam,'file'));
@@ -359,16 +382,16 @@ fwrite(fid,tmp_bed_ps__,'uint8');
 fclose(fid);
 end;%if (flag_force_create | ~exist(fn_bed,'file'));
 %%%%%%%%;
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% This is where you would specify the identity of the patients listed in mds_pv__. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% This is where you would specify the identity of the patients listed in mds_pv__. ;')); end;
 mds_fidandiid_p_ = cell(n_mds_p,1);
 for npatient_cup=0:n_patient_cup-1;
 mds_fidandiid_p_{1+npatient_cup} = sprintf('%s&%s',fam_cup_fid_{1+npatient_cup},fam_cup_iid_{1+npatient_cup});
 end;%for npatient_cup=0:n_patient_cup-1;
 %%%%%%%%;
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% You can also set certain people to be excluded (similar to a famex file). ;')); end;
-if (verbose); disp(sprintf(' %% For now we skip this step. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% You can also set certain people to be excluded (similar to a famex file). ;')); end;
+if (flag_verbose); disp(sprintf(' %% For now we skip this step. ;')); end;
 n_famex = 0;
 index_npatient_cup_from_nfamex_ = randperm(n_patient_cup,n_famex)-1;
 famex_fidandiid_p_ = cell(n_famex,1);
@@ -377,31 +400,32 @@ npatient_cup = index_npatient_cup_from_nfamex_(1+nfamex);
 famex_fidandiid_p_{1+nfamex} = sprintf('%s&%s',fam_cup_fid_{1+npatient_cup},fam_cup_iid_{1+npatient_cup});
 end;%for nfamex=0:n_famex-1;
 %%%%%%%%;
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% When converting the bed, bim and fam data into a b16 array, ;')); end;
-if (verbose); disp(sprintf(' %% we must specify a few parameters. ;')); end;
-if (verbose); disp(sprintf(' %% Some of the more important parameter are: ;')); end;
-if (verbose); disp(sprintf(' %% maf_cutoff: scalar double: this is the minor-allele-frequency (maf) cutoff for snps. ;')); end;
-if (verbose); disp(sprintf(' %%\t Only snps with a strictly higher maf will be considered. ;')); end;
-if (verbose); disp(sprintf(' %% ent_cutoff: scalar double: this is the entropy-cutoff for snps. ;')); end;
-if (verbose); disp(sprintf(' %%\t We typically expect the dosage-data for any particular snp ;')); end;
-if (verbose); disp(sprintf(' %%\t to have a frequency of 0, 1 and 2 values ;')); end;
-if (verbose); disp(sprintf(' %%\t (i.e., ''aa'', ''Aa'' and ''AA'' values) ;')); end;
-if (verbose); disp(sprintf(' %%\t which is close to pp, 2pq and qq, respectively, ;')); end;
-if (verbose); disp(sprintf(' %%\t where p is the associated minor-allele-frequency (maf). ;')); end;
-if (verbose); disp(sprintf(' %%\t The entropy (I_opt) measures the deviation from this expectation, ;')); end;
-if (verbose); disp(sprintf(' %%\t with higher values indicating a greater deviation. ;')); end;
-if (verbose); disp(sprintf(' %%\t Only snps with a strictly lower I_opt will be considered.  ;')); end;
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% This is also where you need to specify the mds-components you are correcting for, ;')); end;
-if (verbose); disp(sprintf(' %% As well as the patients to be excluded (i.e., famex). ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% When converting the bed, bim and fam data into a b16 array, ;')); end;
+if (flag_verbose); disp(sprintf(' %% we must specify a few parameters. ;')); end;
+if (flag_verbose); disp(sprintf(' %% Some of the more important parameter are: ;')); end;
+if (flag_verbose); disp(sprintf(' %% maf_cutoff: scalar double: this is the minor-allele-frequency (maf) cutoff for snps. ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t Only snps with a strictly higher maf will be considered. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ent_cutoff: scalar double: this is the entropy-cutoff for snps. ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t We typically expect the dosage-data for any particular snp ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t to have a frequency of 0, 1 and 2 values ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t (i.e., ''aa'', ''Aa'' and ''AA'' values) ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t which is close to pp, 2pq and qq, respectively, ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t where p is the associated minor-allele-frequency (maf). ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t The entropy (I_opt) measures the deviation from this expectation, ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t with higher values indicating a greater deviation. ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t Only snps with a strictly lower I_opt will be considered.  ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% This is also where you need to specify the mds-components you are correcting for, ;')); end;
+if (flag_verbose); disp(sprintf(' %% As well as the patients to be excluded (i.e., famex). ;')); end;
 str_output_prefix = 'test';
 parameter = struct('type','parameter');
-parameter.verbose = 1;
+parameter.flag_verbose = max(0,flag_verbose-1);
 parameter.str_output_prefix = str_output_prefix;
 parameter.dir_trunk = dir_trunk;
 parameter.ent_cutoff = 0.001; %<-- this is a typical entropy-cutoff. ;
 parameter.ent_cutoff = prctile(dsg_cup_I_opt_,99); %<-- for this example we will make sure to include most of the snps. ;
+if (flag_verbose); disp(sprintf(' %% Note: using parameter.ent_cutoff: %0.16f',parameter.ent_cutoff)); end;
 parameter.maf_cutoff = 0.010;
 parameter.flag_force_create = flag_force_create;
 [ ...
@@ -424,12 +448,13 @@ str_maf = sprintf('maf%.2d',floor(100*parameter.maf_cutoff));
 str_output_prefix_plus_maf = sprintf('%s_%s',str_output_prefix,str_maf);
 str_output_prefix_local = sprintf('%s_',str_output_prefix_plus_maf);
 dir_out = sprintf('%s/dir_%s',parameter.dir_trunk,str_output_prefix_plus_maf);
-if (verbose>0); disp(sprintf(' %% str_output_prefix_local %s ;\n %% dir_out %s ;\n',str_output_prefix_local,dir_out)); end;
+if (flag_verbose>0); disp(sprintf(' %% str_output_prefix_local %s ;\n %% dir_out %s ;\n',str_output_prefix_local,dir_out)); end;
+%%%%%%%%;
 
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we do not uncompress the b16 file. ;')); end;
-if (verbose); disp(sprintf(' %% This step is too slow for larger data-sets. ;')); end;
-if (verbose); disp(sprintf(' %% We can still load the fam.ext and bim.ext files. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% Now we do not uncompress the b16 file. ;')); end;
+if (flag_verbose); disp(sprintf(' %% This step is too slow for larger data-sets. ;')); end;
+if (flag_verbose); disp(sprintf(' %% We can still load the fam.ext and bim.ext files. ;')); end;
 fname_b16 = sprintf('%s/%s_A_full_n.b16',dir_out,str_output_prefix_plus_maf);
 %A_full_n_ = binary_uncompress(fname_b16);
 %%%%%%%%;
@@ -450,7 +475,7 @@ load_famext_ver1( ...
  fname_famext ...
 );
 [~,~,ij_fam_ext_from_cap_] = intersect(fam_cup_fid_,famext_fid_,'stable');
-disp(sprintf(' %% famext_fid_ vs fam_cup_fid_: %0.16f',fnorm(ij_fam_ext_from_cap_-transpose(1:n_patient))));
+if (flag_verbose); disp(sprintf(' %% famext_fid_ vs fam_cup_fid_: %0.16f',fnorm(ij_fam_ext_from_cap_-transpose(1:n_patient)))); end;
 %%%%%%%%;
 fname_bimext = sprintf('%s/%s_bim.ext',dir_out,str_output_prefix_plus_maf);
 [ ...
@@ -534,10 +559,11 @@ n_snp_ext_bcA = numel(find(mc_bcx_==3));
 n_snp_ext_bcB = numel(find(mc_bcx_==2));
 n_snp_ext_bcC = numel(find(mc_bcx_==1));
 %%%%;
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% We do not visualize the b16-data. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% We do not visualize the b16-data. ;')); end;
 %%%%;
 %{
+if flag_disp;
 figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,1024*2,1024]); fig80s;
 imagesc_uAZm_1( ...
  mds_pv__(rij_prm_,:) ...
@@ -546,24 +572,25 @@ imagesc_uAZm_1( ...
 ,[ mr_bcA_(rij_prm_) , mr_bcB_(rij_prm_) , mr_bcC_(rij_prm_) ] ...
 ,[ mc_ext_bcA_(cij_ex2_) , mc_ext_bcB_(cij_ex2_) , mc_ext_bcC_(cij_ex2_) ] ...
 );
+ end;%if flag_disp;
  %}
 %%%%;
 
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we run the basic biclustering method on the b16-data. ;')); end;
-if (verbose); disp(sprintf(' %% This should take approximately 10 seconds for differentially-expressed biclustering. ;')); end;
-if (verbose); disp(sprintf(' %% Some of the important parameters are: ;')); end;
-if (verbose); disp(sprintf(' %% n_mds: scalar integer: number of mds-components to correct for. ;')); end;
-if (verbose); disp(sprintf(' %%\t Note that the mds-components will be binarized into orthants. ;')); end;
-if (verbose); disp(sprintf(' %% n_mds_repl: scalar integer: number of times to replicate the mds-components. ;')); end;
-if (verbose); disp(sprintf(' %%\t This specifically refers to rotation+replication across orthants. ;')); end;
-if (verbose); disp(sprintf(' %%\t Larger numbers are better, but 1 or 2 is usually sufficient. ;')); end;
-if (verbose); disp(sprintf(' %% ij_mds_use_: integer array of size n_mds: 1-based indices of mds-components to correct for. ;')); end;
-if (verbose); disp(sprintf(' %% gamma: scalar double: fraction of rows or columns eliminated at each iteration of the bicluster algorithm. ;')); end;
-if (verbose); disp(sprintf(' %%\t Smaller numbers are more accurate, but larger numbers require less computation time. ;')); end;
-if (verbose); disp(sprintf(' %%\t Empirically, gamma = 0.01 or 0.05 is usually sufficient. ;')); end;
-if (verbose); disp(sprintf(' %% flag_force_create: scalar integer: set to 1 to force recreation of all temporary files. ;')); end;
-if (verbose); disp(sprintf(' %%\t if set to 0 will load temporary files from disk. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% Now we run the basic biclustering method on the b16-data. ;')); end;
+if (flag_verbose); disp(sprintf(' %% This should take approximately 10 seconds for differentially-expressed biclustering. ;')); end;
+if (flag_verbose); disp(sprintf(' %% Some of the important parameters are: ;')); end;
+if (flag_verbose); disp(sprintf(' %% n_mds: scalar integer: number of mds-components to correct for. ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t Note that the mds-components will be binarized into orthants. ;')); end;
+if (flag_verbose); disp(sprintf(' %% n_mds_repl: scalar integer: number of times to replicate the mds-components. ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t This specifically refers to rotation+replication across orthants. ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t Larger numbers are better, but 1 or 2 is usually sufficient. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ij_mds_use_: integer array of size n_mds: 1-based indices of mds-components to correct for. ;')); end;
+if (flag_verbose); disp(sprintf(' %% gamma: scalar double: fraction of rows or columns eliminated at each iteration of the bicluster algorithm. ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t Smaller numbers are more accurate, but larger numbers require less computation time. ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t Empirically, gamma = 0.01 or 0.05 is usually sufficient. ;')); end;
+if (flag_verbose); disp(sprintf(' %% flag_force_create: scalar integer: set to 1 to force recreation of all temporary files. ;')); end;
+if (flag_verbose); disp(sprintf(' %%\t if set to 0 will load temporary files from disk. ;')); end;
 n_mds_0in = 2; n_mds_repl = 1; ij_mds_use_ = [1:2];
 gamma = 0.05;
 dir_code = sprintf('%s/..',pwd);
@@ -576,6 +603,7 @@ parameter.n_mds = n_mds_0in;
 parameter.n_mds_repl = n_mds_repl;
 parameter.ij_mds_use_ = ij_mds_use_;
 parameter.flag_force_create = flag_force_create;
+parameter.flag_verbose = max(0,flag_verbose-1);
 [ ...
  parameter ...
 ] = ...
@@ -583,8 +611,8 @@ xxxcluster_fromdisk_uADZSZDA_ver16( ...
  parameter ...
 );
 
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we load the results of this single biclustering run. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% Now we load the results of this single biclustering run. ;')); end;
 parameter.str_out_xdrop_a_s0000 = sprintf('%s/out_xdrop_a.txt',parameter.dir_out_s0000);
 [ ...
  xdrop_ ...
@@ -596,13 +624,14 @@ index_rdrop_ = xdrop_.index_rdrop_;
 index_cdrop_ = xdrop_.index_cdrop_;
 
 %{
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we display the results of this single biclustering run. ;')); end;
-if (verbose); disp(sprintf(' %% The rows and cols are ordered by the biclustering-algorithm. ;')); end;
-if (verbose); disp(sprintf(' %% Those rows and cols eliminated first are shown towards the bottom-right. ;')); end;
-if (verbose); disp(sprintf(' %% Those rows and cols retained longest are shown towards the top-left. ;')); end;
-if (verbose); disp(sprintf(' %% Note that most of bcA is retained until the end. ;')); end;
-if (verbose); disp(sprintf(' %% That is to say, the biclustering-algorithm successfully focused on bcA. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% Now we display the results of this single biclustering run. ;')); end;
+if (flag_verbose); disp(sprintf(' %% The rows and cols are ordered by the biclustering-algorithm. ;')); end;
+if (flag_verbose); disp(sprintf(' %% Those rows and cols eliminated first are shown towards the bottom-right. ;')); end;
+if (flag_verbose); disp(sprintf(' %% Those rows and cols retained longest are shown towards the top-left. ;')); end;
+if (flag_verbose); disp(sprintf(' %% Note that most of bcA is retained until the end. ;')); end;
+if (flag_verbose); disp(sprintf(' %% That is to say, the biclustering-algorithm successfully focused on bcA. ;')); end;
+if flag_disp;
 figure(1+nf);nf=nf+1;clf;set(gcf,'Position',1+[0,0,1024*2,1024]); fig80s;
 tmp_rij_prm_ = [xdrop_.ij_rkeep_;rij_ctrl_prm_];
 tmp_cij_prm_ = [xdrop_.ij_ckeep_];
@@ -613,16 +642,17 @@ imagesc_uAZm_1( ...
 ,[ mr_bcA_(tmp_rij_prm_) , mr_bcB_(tmp_rij_prm_) , mr_bcC_(tmp_rij_prm_) ] ...
 ,[ mc_ext_bcA_(tmp_cij_prm_) , mc_ext_bcB_(tmp_cij_prm_) , mc_ext_bcC_(tmp_cij_prm_) ] ...
 );
+ end;%if flag_disp;
  %}
 
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we run a permutation-test. ;')); end;
-if (verbose); disp(sprintf(' %% This involves rerunning the biclustering-algorithm on ;')); end;
-if (verbose); disp(sprintf(' %% several label-permuted data-sets. ;')); end;
-if (verbose); disp(sprintf(' %% The parameter nshuffle indicates the (0-based) shuffle-index. ')); end;
-if (verbose); disp(sprintf(' %% When nshuffle==0 we do not shuffle, and process the original data-set. ;')); end;
-if (verbose); disp(sprintf(' %% This was already done above (as nshuffle==0 by default). ;')); end;
-if (verbose); disp(sprintf(' %% Each run should take as long as the original. ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% Now we run a permutation-test. ;')); end;
+if (flag_verbose); disp(sprintf(' %% This involves rerunning the biclustering-algorithm on ;')); end;
+if (flag_verbose); disp(sprintf(' %% several label-permuted data-sets. ;')); end;
+if (flag_verbose); disp(sprintf(' %% The parameter nshuffle indicates the (0-based) shuffle-index. ')); end;
+if (flag_verbose); disp(sprintf(' %% When nshuffle==0 we do not shuffle, and process the original data-set. ;')); end;
+if (flag_verbose); disp(sprintf(' %% This was already done above (as nshuffle==0 by default). ;')); end;
+if (flag_verbose); disp(sprintf(' %% Each run should take as long as the original. ;')); end;
 n_shuffle = 32;
 for nshuffle=1:n_shuffle;
 n_mds_0in = 2; n_mds_repl = 1; ij_mds_use_ = [1:2];
@@ -646,19 +676,20 @@ xxxcluster_fromdisk_uADZSZDA_ver16( ...
 );
 end;%for nshuffle=1:n_shuffle;
 
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we load the traces from each run. ;')); end;
-if (verbose); disp(sprintf(' %% Each trace records the (reweighted) mean-squared-correlation of the remaining array (across iterations).')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% Now we load the traces from each run. ;')); end;
+if (flag_verbose); disp(sprintf(' %% Each trace records the (reweighted) mean-squared-correlation of the remaining array (across iterations).')); end;
 trace__ = load_trace__from_dir_ver0(parameter.dir_out_trace);
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% Now we display the original trace (red) against the label-shuffled traces (black). ;')); end;
-if (verbose); disp(sprintf(' %% The horizontal indicates iteration, and the vertical indicates z-score. ;')); end;
-if (verbose); disp(sprintf(' %% The maximum negative-log-p-value for the original trace is circled (red).')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% Now we display the original trace (red) against the label-shuffled traces (black). ;')); end;
+if (flag_verbose); disp(sprintf(' %% The horizontal indicates iteration, and the vertical indicates z-score. ;')); end;
+if (flag_verbose); disp(sprintf(' %% The maximum negative-log-p-value for the original trace is circled (red).')); end;
+[tmp_nlpR,ij_nlpR] = max(trace__.nlpR_s0000_);
+if flag_disp;
 figure(1+nf);nf=nf+1;clf;figsml;
 linewidth_sml = 0.5;
 linewidth_big = 3;
 markersize_big = 16;
-[tmp_nlpR,ij_nlpR] = max(trace__.nlpR_s0000_);
 hold on;
 plot(trace__.niter_s0000_,trace__.ZR_is__,'k-','LineWidth',linewidth_sml);
 plot(trace__.niter_s0000_,trace__.ZR_s0000_,'r-','LineWidth',linewidth_big);
@@ -666,31 +697,34 @@ plot(trace__.niter_s0000_(ij_nlpR),trace__.ZR_s0000_(ij_nlpR),'ko','MarkerFaceCo
 hold off;
 xlim([min(trace__.niter_s0000_),max(trace__.niter_s0000_)]); xlabel('iteration');
 ylabel('negative-log-p');
+end;%if flag_disp;
 
-if (verbose); disp(sprintf(' %% ')); end;
-if (verbose); disp(sprintf(' %% We use this maximum negative-log-p-value to define a ''dominant bicluster''. ;')); end;
-if (verbose); disp(sprintf(' %% We extract this dominant bicluster (i.e., using the rows and cols at that iteration), ;')); end;
-if (verbose); disp(sprintf(' %% and then measure the principal-components of that bicluster. ;')); end;
-if (verbose); disp(sprintf(' %% By projecting each of the patients onto those principal-components, ;')); end;
-if (verbose); disp(sprintf(' %% we can visualize the effect of the biclustering. ;')); end;
-if (verbose); disp(sprintf(' %% A scatterplot of these patient-projections is shown below (right). ;')); end;
-if (verbose); disp(sprintf(' %% Each patient is colored with a (r,g,b) triplet indicating its membership in (bcA,bcB,bcC). ;')); end;
-if (verbose); disp(sprintf(' %% Thus, patients in bcA will be: ')); end;
-if (verbose); disp(sprintf(' %%\t red if they are only in bcA, ')); end;
-if (verbose); disp(sprintf(' %%\t yellow if they are in bcA+bcB, ')); end;
-if (verbose); disp(sprintf(' %%\t magenta if they are in bcA+bcC, ')); end;
-if (verbose); disp(sprintf(' %%\t white if they are in bcA+bcB+bcC. ')); end;
-if (verbose); disp(sprintf(' %% Similarly, patients in bcB will be mostly green, ;')); end;
-if (verbose); disp(sprintf(' %% while patients in bcC will be mostly blue. ;')); end;
-if (verbose); disp(sprintf(' %% Note that the bicluster-informed projection singles out bcA, ;')); end;
-if (verbose); disp(sprintf(' %% while an uninformed projection (using the principal-components of the full data-set) ;')); end;
-if (verbose); disp(sprintf(' %% does not single out bcA, but instead is confounded by the nonspecific bicluster bcB, ;')); end;
-if (verbose); disp(sprintf(' %% as well as the mds-biased bicluster bcC (c.f. principal-components 1 and 2, respectively). ;')); end;
-if (verbose); disp(sprintf(' %% We use our ''pca_driver'' code to calculate the principal-components (using power iteration). ;')); end;
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% We use this maximum negative-log-p-value to define a ''dominant bicluster''. ;')); end;
+if (flag_verbose); disp(sprintf(' %% We extract this dominant bicluster (i.e., using the rows and cols at that iteration), ;')); end;
+if (flag_verbose); disp(sprintf(' %% and then measure the principal-components of that bicluster. ;')); end;
+if (flag_verbose); disp(sprintf(' %% By projecting each of the patients onto those principal-components, ;')); end;
+if (flag_verbose); disp(sprintf(' %% we can visualize the effect of the biclustering. ;')); end;
+if (flag_verbose); disp(sprintf(' %% A scatterplot of these patient-projections is shown below (right). ;')); end;
+if (flag_verbose); disp(sprintf(' %% Each patient is colored with a (r,g,b) triplet indicating its membership in (bcA,bcB,bcC). ;')); end;
+if (flag_verbose); disp(sprintf(' %% Thus, patients in bcA will be: ')); end;
+if (flag_verbose); disp(sprintf(' %%\t red if they are only in bcA, ')); end;
+if (flag_verbose); disp(sprintf(' %%\t yellow if they are in bcA+bcB, ')); end;
+if (flag_verbose); disp(sprintf(' %%\t magenta if they are in bcA+bcC, ')); end;
+if (flag_verbose); disp(sprintf(' %%\t white if they are in bcA+bcB+bcC. ')); end;
+if (flag_verbose); disp(sprintf(' %% Similarly, patients in bcB will be mostly green, ;')); end;
+if (flag_verbose); disp(sprintf(' %% while patients in bcC will be mostly blue. ;')); end;
+if (flag_verbose); disp(sprintf(' %% Note that the bicluster-informed projection singles out bcA, ;')); end;
+if (flag_verbose); disp(sprintf(' %% while an uninformed projection (using the principal-components of the full data-set) ;')); end;
+if (flag_verbose); disp(sprintf(' %% does not single out bcA, but instead is confounded by the nonspecific bicluster bcB, ;')); end;
+if (flag_verbose); disp(sprintf(' %% as well as the mds-biased bicluster bcC (c.f. principal-components 1 and 2, respectively). ;')); end;
+if (flag_verbose); disp(sprintf(' %% We use our ''pca_driver'' code to calculate the principal-components (using power iteration). ;')); end;
+if flag_disp;
 figure(1+nf);nf=nf+1;clf;
 %set(gcf,'Position',1+[0,0,1024,1024]);fig80s;
 %p_row = 2; p_col = 2; np=0;
 figmed;fig80s;
+end;%if flag_disp;
 p_row = 1; p_col = 2; np=0;
 mr_ABC__ = zeros(n_patient,3);
 mr_ABC__(rij_case_bcA_,1+0) = 1;
@@ -707,20 +741,6 @@ xdrop_ij_ckeep_ = xdrop_.ij_ckeep_;
 [A_p_c_,A_p_0_,AZ_rsum_] = load_A_p_c_from_dir_0(parameter.dir_out_s0000);
 alpha_c_ = A_p_c_ - (1-A_p_c_);
 D_c_ = sqrt(1./max(0.01,4.0*A_p_c_.*(1-A_p_c_)));
-%A_full_normalized_n_ = bsxfun(@times,bsxfun(@minus,A_full_n_,transpose(alpha_c_)),transpose(sqrt(D_c_)));
-%[tmp_U_,tmp_S_,tmp_V_] = svds(A_full_normalized_n_(xdrop_ij_rkeep_,xdrop_ij_ckeep_),2);
-%AZnV_ni0_ = A_full_normalized_n_(:,xdrop_ij_ckeep_)*tmp_V_;
-%subplot(p_row,p_col,1+np);np=np+1;
-%scatter(AZnV_ni0_(:,1),AZnV_ni0_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
-%axisnotick; title('full data-set (matlab)'); xlabel('PC1'); ylabel('PC2');
-%%%%;
-%n_r_tmp = trace__.r_rem_s0000_(ij_nlpR);
-%n_c_tmp = trace__.c_rem_s0000_(ij_nlpR);
-%[tmp_U_,tmp_S_,tmp_V_] = svds(A_full_normalized_n_(xdrop_ij_rkeep_(1:n_r_tmp),xdrop_ij_ckeep_(1:n_c_tmp)),2);
-%AZnV_nix_ = A_full_normalized_n_(:,xdrop_ij_ckeep_(1:n_c_tmp))*tmp_V_;
-%subplot(p_row,p_col,1+np);np=np+1;
-%scatter(AZnV_nix_(:,1),AZnV_nix_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
-%axisnotick; title('bicluster informed (matlab)'); xlabel('PC1'); ylabel('PC2');
 mx__ = load_mx__from_parameter_ver0(parameter);
 %%%%%%%%;
 ni=0;
@@ -734,9 +754,11 @@ xxxcluster_fromdisk_uADZSZDA_pca_D_from_ni_ver16( ...
 ,trace__ ...
 ,mx__ ...
 );
+if flag_disp;
 subplot(p_row,p_col,1+np);np=np+1;
 scatter(AZnV_ni0_driver_(:,1),AZnV_ni0_driver_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
 axisnotick; title('full data-set (driver)'); xlabel('PC1'); ylabel('PC2');
+end;%if flag_disp;
 %%%%%%%%;
 ni=ij_nlpR-1;
 [ ...
@@ -749,10 +771,13 @@ xxxcluster_fromdisk_uADZSZDA_pca_D_from_ni_ver16( ...
 ,trace__ ...
 ,mx__ ...
 );
+if flag_disp;
 subplot(p_row,p_col,1+np);np=np+1;
 scatter(AZnV_nix_driver_(:,1),AZnV_nix_driver_(:,2),16,mr_ABC__,'filled','MarkerEdgeColor','k');
 axisnotick; title('bicluster-informed (driver)'); xlabel('PC1'); ylabel('PC2');
+end;%if flag_disp;
 
+if (flag_verbose); disp(sprintf(' %% [finished test_stripped_xxxcluster_fromdisk_ver16]')); end;
 
 
 

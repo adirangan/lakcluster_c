@@ -43,7 +43,7 @@ end;% for ns=0:mx__.n_study-1;
 tmp_fname = sprintf('%s/%s_mc_A.b16',mx__.dir_0in,mx__.str_prefix);
 mx__.mc_A_default_ = (binary_uncompress(tmp_fname)>0);
 %%%%%%%%;
-if (mx__.flag_verbose>-1); disp(sprintf(' %% default masks: mr_A error %0.16f ; mr_Z error %0.16f ; mc_A %d',fnorm(mr_A_tmp_-mx__.mr_A_default_full_),fnorm(mr_Z_tmp_-mx__.mr_Z_default_full_),sum(mx__.mc_A_default_))); end;
+if (mx__.flag_verbose>0); disp(sprintf(' %% default masks: mr_A error %0.16f ; mr_Z error %0.16f ; mc_A %d',fnorm(mr_A_tmp_-mx__.mr_A_default_full_),fnorm(mr_Z_tmp_-mx__.mr_Z_default_full_),sum(mx__.mc_A_default_))); end;
 %%%%%%%%;
 if length(mx__.str_mr_0in)>0;
 mx__.mr_A__ = cell(mx__.n_study,1);
