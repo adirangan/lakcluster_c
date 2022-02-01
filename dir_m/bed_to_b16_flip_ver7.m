@@ -604,6 +604,7 @@ binary_compress(bitj,transpose([ones(n_rij_cap_s_(1+ns),1) , (T_{1+ns}>0)]),tmpc
 end;%if (flag_force_create | ~exist(tmpchar,'file'));
 end;%for ns=0:n_study-1;
 
+if (size(T_full_,2)>=2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (flag_verbose>0); disp(sprintf(' %% ; ')); end;
 if (flag_verbose>0); disp(sprintf(' %% creating mds_m2rx ; ')); end;
@@ -676,6 +677,8 @@ tmp_fp = fopen(tmpchar,'w'); fprintf(tmp_fp,'%0.16f\n',tmp_kappa_squared); fclos
 if (flag_verbose>0); disp(sprintf(' %% nx %d: kappa^2 = %0.6f (versus %0.6f) --> writing to %s',nz,tmp_kappa_squared,tmp_d,tmpchar)); end;
 end;%if (flag_force_create | ~exist(tmpchar,'file'));
 end;%for nz=1:n_z;
+%%%%%%%%;
+end;%if (size(T_full_,2)>=2);
 
 if flag_stop>2;
 disp(' %% returning after mds'); return; 
