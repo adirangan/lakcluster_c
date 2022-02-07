@@ -13,7 +13,7 @@ disp(sprintf(' %% Now running xxxcluster_fromdisk_uADZSZDA_ver16_dr_0 on same fi
 dir_trunk = sprintf('%s/dir_test_xxxcluster_fromdisk_ver16',pwd);
 test_stripped_xxxcluster_fromdisk_ver16(struct('flag_verbose',0));
 parameter = struct('type','parameter');
-parameter.flag_verbose = 0;
+parameter.flag_verbose = 1;
 parameter.dir_trunk = dir_trunk;
 parameter.study_name_of_branch_s_ = {'dir_study00'};
 parameter.study_name_without_extension_s_ = {'study00'};
@@ -459,10 +459,12 @@ if (flag_verbose); disp(sprintf(' %% The horizontal indicates iteration, and the
 if (flag_verbose); disp(sprintf(' %% The maximum negative-log-p-value for the original trace is circled (red).')); end;
 [tmp_nlpR,ij_nlpR] = max(trace__.nlpR_s0000_);
 if flag_disp;
-figure(1+nf);nf=nf+1;clf;figsml;
+figure(1+nf);nf=nf+1;clf;figmed;
 linewidth_sml = 0.5;
 linewidth_big = 3;
 markersize_big = 16;
+%%%%;
+subplot(1,2,1);
 hold on;
 plot(trace__.niter_s0000_,trace__.ZR_is__,'k-','LineWidth',linewidth_sml);
 plot(trace__.niter_s0000_,trace__.ZR_s0000_,'r-','LineWidth',linewidth_big);
@@ -470,6 +472,18 @@ plot(trace__.niter_s0000_(ij_nlpR),trace__.ZR_s0000_(ij_nlpR),'ko','MarkerFaceCo
 hold off;
 xlim([min(trace__.niter_s0000_),max(trace__.niter_s0000_)]); xlabel('iteration');
 ylabel('negative-log-p');
+%%%%;
+subplot(1,2,2);
+hold on;
+r_rem_max = max(trace__.r_rem_s0000_);
+plot(r_rem_max-trace__.r_rem_s0000_,trace__.ZR_is__,'k-','LineWidth',linewidth_sml);
+plot(r_rem_max-trace__.r_rem_s0000_,trace__.ZR_s0000_,'r-','LineWidth',linewidth_big);
+plot(r_rem_max-trace__.r_rem_s0000_(ij_nlpR),trace__.ZR_s0000_(ij_nlpR),'ko','MarkerFaceColor','r','MarkerSize',markersize_big);
+hold off;
+xlim([0,r_rem_max]);
+xlabel('patients excluded');
+ylabel('negative-log-p');
+%%%%;
 end;%if flag_disp;
 
 if (flag_verbose); disp(sprintf(' %% ')); end;
@@ -499,7 +513,7 @@ mx__ = load_mx__from_parameter_ver0(parameter);
 %%%%%%%%;
 ni=0;
 [ ...
- AZnV_ni0_driver_ ...
+ AZnV_ni0_driver_pd__ ...
 ] = ...
 xxxcluster_fromdisk_uADZSZDA_pca_D_from_ni_ver16( ...
  parameter ...
@@ -510,13 +524,13 @@ xxxcluster_fromdisk_uADZSZDA_pca_D_from_ni_ver16( ...
 );
 if flag_disp;
 subplot(p_row,p_col,1+np);np=np+1;
-scatter(AZnV_ni0_driver_(:,1),AZnV_ni0_driver_(:,2),16,mr_dvx_,'filled','MarkerEdgeColor','k');
+scatter(AZnV_ni0_driver_pd__(:,1),AZnV_ni0_driver_pd__(:,2),16,mr_dvx_,'filled','MarkerEdgeColor','k');
 axisnotick; title('full data-set (driver)'); xlabel('PC1'); ylabel('PC2');
 end;%if flag_disp;
 %%%%%%%%;
 ni=ij_nlpR-1;
 [ ...
- AZnV_nix_driver_ ...
+ AZnV_nix_driver_pd__ ...
 ] = ...
 xxxcluster_fromdisk_uADZSZDA_pca_D_from_ni_ver16( ...
  parameter ...
@@ -527,9 +541,74 @@ xxxcluster_fromdisk_uADZSZDA_pca_D_from_ni_ver16( ...
 );
 if flag_disp;
 subplot(p_row,p_col,1+np);np=np+1;
-scatter(AZnV_nix_driver_(:,1),AZnV_nix_driver_(:,2),16,mr_dvx_,'filled','MarkerEdgeColor','k');
+scatter(AZnV_nix_driver_pd__(:,1),AZnV_nix_driver_pd__(:,2),16,mr_dvx_,'filled','MarkerEdgeColor','k');
 axisnotick; title('bicluster-informed (driver)'); xlabel('PC1'); ylabel('PC2');
 end;%if flag_disp;
+
+if (flag_verbose); disp(sprintf(' %% ')); end;
+if (flag_verbose); disp(sprintf(' %% We repeat our visualization. ;')); end;
+if (flag_verbose); disp(sprintf(' %% This time, instead of calculating the standard principal-components, ;')); end;
+if (flag_verbose); disp(sprintf(' %% we calculate case-ctrl corrected principal-components. ;')); end;
+if (flag_verbose); disp(sprintf(' %% These are, simply put, the projections that maximize the variance of the ;')); end;
+if (flag_verbose); disp(sprintf(' %% typical difference between a case and a ctrl. ;')); end;
+if (flag_verbose); disp(sprintf(' %% We calculate this visualization for a sequence of iterations. ;')); end;
+%%%%%%%%;
+niter_ = trace__.niter_s0000_; n_iter = numel(niter_);
+n_niter_use = 12;
+index_niter_use_ = round(linspace(0,n_iter-1,n_niter_use)); %<-- use for equispaced iterations. ;
+r_rem_ = trace__.r_rem_s0000_;
+c_rem_ = trace__.c_rem_s0000_;
+r_rem_use_ = round(linspace(r_rem_(1),max(2,r_rem_(end-1)),n_niter_use));
+index_niter_use_ = zeros(n_niter_use,1);
+for nniter_use=0:n_niter_use-1;
+r_rem_use = r_rem_use_(1+nniter_use);
+index_niter_use_(1+nniter_use) = min(n_iter-1,max(efind(r_rem_>=r_rem_use)));
+end;%for nniter_use=0:n_niter_use-1;
+niter_use_ = niter_(1+index_niter_use_);
+AZnV_DvX_nix_driver_pdi___ = zeros(n_patient_famext,2,n_niter_use);
+for nniter_use=0:n_niter_use-1;
+niter_use = niter_use_(1+nniter_use);
+[ ...
+ AZnV_DvX_nix_driver_pd__ ...
+] = ...
+xxxcluster_fromdisk_uADZSZDA_pca_DvX_from_ni_ver16( ...
+ parameter ...
+,niter_use ...
+,xdrop_ ...
+,trace__ ...
+,mx__ ...
+);
+AZnV_DvX_nix_driver_pdi___(:,:,1+nniter_use) = AZnV_DvX_nix_driver_pd__;
+end;%for nniter_use=0:n_niter_use-1;
+%%%%%%%%;
+
+if flag_disp;
+figure(1+nf);nf=nf+1;clf;
+figbig;fig80s;
+end;%if flag_disp;
+p_row = 3; p_col = ceil(n_niter_use/p_row); np=0;
+markersize_sml = 4;
+markersize_med = 8;
+markersize_big = 24;
+r_rem_ = trace__.r_rem_s0000_;
+c_rem_ = trace__.c_rem_s0000_;
+xdrop_ij_rkeep_ = xdrop_.ij_rkeep_;
+xdrop_ij_ckeep_ = xdrop_.ij_ckeep_;
+%%%%%%%%;
+for nniter_use=0:n_niter_use-1;
+niter_use = niter_use_(1+nniter_use);
+r_rem_use = r_rem_(1+niter_use);
+c_rem_use = c_rem_(1+niter_use);
+tmp_xdrop_ij_rkeep_ = xdrop_ij_rkeep_(1:r_rem_use);
+tmp_xdrop_ij_ckeep_ = xdrop_ij_ckeep_(1:c_rem_use);
+AZnV_DvX_nix_driver_pd__ = AZnV_DvX_nix_driver_pdi___(:,:,1+nniter_use);
+subplot(p_row,p_col,1+np);np=np+1;
+hold on;
+scatter(AZnV_DvX_nix_driver_pd__(:,1),AZnV_DvX_nix_driver_pd__(:,2),markersize_med,mr_dvx_,'filled','MarkerEdgeColor','k');
+scatter(AZnV_DvX_nix_driver_pd__(tmp_xdrop_ij_rkeep_,1),AZnV_DvX_nix_driver_pd__(tmp_xdrop_ij_rkeep_,2),markersize_big,mr_dvx_(tmp_xdrop_ij_rkeep_),'MarkerEdgeColor','k');
+hold off;
+axisnotick; title(sprintf('niter %d r_rem %d c_rem %d',niter_use,r_rem_use,c_rem_use),'Interpreter','none'); xlabel('PC1'); ylabel('PC2');
+end;%for nniter_use=0:n_niter_use-1;
 
 if (flag_verbose); disp(sprintf(' %% [finished xxxcluster_fromdisk_ver16_dr_0]')); end;
 

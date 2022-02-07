@@ -6,6 +6,12 @@ load_trace__from_dir_ver0( ...
  dir_out_trace ...
 );
 
+str_thisfunction = 'load_trace__from_dir_ver0';
+
+flag_verbose=0;
+
+if (flag_verbose); disp(sprintf(' %% [entering %s]',str_thisfunction)); end;
+
 nshuffle=0;
 fname = sprintf('%s/out_trace_s%.4d.txt',dir_out_trace,nshuffle);
 [ ...
@@ -21,6 +27,7 @@ load_trace_ver0( ...
  fname ...
 );
 n_iter = numel(niter_s0000_);
+if (flag_verbose); disp(sprintf(' %% n_iter %d',n_iter)); end;
 
 nshuffle=0;
 flag_continue=1;
@@ -31,6 +38,7 @@ flag_exist = exist(fname,'file');
 if flag_exist;
 flag_match = 1;
 [ niter_ ] = load_trace_ver0( fname );
+if (flag_verbose); disp(sprintf(' %% nshuffle %d: n_iter %d',nshuffle,numel(niter_))); end;
 if (numel(niter_)==n_iter); flag_match=1; end;
 if (numel(niter_)~=n_iter); flag_match=0; end;
 if ~flag_match; flag_continue=0; end;
@@ -119,6 +127,7 @@ trace__.ZC_s0000_ = ZC_s0000_;
 trace__.nlpC_s0000_ = nlpC_s0000_;
 %%%%;
 
+if (flag_verbose); disp(sprintf(' %% [finished %s]',str_thisfunction)); end;
 
 
  
