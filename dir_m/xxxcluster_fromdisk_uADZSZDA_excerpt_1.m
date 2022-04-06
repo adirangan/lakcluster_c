@@ -1,7 +1,12 @@
-function xxxcluster_fromdisk_uADZSZDA_excerpt_1(fp,str_0,n_bin,M_);
-fprintf(fp,str_0);
+function str_out = xxxcluster_fromdisk_uADZSZDA_excerpt_1(fp,str_0,n_bin,M_);
+str_out = '';
+if (fp>0); fprintf(fp,str_0); end;
+str_out = sprintf('%s%s',str_out,str_0);
 for nb=0:n_bin-1; 
-fprintf(fp,'%d',M_(1+nb)); 
-if nb<n_bin-1; fprintf(fp,','); else fprintf(fp,';'); end; 
+if (fp>0); fprintf(fp,'%d',M_(1+nb)); end;
+str_out = sprintf('%s%d',str_out,M_(1+nb));
+if (fp>0); if nb<n_bin-1; fprintf(fp,','); else fprintf(fp,';'); end; end;
+if nb<n_bin-1; str_out = sprintf('%s,',str_out); else str_out = sprintf('%s;',str_out); end;
 end; %for nb=0:n_bin-1; 
-fprintf(fp,'\n');
+if (fp>0); fprintf(fp,'\n'); end;
+str_out = sprintf('%s\n',str_out);
