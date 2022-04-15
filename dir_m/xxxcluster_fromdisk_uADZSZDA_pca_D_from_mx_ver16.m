@@ -1,28 +1,24 @@
 function ...
 [ ...
  parameter ...
-,AZnV_ ...
 ,AnV_ ...
-,ZnV_ ...
 ,V_ ...
 ] = ...
-xxxcluster_fromdisk_uADZSZDA_pca_DvX_from_mx_ver16( ...
+xxxcluster_fromdisk_uADZSZDA_pca_D_from_mx_ver16( ...
  parameter ...
 ,pca_rank ...
 ,pca_mr_A_ ...
-,pca_mr_Z_ ...
 ,pca_mc_A ...
 ,pca_str_infix ...
 ,mx__ ...
 );
 
-str_thisfunction = 'xxxcluster_fromdisk_uADZSZDA_pca_DvX_from_mx_ver16';
+str_thisfunction = 'xxxcluster_fromdisk_uADZSZDA_pca_D_from_mx_ver16';
 
 na=0;
 if (nargin<1+na); parameter=[]; end; na=na+1;
 if (nargin<1+na); pca_rank=[]; end; na=na+1;
 if (nargin<1+na); pca_mr_A_=[]; end; na=na+1;
-if (nargin<1+na); pca_mr_Z_=[]; end; na=na+1;
 if (nargin<1+na); pca_mc_A=[]; end; na=na+1;
 if (nargin<1+na); pca_str_infix=[]; end; na=na+1;
 if (nargin<1+na); mx__=[]; end; na=na+1;
@@ -80,12 +76,10 @@ if ~isempty(pca_mc_A); parameter_A_p.pca_mc_A = pca_mc_A; end;
 parameter_A_p.pca_mr_A_ = cell(n_study,1);
 parameter_A_p.pca_mr_Z_ = cell(n_study,1);
 for nstudy=0:n_study-1;
-parameter_A_p.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy};
-parameter_A_p.pca_mr_Z_{1+nstudy} = mx__.mr_Z__{1+nstudy};
+parameter_A_p.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy} | mx__.mr_Z__{1+nstudy};
+parameter_A_p.pca_mr_Z_{1+nstudy} = 0*mx__.mr_Z__{1+nstudy};
 end;%for nstudy=0:n_study-1;
-%if ~isempty(pca_mr_A_); parameter_A_p.pca_mr_A_ = pca_mr_A_; end;
-%if ~isempty(pca_mr_Z_); parameter_A_p.pca_mr_Z_ = pca_mr_Z_; end;
-parameter_A_p.str_infix = ''; if ~isempty(pca_str_infix); parameter_A_p.str_infix = sprintf('A_p_DvX_%s',pca_str_infix); end;
+parameter_A_p.str_infix = ''; if ~isempty(pca_str_infix); parameter_A_p.str_infix = sprintf('A_p_D_%s',pca_str_infix); end;
 [ ...
  parameter ...
  parameter_A_p ...
@@ -108,13 +102,13 @@ if ~isempty(pca_mc_A); parameter_pca.pca_mc_A = pca_mc_A; end;
 parameter_pca.pca_mr_A_ = cell(n_study,1);
 parameter_pca.pca_mr_Z_ = cell(n_study,1);
 for nstudy=0:n_study-1;
-parameter_pca.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy};
-parameter_pca.pca_mr_Z_{1+nstudy} = mx__.mr_Z__{1+nstudy};
+parameter_pca.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy} | mx__.mr_Z__{1+nstudy};
+parameter_pca.pca_mr_Z_{1+nstudy} = 0*mx__.mr_Z__{1+nstudy};
 end;%for nstudy=0:n_study-1;
 if ~isempty(pca_mr_A_); parameter_pca.pca_mr_A_ = pca_mr_A_; end;
-if ~isempty(pca_mr_Z_); parameter_pca.pca_mr_Z_ = pca_mr_Z_; end;
-parameter_pca.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca.str_infix = sprintf('pca_DvX_%s',pca_str_infix); end;
+parameter_pca.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca.str_infix = sprintf('pca_D_%s',pca_str_infix); end;
 if ~isempty(pca_rank); parameter_pca.rank = pca_rank; end;
+parameter_pca.flag_reverse = 0;
 [ ...
  parameter ...
  parameter_pca ...
@@ -139,13 +133,12 @@ if ~isempty(pca_mc_A); parameter_pca_proj.pca_mc_A = pca_mc_A; end;
 parameter_pca_proj.pca_mr_A_ = cell(n_study,1);
 parameter_pca_proj.pca_mr_Z_ = cell(n_study,1);
 for nstudy=0:n_study-1;
-parameter_pca_proj.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy};
-parameter_pca_proj.pca_mr_Z_{1+nstudy} = mx__.mr_Z__{1+nstudy};
+parameter_pca_proj.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy} | mx__.mr_Z__{1+nstudy};
+parameter_pca_proj.pca_mr_Z_{1+nstudy} = 0*mx__.mr_Z__{1+nstudy};
 end;%for nstudy=0:n_study-1;
-%if ~isempty(pca_mr_A_); parameter_pca_proj.pca_mr_A_ = pca_mr_A_; end;
-%if ~isempty(pca_mr_Z_); parameter_pca_proj.pca_mr_Z_ = pca_mr_Z_; end;
-parameter_pca_proj.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca_proj.str_infix = sprintf('pca_proj_DvX_%s',pca_str_infix); end;
+parameter_pca_proj.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca_proj.str_infix = sprintf('pca_proj_D_%s',pca_str_infix); end;
 if ~isempty(pca_rank); parameter_pca_proj.rank = pca_rank; end;
+parameter_pca.flag_reverse = 0;
 [ ...
  parameter ...
  parameter_pca_proj ...
@@ -156,5 +149,4 @@ xxxcluster_fromdisk_uADZSZDA_pca_ver16( ...
 );
 %%%%%%%%;
 AnV_ = mda_read_r8(parameter_pca_proj.str_AnV);
-ZnV_ = mda_read_r8(parameter_pca_proj.str_ZnV);
-AZnV_ = AnV_ + ZnV_;
+AZnV_ = AnV_;
