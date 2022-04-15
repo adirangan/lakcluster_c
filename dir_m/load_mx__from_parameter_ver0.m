@@ -6,6 +6,19 @@ load_mx__from_parameter_ver0( ...
  parameter ...
 );
 
+na=0;
+if (nargin<1+na); parameter=[]; end; na=na+1;
+if isempty(parameter); parameter = struct('type','parameter'); end;
+%%%%%%%%;
+if ~isfield(parameter,'flag_verbose'); parameter.flag_verbose = 0; end;
+if ~isfield(parameter,'dir_0in'); parameter.dir_0in = pwd; end;
+if ~isfield(parameter,'str_prefix'); parameter.str_prefix = 'test'; end;
+if ~isfield(parameter,'str_mr_0in'); parameter.str_mr_0in = ''; end;
+if ~isfield(parameter,'str_mc_0in'); parameter.str_mc_0in = ''; end;
+if ~isfield(parameter,'flag_reverse'); parameter.flag_reverse = 0; end;
+if ~isfield(parameter,'n_study'); parameter.n_study = 1; end;
+if ~isfield(parameter,'n_bin'); parameter.n_bin = parameter.n_study; end;
+
 n_study = parameter.n_study;
 
 mx__ = struct('type','mx__');

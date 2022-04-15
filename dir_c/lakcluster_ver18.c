@@ -363,6 +363,7 @@ int main(int argc, char** argv) {
   if (strcmp(GLOBAL_TEST_TYPE,"b16_merge")==0){ b16_merge();}
   if (strcmp(GLOBAL_TEST_TYPE,"wrap_transpose_test")==0){ wrap_transpose_test();}
   if (strcmp(GLOBAL_TEST_TYPE,"wrap_transpose_driver")==0){ wrap_transpose_driver();}
+  if (strcmp(GLOBAL_TEST_TYPE,"A_p_driver")==0){ A_p_driver();}
   free(wkspace_ua); exit(RET_SUCCESS);
   return 0;
 }

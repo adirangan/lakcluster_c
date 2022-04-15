@@ -1296,3 +1296,21 @@ void dcc_init_test()
   raprintf(D->Y_p,"double",1,psize(D->Y_ncols)," %% D->Y_p: "); raprintf(D->Y_ajdk,"double",psize(D->Y_ncols),AJDK_TOT," %% D->Y_ajdk: ");
   wkspace_printf();
 }
+
+void A_p_driver()
+{
+  /* generates A_p */
+  int verbose=GLOBAL_verbose; int nl=0,nr=0; double ct=0,rt=0,r=0,it=0,et=0; int iteration_max = GLOBAL_TEST_niter;
+  struct dcc_ajdk *D=NULL;struct dcc_single **E_=NULL; struct dcc_double **F_=NULL;
+  char tmpchar[FNAMESIZE];
+  if (verbose>1){ printf(" %% [entering A_p_driver]\n");}
+  if (verbose>1){ printf(" %% loading data from disk.\n");}
+  GLOBAL_tic(2);
+  GLOBAL_tic(1);
+  dcc_load(&D,&E_,&F_); 
+  GLOBAL_toc(1,verbose," %% loading time: ");
+  GLOBAL_toc(2,0,""); ct = GLOBAL_elct[2]; rt = GLOBAL_elrt[2]; r=ct/maximum(1,rt);
+  if (verbose>-1){ printf(" %% total elapsed time ct/rt %6.1fs(%2.1fh)/%6.1fs(%2.1fh) = %2.1f; finished.\n",ct,ct/3600,rt,rt/3600,r);}
+  wkspace_printf();
+  if (verbose>1){ printf(" %% [finished A_p_driver]\n");}
+}

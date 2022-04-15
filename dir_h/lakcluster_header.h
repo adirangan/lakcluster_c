@@ -545,6 +545,7 @@ void dcc_copy(struct dcc_ajdk *D,struct dcc_ajdk *D_in);
 void dcc_load(struct dcc_ajdk **D_p,struct dcc_single ***E_p,struct dcc_double ***F_p);
 void dcc_init(char *error_vs_speed,double mrnd,struct dcc_ajdk **D_p,struct dcc_single ***E_p,struct dcc_double ***F_p);
 void dcc_init_test();
+void A_p_driver();
 void dcc_An_ajdk(struct dcc_ajdk *D);
 void dcc_lf_ZtSn(struct dcc_ajdk *D);
 void dcc_lf_D_AtTn_ZtSn_vv(struct dcc_ajdk *D);
