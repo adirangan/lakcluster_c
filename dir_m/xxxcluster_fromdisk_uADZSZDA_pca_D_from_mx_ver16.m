@@ -1,17 +1,31 @@
 function ...
 [ ...
  parameter ...
+,AZnV_ ...
 ,AnV_ ...
+,ZnV_ ...
 ,V_ ...
 ] = ...
 xxxcluster_fromdisk_uADZSZDA_pca_D_from_mx_ver16( ...
  parameter ...
 ,pca_rank ...
 ,pca_mr_A_ ...
+,pca_mr_Z_ ...
 ,pca_mc_A ...
 ,pca_str_infix ...
 ,mx__ ...
 );
+
+%%%%%%%%;
+% Note: the A_p used by: ;
+% xxxcluster_fromdisk_uADZSZDA_pca_D_from_ni_ver16 ;
+% is adaptive, recomputed for each iteration (using mr_ and mc). ;
+% On the other hand, the A_p used by: ;
+% xxxcluster_fromdisk_uADZSZDA_pca_D_from_mx_ver16 ;
+% is fixed (and recomputed) using the input mr_ and mc. ;
+% We will retain this feature for now, ;
+% as manually adjusting the A_p might be warranted in some scenarios. ;
+%%%%%%%%;
 
 str_thisfunction = 'xxxcluster_fromdisk_uADZSZDA_pca_D_from_mx_ver16';
 
@@ -19,13 +33,16 @@ na=0;
 if (nargin<1+na); parameter=[]; end; na=na+1;
 if (nargin<1+na); pca_rank=[]; end; na=na+1;
 if (nargin<1+na); pca_mr_A_=[]; end; na=na+1;
+if (nargin<1+na); pca_mr_Z_=[]; end; na=na+1;
 if (nargin<1+na); pca_mc_A=[]; end; na=na+1;
 if (nargin<1+na); pca_str_infix=[]; end; na=na+1;
 if (nargin<1+na); mx__=[]; end; na=na+1;
 
 if isempty(parameter); parameter = struct('type','parameter'); end;
 if ~isfield(parameter,'flag_verbose'); parameter.flag_verbose = 0; end;
+if ~isfield(parameter,'flag_reverse'); parameter.flag_reverse = 0; end;
 flag_verbose = parameter.flag_verbose;
+flag_reverse = parameter.flag_reverse;
 
 if isempty(mx__); mx__ = load_mx__from_parameter_ver0(parameter); end;
 %%%%;
@@ -64,6 +81,8 @@ pca_str_infix = sprintf('deleteme_%s',str_tmp);
 end;%if isempty(pca_str_infix);
 if (flag_verbose); disp(sprintf(' %% pca_str_infix: %s',pca_str_infix)); end;
 
+flag_reverse = parameter.flag_reverse;
+
 %%%%%%%%;
 % A_p. ;
 %%%%%%%%;
@@ -76,8 +95,8 @@ if ~isempty(pca_mc_A); parameter_A_p.pca_mc_A = pca_mc_A; end;
 parameter_A_p.pca_mr_A_ = cell(n_study,1);
 parameter_A_p.pca_mr_Z_ = cell(n_study,1);
 for nstudy=0:n_study-1;
-parameter_A_p.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy} | mx__.mr_Z__{1+nstudy};
-parameter_A_p.pca_mr_Z_{1+nstudy} = 0*mx__.mr_Z__{1+nstudy};
+parameter_A_p.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy};
+parameter_A_p.pca_mr_Z_{1+nstudy} = mx__.mr_Z__{1+nstudy};
 end;%for nstudy=0:n_study-1;
 parameter_A_p.str_infix = ''; if ~isempty(pca_str_infix); parameter_A_p.str_infix = sprintf('A_p_D_%s',pca_str_infix); end;
 [ ...
@@ -101,14 +120,25 @@ parameter_pca.pca_mc_A = mx__.mc_A_;
 if ~isempty(pca_mc_A); parameter_pca.pca_mc_A = pca_mc_A; end;
 parameter_pca.pca_mr_A_ = cell(n_study,1);
 parameter_pca.pca_mr_Z_ = cell(n_study,1);
+%%%%;
+if (flag_reverse==0);
 for nstudy=0:n_study-1;
-parameter_pca.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy} | mx__.mr_Z__{1+nstudy};
+parameter_pca.pca_mr_A_{1+nstudy} = 1*mx__.mr_A__{1+nstudy};
 parameter_pca.pca_mr_Z_{1+nstudy} = 0*mx__.mr_Z__{1+nstudy};
 end;%for nstudy=0:n_study-1;
 if ~isempty(pca_mr_A_); parameter_pca.pca_mr_A_ = pca_mr_A_; end;
+end;%if (flag_reverse==0);
+%%%%;
+if (flag_reverse==1);
+for nstudy=0:n_study-1;
+parameter_pca.pca_mr_A_{1+nstudy} = 0*mx__.mr_A__{1+nstudy};
+parameter_pca.pca_mr_Z_{1+nstudy} = 1*mx__.mr_Z__{1+nstudy};
+end;%for nstudy=0:n_study-1;
+if ~isempty(pca_mr_Z_); parameter_pca.pca_mr_Z_ = pca_mr_Z_; end;
+end;%if (flag_reverse==1);
+%%%%;
 parameter_pca.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca.str_infix = sprintf('pca_D_%s',pca_str_infix); end;
 if ~isempty(pca_rank); parameter_pca.rank = pca_rank; end;
-parameter_pca.flag_reverse = 0;
 [ ...
  parameter ...
  parameter_pca ...
@@ -133,12 +163,11 @@ if ~isempty(pca_mc_A); parameter_pca_proj.pca_mc_A = pca_mc_A; end;
 parameter_pca_proj.pca_mr_A_ = cell(n_study,1);
 parameter_pca_proj.pca_mr_Z_ = cell(n_study,1);
 for nstudy=0:n_study-1;
-parameter_pca_proj.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy} | mx__.mr_Z__{1+nstudy};
-parameter_pca_proj.pca_mr_Z_{1+nstudy} = 0*mx__.mr_Z__{1+nstudy};
+parameter_pca_proj.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy};
+parameter_pca_proj.pca_mr_Z_{1+nstudy} = mx__.mr_Z__{1+nstudy};
 end;%for nstudy=0:n_study-1;
 parameter_pca_proj.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca_proj.str_infix = sprintf('pca_proj_D_%s',pca_str_infix); end;
 if ~isempty(pca_rank); parameter_pca_proj.rank = pca_rank; end;
-parameter_pca.flag_reverse = 0;
 [ ...
  parameter ...
  parameter_pca_proj ...
@@ -149,4 +178,5 @@ xxxcluster_fromdisk_uADZSZDA_pca_ver16( ...
 );
 %%%%%%%%;
 AnV_ = mda_read_r8(parameter_pca_proj.str_AnV);
-AZnV_ = AnV_;
+ZnV_ = mda_read_r8(parameter_pca_proj.str_ZnV);
+AZnV_ = AnV_ + ZnV_;

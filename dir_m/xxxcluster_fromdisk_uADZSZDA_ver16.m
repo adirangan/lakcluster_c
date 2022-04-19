@@ -179,6 +179,7 @@ parameter.str_name_s0000 = str_name_s0000;
 parameter.dir_out_s0000 = dir_out_s0000;
 parameter.dir_out_trace = dir_out_trace;
 parameter.str_timing_s0000 = str_timing_s0000;
+parameter.str_out_xdrop_a_s0000 = sprintf('%s/out_xdrop_a.txt',parameter.dir_out_s0000);
 
 if ~flag_skip_all
 

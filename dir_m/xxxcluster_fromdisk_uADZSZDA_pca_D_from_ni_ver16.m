@@ -13,6 +13,17 @@ xxxcluster_fromdisk_uADZSZDA_pca_D_from_ni_ver16( ...
 ,mx__ ...
 );
 
+%%%%%%%%;
+% Note: the A_p used by: ;
+% xxxcluster_fromdisk_uADZSZDA_pca_D_from_ni_ver16 ;
+% is adaptive, recomputed for each iteration (using mr_ and mc). ;
+% On the other hand, the A_p used by: ;
+% xxxcluster_fromdisk_uADZSZDA_pca_D_from_mx_ver16 ;
+% is fixed (and recomputed) using the input mr_ and mc. ;
+% We will retain this feature for now, ;
+% as manually adjusting the A_p might be warranted in some scenarios. ;
+%%%%%%%%;
+
 na=0;
 if (nargin<1+na); parameter=[]; end; na=na+1;
 if (nargin<1+na); ni=[]; end; na=na+1;
@@ -21,6 +32,7 @@ if (nargin<1+na); trace__=[]; end; na=na+1;
 if (nargin<1+na); mx__=[]; end; na=na+1;
 
 if isempty(ni); ni=0; end;
+if ~isfield(parameter,'str_out_xdrop_a_s0000'); parameter.str_out_xdrop_a_s0000 = sprintf('%s/out_xdrop_a.txt',parameter.dir_out_s0000); end;
 if isempty(xdrop_); xdrop_ = load_out_xdrop_from_str_ver0(parameter.str_out_xdrop_a_s0000); end;
 if isempty(trace__); trace__ = load_trace__from_dir_ver0(parameter.dir_out_trace); end;
 if isempty(mx__); mx__ = load_mx__from_parameter_ver0(parameter); end;
