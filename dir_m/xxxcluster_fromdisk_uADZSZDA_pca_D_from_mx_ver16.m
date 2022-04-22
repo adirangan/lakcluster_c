@@ -41,8 +41,10 @@ if (nargin<1+na); mx__=[]; end; na=na+1;
 if isempty(parameter); parameter = struct('type','parameter'); end;
 if ~isfield(parameter,'flag_verbose'); parameter.flag_verbose = 0; end;
 if ~isfield(parameter,'flag_reverse'); parameter.flag_reverse = 0; end;
+if ~isfield(parameter,'str_A_p'); parameter.str_A_p = ''; end;
 flag_verbose = parameter.flag_verbose;
 flag_reverse = parameter.flag_reverse;
+str_A_p = parameter.str_A_p;
 
 if isempty(mx__); mx__ = load_mx__from_parameter_ver0(parameter); end;
 %%%%;
@@ -83,6 +85,7 @@ if (flag_verbose); disp(sprintf(' %% pca_str_infix: %s',pca_str_infix)); end;
 
 flag_reverse = parameter.flag_reverse;
 
+%{
 %%%%%%%%;
 % A_p. ;
 %%%%%%%%;
@@ -108,6 +111,7 @@ xxxcluster_fromdisk_uADZSZDA_pca_ver16( ...
 ,parameter_A_p ...
 );
 %%%%%%%%;
+ %}
 
 %%%%%%%%;
 % pca. ;
@@ -138,6 +142,7 @@ if ~isempty(pca_mr_Z_); parameter_pca.pca_mr_Z_ = pca_mr_Z_; end;
 end;%if (flag_reverse==1);
 %%%%;
 parameter_pca.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca.str_infix = sprintf('pca_D_%s',pca_str_infix); end;
+if ~isempty(str_A_p); parameter_pca.str_A_p = str_A_p; end;
 if ~isempty(pca_rank); parameter_pca.rank = pca_rank; end;
 [ ...
  parameter ...
@@ -167,6 +172,7 @@ parameter_pca_proj.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy};
 parameter_pca_proj.pca_mr_Z_{1+nstudy} = mx__.mr_Z__{1+nstudy};
 end;%for nstudy=0:n_study-1;
 parameter_pca_proj.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca_proj.str_infix = sprintf('pca_proj_D_%s',pca_str_infix); end;
+if ~isempty(str_A_p); parameter_pca_proj.str_A_p = str_A_p; end;
 if ~isempty(pca_rank); parameter_pca_proj.rank = pca_rank; end;
 [ ...
  parameter ...

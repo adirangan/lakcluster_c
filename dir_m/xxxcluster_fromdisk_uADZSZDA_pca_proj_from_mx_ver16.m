@@ -6,9 +6,10 @@ function ...
 ,ZnV_ ...
 ,V_ ...
 ] = ...
-xxxcluster_fromdisk_uADZSZDA_pca_DvX_from_mx_ver16( ...
+xxxcluster_fromdisk_uADZSZDA_pca_proj_from_mx_ver16( ...
  parameter ...
 ,pca_rank ...
+,pca_str_V ...
 ,pca_mr_A_ ...
 ,pca_mr_Z_ ...
 ,pca_mc_A ...
@@ -16,22 +17,12 @@ xxxcluster_fromdisk_uADZSZDA_pca_DvX_from_mx_ver16( ...
 ,mx__ ...
 );
 
-%%%%%%%%;
-% Note: the A_p used by: ;
-% xxxcluster_fromdisk_uADZSZDA_pca_D_from_ni_ver16 ;
-% is adaptive, recomputed for each iteration (using mr_ and mc). ;
-% On the other hand, the A_p used by: ;
-% xxxcluster_fromdisk_uADZSZDA_pca_D_from_mx_ver16 ;
-% is fixed (and recomputed) using the input mr_ and mc. ;
-% We will retain this feature for now, ;
-% as manually adjusting the A_p might be warranted in some scenarios. ;
-%%%%%%%%;
-
-str_thisfunction = 'xxxcluster_fromdisk_uADZSZDA_pca_DvX_from_mx_ver16';
+str_thisfunction = 'xxxcluster_fromdisk_uADZSZDA_pca_proj_from_mx_ver16';
 
 na=0;
 if (nargin<1+na); parameter=[]; end; na=na+1;
 if (nargin<1+na); pca_rank=[]; end; na=na+1;
+if (nargin<1+na); pca_str_V=[]; end; na=na+1;
 if (nargin<1+na); pca_mr_A_=[]; end; na=na+1;
 if (nargin<1+na); pca_mr_Z_=[]; end; na=na+1;
 if (nargin<1+na); pca_mc_A=[]; end; na=na+1;
@@ -47,6 +38,7 @@ flag_reverse = parameter.flag_reverse;
 str_A_p = parameter.str_A_p;
 
 if isempty(mx__); mx__ = load_mx__from_parameter_ver0(parameter); end;
+if isempty(pca_str_V); pca_str_V = zeros(size(mx__.mc_A_,1),pca_rank); end;
 %%%%;
 if ~isfield(parameter,'dir_0in'); disp(sprintf(' %% Warning, parameter.dir_0in undefined in %s',str_thisfunction)); end;
 dir_0in = parameter.dir_0in;
@@ -85,63 +77,33 @@ if (flag_verbose); disp(sprintf(' %% pca_str_infix: %s',pca_str_infix)); end;
 
 flag_reverse = parameter.flag_reverse;
 
-%{
 %%%%%%%%;
-% A_p. ;
+% write and/or read V_. ;
 %%%%%%%%;
-parameter_A_p = struct('type','parameter_A_p');
-parameter_A_p.str_driver = 'A_p_driver';
-if flag_force_create; parameter_A_p.flag_force_create = 1; end;
-parameter_A_p.pca_mc_T = zeros(size(mx__.mc_T_)); parameter_A_p.pca_mc_T(1)=1;
-parameter_A_p.pca_mc_A = mx__.mc_A_;
-if ~isempty(pca_mc_A); parameter_A_p.pca_mc_A = pca_mc_A; end;
-parameter_A_p.pca_mr_A_ = cell(n_study,1);
-parameter_A_p.pca_mr_Z_ = cell(n_study,1);
-for nstudy=0:n_study-1;
-parameter_A_p.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy};
-parameter_A_p.pca_mr_Z_{1+nstudy} = mx__.mr_Z__{1+nstudy};
-end;%for nstudy=0:n_study-1;
-parameter_A_p.str_infix = ''; if ~isempty(pca_str_infix); parameter_A_p.str_infix = sprintf('A_p_DvX_%s',pca_str_infix); end;
-[ ...
- parameter ...
- parameter_A_p ...
-] = ...
-xxxcluster_fromdisk_uADZSZDA_pca_ver16( ...
- parameter ...
-,parameter_A_p ...
-);
-%%%%%%%%;
- %}
-
-%%%%%%%%;
-% pca. ;
-%%%%%%%%;
-parameter_pca = struct('type','parameter_pca');
-parameter_pca.str_driver = 'pca_driver';
-if flag_force_create; parameter_pca.flag_force_create = 1; end;
-parameter_pca.pca_mc_T = zeros(size(mx__.mc_T_)); parameter_pca.pca_mc_T(1)=1;
-parameter_pca.pca_mc_A = mx__.mc_A_;
-if ~isempty(pca_mc_A); parameter_pca.pca_mc_A = pca_mc_A; end;
-parameter_pca.pca_mr_A_ = cell(n_study,1);
-parameter_pca.pca_mr_Z_ = cell(n_study,1);
-for nstudy=0:n_study-1;
-parameter_pca.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy};
-parameter_pca.pca_mr_Z_{1+nstudy} = mx__.mr_Z__{1+nstudy};
-end;%for nstudy=0:n_study-1;
-if ~isempty(pca_mr_A_); parameter_pca.pca_mr_A_ = pca_mr_A_; end;
-if ~isempty(pca_mr_Z_); parameter_pca.pca_mr_Z_ = pca_mr_Z_; end;
-parameter_pca.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca.str_infix = sprintf('pca_DvX_%s',pca_str_infix); end;
-if ~isempty(str_A_p); parameter_pca.str_A_p = str_A_p; end;
-if ~isempty(pca_rank); parameter_pca.rank = pca_rank; end;
-[ ...
- parameter ...
- parameter_pca ...
-] = ...
-xxxcluster_fromdisk_uADZSZDA_pca_ver16( ...
- parameter ...
-,parameter_pca ...
-);
-V_ = mda_read_r8(parameter_pca.str_V);
+if ~isnumeric(pca_str_V) & ~isstring(pca_str_V); 
+disp(sprintf(' %% Warning, pca_str_V neither numeric nor string in %s',str_thisfunction));
+disp('returning'); return;
+end;%if ~isnumeric(pca_str_V) & ~isstring(pca_str_V); 
+%%%%;
+if ~isnumeric(pca_str_V) &  isstring(pca_str_V); 
+if (flag_verbose); disp(sprintf(' %% pca_str_V a string in %s',str_thisfunction)); end;
+end;%if ~isnumeric(pca_str_V) &  isstring(pca_str_V); 
+%%%%;
+if  isnumeric(pca_str_V) & ~isstring(pca_str_V); 
+if (flag_verbose); disp(sprintf(' %% pca_str_V numeric in %s',str_thisfunction)); end;
+V_ = pca_str_V;
+if size(V_,1)~=size(mx__.mc_A_,1);
+disp(sprintf(' %% Warning, V_ incompatible with mc_A_ in %s',str_thisfunction));
+disp('returning'); return;
+end;%if size(V_,1)~=size(mx__.mc_A_,1);
+if  isempty(pca_rank); pca_rank = size(V_,2); end;
+pca_rank = min(pca_rank,size(V_,2));
+pca_str_V = sprintf('%s/%s_k%d_B44_V.mda',dir_out_s0000,str_name_s0000,pca_rank);
+mda_write_d3_r8(V_(:,1:pca_rank),pca_str_V);
+end;%if  isnumeric(pca_str_V) & ~isstring(pca_str_V); 
+%%%%;
+parameter.pca_str_V = pca_str_V;
+V_ = mda_read_r8(pca_str_V);
 %%%%%%%%;
 
 %%%%%%%%;
@@ -149,7 +111,7 @@ V_ = mda_read_r8(parameter_pca.str_V);
 %%%%%%%%;
 parameter_pca_proj = struct('type','parameter_pca_proj');
 parameter_pca_proj.str_driver = 'pca_proj_driver';
-parameter_pca_proj.str_V = parameter_pca.str_V;
+parameter_pca_proj.str_V = pca_str_V;
 if flag_force_create; parameter_pca_proj.flag_force_create = 1; end;
 parameter_pca_proj.pca_mc_T = zeros(size(mx__.mc_T_)); parameter_pca_proj.pca_mc_T(1)=1;
 parameter_pca_proj.pca_mc_A = mx__.mc_A_;
@@ -160,7 +122,7 @@ for nstudy=0:n_study-1;
 parameter_pca_proj.pca_mr_A_{1+nstudy} = mx__.mr_A__{1+nstudy};
 parameter_pca_proj.pca_mr_Z_{1+nstudy} = mx__.mr_Z__{1+nstudy};
 end;%for nstudy=0:n_study-1;
-parameter_pca_proj.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca_proj.str_infix = sprintf('pca_proj_DvX_%s',pca_str_infix); end;
+parameter_pca_proj.str_infix = ''; if ~isempty(pca_str_infix); parameter_pca_proj.str_infix = sprintf('pca_proj_D_%s',pca_str_infix); end;
 if ~isempty(str_A_p); parameter_pca_proj.str_A_p = str_A_p; end;
 if ~isempty(pca_rank); parameter_pca_proj.rank = pca_rank; end;
 [ ...
