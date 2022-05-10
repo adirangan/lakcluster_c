@@ -61,7 +61,7 @@ parameter.n_famex = n_famex;
 if (flag_verbose>0); disp(sprintf(' %% [entering_bed_to_b16_flip_ver7]')); end;
 
 %%%%%%%%;
-% flag_stop: [3=after mds, 2=after bim&fam, 1=after masks, 0=after An&At] ;
+% flag_stop: [4=after mds, 3=after bim&fam, 2=after masks, 1=after An&At] ;
 %%%%%%%%;
 bitj=16; bit8=8; bit4=4; 
 nkhr=22; 
@@ -680,9 +680,9 @@ end;%for nz=1:n_z;
 %%%%%%%%;
 end;%if (size(T_full_,2)>=2);
 
-if flag_stop>2;
+if flag_stop>3;
 disp(' %% returning after mds'); return; 
-end;%if flag_stop>2;
+end;%if flag_stop>3;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (flag_verbose>0); disp(sprintf(' %% ; ')); end;
@@ -854,9 +854,9 @@ fclose(fid);
 end;%if (flag_force_create | ~exist(tmpchar,'file'));
 end;%if flag_fam_ext;
 
-if flag_stop>1;
+if flag_stop>2;
 disp(' %% returning after bim.ext and fam.ext'); return; 
-end;%if flag_stop>1;
+end;%if flag_stop>2;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (flag_verbose>0); disp(sprintf(' %% ; ')); end;
