@@ -220,6 +220,7 @@ extern int GLOBAL_scorebox_col_max;
 extern int GLOBAL_scorebox_col_num;
 extern char GLOBAL_pca_out_xdrop[FNAMESIZE];
 extern char GLOBAL_pca_V_[FNAMESIZE];
+extern char GLOBAL_pca_V_pre_[FNAMESIZE];
 extern char GLOBAL_pca_infix[FNAMESIZE];
 extern int GLOBAL_pca_iteration_num;
 extern int GLOBAL_pca_iteration_max;
@@ -757,7 +758,7 @@ int wrap_An_Xn_ww__run(int *tidx,void **vpra,pthread_t *thread_in,int spacing_a,
 void *get_An_Xn_uu(void *vp);
 int wrap_An_Xn_uu__run(int *tidx,void **vpra,pthread_t *thread_in,int spacing_a,int spacing_s,int spacing_w,struct M_handle *M_An,/* struct M_handle *M_St, */struct L_handle *lf_Xn,struct M_handle *M_Xt,double *A_ajdk,int trm_flag,struct L_handle **output_An_Xn_uu_p);
 void wrap_An_Xn_ww_test();
-struct P_handle *P_handle_make(char *pca_infix,char *out_xdrop_fname,char *V_fname,struct dcc_ajdk *D,int iteration_num,int iteration_max,int iteration_min,int rank,double tolerance,int b_mlt);
+struct P_handle *P_handle_make(char *pca_infix,char *out_xdrop_fname,char *V_fname,char *V_pre_fname,struct dcc_ajdk *D,int iteration_num,int iteration_max,int iteration_min,int rank,double tolerance,int b_mlt);
 void P_init_dcc(struct dcc_ajdk *D,struct P_handle *P);
 void P_handle_printf(int verbose,struct P_handle *P,char *prefix);
 void P_handle_dmp(struct P_handle *P);

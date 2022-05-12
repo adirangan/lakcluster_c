@@ -11,6 +11,7 @@ struct P_handle
   int *mr_index_local_nb; /* local nb from row-indices */
   int *mr_index_local_mr; /* local mr from row-indices */
   int rank; /* rank of pca */
+  int rank_pre; /* rank of pca_pre */
   double tolerance; /* tolerance used to assess relative-error in power-iteration */
   int iteration_num; /* number of iterations */
   int iteration_min; /* maximum iteration */
@@ -26,6 +27,8 @@ struct P_handle
   double *U_; /* left singular-vectors (size P->D->A_nrows_total-x-P->rank-x-P->iteration_num) */
   double *V_; /* right singular_vectors (size P->D->A_ncols-x-P->rank-x-P->iteration_num) */
   char V_name[FNAMESIZE]; /* name of V_ file */
+  double *V_pre_; /* right singular_vectors (size P->D->A_ncols-x-P->rank_pre-x-P->iteration_num) */
+  char V_pre_name[FNAMESIZE]; /* name of V_pre_ file */
   double *AnV_; /* projection of V_ onto An */
   double *ZnV_; /* projection of V_ onto Zn */
   struct L_handle **lf_U_; struct M_handle **M_U_;

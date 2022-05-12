@@ -180,7 +180,7 @@ void dcc_ajdk_copy_QR_index_global(struct dcc_ajdk *D)
   if (verbose){ printf(" %% [finished dcc_ajdk_copy_QR_index_global]\n");}
 }
 
-struct P_handle *P_handle_make(char *pca_infix,char *out_xdrop_fname,char *V_fname,struct dcc_ajdk *D,int iteration_num,int iteration_max,int iteration_min,int rank,double tolerance,int b_mlt)
+struct P_handle *P_handle_make(char *pca_infix,char *out_xdrop_fname,char *V_fname,char *V_pre_fname,struct dcc_ajdk *D,int iteration_num,int iteration_max,int iteration_min,int rank,double tolerance,int b_mlt)
 {
   int verbose=0;
   int nbins = D->nbins,nb=0,nr=0;
@@ -208,6 +208,7 @@ struct P_handle *P_handle_make(char *pca_infix,char *out_xdrop_fname,char *V_fna
   P->ckeep=NULL; /* array of c-values (cols remaining) */
   P->cdrop=NULL; /* array of cdrop-values */
   P->rank=rank; /* rank of pca */
+  P->rank_pre=rank; /* rank of pca_pre */
   P->tolerance=tolerance; /* tolerance used to assess relative-error in power-iteration */
   P->A_rpop_j_total=NULL; /* output array (size iteration_num) */
   P->A_cpop_j=NULL; /* output array (size iteration_num) */
@@ -215,6 +216,8 @@ struct P_handle *P_handle_make(char *pca_infix,char *out_xdrop_fname,char *V_fna
   P->U_=NULL; /* left singular-vectors (size P->D->A_nrows_total-x-P->rank-x-P->iteration_num) */
   P->V_=NULL; /* right singular_vectors (size P->D->A_ncols-x-P->rank-x-P->iteration_num) */
   if (V_fname!=NULL){ sprintf(P->V_name,V_fname);} else{ sprintf(P->V_name,"\0");}
+  P->V_pre_=NULL; /* right singular_vectors (size P->D->A_ncols-x-P->rank_pre-x-P->iteration_num) */
+  if (V_pre_fname!=NULL){ sprintf(P->V_pre_name,V_pre_fname);} else{ sprintf(P->V_pre_name,"\0");}
   P->AnV_=NULL; /* projection of V_ onto An */
   P->ZnV_=NULL; /* projection of V_ onto Zn */
   P->b_mlt=b_mlt; /* precision used for xcalc */
@@ -252,6 +255,14 @@ struct P_handle *P_handle_make(char *pca_infix,char *out_xdrop_fname,char *V_fna
     P->AnV_ = (double *) wkspace_all0c(P->D->A_nrows_total*P->rank*P->iteration_num*sizeof(double));
     P->ZnV_ = (double *) wkspace_all0c(P->D->Z_nrows_total*P->rank*P->iteration_num*sizeof(double));
     /* if (P->V_name!=NULL &&  strcmp(P->V_name,"\0")){ } */}
+  P->V_pre_ = NULL;
+  if (P->V_pre_name!=NULL &&  strcmp(P->V_pre_name,"\0")){ 
+    if (verbose>1){ printf(" %% reading P->V_pre_\n");}
+    mda_read_d3_r8(P->V_pre_name,NULL,&(P->rank_pre),&(P->iteration_num),NULL);
+    if (verbose>2){ printf(" %% P->V_pre_name %s P->rank_pre %d P->iteration_num %d\n",P->V_pre_name,P->rank_pre,P->iteration_num);}
+    P->V_pre_ = (double *) wkspace_all0c(P->D->A_ncols*P->rank_pre*P->iteration_num*sizeof(double));
+    mda_read_d3_r8(P->V_pre_name,NULL,NULL,NULL,P->V_pre_);
+    /* if (P->V_pre_name!=NULL &&  strcmp(P->V_pre_name,"\0")){ } */}
   /* Left singular vector U minimizes:
      (1/A_nrows) * (AnAtU/A_ncols - YnYtU/Y_ncols).^2 - (1/Z_nrows) * (ZnAtU/A_nrows - WnYtU/Y_ncols).^2,
      implying that U is an eigenvector of:

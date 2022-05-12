@@ -137,6 +137,7 @@ int GLOBAL_scorebox_col_max=0;
 int GLOBAL_scorebox_col_num=0;
 char GLOBAL_pca_out_xdrop[FNAMESIZE]="\0";
 char GLOBAL_pca_V_[FNAMESIZE]="\0";
+char GLOBAL_pca_V_pre_[FNAMESIZE]="\0";
 char GLOBAL_pca_infix[FNAMESIZE]="\0";
 int GLOBAL_pca_iteration_num=0;
 int GLOBAL_pca_iteration_max=0;

@@ -156,19 +156,27 @@ void pca_stage_a0(struct P_handle *P)
   int verbose=GLOBAL_verbose;
   int na_a=0,na_b=0,na_j=0,nr=0,nb=0;
   struct M_handle *M_An=NULL;
+  int nl=0;
   double dtmp=0;
   if (verbose>1){ printf(" %% [entering pca_stage_a0]\n");}
   L_zero(P->lf_V);
   M_An = P->D->E_[nb]->M_An;
-  na_j=0;
-  while (na_j<M_An->cpop_j){
-    na_a = M_An->n_a_[na_j]; na_b = M_An->n_b_[na_j];
-    for (nr=0;nr<P->rank;nr++){
-      /* dtmp = (nr==0?1:0) + (nr>0?2*rand01-1:0); */
-      dtmp = (nr==0?1:0) + (nr>0? pow(-1,na_a%nr)*na_a:0);
-      L2_set(P->lf_V,na_j,na_b,na_a,0,0,nr,dtmp);
-      /* for (nr=0;nr<P->rank;nr++){ } */}
-    na_j++; /* while (na_j<M_An->cpop_j){ } */}
+  if (P->V_pre_!=NULL){
+    for (nl=0;nl<P->D->A_ncols*minimum(P->rank,P->rank_pre);nl++){
+      P->lf_V->lf[nl] = P->V_pre_[nl + P->nx*P->D->A_ncols*P->rank_pre];
+      /* for (nl=0;nl<P->D->A_ncols*minimum(P->rank,P->rank_pre);nl++){ } */}
+    /* if (P->V_pre_!=NULL){ } */}
+  else /* if not provided */{
+    na_j=0;
+    while (na_j<M_An->cpop_j){
+      na_a = M_An->n_a_[na_j]; na_b = M_An->n_b_[na_j];
+      for (nr=0;nr<P->rank;nr++){
+	/* dtmp = (nr==0?1:0) + (nr>0?2*rand01-1:0); */
+	dtmp = (nr==0?1:0) + (nr>0? pow(-1,na_a%nr)*na_a:0);
+	L2_set(P->lf_V,na_j,na_b,na_a,0,0,nr,dtmp);
+	/* for (nr=0;nr<P->rank;nr++){ } */}
+      na_j++; /* while (na_j<M_An->cpop_j){ } */}
+    /* if not provided */}
   if (verbose>1){ printf(" %% [finished pca_stage_a0]\n");}
 }
 
@@ -1308,7 +1316,7 @@ void pca_init_test()
   dcc_ajdk_set_mx_j_to_mx_b(D); dcc_X_nrows_total(D); dcc_M_mxset(D); dcc_init_QX(D); dcc_ajdk_set_QC_index_local(D); dcc_ajdk_copy_QR_index_global(D); 
   GLOBAL_toc(1,verbose," %% loading time: ");
   if (verbose>1){ printf(" %% making P_handle.\n");}
-  P = P_handle_make(GLOBAL_pca_infix,GLOBAL_pca_out_xdrop,NULL,D,GLOBAL_pca_iteration_num,GLOBAL_pca_iteration_max,GLOBAL_pca_iteration_min,GLOBAL_pca_rank,GLOBAL_pca_tolerance,GLOBAL_B_MLT);
+  P = P_handle_make(GLOBAL_pca_infix,GLOBAL_pca_out_xdrop,NULL,NULL,D,GLOBAL_pca_iteration_num,GLOBAL_pca_iteration_max,GLOBAL_pca_iteration_min,GLOBAL_pca_rank,GLOBAL_pca_tolerance,GLOBAL_B_MLT);
   P_xdrop_init(D,P);  
   if (verbose>1){ printf(" %% P->D->A_rpop_b_total %d P->out_xdrop_nrows %d\n",P->D->A_rpop_b_total,P->out_xdrop_nrows);}
   for (P->nx=0;P->nx<P->iteration_num;P->nx++){
@@ -1390,7 +1398,7 @@ void pca_iter_test()
   dcc_ajdk_set_mx_j_to_mx_b(D); dcc_X_nrows_total(D); dcc_M_mxset(D); dcc_init_QX(D); dcc_ajdk_set_QC_index_local(D); dcc_ajdk_copy_QR_index_global(D); 
   GLOBAL_toc(1,verbose," %% loading time: ");
   if (verbose>1){ printf(" %% making P_handle.\n");}
-  P = P_handle_make(GLOBAL_pca_infix,GLOBAL_pca_out_xdrop,NULL,D,GLOBAL_pca_iteration_num,GLOBAL_pca_iteration_max,GLOBAL_pca_iteration_min,GLOBAL_pca_rank,GLOBAL_pca_tolerance,GLOBAL_B_MLT);
+  P = P_handle_make(GLOBAL_pca_infix,GLOBAL_pca_out_xdrop,NULL,NULL,D,GLOBAL_pca_iteration_num,GLOBAL_pca_iteration_max,GLOBAL_pca_iteration_min,GLOBAL_pca_rank,GLOBAL_pca_tolerance,GLOBAL_B_MLT);
   P_xdrop_init(D,P);  
   if (verbose>1){ printf(" %% P->D->A_rpop_b_total %d P->out_xdrop_nrows %d\n",P->D->A_rpop_b_total,P->out_xdrop_nrows);}
   for (P->nx=0;P->nx<P->iteration_num;P->nx++){
@@ -1447,7 +1455,7 @@ void pca_driver()
   dcc_ajdk_set_mx_j_to_mx_b(D); dcc_X_nrows_total(D); dcc_M_mxset(D); dcc_init_QX(D); dcc_ajdk_set_QC_index_local(D); dcc_ajdk_copy_QR_index_global(D); 
   GLOBAL_toc(1,verbose," %% loading time: ");
   if (verbose>1){ printf(" %% making P_handle.\n");}
-  P = P_handle_make(GLOBAL_pca_infix,GLOBAL_pca_out_xdrop,NULL,D,GLOBAL_pca_iteration_num,GLOBAL_pca_iteration_max,GLOBAL_pca_iteration_min,GLOBAL_pca_rank,GLOBAL_pca_tolerance,GLOBAL_B_MLT);
+  P = P_handle_make(GLOBAL_pca_infix,GLOBAL_pca_out_xdrop,NULL,GLOBAL_pca_V_pre_,D,GLOBAL_pca_iteration_num,GLOBAL_pca_iteration_max,GLOBAL_pca_iteration_min,GLOBAL_pca_rank,GLOBAL_pca_tolerance,GLOBAL_B_MLT);
   P_xdrop_init(D,P);  
   if (verbose>1){ printf(" %% P->D->A_rpop_b_total %d P->out_xdrop_nrows %d\n",P->D->A_rpop_b_total,P->out_xdrop_nrows);}
   for (P->nx=0;P->nx<P->iteration_num;P->nx++){
@@ -1510,7 +1518,7 @@ void pca_proj_test()
   dcc_ajdk_set_mx_j_to_mx_b(D); dcc_X_nrows_total(D); dcc_M_mxset(D); dcc_init_QX(D); dcc_ajdk_set_QC_index_local(D); dcc_ajdk_copy_QR_index_global(D); 
   GLOBAL_toc(1,verbose," %% loading time: ");
   if (verbose>1){ printf(" %% making P_handle.\n");}
-  P = P_handle_make(GLOBAL_pca_infix,GLOBAL_pca_out_xdrop,GLOBAL_pca_V_,D,GLOBAL_pca_iteration_num,GLOBAL_pca_iteration_max,GLOBAL_pca_iteration_min,GLOBAL_pca_rank,GLOBAL_pca_tolerance,GLOBAL_B_MLT);
+  P = P_handle_make(GLOBAL_pca_infix,GLOBAL_pca_out_xdrop,GLOBAL_pca_V_,NULL,D,GLOBAL_pca_iteration_num,GLOBAL_pca_iteration_max,GLOBAL_pca_iteration_min,GLOBAL_pca_rank,GLOBAL_pca_tolerance,GLOBAL_B_MLT);
   P_xdrop_init(D,P); for (nl=0;nl<P->iteration_num;nl++){ P->rkeep[nl] = P->D->A_rpop_b_total; P->rdrop[nl] = 0;}
   if (verbose>1){ printf(" %% P->D->A_rpop_b_total %d P->out_xdrop_nrows %d\n",P->D->A_rpop_b_total,P->out_xdrop_nrows);}
   for (P->nx=0;P->nx<P->iteration_num;P->nx++){
@@ -1554,7 +1562,7 @@ void pca_proj_driver()
   dcc_ajdk_set_mx_j_to_mx_b(D); dcc_X_nrows_total(D); dcc_M_mxset(D); dcc_init_QX(D); dcc_ajdk_set_QC_index_local(D); dcc_ajdk_copy_QR_index_global(D); 
   GLOBAL_toc(1,verbose," %% loading time: ");
   if (verbose>1){ printf(" %% making P_handle.\n");}
-  P = P_handle_make(GLOBAL_pca_infix,GLOBAL_pca_out_xdrop,GLOBAL_pca_V_,D,GLOBAL_pca_iteration_num,GLOBAL_pca_iteration_max,GLOBAL_pca_iteration_min,GLOBAL_pca_rank,GLOBAL_pca_tolerance,GLOBAL_B_MLT);
+  P = P_handle_make(GLOBAL_pca_infix,GLOBAL_pca_out_xdrop,GLOBAL_pca_V_,NULL,D,GLOBAL_pca_iteration_num,GLOBAL_pca_iteration_max,GLOBAL_pca_iteration_min,GLOBAL_pca_rank,GLOBAL_pca_tolerance,GLOBAL_B_MLT);
   P_xdrop_init(D,P); for (nl=0;nl<P->iteration_num;nl++){ P->rkeep[nl] = P->D->A_rpop_b_total; P->rdrop[nl] = 0;}
   if (verbose>1){ printf(" %% P->D->A_rpop_b_total %d P->out_xdrop_nrows %d\n",P->D->A_rpop_b_total,P->out_xdrop_nrows);}
   /* if (verbose>1){ printf(" %% P->rank %d P->iteration_num %d\n",P->rank,P->iteration_num);} */

@@ -140,6 +140,7 @@ void updateglobals(char *vname)
   else if (strcmp(vname,"GLOBAL_scorebox_col_num")==0){ scanf("%d",&GLOBAL_scorebox_col_num); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_scorebox_col_num);}}
   else if (strcmp(vname,"GLOBAL_pca_out_xdrop")==0){ scanf("%[^,;]",GLOBAL_pca_out_xdrop); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_pca_out_xdrop);} /* else if (strcmp(vname,"GLOBAL_pca_out_xdrop")==0){ } */}
   else if (strcmp(vname,"GLOBAL_pca_V_")==0){ scanf("%[^,;]",GLOBAL_pca_V_); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_pca_V_);} /* else if (strcmp(vname,"GLOBAL_pca_V_")==0){ } */}
+  else if (strcmp(vname,"GLOBAL_pca_V_pre_")==0){ scanf("%[^,;]",GLOBAL_pca_V_pre_); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_pca_V_pre_);} /* else if (strcmp(vname,"GLOBAL_pca_V_pre_")==0){ } */}
   else if (strcmp(vname,"GLOBAL_pca_infix")==0){ scanf("%[^,;]",GLOBAL_pca_infix); if (verbose>0){ printf("%s read to be %s\n",vname,GLOBAL_pca_infix);} /* else if (strcmp(vname,"GLOBAL_pca_infix")==0){ } */}
   else if (strcmp(vname,"GLOBAL_pca_iteration_num")==0){ scanf("%d",&GLOBAL_pca_iteration_num); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_pca_iteration_num);}}
   else if (strcmp(vname,"GLOBAL_pca_iteration_max")==0){ scanf("%d",&GLOBAL_pca_iteration_max); if (verbose>0){ printf("%s read to be %d\n",vname,GLOBAL_pca_iteration_max);}}
