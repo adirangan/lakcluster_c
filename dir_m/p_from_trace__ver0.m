@@ -7,8 +7,8 @@ str_thisfunction = 'p_from_trace__ver0';
 
 if isempty(parameter); parameter = struct('type','parameter'); end;
 if ~isfield(parameter,'flag_verbose'); parameter.flag_verbose = 0; end;
-if ~isfield(parameter,'niteration_alo'); parameter.niteration_alo = 0; end; %<-- this is the first iteration from which the 'maximum' is calculated (i.e., 'top'). ;
-if ~isfield(parameter,'niteration_ahi'); parameter.niteration_ahi = 0; end; %<-- this is the final iteration from which the 'maximum' is calculated (i.e., 'top'). ;
+if ~isfield(parameter,'niteration_alo'); parameter.niteration_alo = []; end; %<-- this is the first iteration from which the 'maximum' is calculated (i.e., 'top'). ;
+if ~isfield(parameter,'niteration_ahi'); parameter.niteration_ahi = []; end; %<-- this is the final iteration from which the 'maximum' is calculated (i.e., 'top'). ;
 flag_verbose = parameter.flag_verbose;
 niteration_alo = parameter.niteration_alo;
 niteration_ahi = parameter.niteration_ahi;
@@ -22,8 +22,8 @@ n_iteration = numel(niter_i_);
 r_rem_i_ = trace__.r_rem_is__(:,1+0);
 c_rem_i_ = trace__.c_rem_is__(:,1+0);
 ZR_is__ = trace__.ZR_is__;
-if niteration_alo<=0; niteration_alo = floor(0.05*(n_iteration-1)); end;
-if niteration_ahi<=0; niteration_ahi = floor(0.95*(n_iteration-1)); end;
+if isempty(niteration_alo); niteration_alo = floor(0.05*(n_iteration-1)); end;
+if isempty(niteration_ahi); niteration_ahi = floor(0.95*(n_iteration-1)); end;
 niteration_avg_ = transpose(             0:niteration_ahi); %<-- these are the iterations for which the 'average' is calculated (i.e., 'avg'). ;
 niteration_top_ = transpose(niteration_alo:niteration_ahi); %<-- these are the iterations for which the 'maximum' is calculated (i.e., 'top'). ;
 
