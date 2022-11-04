@@ -9,7 +9,7 @@ git add *.sh ;
 git commit -m "updating dir_lakcluster_c_dev for jeremy elman " ;
 git push ;
 git pull ;
-cd /data/rangan/dir_bcc/dir_lakcluster_c_dev ;
+cd /home/rangan/dir_bcc/dir_lakcluster_c_dev ;
 
 #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
 #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
