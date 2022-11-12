@@ -30,7 +30,7 @@ niteration_top_ = transpose(niteration_alo:niteration_ahi); %<-- these are the i
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ;
 % plot colored scatterplot using ZR_ ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ;
-dr_i_ = diff(r_rem_i_); dc_i_ = diff(c_rem_i_); 
+dr_i_ = -diff(r_rem_i_); dc_i_ = -diff(c_rem_i_);  %<-- negate the difference to obtain the (positive) number of rows/cols removed at each iteration. ;
 dr2_i_ = reshape(dr_i_(1+niteration_avg_)/max(1,sum(dr_i_(1+niteration_avg_))),[1,numel(niteration_avg_)]);
 dc2_i_ = reshape(dc_i_(1+niteration_avg_)/max(1,sum(dc_i_(1+niteration_avg_))),[1,numel(niteration_avg_)]);
 tr_avg_s_    = dr2_i_*ZR_is__(1+niteration_avg_,:);
