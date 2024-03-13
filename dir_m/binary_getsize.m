@@ -1,9 +1,9 @@
 function [j,nrows,ncols] = binary_getsize(filename_to_read);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
-% function [j,nrows,ncols] = binary_getsize(bitj,input,filename_to_save);
+% function [j,nrows,ncols] = binary_getsize(filename_to_save);
 %
-% This function get the size of a binary array (stored in filename_to read) ;
+% This function gets the size of a binary array (stored in filename_to read) ;
 % The inputs are filename_to_read (a string). ;
 % The output is j (i.e., bitj=16), nrows and ncols (all integers). ;
 %
